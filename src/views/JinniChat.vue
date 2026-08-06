@@ -7841,6 +7841,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 @media (prefers-reduced-motion:reduce){.usage-notice-enter-active,.usage-notice-leave-active{transition:none}}
 
 /* ── Click-to-search place names in AI prose ── */
-.message-text .place-search { border-bottom: 1px dotted currentColor; cursor: pointer; text-underline-offset: 2px; transition: opacity 0.15s ease; }
-.message-text .place-search:hover { opacity: 0.65; }
+/* :deep — the place-search spans are injected via v-html, so scoped selectors
+   without :deep never reach them (no data-v attribute). Mirrors the .text
+   :deep(strong) pattern above. This is what renders the dotted underline AND
+   the pointer cursor. */
+.text :deep(.place-search) { border-bottom: 1px dotted currentColor; cursor: pointer; text-underline-offset: 3px; transition: opacity 0.15s ease; }
+.text :deep(.place-search:hover) { opacity: 0.65; }
 </style>
