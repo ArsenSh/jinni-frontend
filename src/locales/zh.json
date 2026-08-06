@@ -951,7 +951,8 @@
       "breakfast_yes": "含早餐",
       "breakfast_no": "不含早餐",
       "collecting": "正在收集最佳地点..."
-    }
+    },
+    "search_place": "查找"
   },
   "profile": {
     "title": "您的个人资料",

@@ -947,7 +947,8 @@
       "breakfast_yes": "Included",
       "breakfast_no": "Not included",
       "collecting": "Collecting the best places..."
-    }
+    },
+    "search_place": "Look up"
   },
   "profile": {
     "title": "Your Profile",

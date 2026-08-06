@@ -2179,6 +2179,7 @@ export default {
   },
   mounted() {
     this.checkScreenSize();
+    this.$el.addEventListener('click', this.handlePlaceSearchClick);
     window.addEventListener('resize', this.checkScreenSize);
     this.setupPreferenceButtonHandler();
     setTimeout(() => { this.getCurrentLocation().catch(() => { console.log('Location not available on mount') }) }, 100);
@@ -2206,6 +2207,7 @@ export default {
     document.addEventListener('touchstart', this._clearTouchedMessage, { passive: true });
   },
   beforeUnmount() {
+    this.$el && this.$el.removeEventListener('click', this.handlePlaceSearchClick);
     clearTimeout(this._usageNoticeTimer);
     if (this.barAutoHideTimer) { clearTimeout(this.barAutoHideTimer) }
     if (this.tokenCheckInterval) { clearInterval(this.tokenCheckInterval) }
@@ -3942,6 +3944,7 @@ export default {
       formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
       formatted = formatted.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
       formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      formatted = this.linkifyPlaceNames(formatted);
       formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
       formatted = formatted.replace(/_(.+?)_/g, '<em>$1</em>');
       formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
@@ -3951,6 +3954,40 @@ export default {
       formatted = formatted.replace(/\|\|\|NL\|\|\|/g, '<br>');
       formatted = formatted.replace(/(<br>){3,}/g, '<br><br>');
       return formatted;
+    },
+    /* ── Click-to-search place names ─────────────────────────────────────────
+       When the AI answers in prose (no rec cards) it bolds place names, e.g.
+       **Sky Bar Yerevan**. This turns those bolds into a dotted-underline
+       "click to look it up" hint. Heuristic keeps it to name-like bolds and
+       skips labels ("Important:") and sentences, so emphasis text is left
+       alone. Rendered via v-html, so the click is handled by delegation. */
+    linkifyPlaceNames(html) {
+      return html.replace(/<strong>([^<]{2,60})<\/strong>/g, (m, name) => {
+        const t = name.trim();
+        if (/[.!?:]$/.test(t)) return m;              // labels / sentence-enders
+        if (/[.!?]/.test(t)) return m;                // full sentences
+        if (!/^[A-Z\u00C0-\u024F\u0400-\u04FF0-9]/.test(t)) return m;  // starts capital/number (Latin+Cyrillic)
+        if (t.split(/\s+/).length > 7) return m;      // too long to be a name
+        const enc = t.replace(/"/g, '&quot;');
+        return `<strong class="place-search" data-place="${enc}" title="${this.t('chat.search_place') || 'Look up'}">${name}</strong>`;
+      });
+    },
+    handlePlaceSearchClick(e) {
+      const el = e.target.closest && e.target.closest('.place-search');
+      if (!el) return;
+      const name = el.getAttribute('data-place');
+      if (name) this.searchPlace(name);
+    },
+    searchPlace(name) {
+      // Add city/country context so a bare "Sky Bar" resolves to the right
+      // place. Google MAPS search (not plain web) — drops the venue on the map
+      // with photos, reviews and directions, which is what a traveler wants.
+      // For plain web search instead, swap the URL for
+      //   https://www.google.com/search?q=${q}
+      const loc = this.userSettings && this.userSettings.location;
+      const ctx = (loc && loc.city && loc.countryName) ? ` ${loc.city} ${loc.countryName}` : '';
+      const q = encodeURIComponent(name + ctx);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank', 'noopener');
     },
     setupPreferenceButtonHandler() {window.openPreferences = () => {this.editPreferences()}},
     handleImageError(event) {
@@ -7797,4 +7834,8 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .usage-notice-enter-active,.usage-notice-leave-active{transition:opacity 0.28s ease,transform 0.28s ease}
 .usage-notice-enter-from,.usage-notice-leave-to{opacity:0;transform:translateX(-50%) translateY(6px)}
 @media (prefers-reduced-motion:reduce){.usage-notice-enter-active,.usage-notice-leave-active{transition:none}}
+
+/* ── Click-to-search place names in AI prose ── */
+.message-text .place-search { border-bottom: 1px dotted currentColor; cursor: pointer; text-underline-offset: 2px; transition: opacity 0.15s ease; }
+.message-text .place-search:hover { opacity: 0.65; }
 </style>

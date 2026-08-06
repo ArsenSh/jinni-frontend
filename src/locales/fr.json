@@ -954,7 +954,8 @@
       "breakfast_yes": "Inclus",
       "breakfast_no": "Non inclus",
       "collecting": "Nous rassemblons les meilleurs lieux..."
-    }
+    },
+    "search_place": "Rechercher"
   },
   "profile": {
     "title": "Profil",

@@ -945,7 +945,8 @@
       "breakfast_yes": "Включён",
       "breakfast_no": "Не включён",
       "collecting": "Собираем лучшие места..."
-    }
+    },
+    "search_place": "Найти на карте"
   },
   "profile": {
     "title": "Ваш профиль",

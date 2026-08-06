@@ -942,7 +942,8 @@
       "breakfast_yes": "مشمول",
       "breakfast_no": "غير مشمول",
       "collecting": "نجمع أفضل الأماكن..."
-    }
+    },
+    "search_place": "بحث"
   },
   "profile": {
     "title": "ملفك الشخصي",
