@@ -20,7 +20,7 @@
     <div v-else-if="error" class="share-center">
       <div class="share-error-icon">✨</div>
       <p class="share-error-title">{{ t('share.link_expired') }}</p>
-      <a href="https://jinni.travel" class="cta-btn">{{ t('share.discover_places') }}</a>
+      <a href="https://jinni.travel/chat" class="cta-btn">{{ t('share.discover_places') }}</a>
     </div>
 
     <!-- ── Content ────────────────────────────────────────────────── -->
@@ -307,7 +307,7 @@
       <!-- ── CTA ────────────────────────────────────────────────────── -->
       <div class="share-cta-block">
         <p class="share-cta-text">{{ t('share.cta_question') }}</p>
-        <a href="https://jinni.travel" class="cta-btn">{{ t('share.discover') }}</a>
+        <a href="https://jinni.travel/chat" class="cta-btn">{{ t('share.discover') }}</a>
       </div>
 
     </main>
