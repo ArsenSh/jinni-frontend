@@ -2179,7 +2179,7 @@ export default {
   },
   mounted() {
     this.checkScreenSize();
-    this.$el.addEventListener('click', this.handlePlaceSearchClick);
+    document.addEventListener('click', this.handlePlaceSearchClick);
     window.addEventListener('resize', this.checkScreenSize);
     this.setupPreferenceButtonHandler();
     setTimeout(() => { this.getCurrentLocation().catch(() => { console.log('Location not available on mount') }) }, 100);
@@ -2207,7 +2207,7 @@ export default {
     document.addEventListener('touchstart', this._clearTouchedMessage, { passive: true });
   },
   beforeUnmount() {
-    this.$el && this.$el.removeEventListener('click', this.handlePlaceSearchClick);
+    document.removeEventListener('click', this.handlePlaceSearchClick);
     clearTimeout(this._usageNoticeTimer);
     if (this.barAutoHideTimer) { clearTimeout(this.barAutoHideTimer) }
     if (this.tokenCheckInterval) { clearInterval(this.tokenCheckInterval) }
@@ -3987,7 +3987,12 @@ export default {
       const loc = this.userSettings && this.userSettings.location;
       const ctx = (loc && loc.city && loc.countryName) ? ` ${loc.city} ${loc.countryName}` : '';
       const q = encodeURIComponent(name + ctx);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank', 'noopener');
+      const url = `https://www.google.com/maps/search/?api=1&query=${q}`;
+      // Anchor-click rather than window.open: a synthesized anchor click from a
+      // real user click is not treated as a popup, so it isn't blocked.
+      const a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      document.body.appendChild(a); a.click(); a.remove();
     },
     setupPreferenceButtonHandler() {window.openPreferences = () => {this.editPreferences()}},
     handleImageError(event) {
