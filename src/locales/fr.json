@@ -1,0 +1,1215 @@
+{
+  "location_help": {
+    "ios-safari": "L'accès à la localisation est bloqué. Ouvrez l'app Réglages → Confidentialité et sécurité → Services de localisation → Sites web Safari, choisissez « Lors de l'utilisation », puis revenez ici et appuyez sur « Autoriser ».",
+    "ios-chrome": "L'accès à la localisation est bloqué. Ouvrez l'app Réglages → Confidentialité et sécurité → Services de localisation → trouvez ce navigateur dans la liste et choisissez « Lors de l'utilisation ». Rechargez ensuite cette page et appuyez sur « Autoriser ».",
+    "android-chrome": "L'accès à la localisation est bloqué. Appuyez sur l'icône de cadenas ou de réglage à côté de la barre d'adresse → Autorisations → Localisation → Autoriser. (Ou menu Chrome → Paramètres → Paramètres des sites → Localisation.) Assurez-vous que la localisation du téléphone est activée, puis rechargez et appuyez sur « Autoriser ».",
+    "android-samsung": "L'accès à la localisation est bloqué. Appuyez sur l'icône de cadenas à côté de la barre d'adresse → Autorisations → Localisation → Autoriser. Assurez-vous que la localisation du téléphone est activée, puis rechargez et appuyez sur « Autoriser ».",
+    "android-firefox": "L'accès à la localisation est bloqué. Ouvrez le menu → Paramètres → Autorisations des sites → Localisation, autorisez ce site, puis rechargez et appuyez sur « Autoriser ».",
+    "desktop-chrome": "L'accès à la localisation est bloqué. Cliquez sur l'icône de localisation ou de cadenas à gauche de la barre d'adresse → Localisation → Autoriser (ou « Réinitialiser l'autorisation »), puis rechargez la page et appuyez sur « Autoriser ».",
+    "desktop-firefox": "L'accès à la localisation est bloqué. Cliquez sur l'icône de cadenas à gauche de la barre d'adresse et effacez l'autorisation bloquée « Accéder à votre position », puis rechargez et appuyez sur « Autoriser ».",
+    "desktop-safari": "L'accès à la localisation est bloqué. Ouvrez Safari → Réglages → Sites web → Localisation et autorisez ce site. Vous devrez peut-être aussi aller dans Réglages Système macOS → Confidentialité et sécurité → Services de localisation → Safari. Rechargez ensuite et appuyez sur « Autoriser ».",
+    "desktop-generic": "L'accès à la localisation est bloqué. Autorisez l'accès à la localisation pour ce site dans les réglages de votre navigateur ou de votre appareil, puis rechargez et appuyez sur « Autoriser »."
+  },
+  "businessTerms": {
+    "title": "Conditions d'utilisation pour les entreprises",
+    "last_updated": "Dernière mise à jour : 29 mai 2026",
+    "sections": {
+      "intro": {
+        "title": "1. Accord et acceptation",
+        "content": "Les présentes Conditions d'utilisation pour les entreprises régissent votre inscription et votre utilisation de Jinni en tant qu'entreprise — référencer un lieu, un événement ou un établissement et le gérer via un compte professionnel. En soumettant une demande ou en utilisant un tableau de bord professionnel, vous acceptez ces conditions, notre Politique de confidentialité pour les entreprises et nos Conditions d'utilisation générales. Si vous acceptez ces conditions au nom d'une entreprise, vous confirmez être autorisé à le faire. Certaines conditions varient selon le niveau de partenariat — utilisez les boutons ci-dessous pour lire les conditions applicables à Verified, Spotlight ou Signature."
+      }
+    },
+    "tier_selector": {
+      "title": "Choisissez votre niveau de partenariat",
+      "subtitle": "Sélectionnez un niveau pour voir les conditions spécifiques — tarifs, fonctionnalités, placement et annulation — qui s'y appliquent. Les sections ci-dessous s'appliquent à toutes les entreprises sur Jinni."
+    },
+    "tiers": {
+      "verified": {
+        "label": "Verified (gratuit)",
+        "title": "Conditions pour les fiches Verified",
+        "intro": "Une fiche Verified est fournie gratuitement et constitue le niveau d'entrée.",
+        "points": [
+          "Une fiche Verified est sans frais et n'entraîne aucune obligation de paiement.",
+          "Les fiches Verified affichent des images provenant automatiquement de Google lors de la vérification ; vous ne pouvez pas téléverser vos propres photos, et les horaires d'ouverture, les liens sociaux et les points forts ne sont pas disponibles à ce niveau.",
+          "Vous ne recevez qu'un nombre de vues ; les analyses détaillées sont réservées aux niveaux payants.",
+          "Une fiche Verified ne peut pas occuper une zone de la carte déjà complète. Si une zone est pleine, vous devez passer à Spotlight ou Signature pour être pris en compte, et dans une zone disputée une entreprise de niveau supérieur peut être prioritaire sur une fiche gratuite.",
+          "Les fiches Verified restent soumises aux règles de vérification, de contenu et de modération des sections communes ci-dessous.",
+          "Nous pouvons, à notre discrétion, maintenir Verified gratuit, modifier ses fonctionnalités ou supprimer ce niveau, avec préavis le cas échéant."
+        ]
+      },
+      "spotlight": {
+        "label": "Spotlight (29 $/mois)",
+        "title": "Conditions pour les fiches Spotlight",
+        "intro": "Une fiche Spotlight est un abonnement payant de 29 $ US par mois (ou l'équivalent en monnaie locale) et débloque des fonctionnalités améliorées.",
+        "points": [
+          "En vous abonnant, vous autorisez le prélèvement mensuel récurrent des frais Spotlight jusqu'à votre annulation.",
+          "Spotlight débloque les horaires d'ouverture, des images supplémentaires, un tableau de bord d'analyse complet et un score de performance utilisé pour classer les fiches au sein d'une zone.",
+          "Les zones accueillent un nombre limité de fiches. Une fiche Spotlight peut prendre une place devant une fiche gratuite dans une zone pleine, et peut elle-même être surclassée ou remplacée par une fiche Signature — voir « Zones, placement et remplacement » ci-dessous.",
+          "Si votre fiche perd sa place, elle peut être gelée (masquée aux voyageurs) tout en conservant ses données ; cela ne constitue pas une défaillance de service donnant droit à remboursement.",
+          "Vous pouvez annuler à tout moment ; votre fiche conserve les fonctionnalités Spotlight jusqu'à la fin de la période payée en cours, après quoi elle peut revenir à Verified ou devenir inactive.",
+          "Les tarifs, les fonctionnalités et la disponibilité peuvent changer moyennant un préavis raisonnable."
+        ]
+      },
+      "signature": {
+        "label": "Signature (49 $/mois)",
+        "title": "Conditions pour les fiches Signature",
+        "intro": "Une fiche Signature est notre abonnement premium, à partir de 49 $ US par mois (ou l'équivalent en monnaie locale). Dans les zones disputées, le prix mensuel peut être plus élevé en raison de l'Enchère de Zone.",
+        "points": [
+          "En vous abonnant, vous autorisez le prélèvement mensuel récurrent à votre prix Signature applicable jusqu'à votre annulation.",
+          "Signature débloque les liens vers les réseaux sociaux, les points forts de la fiche, le statut facultatif « Pépite cachée », les images téléversées par le propriétaire que nous hébergeons et diffusons publiquement, Zone Intelligence et une estimation de revenus (une estimation seulement, non une garantie de ventes).",
+          "ENCHÈRE DE ZONE : lorsqu'une zone est déjà occupée par trois fiches Signature, l'entrée est décidée par une enchère. Vous pouvez soumettre une enchère mensuelle maximale supérieure au prix plancher. Remporter ou défendre une place verrouille votre prix mensuel pour la période de verrouillage (environ trois mois). Les enchères et les prix verrouillés sont contraignants pour cette période.",
+          "REMPLACEMENT ET DÉFENSE : environ une semaine avant le renouvellement, la fiche Signature la moins performante d'une zone pleine doit dépasser l'enchère la plus élevée actuelle dans les 72 heures, sinon elle perd sa place. Une fiche cédée ou surenchérie est gelée ; elle conserve ses données et peut enchérir à nouveau ultérieurement.",
+          "ANNULATION : vous pouvez annuler un abonnement Signature ; la place reste active jusqu'à la fin de la période payée, puis devient disponible pour l'enchérisseur suivant. Les engagements d'enchère déjà remportés pour la période verrouillée en cours restent dus.",
+          "Un placement plus élevé reflète le niveau et les enchères, et non une approbation éditoriale, et l'assistant IA de Jinni ne met pas artificiellement en avant les fiches payantes dans ses recommandations."
+        ]
+      }
+    },
+    "common": [
+      {
+        "title": "Éligibilité et votre compte",
+        "content": "Vous devez représenter une entreprise, un lieu, un événement ou un établissement réel et licite que vous êtes autorisé à référencer. Lorsque vous faites une demande, nous créons un compte propriétaire pour vous et vous envoyons un lien sécurisé pour définir votre mot de passe. Vous êtes responsable de la sécurité de vos identifiants et de toute activité sous votre compte, ainsi que de l'exactitude, de l'actualité et de la non-tromperie des informations fournies."
+      },
+      {
+        "title": "Soumission de la fiche et vérification",
+        "content": "Chaque fiche est soumise à une vérification automatisée et à un examen humain avant sa mise en ligne. La vérification peut consister à comparer les informations soumises à des sources tierces telles que Google, votre site web, TripAdvisor et Instagram. Nous pouvons, à notre discrétion, approuver une fiche, demander des modifications, la mettre en file d'attente ou la rejeter. L'approbation n'est pas garantie, et la réussite de la vérification ne constitue ni une approbation ni une garantie concernant votre entreprise.",
+        "points": [
+          "Vous confirmez avoir le droit d'utiliser tous les noms, textes, images et liens que vous soumettez.",
+          "Vous ne devez pas usurper l'identité d'une autre entreprise ni soumettre des fiches en double pour la même entreprise.",
+          "Nous pouvons réexaminer une fiche à chaque modification, et la modification d'une fiche rejetée ou expirée la renvoie en examen."
+        ]
+      },
+      {
+        "title": "Votre contenu et la licence accordée à Jinni",
+        "content": "Vous conservez la propriété du contenu que vous soumettez (descriptions, images, logos et autres éléments). Vous accordez à Jinni une licence mondiale, non exclusive et gratuite pour héberger, stocker, reproduire, adapter aux fins d'affichage, traduire et publier ce contenu dans le cadre de l'exploitation et de la promotion de votre fiche sur Jinni, y compris dans la recherche, la découverte sur la carte et l'assistant IA. Il vous incombe de veiller à ce que votre contenu ne porte pas atteinte aux droits de tiers et soit conforme à la loi applicable."
+      },
+      {
+        "title": "Utilisation acceptable et conduite interdite",
+        "content": "Lorsque vous utilisez Jinni for Business, vous ne devez pas :",
+        "points": [
+          "Soumettre des informations, des avis ou des images faux, trompeurs, frauduleux ou mensongers.",
+          "Référencer une entreprise que vous ne possédez pas ou n'êtes pas autorisé à représenter, ni créer des fiches en double ou contournant les empreintes.",
+          "Manipuler les analyses, les scores de performance, le système de zones ou l'Enchère de Zone au moyen d'interactions fictives ou de moyens automatisés.",
+          "Téléverser du contenu illégal, contrefaisant, offensant ou nuisible, ou du contenu que vous n'avez pas le droit d'utiliser.",
+          "Tenter de contourner les contrôles de modération, de rejet ou de liste de blocage.",
+          "Utiliser la plateforme pour enfreindre une loi applicable ou les droits de tiers."
+        ]
+      },
+      {
+        "title": "Zones, placement et remplacement",
+        "content": "Jinni organise les fiches en zones géographiques comportant un nombre limité de places par catégorie. Le placement et la visibilité dépendent de votre niveau, de votre score de performance et (pour Signature) des enchères. Les niveaux supérieurs peuvent remplacer les niveaux inférieurs, et une fiche remplacée peut être gelée et masquée aux voyageurs tout en conservant ses données. La disponibilité des places, le classement, le remplacement et l'Enchère de Zone fonctionnent comme décrit dans les sections par niveau ci-dessus et peuvent être ajustés à mesure que nous améliorons la plateforme. Nous ne garantissons aucun placement, classement, visibilité, trafic, contact, réservation ou revenu particulier."
+      },
+      {
+        "title": "Frais, facturation et remboursements",
+        "content": "Les niveaux payants (Spotlight et Signature) sont facturés d'avance sur une base mensuelle récurrente via notre prestataire de paiement tiers ; les prix Signature fixés par l'Enchère de Zone sont verrouillés pour la période de verrouillage et sont dus pour cette période. Vous nous autorisez, ainsi que notre prestataire de paiement, à débiter votre moyen de paiement choisi jusqu'à votre annulation. Sauf disposition légale contraire, les frais ne sont pas remboursables, y compris si une fiche est ensuite gelée, remplacée, rejetée pour manquement à ces conditions ou supprimée pour motif valable. Des taxes, des conversions de devises et des frais de prestataire de paiement peuvent s'appliquer. Nous pouvons modifier les frais moyennant un préavis raisonnable ; les modifications prennent effet au cycle de facturation suivant."
+      },
+      {
+        "title": "Analyses et données de performance",
+        "content": "Les analyses du tableau de bord, les scores de performance, les parts de trafic et l'estimation de revenus sont fournis à titre d'information uniquement. Ce sont des estimations fondées sur l'activité sur la plateforme, qui peuvent être incomplètes ou différées, et sur lesquelles il ne faut pas se fonder comme mesure des ventes réelles ou garantie de résultats. Nous ne sommes pas responsables des décisions commerciales que vous prenez sur la base de ces chiffres."
+      },
+      {
+        "title": "Suspension, gel et résiliation",
+        "content": "Nous pouvons suspendre, geler, rétrograder, supprimer ou rejeter définitivement une fiche, et désactiver le compte propriétaire associé, si nous estimons que ces conditions ont été enfreintes, si une fiche est frauduleuse ou abusive, si un paiement échoue, ou si cela est nécessaire pour protéger Jinni, les voyageurs ou des tiers. Un rejet définitif pour abus peut bloquer les demandes futures associées à vos informations. Vous pouvez cesser d'utiliser le service ou demander la suppression de votre fiche à tout moment ; certains enregistrements peuvent être conservés comme décrit dans la Politique de confidentialité pour les entreprises. Les dispositions qui par nature doivent survivre à la résiliation (y compris la licence sur le contenu déjà publié, les frais dus, les exclusions de garantie et la limitation de responsabilité) survivront."
+      },
+      {
+        "title": "Exclusions de garantie",
+        "content": "Jinni for Business est fourni « en l'état » et « selon disponibilité », sans garantie d'aucune sorte, expresse ou implicite, y compris la qualité marchande, l'adéquation à un usage particulier et l'absence de contrefaçon. Nous ne garantissons pas que le service sera ininterrompu, exempt d'erreurs ou sécurisé, que la vérification détectera tout problème, ou que les fiches généreront un niveau particulier d'intérêt, de trafic ou de revenu."
+      },
+      {
+        "title": "Limitation de responsabilité",
+        "content": "Dans toute la mesure permise par la loi, Jinni et ses affiliés ne sauraient être tenus responsables des dommages indirects, accessoires, spéciaux, consécutifs ou punitifs, ni de toute perte de bénéfices, de revenus, de clientèle, de données ou d'opportunités commerciales, découlant de votre utilisation de Jinni for Business ou liés à celle-ci. Dans la mesure où notre responsabilité serait engagée, notre responsabilité totale cumulée n'excédera pas le montant que vous avez versé à Jinni pour la fiche concernée au cours des trois mois précédant l'événement à l'origine de la réclamation."
+      },
+      {
+        "title": "Indemnisation",
+        "content": "Vous acceptez d'indemniser et de dégager de toute responsabilité Jinni et ses affiliés contre toute réclamation, dommage, perte, responsabilité et frais (y compris les frais juridiques raisonnables) découlant de votre fiche, de votre contenu, de votre utilisation du service ou de votre manquement à ces conditions ou à toute loi ou droit de tiers."
+      },
+      {
+        "title": "Modifications de ces conditions",
+        "content": "Nous pouvons mettre à jour ces Conditions d'utilisation pour les entreprises de temps à autre. En cas de modifications importantes, nous mettrons à jour la date de « Dernière mise à jour » et, le cas échéant, vous en informerons. Votre utilisation continue de Jinni for Business après une mise à jour vaut acceptation des conditions révisées."
+      },
+      {
+        "title": "Droit applicable et contact",
+        "content": "Les présentes conditions sont régies par les lois applicables de la juridiction dans laquelle Jinni opère, sans égard aux principes de conflit de lois. Si vous avez des questions sur ces Conditions d'utilisation pour les entreprises, contactez-nous via la page Contact de Jinni."
+      }
+    ]
+  },
+  "businessPrivacy": {
+    "title": "Politique de confidentialité pour les entreprises",
+    "last_updated": "Dernière mise à jour : 29 mai 2026",
+    "sections": {
+      "intro": {
+        "title": "1. À propos de cette politique",
+        "content": "La présente Politique de confidentialité pour les entreprises explique comment Jinni collecte, utilise, divulgue et protège les informations relatives aux entreprises et aux personnes qui créent et gèrent des fiches d'établissement sur Jinni. Elle complète notre Politique de confidentialité générale et nos Conditions d'utilisation. Certaines pratiques varient selon votre niveau de partenariat — utilisez les boutons ci-dessous pour lire les dispositions applicables aux niveaux Verified, Spotlight ou Signature."
+      }
+    },
+    "tier_selector": {
+      "title": "Choisissez votre niveau de partenariat",
+      "subtitle": "Sélectionnez un niveau pour voir exactement quelles données nous collectons, traitons et affichons pour ce type de fiche. Les sections qui suivent s'appliquent à toutes les entreprises sur Jinni."
+    },
+    "tiers": {
+      "verified": {
+        "label": "Verified (gratuit)",
+        "title": "Notes de confidentialité pour les fiches Verified",
+        "intro": "Une fiche Verified est gratuite. C'est le niveau le plus léger en matière de données que nous conservons sur votre entreprise.",
+        "points": [
+          "Nous n'acceptons pas vos propres photos pour une fiche Verified. À la place, les images affichées proviennent automatiquement de Google Places lors de la vérification et sont stockées sur nos serveurs.",
+          "Les horaires d'ouverture, les liens vers les réseaux sociaux et les points forts de la fiche ne sont pas collectés pour ce niveau et sont ignorés s'ils sont soumis.",
+          "Vous ne voyez que des statistiques de base — un nombre total de vues et une invitation à passer à un niveau supérieur. Les indicateurs d'engagement détaillés ne sont pas fournis aux propriétaires Verified.",
+          "Nous collectons et traitons tout de même les données essentielles de votre demande (nom de l'entreprise, catégorie, adresse et coordonnées, coordonnées de contact, tarifs) et effectuons les vérifications décrites ci-dessous.",
+          "Une fiche Verified ne peut pas occuper une zone de la carte déjà complète ; aucune donnée d'enchère ou d'enchères de zone n'est collectée pour ce niveau."
+        ]
+      },
+      "spotlight": {
+        "label": "Spotlight (29 $/mois)",
+        "title": "Notes de confidentialité pour les fiches Spotlight",
+        "intro": "Une fiche Spotlight est un niveau payant (29 $ par mois) qui débloque davantage de champs et un tableau de bord d'analyse complet ; nous traitons donc plus de données que pour Verified.",
+        "points": [
+          "Nous collectons et affichons les horaires d'ouverture et jusqu'à huit images que vous fournissez (avec des images Google en solution de repli).",
+          "Nous traitons pour vous un tableau de bord d'analyse complet : vues, enregistrements, clics, mentions « j'aime » et « je n'aime pas », partages, clics « Demander à l'IA » et « Plus d'images », tous les clics de contact/conversion, tendances hebdomadaires et un score de performance.",
+          "Votre score de performance est calculé à partir de votre activité récente, de l'engagement, des clics de conversion et de l'exhaustivité de votre profil. Il sert à classer les fiches au sein d'une zone et à décider du remplacement lorsqu'une zone est pleine.",
+          "Comme il s'agit d'un niveau payant, nous traitons les données d'abonnement et de paiement via notre prestataire de paiement (voir « Paiements et facturation »).",
+          "Dans une zone pleine, une fiche Spotlight peut remplacer la fiche gratuite la moins performante ; le résultat est enregistré sur les fiches concernées."
+        ]
+      },
+      "signature": {
+        "label": "Signature (49 $/mois)",
+        "title": "Notes de confidentialité pour les fiches Signature",
+        "intro": "Une fiche Signature est notre niveau payant supérieur (à partir de 49 $ par mois) et débloque le plus de fonctionnalités ; elle implique donc le plus de traitement de données — y compris des images que nous hébergeons pour vous et des analyses concurrentielles.",
+        "points": [
+          "Nous collectons tout ce qu'une fiche Spotlight collecte, plus les liens vers les réseaux sociaux (Instagram, Facebook, TripAdvisor, Booking.com), les points forts de la fiche et le statut facultatif « Pépite cachée ».",
+          "Les images que vous téléversez sont stockées sous forme de fichiers dans notre base de données et sont diffusées publiquement par URL afin que les voyageurs puissent les voir. Vous pouvez les supprimer à tout moment depuis votre tableau de bord.",
+          "Zone Intelligence vous montre des informations concurrentielles sur votre zone de la carte. Vous pouvez voir les noms des concurrents, leurs niveaux, leur localisation approximative et leur performance affichée uniquement sous forme de plages floutées (jamais exactes). En retour, le nom de votre entreprise, votre niveau et votre localisation approximative sont visibles par les autres propriétaires Signature de la même zone, et le nom, le niveau et les coordonnées de votre fiche apparaissent dans la vérification publique de disponibilité de zone.",
+          "Si votre zone est occupée par trois fiches Signature, vous pouvez participer à l'Enchère de Zone. Nous traitons alors vos montants d'enchère, l'horodatage des enchères, vos réponses de défense et le prix verrouillé convenu.",
+          "Votre tableau de bord affiche une estimation de revenus calculée à partir des clics de conversion et de vos tarifs déclarés. Il s'agit uniquement d'une estimation, non fondée sur des données de ventes réelles.",
+          "Les données d'abonnement et de paiement sont traitées via notre prestataire de paiement (voir « Paiements et facturation »)."
+        ]
+      }
+    },
+    "common": [
+      {
+        "title": "Le compte professionnel que nous créons pour vous",
+        "content": "Lorsque vous soumettez une demande d'établissement, nous créons automatiquement un compte propriétaire pour vous, à partir de votre adresse e-mail de contact. Si vous ne fournissez qu'un numéro de téléphone, nous générons une adresse de connexion fictive basée sur ce numéro. Nous vous envoyons un lien sécurisé à durée limitée (valable 24 heures) afin que vous puissiez définir votre propre mot de passe et accéder à votre tableau de bord. Si l'e-mail appartient déjà à un compte Jinni existant, nous le réutilisons sans modifier votre mot de passe actuel."
+      },
+      {
+        "title": "Les informations que vous fournissez",
+        "content": "Lorsque vous enregistrez ou modifiez une fiche, nous collectons : le nom et les catégories de votre entreprise ; des descriptions courtes et détaillées ainsi que des points forts ; votre adresse, ville, région, pays et coordonnées sur la carte ; les coordonnées de contact (e-mail, téléphone, site web) et les liens vers les réseaux sociaux ; les tarifs ; les horaires d'ouverture ; les dates d'événement et le fuseau horaire du lieu ; ainsi que toutes les images que vous téléversez. Nous enregistrons aussi les informations que vous choisissez de rendre publiques, par exemple l'affichage ou non de votre e-mail."
+      },
+      {
+        "title": "Comment nous vérifions votre fiche",
+        "content": "Pour confirmer qu'une fiche est authentique, nous procédons à une vérification automatisée lors de votre demande. Cela signifie qu'une partie des informations que vous soumettez est transmise à des tiers : nous interrogeons l'API Google Places à l'aide du nom et de l'emplacement de votre entreprise et pouvons récupérer et stocker des photos et des détails correspondants ; nous récupérons votre site web, votre page TripAdvisor et votre profil Instagram (s'ils sont fournis) pour vérifier que le nom de votre entreprise y figure ; et nous pouvons envoyer votre adresse à OpenStreetMap/Nominatim pour le géocodage. Ces vérifications produisent un score automatisé et des notes que notre personnel utilise lors de l'examen de votre fiche. Un examinateur humain approuve ou rejette chaque fiche."
+      },
+      {
+        "title": "Comment nous utilisons les informations d'entreprise",
+        "points": [
+          "Pour créer et exploiter votre fiche et votre compte propriétaire.",
+          "Pour vérifier l'authenticité de votre entreprise et l'examiner en matière de qualité et de sécurité.",
+          "Pour afficher votre fiche aux voyageurs, notamment via la recherche, la découverte sur la carte et l'assistant IA de Jinni.",
+          "Pour produire les analyses et les scores de performance affichés sur votre tableau de bord.",
+          "Pour gérer les zones, les remplacements et (pour Signature) l'Enchère de Zone.",
+          "Pour traiter les paiements des niveaux payants et vous contacter au sujet de votre fiche.",
+          "Pour détecter et prévenir la fraude, les abus et les fiches en double ou de mauvaise foi."
+        ]
+      },
+      {
+        "title": "Informations rendues publiques sur Jinni",
+        "content": "Une fiche approuvée et active est présentée aux voyageurs. Les informations visibles publiquement incluent le nom de votre entreprise, la description, les catégories, l'adresse et les coordonnées, les images, les horaires d'ouverture, les tarifs et les liens de contact tels que le téléphone, le site web et les réseaux sociaux. Votre adresse e-mail n'est affichée que si vous activez l'option « afficher l'e-mail ». Les détails de modération — comme l'adresse IP d'où provient votre demande, les notes internes d'examen et nos signalements d'abus — ne sont jamais affichés publiquement."
+      },
+      {
+        "title": "Partage avec des tiers",
+        "content": "Nous partageons les informations d'entreprise avec des prestataires de services uniquement dans la mesure nécessaire au fonctionnement de Jinni : Google (données Places et photos) et OpenStreetMap/Nominatim pour la vérification et la cartographie ; OpenAI, à qui nous n'envoyons que le nom de votre entreprise dans le cadre de la génération de recommandations par IA (et non vos coordonnées de contact, votre emplacement exact, vos tarifs ou vos liens sociaux) ; notre prestataire de messagerie pour les messages transactionnels ; et notre prestataire de paiement pour les niveaux payants. Nous pouvons également divulguer des informations lorsque la loi l'exige ou pour protéger les droits, la sécurité de Jinni, de nos utilisateurs et du public."
+      },
+      {
+        "title": "Analyses et données de performance",
+        "content": "Nous enregistrons la manière dont les voyageurs interagissent avec votre fiche — vues, clics, enregistrements, partages, réactions, actions « Demander à l'IA » et clics de contact/conversion — et conservons des instantanés hebdomadaires et un score de performance. Certains de ces événements d'interaction sont stockés de façon à relier l'action à la fois au compte du voyageur et à votre fiche. Les totaux agrégés alimentent votre tableau de bord. L'estimation de revenus (Signature) est calculée à partir des clics de conversion et de vos tarifs déclarés et n'est qu'une estimation."
+      },
+      {
+        "title": "Sécurité, prévention des abus et empreintes",
+        "content": "Pour empêcher les fiches frauduleuses, en double ou de mauvaise foi, nous capturons et conservons l'adresse IP depuis laquelle votre demande a été soumise, et nous créons des « empreintes » fondées sur l'e-mail, le numéro de téléphone, le nom de l'entreprise et la ville, l'adresse IP et l'identifiant de compte. Nous les comparons à une liste de blocage interne. Si une fiche est définitivement rejetée pour abus, nous pouvons bloquer ces empreintes pour les demandes futures et désactiver l'identifiant propriétaire associé. Nous n'indiquons jamais au demandeur quel détail précis a causé un blocage. Des rejets répétés partageant le même e-mail ou téléphone peuvent être signalés automatiquement."
+      },
+      {
+        "title": "Paiements et facturation",
+        "content": "Les niveaux payants (Spotlight et Signature) sont facturés mensuellement, et les résultats de l'Enchère de Zone peuvent fixer un prix mensuel plus élevé verrouillé pour une période. Les paiements sont censés être traités via une passerelle de paiement tierce ; nous conservons des enregistrements de facturation tels que le montant, la devise, le moyen de paiement, la période de facturation, une référence de transaction de la passerelle et le statut du paiement. Nous ne stockons pas les coordonnées bancaires complètes sur nos propres serveurs. Les moyens de paiement exacts, la devise, le cycle de facturation et les conditions de remboursement sont décrits dans nos Conditions d'utilisation pour les entreprises."
+      },
+      {
+        "title": "Stockage et sécurité des données",
+        "content": "Les données d'entreprise sont stockées dans notre base de données cloud gérée. Les images que vous téléversez, ainsi que les photos que nous récupérons auprès de Google lors de la vérification, sont stockées dans cette base et diffusées sur le web ; les images téléversées et mises en cache sont accessibles publiquement par URL et peuvent être mises en cache pendant une certaine durée. Nous appliquons des mesures techniques et organisationnelles pour protéger vos informations, et l'accès aux outils de modération est limité au personnel et aux administrateurs autorisés."
+      },
+      {
+        "title": "Conservation des données",
+        "content": "Nous conservons votre fiche et les données associées tant que votre compte et votre fiche existent. Certains enregistrements sont conservés plus longtemps pour des raisons de sécurité et d'audit — par exemple l'adresse IP de soumission et l'historique d'examen d'une fiche, ainsi que les empreintes de la liste de blocage, qui peuvent survivre à la fiche qui les a générées. Lorsqu'une fiche est supprimée par un administrateur, ses analyses d'interaction détaillées sont supprimées, tandis que le journal d'examen/audit peut être conservé."
+      },
+      {
+        "title": "Vos choix et vos droits",
+        "points": [
+          "Consulter et mettre à jour la plupart des détails de votre fiche depuis votre tableau de bord (certains champs dépendent de votre niveau).",
+          "Contrôler l'affichage public ou non de votre adresse e-mail.",
+          "Supprimer les images que vous avez téléversées.",
+          "Annuler un abonnement payant ; pour les fiches Signature, cela se fait via le processus d'enchère/annulation.",
+          "Demander l'accès, la rectification ou la suppression des données de votre entreprise et de votre compte propriétaire en nous contactant. Certaines données peuvent être conservées lorsque nous avons une base légale ou un intérêt légitime, par exemple la prévention de la fraude."
+        ]
+      },
+      {
+        "title": "Modifications de cette politique",
+        "content": "Nous pouvons mettre à jour cette Politique de confidentialité pour les entreprises de temps à autre. En cas de modifications importantes, nous mettrons à jour la date de « Dernière mise à jour » et, le cas échéant, vous en informerons. Votre utilisation continue de Jinni for Business après une mise à jour vaut acceptation de la politique révisée."
+      },
+      {
+        "title": "Nous contacter",
+        "content": "Si vous avez des questions sur cette Politique de confidentialité pour les entreprises ou sur la manière dont nous traitons les données de votre entreprise, veuillez nous contacter via la page Contact de Jinni."
+      }
+    ]
+  },
+  "landing": {
+    "hero": {
+      "title": "Où Jinni vous emmènera-t-il ?",
+      "subtitle": "Découvrez des destinations dont vous ignoriez l'existence",
+      "cta": "Faites un vœu ✨"
+    },
+    "features": {
+      "title": "Trois souhaits, possibilités infinies",
+      "ai": {
+        "title": "Personnalisé rien que pour vous",
+        "description": "Jinni décode votre style et vos goûts pour révéler des lieux avec lesquels vous vous connecterez instantanément"
+      },
+      "gems": {
+        "title": "Découvrez des trésors cachés",
+        "description": "Accédez à des lieux secrets et des expériences authentiques qui transforment les voyages en histoires inoubliables"
+      },
+      "business": {
+        "title": "Planification à la vitesse de la pensée",
+        "description": "Un clic pour une inspiration instantanée. Ou plongez plus profond. Jinni reflète la façon dont vous rêvez - fluidement, librement"
+      }
+    },
+    "footer": {
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation",
+      "contact": "Contactez-nous",
+      "copyright": "© 2026 Jinni. Tous droits réservés."
+    },
+    "mode_switch": {
+      "explore": "Explorer",
+      "for_business": "Pour les entreprises"
+    }
+  },
+  "auth": {
+    "title": "Jinni",
+    "subtitle_login": "Bon retour",
+    "subtitle_register": "Commencez votre voyage magique",
+    "sign_in": "Se connecter",
+    "sign_up": "S'inscrire",
+    "full_name": "Nom complet",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "create_account": "Créer un compte",
+    "or_continue": "Ou continuer avec",
+    "terms": "En vous inscrivant, vous acceptez nos {0} et {1}",
+    "terms_link": "Conditions d'utilisation",
+    "privacy_link": "Politique de confidentialité",
+    "forgot_password": "Mot de passe oublié ?",
+    "welcome_back": "Bon retour",
+    "account_created": "Compte créé avec succès",
+    "name_error": "Le nom doit contenir au moins 2 caractères",
+    "email_error": "Veuillez entrer une adresse e-mail valide",
+    "password_error": "Le mot de passe doit contenir au moins 6 caractères",
+    "password_required": "Le mot de passe est requis",
+    "terms_prefix": "En vous inscrivant, vous acceptez nos",
+    "terms_and": "et",
+    "signing_in": "Connexion en cours...",
+    "creating_account": "Création du compte...",
+    "unexpected_error": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "google_error": "La connexion avec Google a échoué. Veuillez réessayer.",
+    "apple_error": "La connexion avec Apple a échoué. Veuillez réessayer.",
+    "check_email": "Vérifiez votre e-mail",
+    "verification_sent": "Nous avons envoyé un code de vérification à 6 chiffres à",
+    "enter_code": "Entrez le code à 6 chiffres",
+    "verify_create": "Vérifier",
+    "back_to_registration": "Retour à l'inscription",
+    "resend_code": "Renvoyer le code",
+    "resend_timer": "Renvoyer le code dans {0}s",
+    "send_verification": "Envoyer le code de vérification",
+    "sending_verification": "Envoi de la vérification...",
+    "verifying": "Vérification...",
+    "new_code_sent": "Nouveau code envoyé",
+    "invalid_code": "Code invalide",
+    "attempts_left": "{0} tentatives restantes",
+    "too_many_attempts": "Trop de tentatives. Veuillez réessayer plus tard",
+    "forgot_subtitle": "Entrez votre adresse e-mail",
+    "reset_subtitle": "Entrez le code de réinitialisation",
+    "send_reset_code": "Code de réinitialisation",
+    "sending_reset_code": "Envoi du code...",
+    "reset_code_sent": "Code de réinitialisation envoyé à votre e-mail",
+    "enter_reset_code": "Entrez le code de réinitialisation à 6 chiffres",
+    "new_password": "Nouveau mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "reset_password": "Réinitialiser le mot de passe",
+    "reset_password_title": "Créer un nouveau mot de passe",
+    "resetting_password": "Réinitialisation du mot de passe...",
+    "back_to_login": "Retour à la connexion",
+    "resend_reset_code": "Renvoyer le code de réinitialisation",
+    "new_reset_code_sent": "Nouveau code de réinitialisation envoyé",
+    "password_reset_success": "Redirection vers la connexion...",
+    "all_fields_required": "Tous les champs sont requis",
+    "passwords_dont_match": "Les mots de passe ne correspondent pas",
+    "email_required": "L'adresse e-mail est requise",
+    "setup_password_subtitle": "Créez un mot de passe pour votre compte professionnel",
+    "setup_new_password": "Nouveau mot de passe",
+    "setup_confirm_password": "Confirmer le mot de passe",
+    "setup_submit": "Définir le mot de passe et se connecter",
+    "setup_saving": "Enregistrement...",
+    "setup_both_fields": "Veuillez remplir les deux champs de mot de passe",
+    "setup_password_min": "Le mot de passe doit contenir au moins 8 caractères",
+    "setup_error": "Une erreur s'est produite",
+    "hint_uppercase": "✓ Majuscule",
+    "hint_number": "✓ Chiffre",
+    "hint_symbol": "✓ Symbole"
+  },
+  "onboarding": {
+    "title": "Personnalisez votre expérience",
+    "edit_title": "Préférences",
+    "subtitle": "Parlez-nous de vos préférences de voyage pour obtenir des recommandations personnalisées",
+    "edit_subtitle": "Mettez à jour pour des recommandations sur mesure",
+    "complete": "% Terminé",
+    "interests_title": "Vos intérêts",
+    "interests_desc": "Sélectionnez les activités que vous aimez",
+    "budget_title": "Votre budget",
+    "budget_desc": "Définissez votre fourchette de dépenses préférée",
+    "budget_optional": "Définissez une fourchette de budget pour des recommandations personnalisées",
+    "set_budget": "Définir",
+    "min_budget": "Minimum",
+    "max_budget": "Maximum",
+    "cancel_budget": "Annuler",
+    "style_title": "Votre style",
+    "style_desc": "Comment préférez-vous voyager ?",
+    "location_title": "Votre position",
+    "location_permission_required": "L'autorisation GPS est requise pour utiliser votre position actuelle -",
+    "location_permission_grant": "Autoriser",
+    "location_desc": "Sélectionnez votre position actuelle ou choisissez une destination",
+    "use_current_location": "Ma position",
+    "choose_destination": "Choisir la destination",
+    "select_destination": "Sélectionner la destination sur la carte",
+    "country": "Pays",
+    "city": "Ville",
+    "select_country": "Sélectionner le pays",
+    "select_city": "Sélectionner la ville",
+    "search_countries": "Rechercher des pays...",
+    "search_cities": "Rechercher des villes...",
+    "loading": "Chargement...",
+    "or": "ou",
+    "select_on_map": "Sélectionner sur la carte",
+    "using_gps": "Utilisation de votre position GPS actuelle",
+    "lang_title": "Langue préférée",
+    "lang_desc": "Sélectionnez les langues qui vous conviennent",
+    "get_recommendations": "Obtenir des recommandations",
+    "save_preferences": "Enregistrer les préférences",
+    "complete_warning": "Complétez toutes les sections à 100%",
+    "budget_validation_error": "Entrez une fourchette de budget valide (min ≤ max)",
+    "unexpected_error": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "location_denied_ios": "L'accès à la localisation est bloqué. Pour utiliser le GPS, allez dans Réglages → Confidentialité et sécurité → Services de localisation → Safari → choisissez « Lors de l'utilisation ». Revenez ensuite ici et appuyez sur « Autoriser ».",
+    "location_denied_btn_title": "L'accès à la localisation est bloqué dans les réglages de l'appareil. Choisissez une destination manuellement.",
+    "gps_failed": "Impossible d'obtenir votre position GPS. Autorisez l'accès à la localisation ou choisissez un lieu sur la carte.",
+    "currency": "Devise",
+    "saving": "Enregistrement...",
+    "currencies": {
+      "AED": "AED",
+      "USD": "USD",
+      "RUB": "RUB",
+      "EUR": "EUR",
+      "GBP": "GBP"
+    },
+    "interests": {
+      "family": "Famille",
+      "romantic": "Romantique",
+      "nature": "Nature",
+      "adventure": "Aventure",
+      "cultural": "Culturel",
+      "history": "Histoire",
+      "art": "Art",
+      "food_drink": "Nourriture et boissons",
+      "nightlife": "Vie nocturne",
+      "relaxation": "Détente"
+    },
+    "styles": {
+      "luxury": "Luxe",
+      "budget": "Économique"
+    }
+  },
+  "contact": {
+    "back": "Retour",
+    "title": "Contactez-nous",
+    "subtitle": "Des questions sur votre compagnon de voyage IA ? Nous sommes là pour vous aider à planifier le voyage parfait.",
+    "form_title": "Envoyer un message",
+    "form_description": "Remplissez le formulaire ci-dessous et nos experts en voyage IA vous répondront rapidement.",
+    "subject": "Sujet",
+    "select_topic": "Sélectionnez un sujet",
+    "subjects": {
+      "general": "Demande générale",
+      "technical": "Support technique",
+      "billing": "Question de facturation",
+      "feature": "Demande de fonctionnalité",
+      "partnership": "Opportunité de partenariat"
+    },
+    "message": "Votre message",
+    "message_placeholder": "Parlez-nous de vos projets de voyage ou de vos questions...",
+    "response_sent_to": "La réponse sera envoyée à",
+    "send_message": "Envoyer le message",
+    "sending": "Envoi en cours...",
+    "response_time": "Nous répondons généralement dans les 4 heures pendant les jours ouvrables.",
+    "tagline": "Votre compagnon intelligent pour des voyages extraordinaires",
+    "privacy_policy": "Politique de confidentialité",
+    "terms_of_service": "Conditions d'utilisation",
+    "copyright": "© 2026 Jinni AI. Tous droits réservés.",
+    "modal": {
+      "title": "Message envoyé avec succès",
+      "message": "Merci d'avoir contacté Jinni. Notre équipe vous répondra bientôt à {email}. En attendant, n'hésitez pas à discuter avec notre assistant IA pour des conseils de voyage instantanés.",
+      "button": "Continuer l'exploration"
+    },
+    "fill_required": "Veuillez remplir tous les champs requis.",
+    "send_error": "Échec de l'envoi du message. Veuillez réessayer plus tard."
+  },
+  "map_selector": {
+    "back": "Retour",
+    "title": "Sélectionner la destination",
+    "confirm": "Confirmer",
+    "search_placeholder": "Rechercher une ville ou un lieu...",
+    "searching": "Recherche...",
+    "selected": "Sélectionné :",
+    "click_to_select": "Cliquez sur la carte pour sélectionner",
+    "coordinates": "Coordonnées :",
+    "address": "Adresse :",
+    "loading_map": "Chargement de la carte...",
+    "unsaved_changes": "Vous avez des modifications non enregistrées. Voulez-vous quitter ?",
+    "my_location_btn": "Utiliser ma position actuelle",
+    "gps_denied_banner": "Le GPS est bloqué. Vous pouvez quand même choisir un lieu en appuyant sur la carte ou en faisant une recherche. Pour activer le GPS : Réglages → Confidentialité et sécurité → Services de localisation → Safari → « Lors de l'utilisation ».",
+    "gps_denied_alert": "L'accès à la localisation est bloqué. Allez dans Réglages → Confidentialité et sécurité → Services de localisation → Safari et choisissez « Lors de l'utilisation ».",
+    "gps_unavailable": "Impossible de déterminer votre position. Vérifiez le signal GPS et réessayez."
+  },
+  "terms": {
+    "title": "Conditions d'utilisation",
+    "last_updated": "Dernière mise à jour : 30 janvier 2026",
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptation des conditions",
+        "content": "En accédant ou en utilisant Jinni, vous confirmez avoir lu, compris et accepté d'être lié par ces Conditions d'utilisation ainsi que par notre Politique de confidentialité. Si vous n'acceptez pas intégralement ces conditions, vous ne devez pas accéder à notre service ni l'utiliser. Votre utilisation continue de Jinni après toute mise à jour de ces Conditions constitue une acceptation de la version révisée."
+      },
+      "description": {
+        "title": "2. Description du service",
+        "content": "Jinni est un compagnon de voyage alimenté par l'IA qui fournit des recommandations personnalisées de destinations, une planification de voyage conversationnelle et une découverte d'endroits basée sur la localisation. Notre service exploite l'intelligence artificielle et des sources de données tierces pour adapter les suggestions à vos préférences et à votre emplacement. Nous nous réservons le droit de modifier, d'étendre ou d'interrompre toute fonctionnalité ou aspect du service à tout moment avec un préavis raisonnable."
+      },
+      "account": {
+        "title": "3. Inscription et sécurité du compte",
+        "content": "Pour accéder à Jinni, vous devez créer un compte et fournir des informations exactes et à jour. Vous êtes seul responsable de :",
+        "points": [
+          "la confidentialité de vos identifiants de connexion ;",
+          "toute activité se produisant sous votre compte, qu'elle soit autorisée ou non ;",
+          "nous avertir immédiatement à support@jinni.ai si vous soupçonnez un accès non autorisé ;",
+          "vous assurer que les informations de votre compte restent exactes et à jour."
+        ]
+      },
+      "use": {
+        "title": "4. Utilisation acceptable",
+        "content": "Votre utilisation de Jinni est soumise aux conditions suivantes.",
+        "subsections": {
+          "permitted": {
+            "title": "Utilisation autorisée",
+            "points": [
+              "Utiliser Jinni pour la planification de voyage personnelle et non commerciale ainsi que pour la découverte d’endroits.",
+              "Soumettre des avis, préférences et commentaires authentiques.",
+              "Accéder aux fonctionnalités dans les limites de votre niveau de compte."
+            ]
+          },
+          "prohibited": {
+            "title": "Comportement interdit",
+            "points": [
+              "Tenter de rétro-ingénierie, de décompiler ou d’extraire le code source d’une partie quelconque du service.",
+              "Utiliser des outils automatisés, des robots ou des extracteurs pour accéder, indexer ou collecter du contenu.",
+              "Tenter d’obtenir un accès non autorisé à nos systèmes, serveurs ou comptes d’autres utilisateurs.",
+              "Soumettre des informations fausses, trompeuses ou frauduleuses.",
+              "Transmettre des codes malveillants, des virus ou des données perturbatrices.",
+              "Utiliser le service pour harceler, menacer ou nuire à une personne.",
+              "Contourner les limites d’utilisation, les limites de débit ou les contrôles d’accès.",
+              "Violer toute loi ou règlement local, national ou international applicable."
+            ]
+          }
+        }
+      },
+      "content": {
+        "title": "5. Contenu utilisateur",
+        "content": "Vous conservez la propriété de tout contenu que vous soumettez à Jinni, y compris les préférences, avis et messages. En soumettant du contenu, vous nous accordez une licence mondiale, non exclusive et libre de droits pour stocker, traiter et utiliser ce contenu uniquement pour fournir et améliorer le service. Vous déclarez que votre contenu ne viole aucun droit de tiers et qu’il est conforme aux présentes conditions. Nous nous réservons le droit de supprimer tout contenu qui enfreint ces Conditions ou la loi applicable."
+      },
+      "ai": {
+        "title": "6. Recommandations générées par l’IA",
+        "content": "Jinni utilise l’intelligence artificielle pour générer des suggestions de voyage en fonction de vos préférences, de votre emplacement et de données contextuelles. Toutes les recommandations sont fournies à titre informatif uniquement et ne constituent pas des conseils professionnels en matière de voyage, de droit, de médecine ou de finances. Nous ne garantissons pas qu’un lieu, itinéraire ou expérience recommandé répondra à vos attentes ou sera disponible au moment de votre visite. Vous êtes seul responsable de la vérification indépendante des informations et de toutes les décisions de voyage que vous prenez."
+      },
+      "premium": {
+        "title": "7. Services premium",
+        "content": "Certaines fonctionnalités avancées sont exclusivement disponibles via un abonnement payant.",
+        "subsections": {
+          "billing": {
+            "title": "Facturation",
+            "content": "Les frais d’abonnement sont facturés à l’avance sur une base récurrente (mensuelle ou annuelle selon votre plan choisi) et ne sont pas remboursables, sauf lorsque la loi applicable l’exige. En vous abonnant, vous nous autorisez à débiter automatiquement votre moyen de paiement au début de chaque période de facturation."
+          },
+          "cancellation": {
+            "title": "Annulation",
+            "content": "Vous pouvez annuler votre abonnement à tout moment via les paramètres de votre compte. L’annulation prend effet à la fin de votre période de facturation en cours ; vous conserverez l’accès aux fonctionnalités premium jusqu’à cette date. Nous nous réservons le droit de modifier les tarifs d’abonnement avec un préavis d’au moins 30 jours."
+          }
+        }
+      },
+      "limits": {
+        "title": "8. Limites d’utilisation",
+        "content": "Les comptes gratuits sont soumis à des limites quotidiennes pour les interactions IA et les découvertes d’endroits, telles qu’indiquées sur notre page tarifaire. Les comptes premium bénéficient de limites plus élevées conformément à leur niveau d’abonnement. Nous nous réservons le droit d’ajuster ces limites à tout moment avec un préavis raisonnable. Toute tentative de contournement des limites d’utilisation – y compris par le biais de comptes multiples ou d’un accès automatisé – constitue une violation des présentes Conditions et peut entraîner la suspension du compte."
+      },
+      "ip": {
+        "title": "9. Propriété intellectuelle",
+        "content": "Tout contenu, design, code, marques et technologies qui font partie du service Jinni sont la propriété exclusive de Jinni ou de ses concédants de licence et sont protégés par les lois applicables en matière de propriété intellectuelle. Aucune disposition des présentes Conditions ne vous confère un droit, un titre ou un intérêt sur le service ou sa technologie sous-jacente au-delà de la licence limitée d’utilisation du service telle que décrite ici. Toute utilisation, reproduction ou distribution non autorisée de notre propriété intellectuelle est strictement interdite."
+      },
+      "privacy": {
+        "title": "10. Confidentialité",
+        "content": "Votre utilisation de Jinni est régie par notre Politique de confidentialité, qui est incorporée aux présentes Conditions par référence. En utilisant le service, vous consentez à la collecte, à l’utilisation et au traitement de vos informations tel que décrit dans notre Politique de confidentialité. Veuillez la consulter attentivement."
+      },
+      "termination": {
+        "title": "11. Résiliation",
+        "subsections": {
+          "by_us": {
+            "title": "Résiliation par nos soins",
+            "content": "Nous nous réservons le droit de suspendre ou de résilier définitivement votre compte à notre seule discrétion, sans préavis, si nous déterminons que vous avez violé les présentes Conditions, vous êtes livré à un comportement frauduleux ou abusif, avez constitué un risque de sécurité pour le service ou d’autres utilisateurs, ou si la loi l’exige. En cas de violation grave, la résiliation sera immédiate et définitive."
+          },
+          "by_you": {
+            "title": "Résiliation par vos soins",
+            "content": "Vous pouvez supprimer votre compte à tout moment via les paramètres de votre compte. Après suppression, les données de votre compte seront définitivement supprimées conformément à notre Politique de confidentialité."
+          },
+          "effect": {
+            "title": "Effet de la résiliation",
+            "content": "En cas de résiliation pour quelque raison que ce soit, votre licence d’utilisation du service cesse immédiatement. Les dispositions des présentes Conditions qui, par leur nature, doivent survivre à la résiliation – y compris les droits de propriété intellectuelle, les exclusions de garantie, les limitations de responsabilité et la loi applicable – continueront de s’appliquer."
+          }
+        }
+      },
+      "disclaimer": {
+        "title": "12. Exclusion de garanties",
+        "content": "Jinni est fourni « en l’état » et « selon disponibilité » sans aucune garantie d’aucune sorte, expresse ou implicite, y compris, mais sans s’y limiter, les garanties de qualité marchande, d’adéquation à un usage particulier, d’exactitude ou d’absence de contrefaçon. Nous ne garantissons pas que le service sera ininterrompu, exempt d’erreurs ou exempt de composants nuisibles. L’utilisation du service se fait entièrement à vos propres risques."
+      },
+      "limitation": {
+        "title": "13. Limitation de responsabilité",
+        "content": "Dans toute la mesure permise par la loi applicable, Jinni et ses administrateurs, employés, partenaires et concédants ne peuvent être tenus responsables de tout dommage indirect, accessoire, spécial, consécutif ou punitif – y compris la perte de données, la perte de revenus ou les dommages corporels – découlant de votre utilisation ou de votre incapacité à utiliser le service, même si nous avons été informés de la possibilité de tels dommages. Notre responsabilité totale cumulée pour toute réclamation découlant des présentes Conditions ou de votre utilisation du service ne dépassera pas le plus élevé de (a) le montant que vous nous avez payé au cours des 12 mois précédant la réclamation ou (b) 50 €."
+      },
+      "governing": {
+        "title": "14. Loi applicable et litiges",
+        "content": "Les présentes Conditions sont régies et interprétées conformément à la loi applicable. Tout litige découlant des présentes Conditions ou de votre utilisation de Jinni doit d’abord faire l’objet d’une tentative de résolution par négociation de bonne foi. Si un litige ne peut être réglé de manière informelle dans un délai de 30 jours, il sera soumis à la compétence exclusive des tribunaux compétents."
+      },
+      "changes": {
+        "title": "15. Modifications des Conditions",
+        "content": "Nous pouvons mettre à jour les présentes Conditions d’utilisation de temps à autre pour refléter des changements dans notre service, des exigences légales ou des pratiques commerciales. Nous vous informerons des modifications importantes par e-mail ou par un avis visible dans le service au moins 14 jours avant leur entrée en vigueur. Votre utilisation continue de Jinni après cette date constitue votre acceptation des Conditions mises à jour. Si vous n’acceptez pas les modifications, vous devez cesser d’utiliser le service avant leur entrée en vigueur."
+      },
+      "contact": {
+        "title": "16. Contact",
+        "content": "Si vous avez des questions concernant les présentes Conditions d’utilisation ou souhaitez signaler une violation, veuillez nous contacter via l’assistance intégrée à l’application ou par e-mail à support{'@'}jinni.ai."
+      }
+    }
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "last_updated": "Dernière mise à jour : 27 mars 2026",
+    "sections": {
+      "intro": {
+        "title": "Introduction",
+        "content": "Jinni (« nous », « notre ») est un compagnon de voyage alimenté par l’IA. Cette Politique de confidentialité explique comment nous collectons, utilisons, partageons et protégeons vos informations. En utilisant Jinni, vous acceptez cette politique."
+      },
+      "collection": {
+        "title": "1. Informations que nous collectons",
+        "subsections": {
+          "account": {
+            "title": "Informations du compte",
+            "content": "Lorsque vous créez un compte, nous collectons votre nom, votre adresse e-mail et votre mot de passe (haché, jamais stocké en clair). Si vous vous inscrivez avec Google, nous recevons des informations de profil de base de Google, notamment votre identifiant Google, votre nom d’affichage et votre photo de profil."
+          },
+          "preferences": {
+            "title": "Préférences de voyage",
+            "content": "Nous collectons votre style de voyage, vos intérêts, vos préférences budgétaires (montant et devise) et les langues que vous parlez pour personnaliser les recommandations."
+          },
+          "location": {
+            "title": "Données de localisation",
+            "content": "Nous collectons votre localisation de trois façons : 1) Manuellement – vous sélectionnez une ville ou déposez un repère sur la carte. 2) Détection automatique (avec votre permission) – nous pouvons utiliser vos coordonnées GPS pour affiner les recommandations. Vous pouvez désactiver cette option dans les paramètres à tout moment. 3) Détection IP de secours – si vous n’avez pas défini de localisation et que les permissions de localisation ne sont pas accordées, nous pouvons utiliser votre adresse IP pour estimer votre emplacement approximatif en tant que secours ponctuel. Cette estimation n’est pas stockée à moins que vous ne l’enregistriez explicitement."
+          },
+          "usage": {
+            "title": "Informations d’utilisation",
+            "content": "Nous collectons automatiquement les conversations IA, les lieux que vous consultez ou avec lesquels vous interagissez (par ex. en appuyant sur « itinéraire » ou « site web »), les requêtes de recherche et les fonctionnalités que vous utilisez pour améliorer notre service."
+          },
+          "device": {
+            "title": "Informations techniques et sur l’appareil",
+            "content": "Nous collectons l’adresse IP (temporairement pour la sécurité), le type de navigateur, le système d’exploitation et le type d’appareil."
+          }
+        }
+      },
+      "use": {
+        "title": "2. Comment nous utilisons vos informations",
+        "points": [
+          "Fournir et améliorer les recommandations et fonctionnalités IA de Jinni.",
+          "Personnaliser votre expérience en fonction de vos préférences et de votre localisation.",
+          "Authentifier votre compte et prévenir la fraude (y compris en bloquant temporairement les IP suspectes).",
+          "Envoyer des mises à jour de service, des codes de vérification, des e-mails de réinitialisation de mot de passe et, avec votre consentement, des messages promotionnels.",
+          "Analyser les schémas d’utilisation pour améliorer le service.",
+          "Respecter les obligations légales."
+        ]
+      },
+      "sharing": {
+        "title": "3. Partage des informations",
+        "content": "Nous ne vendons pas vos informations personnelles. Nous partageons des données uniquement avec :",
+        "subsections": {
+          "service": {
+            "title": "Prestataires de services",
+            "content": "Nous nous appuyons sur des tiers de confiance pour faire fonctionner Jinni. Ils sont contractuellement tenus d’utiliser vos données uniquement pour les services que nous demandons.\n\n- Google OAuth (pour la connexion via Google)\n- API Google Places & Geocoding (pour la recherche de lieux, les détails et le géocodage inverse)\n- Open‑Meteo (pour les données météorologiques)\n- Nominatim (OpenStreetMap) (pour la recherche d’emplacements sur la carte)\n- Services de géolocalisation IP (pour le secours approximatif de localisation)\n- SendGrid (pour l’envoi d’e-mails)\n- OpenAI / DeepSeek (pour les réponses du modèle IA – aucune information d’identification personnelle n’est envoyée)"
+          },
+          "legal": {
+            "title": "Obligations légales",
+            "content": "Nous pouvons divulguer vos informations si la loi l’exige ou en réponse à une demande légale valide."
+          },
+          "business": {
+            "title": "Transferts d’activité",
+            "content": "Si Jinni est fusionné, acquis ou vendu, vos informations peuvent être transférées. Nous vous informerons avant tout changement de ce type."
+          }
+        }
+      },
+      "ai": {
+        "title": "4. IA et traitement des données",
+        "content": "Lorsque vous discutez avec Jinni, votre message est traité par un modèle d’IA tiers. L’IA reçoit votre message, vos préférences, votre emplacement effectif (votre destination enregistrée ou, avec votre permission, votre position en temps réel) et des données contextuelles (météo, lieux à proximité). Aucune information personnelle d’identification (nom, e-mail, identifiant de compte) n’est envoyée à l’IA. Nous conservons l’historique des conversations pour maintenir le contexte. Vous pouvez supprimer des sessions individuelles ou l’intégralité de votre historique de chat à tout moment."
+      },
+      "storage": {
+        "title": "5. Stockage et sécurité des données",
+        "content": "Vos informations sont stockées sur des serveurs situés en Europe et aux États-Unis. Nous utilisons des mesures conformes aux normes du secteur : chiffrement en transit (TLS/SSL), chiffrement au repos (les mots de passe sont hachés, les autres données sensibles sont chiffrées) et des contrôles d’accès stricts. Aucun système n’est totalement sécurisé, mais nous nous efforçons de protéger vos informations."
+      },
+      "retention": {
+        "title": "6. Conservation des données",
+        "content": "Nous conservons vos informations aussi longtemps que votre compte est actif. Le compte et les préférences sont conservés jusqu’à ce que vous supprimiez votre compte. Les sessions de discussion peuvent être supprimées plus tôt individuellement. Les codes de vérification par e-mail sont supprimés peu après leur émission ; les codes de réinitialisation de mot de passe sont supprimés après une courte période. Les adresses IP sont stockées temporairement avec les enregistrements de sécurité et sont automatiquement supprimées. Les IP bloquées sont débloquées après une courte période. Si vous supprimez votre compte, toutes les données du compte, sessions de chat et limites d’utilisation sont définitivement supprimées. Les événements d’analyse peuvent être conservés sous forme agrégée."
+      },
+      "rights": {
+        "title": "7. Vos droits",
+        "content": "Selon votre localisation (par exemple, EEE, Royaume-Uni, Californie), vous pouvez avoir le droit :",
+        "points": [
+          "d’accès – demander une copie de vos données personnelles ;",
+          "de rectification – mettre à jour les informations inexactes via les paramètres de votre compte ;",
+          "de suppression – supprimer votre compte et toutes les données associées ;",
+          "de désinscription – vous désabonner des e-mails marketing ; désactiver la détection automatique de localisation ;",
+          "à la portabilité – recevoir vos données dans un format structuré ;",
+          "au retrait du consentement – lorsque le consentement est requis (par ex. localisation), vous pouvez modifier vos paramètres à tout moment."
+        ]
+      },
+      "cookies": {
+        "title": "8. Cookies et suivi",
+        "content": "Nous utilisons des cookies et des technologies similaires pour maintenir votre session de connexion, mémoriser vos préférences (langue, thème) et analyser l’utilisation (analytique interne uniquement). Vous pouvez contrôler les cookies via les paramètres de votre navigateur."
+      },
+      "children": {
+        "title": "9. Vie privée des enfants",
+        "content": "Jinni n’est pas destiné aux utilisateurs de moins de 13 ans. Nous ne collectons pas sciemment de données auprès d’enfants de moins de 13 ans. Si nous en prenons connaissance, nous les supprimerons immédiatement."
+      },
+      "international": {
+        "title": "10. Utilisateurs internationaux",
+        "content": "Si vous êtes en dehors de l’Europe ou des États-Unis, vos informations peuvent être transférées vers des pays dont les lois sur la protection des données diffèrent. En utilisant Jinni, vous consentez à ces transferts. Pour les utilisateurs de l’EEE : nous traitons les données sur la base de l’exécution du contrat, des intérêts légitimes, du consentement ou des obligations légales. Vous pouvez déposer une plainte auprès de votre autorité locale de protection des données."
+      },
+      "changes": {
+        "title": "11. Modifications de cette Politique de confidentialité",
+        "content": "Nous pouvons mettre à jour cette politique. Les modifications importantes seront notifiées par e-mail ou par un avis visible sur notre site. L’utilisation continue après les modifications constitue une acceptation."
+      },
+      "contact": {
+        "title": "12. Nous contacter",
+        "content": "Si vous avez des questions concernant cette Politique de confidentialité ou si vous souhaitez exercer vos droits en matière de confidentialité, veuillez nous contacter via nos canaux d’assistance ou par e-mail à privacy{'@'}jinni.ai."
+      }
+    }
+  },
+  "legal": {
+    "back_to_home": "Retour",
+    "effective_date": "Date d'entrée en vigueur"
+  },
+  "common": {
+    "close": "Fermer"
+  },
+  "chat": {
+    "shopping": {
+      "prompt": "Que souhaitez-vous acheter ?",
+      "souvenirs": "Souvenirs et cadeaux",
+      "clothing": "Vêtements et boutiques",
+      "market": "Marchés et bazars",
+      "mall": "Centres commerciaux",
+      "jewelry": "Bijoux",
+      "food": "Gastronomie et gourmandises"
+    },
+    "preferences": {
+      "answering_with": "Vos préférences",
+      "edit_hint": "Appuyez pour modifier"
+    },
+    "sidebar": {
+      "app_name": "Jinni",
+      "new_chat": "Nouvelle discussion",
+      "loading_conversations": "Chargement des conversations...",
+      "chat": "Discussion",
+      "default_chat_title": "Discussion {number}",
+      "saved_places": "Lieux enregistrés",
+      "session_options": "Options de la conversation"
+    },
+    "header": {
+      "new_chat_title": "Nouvelle discussion"
+    },
+    "greeting": {
+      "how_can_help": "Comment puis-je vous aider ?"
+    },
+    "input": {
+      "placeholder": "Envoyer un message",
+      "placeholder_cooldown": "Vous avez atteint votre limite. Réessayez à {time}",
+      "placeholder_mobile_cooldown": "Limite atteinte. Réessayez à {time}",
+      "mode_nearby": "À proximité",
+      "mode_discovery": "Découverte",
+      "send": "Envoyer le message",
+      "switched_mode": "Passé en mode {mode}"
+    },
+    "context_menu": {
+      "rename": "Renommer",
+      "delete": "Supprimer"
+    },
+    "profile": {
+      "profile": "Profil",
+      "preferences": "Préférences",
+      "settings": "Paramètres",
+      "contact_us": "Nous contacter",
+      "logout": "Se déconnecter"
+    },
+    "actions": {
+      "photo_spots": "Spots photo",
+      "shopping": "Shopping",
+      "restaurants": "Restaurants",
+      "hotels": "Hôtels",
+      "hidden_gems": "Trésors cachés",
+      "historical": "Historique",
+      "events": "Événements locaux",
+      "attractions": "Attractions",
+      "activities": "Activités",
+      "transportation": "Transport",
+      "itinerary": "Itinéraire"
+    },
+    "recommendations": {
+      "recommended": "Recommandé",
+      "results_count": "({count} résultats)",
+      "more": "Plus",
+      "ask_ai": "Demander",
+      "view_more": "Voir plus de {type}",
+      "more_recommendations": "Plus de recommandations",
+      "loading_more": "Chargement de plus de {type}...",
+      "no_more": "C'est tout pour le moment ! Essayez une autre recherche."
+    },
+    "messages": {
+      "connection_error": "J'ai du mal à me connecter à la magie en ce moment. Veuillez réessayer !",
+      "jinni_mistakes": "Jinni peut faire des erreurs. Vérifiez les informations importantes.",
+      "regenerate": "Régénérer",
+      "copy": "Copier",
+      "copied": "Copié !",
+      "edit": "Modifier"
+    },
+    "session": {
+      "warning": {
+        "title": "Longue conversation détectée",
+        "message": "Cette conversation devient longue ({count} messages). Commencer une nouvelle discussion améliorera la qualité des réponses.",
+        "message_limit": "Ce chat a atteint sa limite de messages. Veuillez commencer une nouvelle discussion.",
+        "message_remaining": "Seulement {count} messages restants dans ce chat. Pensez à en commencer un nouveau.",
+        "start_new": "Commencer une nouvelle discussion",
+        "continue": "Continuer ici"
+      },
+      "limit_modal": {
+        "title": "Limite de conversation atteinte",
+        "explanation": "Cette conversation a atteint <strong>{count} messages</strong>. Pour maintenir la qualité des réponses, veuillez commencer une nouvelle discussion.",
+        "reasons_title": "Pourquoi cela se produit-il ?",
+        "reasons": {
+          "slow": "Les longues discussions ralentissent les réponses",
+          "consume": "Les grandes discussions consomment plus de ressources",
+          "reduce": "Les nouvelles discussions améliorent la précision"
+        },
+        "suggestion": "Nous vous recommandons de commencer une nouvelle discussion pour des réponses plus rapides et plus précises.",
+        "start_new": "Commencer une nouvelle discussion",
+        "go_back": "Retour",
+        "button": "Commencer une nouvelle discussion"
+      }
+    },
+    "errors": {
+      "recommendations_error": "J'ai du mal à obtenir des recommandations en ce moment.",
+      "server_error": "Nos serveurs rencontrent des problèmes. Veuillez réessayer plus tard.",
+      "offline": "Vous semblez être hors ligne. Veuillez vérifier votre connexion.",
+      "location_required": "Veuillez définir votre destination de voyage dans les Paramètres ou activer la détection de localisation GPS.",
+      "open_settings": "Ouvrir les paramètres",
+      "load_more_failed": "Désolé, je n'ai pas pu charger plus de recommandations pour le moment !",
+      "no_recommendations": "Aucune recommandation trouvée. Essayez de reformuler votre question !",
+      "recommendations_failed": "Something went wrong while getting recommendations!"
+    },
+    "limit_suggestions": {
+      "restaurants": "Je vous ai montré pas mal d'options de restaurants ! Pour des recommandations plus précises, essayez de me demander quelque chose comme :\n• \"Montre-moi des restaurants avec terrasse\"\n• \"Trouve des restaurants végétariens à moins de 15 000 AMD\"\n• \"J'ai besoin de restaurants près de la Place de la République\"\n• \"Montre-moi des restaurants arméniens traditionnels\"\nQuel type de restaurant recherchez-vous précisément ?",
+      "hotels": "Je vous ai proposé plusieurs options d'hôtels ! Pour trouver exactement ce dont vous avez besoin, essayez d'être plus précis :\n• \"Montre-moi des hôtels économiques à moins de 50 000 AMD\"\n• \"Trouve des hôtels de luxe avec spa\"\n• \"J'ai besoin d'hôtels près de l'aéroport\"\n• \"Montre-moi des hôtels boutique dans le vieux Erevan\"\nQuels sont vos besoins spécifiques en matière d'hébergement ?",
+      "historical": "J'ai partagé de nombreux sites historiques ! Pour des suggestions plus ciblées, essayez :\n• \"Montre-moi des églises médiévales\"\n• \"Trouve des sites archéologiques en dehors d'Erevan\"\n• \"Je veux des monuments de l'ère soviétique\"\n• \"Montre-moi des forteresses anciennes\"\nQuelle période historique vous intéresse précisément ?",
+      "hidden_gems": "J'ai révélé pas mal de trésors cachés ! Pour en découvrir davantage, essayez de demander :\n• \"Montre-moi des trésors cachés pour la photographie\"\n• \"Trouve des endroits secrets que les locaux adorent\"\n• \"Je veux des lieux naturels insolites\"\n• \"Montre-moi des trésors cachés pour couples\"\nQuel type d'expérience cachée recherchez-vous ?",
+      "events": "J'ai suggéré de nombreux événements et activités ! Pour des options plus ciblées :\n• \"Montre-moi des divertissements en soirée\"\n• \"Trouve des événements culturels ce week-end\"\n• \"Je veux des activités en plein air\"\n• \"Montre-moi des événements adaptés aux familles\"\nQuel type d'activité vous intéresse précisément ?"
+    },
+    "view_more": {
+      "hint_first": "Besoin de plus d'options ?",
+      "hint_second": "Vous cherchez toujours quelque chose de précis ?",
+      "hint_last": "Dernier lot - ou dites-moi précisément ce dont vous avez besoin !"
+    },
+    "session_titles": {
+      "photo_spots": "Spots photo",
+      "shopping": "Shopping",
+      "nearby_restaurants": "Restaurants à proximité",
+      "restaurant_recommendations": "Recommandations de restaurants",
+      "nearby_hotels": "Hôtels à proximité",
+      "hotel_suggestions": "Suggestions d'hôtels",
+      "hidden_gems": "Découverte de trésors cachés",
+      "historical": "Lieux historiques",
+      "events": "Événements et activités locaux"
+    },
+    "ai_prompts": {
+      "restaurant": "Parlez-moi de {name} - gamme de prix, plats principaux et comment réserver",
+      "hotel": "Parlez-moi de {name} - gamme de prix, équipements principaux et informations de réservation",
+      "event": "Parlez-moi de {name} - prix des billets, horaires et comment y assister",
+      "historical": "Parlez-moi de {name} - importance historique, horaires de visite et à quoi s'attendre",
+      "hidden_gem": "Parlez-moi de {name} - ce qui le rend spécial, meilleur moment pour visiter et conseils d'initiés",
+      "generic": "Parlez-moi de {name}"
+    },
+    "switch_mode": {
+      "button": "Passer à l'établissement",
+      "switching": "Passage à l'établissement…"
+    },
+    "event": {
+      "ended": "Terminé",
+      "schedule": "Horaire",
+      "event_date": "Date de l'événement",
+      "weekly": "Hebdomadaire",
+      "every_day": "tous les {day}",
+      "all_day": "Toute la journée",
+      "starting": "à partir du {date}"
+    },
+    "quick_actions": {
+      "open_settings": "Ouvrir les paramètres",
+      "preferences": "Préférences"
+    },
+    "feedback": {
+      "like": "J'aime",
+      "dislike": "Je n'aime pas",
+      "good_response": "Bonne réponse",
+      "bad_response": "Mauvaise réponse",
+      "share": "Partager",
+      "copy_response": "Copier la réponse",
+      "copy_message": "Copier le message",
+      "copied": "Copié !"
+    },
+    "saved": {
+      "title": "Lieux enregistrés",
+      "empty_title": "Aucun lieu enregistré pour le moment.",
+      "empty_hint": "Appuyez sur l'icône de signet d'une recommandation pour l'enregistrer ici.",
+      "load_more": "Voir plus",
+      "save_place": "Enregistrer le lieu",
+      "remove_saved": "Retirer des enregistrés"
+    },
+    "share": {
+      "preparing": "Préparation de votre lien de partage…",
+      "fetching": "Récupération des détails — {current} sur {total} lieux",
+      "almost": "Presque terminé…"
+    },
+    "itinerary": {
+      "nearby_confirm_title": "Créer cet itinéraire en mode À proximité ?",
+      "nearby_confirm_desc": "À proximité limite chaque étape à votre rayon local. Pour un voyage de plusieurs jours, Découverte explore généralement une plus grande partie de la destination.",
+      "nearby_confirm_keep": "Garder À proximité",
+      "nearby_confirm_switch": "Utiliser Découverte",
+      "days_prompt": "Combien de jours dure votre voyage ?",
+      "hotel_prompt": "Où logez-vous ?",
+      "hotel_placeholder": "Nom de l'hôtel (facultatif)",
+      "skip_hotel": "Ignorer et créer",
+      "day": "jour",
+      "days": "jours",
+      "day_cap": "Jour",
+      "start": "Créer mon itinéraire",
+      "planning": "Planification de votre voyage...",
+      "finding_hotels": "Recherche d'hôtels pour vous...",
+      "stopped": "Génération arrêtée.",
+      "loading": "Chargement de votre voyage...",
+      "add_stop": "Ajouter une étape",
+      "regenerate_day": "Régénérer la journée",
+      "move_to_day": "Déplacer vers un autre jour",
+      "from_saved": "Mes lieux enregistrés",
+      "no_saved_nearby": "Aucun lieu enregistré près de cette destination pour le moment.",
+      "stage_planning": "planification",
+      "stage_enriching": "recherche de lieux réels…",
+      "retry": "Réessayer",
+      "keep": "Garder cette étape",
+      "move_up": "Monter",
+      "move_down": "Descendre",
+      "replace": "Remplacer",
+      "remove": "Supprimer",
+      "view_photo": "Voir la photo",
+      "not_verified": "Impossible de vérifier que ce lieu existe.",
+      "pick_stop": "Choisissez une étape",
+      "no_candidates": "Aucun résultat — essayez une autre catégorie.",
+      "approx_path": "Itinéraire approximatif",
+      "generic_error": "Une erreur s'est produite. Veuillez réessayer.",
+      "find_replacement": "Trouver un remplacement",
+      "pick_replacement": "Choisir un remplacement",
+      "details": "Détails",
+      "directions": "Itinéraire",
+      "transit": "Transports",
+      "call": "Appeler",
+      "website": "Site web",
+      "suggest_hotels": "Suggérer des hôtels",
+      "choose_hotel": "Choisissez votre hôtel",
+      "breakfast_q": "Petit-déjeuner à l'hôtel ?",
+      "breakfast_yes": "Inclus",
+      "breakfast_no": "Non inclus",
+      "collecting": "Nous rassemblons les meilleurs lieux..."
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "default_name": "Profil",
+    "not_set": "Non défini",
+    "not_specified": "Non spécifié",
+    "interests": "Centres d'intérêt",
+    "budget": "Budget",
+    "style": "Style",
+    "location": "Emplacement",
+    "edit_preferences": "Modifier les préférences",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "saving": "Enregistrement...",
+    "save_success": "Profil enregistré avec succès",
+    "save_error": "Échec de l'enregistrement du profil",
+    "plan": {
+      "label": "Formule",
+      "free": "Gratuite",
+      "premium": "Premium",
+      "places": "Lieux aujourd'hui",
+      "requests": "Requêtes aujourd'hui",
+      "left": "restantes",
+      "resets_daily": "Réinitialisé chaque jour à minuit UTC.",
+      "cooldown": "Limite quotidienne atteinte — de nouveau disponible dans environ {hours} h.",
+      "upgrade": "Passer à Premium",
+      "unavailable": "Utilisation indisponible pour le moment.",
+      "upgrade_unconfigured": "Les abonnements ne sont pas encore configurés. Revenez bientôt.",
+      "days_left": "{days} jours restants",
+      "until": "jusqu'au {date}"
+    },
+    "edit": "Modifier"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "search_languages": "Rechercher des langues...",
+    "location_alert": "Veuillez désactiver « Utiliser ma position actuelle » pour définir une destination.",
+    "display": {
+      "title": "Affichage",
+      "language": "Langue",
+      "theme": "Thème",
+      "theme_light": "Clair",
+      "theme_dark": "Sombre",
+      "theme_system": "Système"
+    },
+    "search": {
+      "title": "Rayon de recherche",
+      "description": "Contrôlez jusqu'où Jinni recherche des recommandations dans chaque mode",
+      "nearby_mode": "Mode à proximité",
+      "discovery_mode": "Mode découverte",
+      "nearby_value": "{km} km",
+      "discovery_value": "{km} km",
+      "close": "Proche",
+      "wide_area": "Zone étendue"
+    },
+    "privacy": {
+      "title": "Confidentialité",
+      "description": "Contrôlez comment Jinni utilise vos données de localisation",
+      "use_location": "Utiliser ma position actuelle",
+      "location_help": "Lorsque cette option est activée, Jinni utilisera le GPS de votre appareil pour afficher les lieux à proximité. Lorsqu'elle est désactivée, les recommandations seront basées sur votre destination de voyage sélectionnée."
+    },
+    "danger": {
+      "title": "Zone dangereuse",
+      "delete_chats": {
+        "label": "Supprimer toutes les discussions",
+        "description_before": "Supprimer définitivement ",
+        "link": "toutes vos discussions",
+        "description_after": ". Cette action ne peut pas être annulée.",
+        "confirm": "Êtes-vous sûr de vouloir supprimer toutes vos discussions ? Cette action est irréversible.",
+        "yes": "Oui, tout supprimer",
+        "no": "Annuler"
+      },
+      "delete_account": {
+        "label": "Supprimer le compte",
+        "description_before": "Supprimer définitivement ",
+        "link": "votre compte et toutes les données associées",
+        "description_after": ". Cette action ne peut pas être annulée.",
+        "confirm": "Êtes-vous <strong>absolument sûr</strong> de vouloir supprimer votre compte ? Toutes vos données seront définitivement supprimées.",
+        "type_confirm": "Veuillez taper <strong>DELETE</strong> pour confirmer la suppression de votre compte.",
+        "type_placeholder": "DELETE",
+        "confirm_button": "Supprimer définitivement mon compte",
+        "cancel": "Annuler"
+      }
+    },
+    "gps_confirm": {
+      "turn_off": "Le GPS sera désactivé. Souhaitez-vous définir une destination de voyage maintenant ?",
+      "turn_on": "L'activation du GPS effacera votre destination actuelle. Continuer ?"
+    },
+    "reset": "Réinitialiser aux valeurs par défaut",
+    "saved": "Enregistré",
+    "reset_confirm": "Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?",
+    "reset_success": "Paramètres réinitialisés avec succès"
+  },
+  "place_info": {
+    "loading": "Chargement des détails...",
+    "rating": "Note",
+    "reviews": "{count} avis",
+    "phone": "Téléphone",
+    "website": "Site web",
+    "visit_website": "Visiter le site web",
+    "hours": "Horaires",
+    "address": "Adresse",
+    "get_directions": "Obtenir l'itinéraire",
+    "search_online": "Rechercher en ligne",
+    "show_more_days": "Plus",
+    "show_less": "Moins",
+    "close": "Fermer",
+    "error": "Impossible de charger les informations sur ce lieu",
+    "open_now": "Ouvert maintenant",
+    "closed_now": "Fermé",
+    "distance": "Distance",
+    "price_level": "Niveau de prix",
+    "highlights": "Points forts"
+  },
+  "usage": {
+    "cooldown": {
+      "short": "Limite atteinte. Réessayez à {time}",
+      "long": "Vous avez atteint votre limite. Réessayez à {time}",
+      "soon": "Vous avez atteint votre limite. Réessayez bientôt",
+      "unknown_time": "Inconnu"
+    },
+    "warning": {
+      "tokens": "Vous avez utilisé {percentage}% de vos jetons quotidiens.",
+      "places": "Vous avez consulté {percentage}% de vos lieux quotidiens.",
+      "upgrade": "Pensez à passer à la version premium pour des limites plus élevées."
+    }
+  },
+  "languages": {
+    "hy": "Arménien",
+    "en": "Anglais",
+    "ru": "Russe",
+    "ar": "Arabe",
+    "fr": "Français",
+    "zh": "Chinois"
+  },
+  "map": {
+    "show": "Voir sur la carte",
+    "hide": "Masquer la carte",
+    "open_fullscreen": "Plein écran",
+    "close": "Fermer (Échap)",
+    "my_location": "Ma position",
+    "you_are_here": "Vous êtes ici",
+    "location_denied": "La localisation est désactivée. Activez-la pour ce site dans les réglages de votre navigateur ou téléphone.",
+    "location_unavailable": "Impossible d'obtenir votre position. Veuillez réessayer.",
+    "location_unsupported": "Cet appareil ne peut pas déterminer votre position.",
+    "location_approx": "Position approximative utilisée.",
+    "route_from_me": "Itinéraire d'ici",
+    "clear_route": "Effacer l'itinéraire",
+    "routing": "Recherche d'itinéraire…",
+    "route_error": "Itinéraire introuvable.",
+    "tap_for_distance": "Voir la distance",
+    "mode_car": "En voiture",
+    "mode_walk": "À pied",
+    "mode_cycle": "À vélo",
+    "details": "Détails",
+    "filter_all": "Tout",
+    "tier_signature": "Jinni's Signature",
+    "tier_spotlight": "Jinni's Spotlight",
+    "tier_verified": "Jinni Verified",
+    "exit_route": "Quitter l'itinéraire",
+    "arrived": "Vous êtes arrivé",
+    "done": "Terminé",
+    "uturn": "Faites demi-tour",
+    "wrong_way": "Faites demi-tour",
+    "wrong_way_hint": "Vous vous éloignez de l'itinéraire",
+    "directions": "Itinéraire",
+    "transit": "Transports",
+    "call": "Appeler",
+    "website": "Site web",
+    "place_fallback": "Lieu",
+    "units": {
+      "km": "km",
+      "m": "m",
+      "min": "min",
+      "hour": "h"
+    }
+  },
+  "time": {
+    "just_now": "À l'instant",
+    "minutes_ago": "Il y a {count} min",
+    "hours_ago": "Il y a {count} h",
+    "days_ago": "Il y a {count} j",
+    "months_ago": "Il y a {count} mois",
+    "daily": "Tous les jours",
+    "closed": "Fermé",
+    "open_24h": "Ouvert 24h/24"
+  },
+  "businessLanding": {
+    "hero": {
+      "title": "Quand ils cherchent, vous êtes là",
+      "subtitle": "Jinni met en relation les voyageurs avec des entreprises vérifiées",
+      "cta": "Ajouter votre entreprise ✨"
+    },
+    "features": {
+      "title": "Comment vous apparaissez"
+    },
+    "tiers": {
+      "verified": {
+        "label": "Jinni Verified",
+        "price": "Gratuit",
+        "heading": "Soyez sur la carte",
+        "description": "Présent dans le mode Discovery. Jinni trouve et attribue automatiquement vos photos. Vérifie votre entreprise lors de la soumission.",
+        "cta": "Choisir Verified"
+      },
+      "spotlight": {
+        "label": "Jinni Spotlight",
+        "price": "29 $",
+        "priceSuffix": "/mois",
+        "heading": "Restez visible",
+        "description": "Emplacement en zone protégée. Apparaissez en mode Nearby lorsque les voyageurs sont à proximité. Ajoutez vos propres photos et descriptions.",
+        "cta": "Choisir Spotlight"
+      },
+      "signature": {
+        "label": "Jinni Signature",
+        "price": "49 $",
+        "priceSuffix": "/mois",
+        "heading": "Maîtrisez votre zone",
+        "description": "Meilleur classement dans les modes Discovery et Nearby. Mise en avant, liens sociaux, catégorie Joyau caché et analyses complètes.",
+        "cta": "Choisir Signature"
+      }
+    }
+  },
+  "share": {
+    "loading": "Chargement…",
+    "link_expired": "Ce lien a expiré ou n'existe pas.",
+    "discover": "Découvrir avec Jinni",
+    "discover_places": "Découvrez des lieux avec Jinni",
+    "cta_question": "Envie de recommandations personnalisées ?",
+    "more_info": "Plus d'infos",
+    "ended": "Terminé",
+    "event_date": "Date de l'événement",
+    "schedule": "Horaire",
+    "event": {
+      "weekly": "Chaque semaine",
+      "every": "le {day}",
+      "all_day": "Toute la journée",
+      "starting": "à partir du {date}"
+    },
+    "itinerary": {
+      "day": "Jour {n}",
+      "days": "{count} jours",
+      "category": {
+        "restaurants": "Cuisine",
+        "cafe": "Café",
+        "hotels": "Hôtel",
+        "hidden_gems": "Trésor caché",
+        "historical": "Historique",
+        "museum": "Musée",
+        "events": "Événement",
+        "photo_spots": "Spot photo",
+        "viewpoint": "Point de vue",
+        "shopping": "Shopping",
+        "nature": "Nature"
+      }
+    },
+    "approximate_path": "Trajet approximatif"
+  }
+}

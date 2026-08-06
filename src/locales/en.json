@@ -1,0 +1,1195 @@
+{
+  "location_help": {
+    "ios-safari": "Location is blocked. Open the Settings app → Privacy & Security → Location Services → Safari Websites, set it to \"While Using the App\", then return here and tap Permit.",
+    "ios-chrome": "Location is blocked. Open the Settings app → Privacy & Security → Location Services → find this browser in the list and set it to \"While Using the App\". Then reload this page and tap Permit.",
+    "android-chrome": "Location is blocked. Tap the lock or tune icon next to the address bar → Permissions → Location → Allow. (Or Chrome menu → Settings → Site settings → Location.) Make sure your phone's Location is turned on, then reload and tap Permit.",
+    "android-samsung": "Location is blocked. Tap the lock icon next to the address bar → Permissions → Location → Allow. Make sure your phone's Location is turned on, then reload and tap Permit.",
+    "android-firefox": "Location is blocked. Tap the menu → Settings → Site permissions → Location, allow this site, then reload and tap Permit.",
+    "desktop-chrome": "Location is blocked. Click the location or lock icon at the left of the address bar → Location → Allow (or Reset permission), then reload the page and tap Permit.",
+    "desktop-firefox": "Location is blocked. Click the lock icon at the left of the address bar and clear the blocked \"Access your location\" setting, then reload and tap Permit.",
+    "desktop-safari": "Location is blocked. Open Safari → Settings → Websites → Location and allow this site. You may also need macOS System Settings → Privacy & Security → Location Services → Safari. Then reload and tap Permit.",
+    "desktop-generic": "Location is blocked. Open your browser or device settings, allow location access for this site, then reload and tap Permit."
+  },
+  "businessTerms": {
+    "title": "Business Terms of Service",
+    "last_updated": "Last Updated: May 29, 2026",
+    "sections": {
+      "intro": {
+        "title": "1. Agreement and Acceptance",
+        "content": "These Business Terms of Service govern your registration and use of Jinni as a business — listing a venue, event, or place and managing it through a business account. By submitting an application or using a business dashboard, you agree to these terms, to our Business Privacy Policy, and to our general Terms of Service. If you are entering into these terms on behalf of a business, you confirm that you are authorised to do so. Some terms differ by partnership tier — use the buttons below to read the terms for Verified, Spotlight, or Signature."
+      }
+    },
+    "tier_selector": {
+      "title": "Choose Your Partnership Tier",
+      "subtitle": "Select a tier to see the specific terms — pricing, features, placement, and cancellation — that apply to it. The sections below apply to every business on Jinni."
+    },
+    "tiers": {
+      "verified": {
+        "label": "Verified (Free)",
+        "title": "Terms for Verified Listings",
+        "intro": "A Verified listing is provided free of charge and is the entry-level tier.",
+        "points": [
+          "There is no fee for a Verified listing and no payment obligation.",
+          "Verified listings display images sourced automatically from Google during verification; you may not upload your own photos, and opening hours, social links, and highlights are not available at this tier.",
+          "You receive a basic view count only; detailed analytics are reserved for paid tiers.",
+          "A Verified listing cannot occupy a map zone that is already full. If a zone is full, you must upgrade to Spotlight or Signature to be considered, and a higher-tier business may take priority over a free listing in a contested zone.",
+          "Verified listings remain subject to the verification, content, and moderation rules in the common sections below.",
+          "We may keep Verified listings free, change their features, or discontinue the tier at our discretion, with notice where appropriate."
+        ]
+      },
+      "spotlight": {
+        "label": "Spotlight ($29/mo)",
+        "title": "Terms for Spotlight Listings",
+        "intro": "A Spotlight listing is a paid subscription of US$29 per month (or local-currency equivalent) and unlocks enhanced features.",
+        "points": [
+          "By subscribing you authorise recurring monthly billing of the Spotlight fee until you cancel.",
+          "Spotlight unlocks opening hours, additional images, a full analytics dashboard, and a performance score used to rank listings within a zone.",
+          "Zones hold a limited number of listings. A Spotlight listing may take a slot ahead of a free listing in a full zone, and may itself be outranked or displaced by a Signature listing — see “Zones, Placement, and Displacement” below.",
+          "If your listing loses its slot, it may be frozen (hidden from travellers) while retaining its data; this is not a refundable service failure.",
+          "You may cancel at any time; your listing keeps Spotlight features until the end of the current paid period, after which it may revert to Verified or become inactive.",
+          "Fees, features, and availability may change with reasonable notice."
+        ]
+      },
+      "signature": {
+        "label": "Signature ($49/mo)",
+        "title": "Terms for Signature Listings",
+        "intro": "A Signature listing is our premium subscription, starting at US$49 per month (or local-currency equivalent). In contested zones the monthly price may be higher as a result of the Zone Auction.",
+        "points": [
+          "By subscribing you authorise recurring monthly billing at your applicable Signature price until you cancel.",
+          "Signature unlocks social media links, listing highlights, optional “Hidden Gem” status, owner-uploaded images that we host and serve publicly, Zone Intelligence, and an estimated-revenue figure (an estimate only, not a guarantee of sales).",
+          "ZONE AUCTION: where a zone is already held by three Signature listings, entry is decided by an auction. You may submit a maximum monthly bid above the floor price. Winning or defending a slot locks your monthly price for the lock-in period (about three months). Bids and locked prices are binding for that period.",
+          "DISPLACEMENT AND DEFENCE: approximately one week before renewal, the lowest-performing Signature in a full zone must beat the current high bid within 72 hours or forfeit its slot. A forfeited or out-bid listing is frozen; it keeps its data and may bid again later.",
+          "CANCELLATION: you may cancel a Signature subscription; the slot stays active until the end of the paid period and then becomes available to the next bidder. Auction commitments already won for the current locked period remain payable.",
+          "Higher placement reflects tier and bidding, not editorial endorsement, and the Jinni AI assistant does not artificially boost paid listings in its recommendations."
+        ]
+      }
+    },
+    "common": [
+      {
+        "title": "Eligibility and Your Account",
+        "content": "You must represent a real, lawful business, venue, event, or place that you are authorised to list. When you apply, we create an owner account for you and email you a secure link to set your password. You are responsible for keeping your login credentials secure and for all activity under your account, and for ensuring the information you provide is accurate, current, and not misleading."
+      },
+      {
+        "title": "Listing Submission and Verification",
+        "content": "Every listing is subject to automated verification and human review before it goes live. Verification may involve checking your submitted details against third-party sources such as Google, your website, TripAdvisor, and Instagram. We may approve, request changes to, waitlist, or reject a listing at our discretion. Approval is not guaranteed, and passing verification is not an endorsement or a warranty about your business.",
+        "points": [
+          "You confirm that you have the right to use all names, text, images, and links you submit.",
+          "You must not impersonate another business or submit duplicate listings for the same business.",
+          "We may re-review a listing whenever it is edited, and editing a rejected or expired listing returns it to review."
+        ]
+      },
+      {
+        "title": "Your Content and Licence to Jinni",
+        "content": "You retain ownership of the content you submit (descriptions, images, logos, and other materials). You grant Jinni a worldwide, non-exclusive, royalty-free licence to host, store, reproduce, adapt for display, translate, and publish that content in connection with operating and promoting your listing across Jinni, including in search, map discovery, and the AI assistant. You are responsible for ensuring your content does not infringe the rights of others and complies with applicable law."
+      },
+      {
+        "title": "Acceptable Use and Prohibited Conduct",
+        "content": "When using Jinni for Business you must not:",
+        "points": [
+          "Submit false, deceptive, fraudulent, or misleading information, reviews, or imagery.",
+          "List a business you do not own or are not authorised to represent, or create duplicate or fingerprint-evading listings.",
+          "Manipulate analytics, performance scores, the zone system, or the Zone Auction through fake interactions or automated means.",
+          "Upload unlawful, infringing, offensive, or harmful content, or content you have no right to use.",
+          "Attempt to circumvent moderation, rejection, or block-list controls.",
+          "Use the platform to violate any applicable law or third-party rights."
+        ]
+      },
+      {
+        "title": "Zones, Placement, and Displacement",
+        "content": "Jinni organises listings into geographic zones with a limited number of slots per category. Placement and visibility depend on your tier, your performance score, and (for Signature) bidding. Higher tiers can displace lower tiers, and a displaced listing may be frozen and hidden from travellers while keeping its data. Slot availability, ranking, displacement, and the Zone Auction operate as described in the tier sections above and may be adjusted as we improve the platform. We do not guarantee any particular placement, ranking, visibility, traffic, leads, bookings, or revenue."
+      },
+      {
+        "title": "Fees, Billing, and Refunds",
+        "content": "Paid tiers (Spotlight and Signature) are billed in advance on a recurring monthly basis through our third-party payment provider; Signature prices set by the Zone Auction are locked for the lock-in period and are payable for that period. You authorise us and our payment provider to charge your chosen payment method until you cancel. Except where required by law, fees are non-refundable, including where a listing is later frozen, displaced, rejected for breach of these terms, or removed for cause. Taxes, currency conversion, and payment-provider charges may apply. We may change fees with reasonable notice; changes take effect at your next billing cycle."
+      },
+      {
+        "title": "Analytics and Performance Data",
+        "content": "Dashboard analytics, performance scores, traffic shares, and estimated revenue are provided for your information only. They are estimates based on on-platform activity, may be incomplete or delayed, and must not be relied upon as a measurement of actual sales or a guarantee of results. We are not liable for business decisions you make based on these figures."
+      },
+      {
+        "title": "Suspension, Freezing, and Termination",
+        "content": "We may suspend, freeze, downgrade, remove, or permanently reject a listing, and may disable the associated owner account, if we believe these terms have been breached, if a listing is fraudulent or abusive, if payment fails, or as required to protect Jinni, travellers, or third parties. A permanent rejection for abuse may block future applications associated with your details. You may stop using the service or request removal of your listing at any time; certain records may be retained as described in the Business Privacy Policy. Provisions that by their nature should survive termination (including content licence for already-published material, fees owed, disclaimers, and limitation of liability) will survive."
+      },
+      {
+        "title": "Disclaimers",
+        "content": "Jinni for Business is provided “as is” and “as available,” without warranties of any kind, whether express or implied, including merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the service will be uninterrupted, error-free, or secure, that verification will detect every issue, or that listings will generate any particular level of interest, traffic, or revenue."
+      },
+      {
+        "title": "Limitation of Liability",
+        "content": "To the maximum extent permitted by law, Jinni and its affiliates will not be liable for any indirect, incidental, special, consequential, or punitive damages, or for any loss of profits, revenue, goodwill, data, or business opportunities, arising from or related to your use of Jinni for Business. To the extent we are found liable, our total aggregate liability will not exceed the amount you paid to Jinni for the listing in question during the three months preceding the event giving rise to the claim."
+      },
+      {
+        "title": "Indemnification",
+        "content": "You agree to indemnify and hold harmless Jinni and its affiliates from any claims, damages, losses, liabilities, and expenses (including reasonable legal fees) arising from your listing, your content, your use of the service, or your breach of these terms or of any law or third-party right."
+      },
+      {
+        "title": "Changes to These Terms",
+        "content": "We may update these Business Terms of Service from time to time. When we make material changes we will update the “Last Updated” date and, where appropriate, notify you. Your continued use of Jinni for Business after an update means you accept the revised terms."
+      },
+      {
+        "title": "Governing Law and Contact",
+        "content": "These terms are governed by the applicable laws of the jurisdiction in which Jinni operates, without regard to conflict-of-law principles. If you have questions about these Business Terms of Service, please reach us through the Contact page on Jinni."
+      }
+    ]
+  },
+  "businessPrivacy": {
+    "title": "Business Privacy Policy",
+    "last_updated": "Last Updated: May 29, 2026",
+    "sections": {
+      "intro": {
+        "title": "1. About This Policy",
+        "content": "This Business Privacy Policy explains how Jinni collects, uses, shares, and protects information relating to businesses and the people who register and manage business listings on Jinni. It applies in addition to our general Privacy Policy and our Terms of Service. Some practices differ depending on your partnership tier — use the buttons below to read the notes that apply to Verified, Spotlight, or Signature listings."
+      }
+    },
+    "tier_selector": {
+      "title": "Choose Your Partnership Tier",
+      "subtitle": "Select a tier to see exactly what data we collect, process, and display for that level of listing. The sections after it apply to every business on Jinni."
+    },
+    "tiers": {
+      "verified": {
+        "label": "Verified (Free)",
+        "title": "Privacy Notes for Verified Listings",
+        "intro": "A Verified listing is free. It is the lightest tier in terms of the data we hold about your business.",
+        "points": [
+          "We do not accept your own uploaded photos for a Verified listing. Instead, images shown on your listing are retrieved automatically from Google Places during verification and stored on our servers.",
+          "Opening hours, social media links, and listing highlights are not collected for this tier and are ignored if submitted.",
+          "You see only basic analytics — a total view count and a prompt to upgrade. We do not expose detailed engagement metrics to Verified owners.",
+          "We still collect and process your core application data (business name, category, address and coordinates, contact details, pricing) and run the verification checks described below.",
+          "A Verified listing cannot enter a map zone that is already full; no bidding or auction data is collected for this tier."
+        ]
+      },
+      "spotlight": {
+        "label": "Spotlight ($29/mo)",
+        "title": "Privacy Notes for Spotlight Listings",
+        "intro": "A Spotlight listing is a paid tier ($29/month) and unlocks more listing fields and a full analytics dashboard, so we process more data than for Verified.",
+        "points": [
+          "We collect and display opening hours and up to eight listing images you provide (with Google-sourced images used as a fallback).",
+          "We process a full analytics dashboard for you: views, saves, clicks, likes, dislikes, shares, “Ask AI” and “More Images” clicks, every contact/conversion click, weekly trends, and a performance score.",
+          "Your performance score is calculated from your recent activity, engagement, conversion clicks, and how complete your profile is. It is used to rank listings within a zone and to decide displacement when a zone is full.",
+          "Because this is a paid tier, we process subscription and payment-related data through our payment provider (see “Payments and Billing”).",
+          "In a full zone, a Spotlight listing may displace the lowest-performing free listing; the outcome is recorded on the affected listings."
+        ]
+      },
+      "signature": {
+        "label": "Signature ($49/mo)",
+        "title": "Privacy Notes for Signature Listings",
+        "intro": "A Signature listing is our top paid tier (from $49/month) and unlocks the most features, so it involves the most data processing — including images we host for you and competitive analytics.",
+        "points": [
+          "We collect everything a Spotlight listing does, plus social media links (Instagram, Facebook, TripAdvisor, Booking.com), listing highlights, and optional “Hidden Gem” status.",
+          "Images you upload are stored as files within our database and are served publicly by URL so travellers can see them. You can delete them at any time from your dashboard.",
+          "Zone Intelligence shows you competitive insight about your map zone. You can see competitors' names, tiers, approximate locations, and performance shown only as fuzzed ranges (never exact). In turn, your business name, tier, and approximate location are visible to other Signature owners in the same zone, and your listing name, tier, and coordinates appear in the public zone-availability check.",
+          "If your zone is held by three Signature listings, you may join the Zone Auction. We then process your bid amounts, bid timing, defend responses, and the agreed locked price.",
+          "Your dashboard shows an estimated revenue figure derived from conversion clicks and your stated pricing. It is an estimate only and is not based on real sales data.",
+          "Subscription and payment-related data is processed through our payment provider (see “Payments and Billing”)."
+        ]
+      }
+    },
+    "common": [
+      {
+        "title": "The Business Account We Create for You",
+        "content": "When you submit a business application we automatically create an owner account for you, using your contact email. If you provide only a phone number, we generate a placeholder login address based on that number. We email you a secure, time-limited link (valid for 24 hours) so you can set your own password and access your dashboard. If the email already belongs to an existing Jinni account, we reuse it and leave your existing password unchanged."
+      },
+      {
+        "title": "Information You Provide",
+        "content": "When you register or edit a listing we collect: your business name and categories; short and detailed descriptions and highlights; your address, city, region, country and map coordinates; contact details (email, phone, website) and social media links; pricing; opening hours; event dates and the venue's time zone; and any images you upload. We also record which information you choose to make public, such as whether your email address is shown."
+      },
+      {
+        "title": "How We Verify Your Listing",
+        "content": "To confirm that a listing is genuine, we run automated verification when you apply. This means some of the information you submit is sent to third parties: we query the Google Places API using your business name and location and may retrieve and store matching photos and details; we fetch your website, TripAdvisor page, and Instagram profile (if provided) to check that your business name appears; and we may send your address to OpenStreetMap/Nominatim for geocoding. These checks produce an automated score and notes that our staff use when reviewing your listing. A human reviewer approves or rejects every listing."
+      },
+      {
+        "title": "How We Use Business Information",
+        "points": [
+          "To create and operate your listing and owner account.",
+          "To verify that your business is genuine and to review it for quality and safety.",
+          "To display your listing to travellers, including through search, map discovery, and the Jinni AI assistant.",
+          "To produce the analytics and performance scores shown on your dashboard.",
+          "To manage zones, displacement, and (for Signature) the Zone Auction.",
+          "To process payments for paid tiers and to contact you about your listing.",
+          "To detect and prevent fraud, abuse, and duplicate or bad-faith listings."
+        ]
+      },
+      {
+        "title": "Information Made Public on Jinni",
+        "content": "An approved, active listing is shown to travellers. Publicly visible information includes your business name, description, categories, address and coordinates, images, opening hours, pricing, and contact links such as phone, website, and social media. Your email address is shown only if you turn on the “show email” option. Moderation details — such as the IP your application came from, internal review notes, and our abuse flags — are never shown publicly."
+      },
+      {
+        "title": "Sharing With Third Parties",
+        "content": "We share business information with service providers only as needed to run Jinni: Google (Places data and photos) and OpenStreetMap/Nominatim for verification and mapping; OpenAI, to which we send only your business name as part of generating AI recommendations (not your contact details, exact location, pricing, or social links); our email provider for transactional messages; and our payment provider for paid tiers. We may also disclose information where required by law or to protect the rights, safety, and security of Jinni, our users, and the public."
+      },
+      {
+        "title": "Analytics and Performance Data",
+        "content": "We record how travellers interact with your listing — views, clicks, saves, shares, reactions, “Ask AI” actions, and contact/conversion clicks — and keep weekly snapshots and a performance score. Some of these interaction events are stored in a way that links the action to the traveller's account as well as to your listing. Aggregate counts power your dashboard. Estimated revenue (Signature) is calculated from conversion clicks and your stated pricing and is an estimate only."
+      },
+      {
+        "title": "Safety, Abuse Prevention, and Fingerprints",
+        "content": "To stop fraudulent, duplicate, or bad-faith listings we capture and retain the IP address your application was submitted from, and we create “fingerprints” based on email, phone number, business name and city, IP address, and account ID. We check these against an internal block-list. If a listing is permanently rejected for abuse, we may block these fingerprints from future applications and disable the associated owner login. We never tell an applicant which specific detail caused a block. Repeated rejections sharing the same email or phone may be flagged automatically."
+      },
+      {
+        "title": "Payments and Billing",
+        "content": "Paid tiers (Spotlight and Signature) are billed on a monthly basis, and Zone Auction outcomes may set a higher monthly price that is locked for a period. Payments are intended to be processed through a third-party payment gateway; we store billing records such as amount, currency, method, billing period, a gateway transaction reference, and payment status. We do not store full card details on our own servers. The exact payment methods, currency, billing cycle, and refund terms are described in our Business Terms of Service."
+      },
+      {
+        "title": "Data Storage and Security",
+        "content": "Business data is stored in our managed cloud database. Images you upload, and photos we retrieve from Google during verification, are stored within that database and served over the web; uploaded and cached images are publicly accessible by URL and may be cached for a period. We apply technical and organisational measures to protect your information, and access to moderation tools is limited to authorised staff and administrators."
+      },
+      {
+        "title": "Data Retention",
+        "content": "We keep your listing and associated data for as long as your account and listing exist. Some records are kept longer for safety and audit reasons — for example, the submission IP and the review history of a listing, and block-list fingerprints, which can outlive the listing that produced them. When a listing is deleted by an administrator, its detailed interaction analytics are removed, while the review/audit trail may be retained."
+      },
+      {
+        "title": "Your Choices and Rights",
+        "points": [
+          "View and update most of your listing details from your dashboard (some fields depend on your tier).",
+          "Control whether your email address is shown publicly.",
+          "Delete images you have uploaded.",
+          "Cancel a paid subscription; for Signature listings this is handled through the auction/cancellation flow.",
+          "Request access to, correction of, or deletion of your business and owner-account data by contacting us. Some data may be retained where we have a legal or legitimate-interest basis, such as fraud prevention."
+        ]
+      },
+      {
+        "title": "Changes to This Policy",
+        "content": "We may update this Business Privacy Policy from time to time. When we make material changes we will update the “Last Updated” date and, where appropriate, notify you. Your continued use of Jinni for Business after an update means you accept the revised policy."
+      },
+      {
+        "title": "Contact Us",
+        "content": "If you have questions about this Business Privacy Policy or how we handle your business data, please contact us through the Contact page on Jinni."
+      }
+    ]
+  },
+  "landing": {
+    "hero": {
+      "title": "Where Will Jinni Take You?",
+      "subtitle": "Unlock destinations you never knew existed",
+      "cta": "Make a Wish ✨"
+    },
+    "features": {
+      "title": "Three Wishes, Infinite Possibilities",
+      "ai": {
+        "title": "Personalized Just for You",
+        "description": "Jinni decodes your vibe and quirks to manifest places you'll instantly connect with"
+      },
+      "gems": {
+        "title": "Uncover Hidden Treasures",
+        "description": "Access secret spots and authentic experiences that turn trips into unforgettable stories"
+      },
+      "business": {
+        "title": "Planning at Thought-Speed",
+        "description": "One tap for instant inspiration. Or dive deeper. Jinni mirrors how you dream - fluidly, fiercely, freely"
+      }
+    },
+    "footer": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact Us",
+      "copyright": "© 2026 Jinni. All rights reserved."
+    },
+    "mode_switch": {
+      "explore": "Explore",
+      "for_business": "For Business"
+    }
+  },
+  "auth": {
+    "title": "Jinni",
+    "subtitle_login": "Welcome back!",
+    "subtitle_register": "Begin your magical journey",
+    "sign_in": "Sign In",
+    "sign_up": "Sign Up",
+    "full_name": "Full Name",
+    "email": "Email Address",
+    "password": "Password",
+    "show": "Show",
+    "hide": "Hide",
+    "create_account": "Create Account",
+    "or_continue": "Or continue with",
+    "terms": "By signing up, you agree to our {0} and {1}",
+    "terms_link": "Terms of Service",
+    "privacy_link": "Privacy Policy",
+    "forgot_password": "Forgot your password?",
+    "welcome_back": "Welcome back!",
+    "account_created": "Account created successfully!",
+    "name_error": "Name must be at least 2 characters",
+    "email_error": "Please enter a valid email",
+    "password_error": "Password must be at least 6 characters",
+    "password_required": "Password is required",
+    "terms_prefix": "By signing up, you agree to our",
+    "terms_and": "and",
+    "signing_in": "Signing in...",
+    "creating_account": "Creating account...",
+    "unexpected_error": "An unexpected error occurred. Please try again.",
+    "google_error": "Google login failed. Please try again.",
+    "apple_error": "Apple login failed. Please try again.",
+    "check_email": "Check your email",
+    "verification_sent": "We've sent a 6 digit verification code to",
+    "enter_code": "Enter 6 digit code",
+    "verify_create": "Verify",
+    "back_to_registration": "Back to Registration",
+    "resend_code": "Resend Code",
+    "resend_timer": "Resend code in {0}s",
+    "send_verification": "Send Verification Code",
+    "sending_verification": "Sending verification...",
+    "verifying": "Verifying...",
+    "new_code_sent": "New verification code sent!",
+    "invalid_code": "Invalid verification code",
+    "attempts_left": "{0} attempts left",
+    "too_many_attempts": "Too many attempts. Please try again later",
+    "forgot_subtitle": "Enter your email address",
+    "reset_subtitle": "Enter the reset code",
+    "send_reset_code": "Reset Code",
+    "sending_reset_code": "Sending code...",
+    "reset_code_sent": "Reset code sent to your email!",
+    "enter_reset_code": "Enter 6 digit reset code",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "reset_password": "Reset Password",
+    "reset_password_title": "Create New Password",
+    "resetting_password": "Resetting password...",
+    "back_to_login": "Back to Login",
+    "resend_reset_code": "Resend Reset Code",
+    "new_reset_code_sent": "New reset code sent!",
+    "password_reset_success": "Redirecting to login...",
+    "all_fields_required": "All fields are required",
+    "passwords_dont_match": "Passwords don't match",
+    "email_required": "Email is required",
+    "setup_password_subtitle": "Create a password for your account",
+    "setup_new_password": "New password",
+    "setup_confirm_password": "Confirm password",
+    "setup_submit": "Set Password & Log In",
+    "setup_saving": "Saving...",
+    "setup_both_fields": "Please fill in both password fields",
+    "setup_password_min": "Password must be at least 8 characters",
+    "setup_error": "Something went wrong",
+    "hint_uppercase": "✓ Uppercase",
+    "hint_number": "✓ Number",
+    "hint_symbol": "✓ Symbol"
+  },
+  "onboarding": {
+    "title": "Personalize Your Experience",
+    "edit_title": "Preferences",
+    "subtitle": "Tell us about your travel preferences to get personalized recommendations",
+    "edit_subtitle": "Update for tailored recommendations",
+    "complete": "% Complete",
+    "interests_title": "Your Interests",
+    "interests_desc": "Select activities you enjoy",
+    "budget_title": "Your Budget",
+    "budget_desc": "Set your preferred spending range",
+    "budget_optional": "Set a budget range for personalized recommendations",
+    "set_budget": "Set",
+    "min_budget": "Minimum",
+    "max_budget": "Maximum",
+    "cancel_budget": "Cancel",
+    "style_title": "Your Style",
+    "style_desc": "How do you prefer to travel?",
+    "location_title": "Your Location",
+    "location_permission_required": "GPS permission required to use your current location -",
+    "location_permission_grant": "Permit",
+    "location_desc": "Select your current location or you can choose destination",
+    "use_current_location": "My Location",
+    "choose_destination": "Choose Destination",
+    "select_destination": "Select Destination on Map",
+    "country": "Country",
+    "city": "City",
+    "select_country": "Select country",
+    "select_city": "Select city",
+    "search_countries": "Search countries...",
+    "search_cities": "Search cities...",
+    "loading": "Loading...",
+    "or": "or",
+    "select_on_map": "Select on Map",
+    "using_gps": "Using your current GPS location",
+    "lang_title": "Preferred Language",
+    "lang_desc": "Select languages you're comfortable with",
+    "get_recommendations": "Get Recommendations",
+    "save_preferences": "Save Preferences",
+    "complete_warning": "Complete all sections to 100%",
+    "budget_validation_error": "Enter a valid budget range (min ≤ max)",
+    "unexpected_error": "An unexpected error occurred. Please try again.",
+    "location_denied_ios": "Location access is blocked. To use GPS, go to your device Settings → Privacy & Security → Location Services → Safari → set to \"While Using\". Then return here and tap Permit.",
+    "location_denied_btn_title": "Location access is blocked in your device settings. Choose a destination manually instead.",
+    "gps_failed": "Could not get your GPS location. Please allow location access or pick a location on the map.",
+    "currency": "Currency",
+    "saving": "Saving...",
+    "currencies": {
+      "AED": "AED",
+      "USD": "USD",
+      "RUB": "RUB",
+      "EUR": "EUR",
+      "GBP": "GBP"
+    },
+    "interests": {
+      "family": "Family",
+      "romantic": "Romantic",
+      "nature": "Nature",
+      "adventure": "Adventure",
+      "cultural": "Cultural",
+      "history": "History",
+      "art": "Art",
+      "food_drink": "Food & Drink",
+      "nightlife": "Nightlife",
+      "relaxation": "Relaxation"
+    },
+    "styles": {
+      "luxury": "Luxury",
+      "budget": "Budget"
+    }
+  },
+  "contact": {
+    "back": "Back",
+    "title": "Get in Touch",
+    "subtitle": "Have questions about your AI travel companion? We're here to help you plan the perfect journey.",
+    "form_title": "Send a Message",
+    "form_description": "Fill out the form below and our AI travel experts will get back to you shortly.",
+    "subject": "Subject",
+    "select_topic": "Select a topic",
+    "subjects": {
+      "general": "General Inquiry",
+      "technical": "Technical Support",
+      "billing": "Billing Question",
+      "feature": "Feature Request",
+      "partnership": "Partnership Opportunity"
+    },
+    "message": "Your Message",
+    "message_placeholder": "Tell us about your travel plans or questions...",
+    "response_sent_to": "Response will be sent to",
+    "send_message": "Send Message",
+    "sending": "Sending...",
+    "response_time": "We typically respond within 4 hours during business days.",
+    "tagline": "Your intelligent companion for extraordinary journeys",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
+    "copyright": "© 2026 Jinni AI. All rights reserved.",
+    "modal": {
+      "title": "Message Sent Successfully!",
+      "message": "Thank you for contacting Jinni. Our team will get back to you soon at {email}. In the meantime, feel free to chat with our AI assistant for instant travel tips.",
+      "button": "Continue Exploring"
+    },
+    "fill_required": "Please fill in all required fields.",
+    "send_error": "Failed to send message. Please try again later."
+  },
+  "map_selector": {
+    "back": "Back",
+    "title": "Select Destination",
+    "confirm": "Confirm",
+    "search_placeholder": "Search for a city or place...",
+    "searching": "Searching...",
+    "selected": "Selected:",
+    "click_to_select": "Click on map to select",
+    "coordinates": "Coordinates:",
+    "address": "Address:",
+    "loading_map": "Loading map...",
+    "unsaved_changes": "You have unsaved changes. Do you want to leave?",
+    "my_location_btn": "Use my current location",
+    "gps_denied_banner": "GPS access is blocked. You can still pick any location by tapping the map or searching above. To enable GPS, go to Settings → Privacy & Security → Location Services → Safari → set to \"While Using\".",
+    "gps_denied_alert": "Location access is blocked. Go to Settings → Privacy & Security → Location Services → Safari and set it to \"While Using\".",
+    "gps_unavailable": "Could not get your location. Please check your GPS signal and try again."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "last_updated": "Last Updated: January 30, 2026",
+    "sections": {
+      "acceptance": {
+        "title": "1. Acceptance of Terms",
+        "content": "By accessing or using Jinni, you confirm that you have read, understood, and agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms in their entirety, you must not access or use our service. Your continued use of Jinni after any update to these Terms constitutes acceptance of the revised version."
+      },
+      "description": {
+        "title": "2. Service Description",
+        "content": "Jinni is an AI-powered travel companion that provides personalised destination recommendations, conversational travel planning, and location-based place discovery. Our service leverages artificial intelligence and third-party data sources to tailor suggestions to your preferences and location. We reserve the right to modify, expand, or discontinue any feature or aspect of the service at any time with reasonable notice."
+      },
+      "account": {
+        "title": "3. Account Registration & Security",
+        "content": "To access Jinni, you must create an account and provide accurate, current information. You are solely responsible for:",
+        "points": [
+          "Maintaining the confidentiality of your login credentials.",
+          "All activity that occurs under your account, whether authorised or not.",
+          "Notifying us immediately at support@jinni.ai if you suspect unauthorised access.",
+          "Ensuring your account information remains accurate and up to date."
+        ]
+      },
+      "use": {
+        "title": "4. Acceptable Use",
+        "content": "Your use of Jinni is subject to the following conditions.",
+        "subsections": {
+          "permitted": {
+            "title": "Permitted Use",
+            "points": [
+              "Using Jinni for personal, non-commercial travel planning and discovery.",
+              "Submitting genuine reviews, preferences, and feedback.",
+              "Accessing features within the limits of your account tier."
+            ]
+          },
+          "prohibited": {
+            "title": "Prohibited Conduct",
+            "points": [
+              "Attempting to reverse-engineer, decompile, or extract source code from any part of the service.",
+              "Using automated tools, bots, or scrapers to access, index, or harvest content.",
+              "Attempting to gain unauthorised access to our systems, servers, or other users' accounts.",
+              "Submitting false, misleading, or fraudulent information.",
+              "Transmitting malicious code, viruses, or disruptive data.",
+              "Using the service to harass, threaten, or harm any person.",
+              "Circumventing usage limits, rate limits, or access controls.",
+              "Violating any applicable local, national, or international law or regulation."
+            ]
+          }
+        }
+      },
+      "content": {
+        "title": "5. User Content",
+        "content": "You retain ownership of any content you submit to Jinni, including preferences, reviews, and messages. By submitting content, you grant us a worldwide, non-exclusive, royalty-free licence to store, process, and use that content solely to provide and improve the service. You represent that your content does not infringe any third-party rights and complies with these Terms. We reserve the right to remove any content that violates these Terms or applicable law."
+      },
+      "ai": {
+        "title": "6. AI-Generated Recommendations",
+        "content": "Jinni uses artificial intelligence to generate travel suggestions based on your preferences, location, and contextual data. All recommendations are provided for informational purposes only and do not constitute professional travel, legal, medical, or financial advice. We make no guarantee that any recommended place, route, or experience will meet your expectations or be available at the time of your visit. You are solely responsible for independently verifying information and for all travel decisions you make."
+      },
+      "premium": {
+        "title": "7. Premium Services",
+        "content": "Certain advanced features are available exclusively through a paid subscription.",
+        "subsections": {
+          "billing": {
+            "title": "Billing",
+            "content": "Subscription fees are billed in advance on a recurring basis (monthly or annually, depending on your chosen plan) and are non-refundable except where required by applicable law. By subscribing, you authorise us to charge your payment method automatically at the start of each billing period."
+          },
+          "cancellation": {
+            "title": "Cancellation",
+            "content": "You may cancel your subscription at any time through your account settings. Cancellation takes effect at the end of your current billing period; you will retain access to premium features until that date. We reserve the right to modify subscription pricing with at least 30 days' advance notice."
+          }
+        }
+      },
+      "limits": {
+        "title": "8. Usage Limits",
+        "content": "Free accounts are subject to daily limits on AI interactions and place discoveries, as specified on our pricing page. Premium accounts receive higher limits according to their subscription tier. We reserve the right to adjust these limits at any time with reasonable notice. Attempts to circumvent usage limits — including through multiple accounts or automated access — are a violation of these Terms and may result in account suspension."
+      },
+      "ip": {
+        "title": "9. Intellectual Property",
+        "content": "All content, design, code, trademarks, and technology that form part of the Jinni service are the exclusive property of Jinni or its licensors and are protected by applicable intellectual property laws. Nothing in these Terms grants you any right, title, or interest in the service or its underlying technology beyond the limited licence to use the service as described herein. Unauthorised use, reproduction, or distribution of our intellectual property is strictly prohibited."
+      },
+      "privacy": {
+        "title": "10. Privacy",
+        "content": "Your use of Jinni is governed by our Privacy Policy, which is incorporated into these Terms by reference. By using the service, you consent to the collection, use, and processing of your information as described in our Privacy Policy. Please review it carefully."
+      },
+      "termination": {
+        "title": "11. Termination",
+        "subsections": {
+          "by_us": {
+            "title": "Termination by Us",
+            "content": "We reserve the right to suspend or permanently terminate your account at our sole discretion, without prior notice, if we determine that you have violated these Terms, engaged in fraudulent or abusive behaviour, posed a security risk to the service or other users, or if required to do so by law. In cases of serious violations, termination will be immediate and permanent."
+          },
+          "by_you": {
+            "title": "Termination by You",
+            "content": "You may delete your account at any time through your account settings. Upon deletion, your account data will be permanently removed in accordance with our Privacy Policy."
+          },
+          "effect": {
+            "title": "Effect of Termination",
+            "content": "Upon termination for any reason, your licence to use the service ceases immediately. Provisions of these Terms that by their nature should survive termination — including intellectual property rights, disclaimers, limitations of liability, and governing law — will continue to apply."
+          }
+        }
+      },
+      "disclaimer": {
+        "title": "12. Disclaimer of Warranties",
+        "content": "Jinni is provided 'as is' and 'as available' without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, accuracy, or non-infringement. We do not warrant that the service will be uninterrupted, error-free, or free of harmful components. Use of the service is entirely at your own risk."
+      },
+      "limitation": {
+        "title": "13. Limitation of Liability",
+        "content": "To the maximum extent permitted by applicable law, Jinni and its directors, employees, partners, and licensors shall not be liable for any indirect, incidental, special, consequential, or punitive damages — including loss of data, loss of revenue, or personal injury — arising from your use of or inability to use the service, even if we have been advised of the possibility of such damages. Our total aggregate liability for any claim arising from these Terms or your use of the service shall not exceed the greater of (a) the amount you paid us in the 12 months preceding the claim or (b) €50."
+      },
+      "governing": {
+        "title": "14. Governing Law & Disputes",
+        "content": "These Terms are governed by and construed in accordance with applicable law. Any disputes arising from or relating to these Terms or your use of Jinni shall first be attempted to be resolved through good-faith negotiation. If a dispute cannot be resolved informally within 30 days, it shall be subject to the exclusive jurisdiction of the competent courts."
+      },
+      "changes": {
+        "title": "15. Changes to Terms",
+        "content": "We may update these Terms of Service from time to time to reflect changes in our service, legal requirements, or business practices. We will notify you of material changes via email or a prominent notice within the service at least 14 days before the changes take effect. Your continued use of Jinni after that date constitutes your acceptance of the updated Terms. If you do not agree to the changes, you must stop using the service before they take effect."
+      },
+      "contact": {
+        "title": "16. Contact",
+        "content": "If you have questions about these Terms of Service or wish to report a violation, please contact us through our in-app support or email us at support{'@'}jinni.ai."
+      }
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "last_updated": "Last Updated: March 27, 2026",
+    "sections": {
+      "intro": {
+        "title": "Introduction",
+        "content": "Jinni ('we', 'our', or 'us') is an AI-powered travel companion. This Privacy Policy explains how we collect, use, share, and protect your information. By using Jinni, you agree to this policy."
+      },
+      "collection": {
+        "title": "1. Information We Collect",
+        "subsections": {
+          "account": {
+            "title": "Account Information",
+            "content": "When you create an account, we collect your name, email address, and password (hashed, never stored in plain text). If you sign up with Google, we receive basic profile information from Google, including your Google ID, display name, and profile photo."
+          },
+          "preferences": {
+            "title": "Travel Preferences",
+            "content": "We collect your travel style, interests, budget preferences (amount and currency), and preferred languages to personalise recommendations."
+          },
+          "location": {
+            "title": "Location Data",
+            "content": "We collect location in three ways: 1) Manually – you select a city or drop a pin on the map. 2) Auto‑detected (with your permission) – we may use your GPS coordinates to refine recommendations. You can turn this off in settings at any time. 3) IP‑based fallback – if you have not set a location and location permissions are not granted, we may use your IP address to estimate your approximate location as a one‑time fallback. This estimate is not stored unless you explicitly save it."
+          },
+          "usage": {
+            "title": "Usage Information",
+            "content": "We automatically collect AI conversations, places you view or interact with (e.g., tapping 'directions' or 'website'), search queries, and features you use to improve our service."
+          },
+          "device": {
+            "title": "Device & Technical Information",
+            "content": "We collect IP address (temporarily for security), browser type, operating system, and device type."
+          }
+        }
+      },
+      "use": {
+        "title": "2. How We Use Your Information",
+        "points": [
+          "Provide and improve Jinni’s AI recommendations and features.",
+          "Personalise your experience based on preferences and location.",
+          "Authenticate your account and prevent fraud (including temporarily blocking suspicious IPs).",
+          "Send service updates, verification codes, password reset emails, and (with your consent) promotional messages.",
+          "Analyse usage patterns to enhance the service.",
+          "Comply with legal obligations."
+        ]
+      },
+      "sharing": {
+        "title": "3. Information Sharing",
+        "content": "We do not sell your personal information. We share data only with:",
+        "subsections": {
+          "service": {
+            "title": "Service Providers",
+            "content": "We rely on trusted third parties to operate Jinni. They are contractually bound to use your data only for the services we request.\n\n- Google OAuth (for sign‑in with Google)\n- Google Places & Geocoding APIs (for place search, details, and reverse geocoding)\n- Open‑Meteo (for weather data)\n- Nominatim (OpenStreetMap) (for location search on the map)\n- IP geolocation services (for approximate location fallback)\n- SendGrid (for sending emails)\n- OpenAI / DeepSeek (for AI model responses – no personally identifying information is sent)"
+          },
+          "legal": {
+            "title": "Legal Requirements",
+            "content": "We may disclose your information if required by law or in response to a valid legal request."
+          },
+          "business": {
+            "title": "Business Transfers",
+            "content": "If Jinni is merged, acquired, or sold, your information may be transferred. We will notify you before any such change."
+          }
+        }
+      },
+      "ai": {
+        "title": "4. AI and Data Processing",
+        "content": "When you chat with Jinni, your message is processed by a third‑party AI model. The AI receives your message, preferences, effective location (your saved destination or, with permission, your real‑time location), and contextual data (weather, nearby places). No personally identifying information (name, email, account ID) is sent to the AI. We store conversation history to maintain context. You can delete individual sessions or your entire chat history at any time."
+      },
+      "storage": {
+        "title": "5. Data Storage and Security",
+        "content": "Your information is stored on servers in Europe and the United States. We use industry‑standard measures: encryption in transit (TLS/SSL), encryption at rest (passwords hashed, other sensitive data encrypted), and strict access controls. No system is completely secure, but we strive to protect your information."
+      },
+      "retention": {
+        "title": "6. Data Retention",
+        "content": "We keep your information as long as your account is active. Account and preferences are kept until you delete your account. Chat sessions can be deleted earlier individually. Email verification codes are deleted shortly after issuance; password reset codes are deleted within a short period. IP addresses are stored temporarily with security records and automatically removed. Blocked IPs are unblocked after a short period. If you delete your account, all account data, chat sessions, and usage limits are permanently removed. Analytics events may be retained in aggregated form."
+      },
+      "rights": {
+        "title": "7. Your Rights",
+        "content": "Depending on your location (e.g., EEA, UK, California), you may have the right to:",
+        "points": [
+          "Access – request a copy of your personal data.",
+          "Correct – update inaccurate information through your account settings.",
+          "Delete – delete your account and all associated data.",
+          "Opt out – unsubscribe from marketing emails; disable location auto‑detection.",
+          "Portability – receive your data in a structured format.",
+          "Withdraw consent – where consent is required (e.g., location), you can change your settings at any time."
+        ]
+      },
+      "cookies": {
+        "title": "8. Cookies and Tracking",
+        "content": "We use cookies and similar technologies to maintain your login session, remember your preferences (language, theme), and analyse usage (in‑house analytics only). You can control cookies through your browser settings."
+      },
+      "children": {
+        "title": "9. Children’s Privacy",
+        "content": "Jinni is not intended for users under 13. We do not knowingly collect data from children under 13. If we become aware, we will delete it immediately."
+      },
+      "international": {
+        "title": "10. International Users",
+        "content": "If you are outside Europe or the United States, your information may be transferred to countries with different data protection laws. By using Jinni, you consent to such transfers. For EEA users: we process data based on contract performance, legitimate interests, consent, or legal obligations. You may lodge a complaint with your local data protection authority."
+      },
+      "changes": {
+        "title": "11. Changes to This Privacy Policy",
+        "content": "We may update this policy. Material changes will be notified by email or a prominent notice on our site. Continued use after changes constitutes acceptance."
+      },
+      "contact": {
+        "title": "12. Contact Us",
+        "content": "If you have questions about this Privacy Policy or wish to exercise your privacy rights, please contact us through our support channels or email us at privacy{'@'}jinni.ai."
+      }
+    }
+  },
+  "legal": {
+    "back_to_home": "Back",
+    "effective_date": "Effective Date"
+  },
+  "common": {
+    "close": "Close"
+  },
+  "chat": {
+    "sidebar": {
+      "app_name": "Jinni",
+      "new_chat": "New Chat",
+      "loading_conversations": "Loading conversations...",
+      "chat": "Chat",
+      "default_chat_title": "Chat {number}",
+      "saved_places": "Saved Places",
+      "session_options": "Session options"
+    },
+    "header": {
+      "new_chat_title": "New Chat"
+    },
+    "greeting": {
+      "how_can_help": "How can I help you?"
+    },
+    "input": {
+      "placeholder": "Message Jinni",
+      "placeholder_cooldown": "You've reached your limit. Try again at {time}",
+      "placeholder_mobile_cooldown": "Limit reached. Try at {time}",
+      "mode_nearby": "Nearby",
+      "mode_discovery": "Discovery",
+      "send": "Send message",
+      "switched_mode": "Switched to {mode} mode"
+    },
+    "context_menu": {
+      "rename": "Rename",
+      "delete": "Delete"
+    },
+    "profile": {
+      "profile": "Profile",
+      "preferences": "Preferences",
+      "settings": "Settings",
+      "contact_us": "Contact Us",
+      "logout": "Log Out"
+    },
+    "actions": {
+      "restaurants": "Restaurants",
+      "hotels": "Hotels",
+      "hidden_gems": "Hidden Gems",
+      "historical": "Historical",
+      "events": "Local Events",
+      "photo_spots": "Photo Spots",
+      "shopping": "Shopping",
+      "itinerary": "Itinerary"
+    },
+    "shopping": {
+      "prompt": "What are you shopping for?",
+      "souvenirs": "Souvenirs & Gifts",
+      "clothing": "Clothing & Boutiques",
+      "market": "Markets & Bazaars",
+      "mall": "Malls",
+      "jewelry": "Jewelry",
+      "food": "Food & Gourmet"
+    },
+    "preferences": {
+      "answering_with": "Your preferences",
+      "edit_hint": "Tap to edit"
+    },
+    "recommendations": {
+      "recommended": "Recommended:",
+      "more_recommendations": "More recommendations:",
+      "results_count": "({count} results)",
+      "view_more": "View More {type}",
+      "loading_more": "Finding more {type}...",
+      "more": "More",
+      "ask_ai": "Ask"
+    },
+    "messages": {
+      "connection_error": "I'm having trouble connecting to the magic right now. Please try again!",
+      "jinni_mistakes": "Jinni can make mistakes. Check important info."
+    },
+    "session": {
+      "warning": {
+        "title": "Long Conversation Detected",
+        "message": "This conversation is getting long ({count} messages). Starting a new chat will improve response quality.",
+        "message_limit": "This chat has reached its message limit. Please start a new chat.",
+        "message_remaining": "Only {count} messages left in this chat. Consider starting a new one.",
+        "start_new": "Start New Chat",
+        "continue": "Continue Here"
+      },
+      "limit_modal": {
+        "title": "Chat Session Limit Reached",
+        "explanation": "This conversation has reached {count} messages",
+        "reasons_title": "Long conversations can:",
+        "reasons": {
+          "slow": "Slow down response times",
+          "consume": "Consume more tokens and resources",
+          "reduce": "Reduce AI accuracy as context grows"
+        },
+        "suggestion": "Starting a new chat will give you faster, more accurate responses!",
+        "start_new": "Start New Chat",
+        "go_back": "Go Back"
+      }
+    },
+    "errors": {
+      "recommendations_error": "I'm having trouble getting recommendations right now.",
+      "server_error": "Our servers are having issues. Please try again later.",
+      "offline": "You appear to be offline. Please check your connection.",
+      "location_required": "Please set your travel destination in Settings or enable GPS location detection.",
+      "open_settings": "Open Settings",
+      "load_more_failed": "Sorry, I couldn't load more recommendations right now!",
+      "no_recommendations": "I couldn't find specific recommendations...",
+      "recommendations_failed": "Something went wrong while getting recommendations!"
+    },
+    "limit_suggestions": {
+      "restaurants": "I've shown you quite a few restaurant options! For more specific recommendations, try asking me something like:\n• \"Show me restaurants with outdoor seating\"\n• \"Find vegetarian restaurants under 15,000 AMD\"\n• \"I need restaurants near Republic Square\"\n• \"Show me traditional restaurants\"\nWhat specific type of restaurant are you looking for?",
+      "hotels": "I've provided several hotel options! To find exactly what you need, try being more specific:\n• \"Show me budget hotels under 50,000 AMD\"\n• \"Find luxury hotels with spa facilities\"\n• \"I need hotels near the airport\"\n• \"Show me boutique hotels in old Yerevan\"\nWhat are your specific accommodation needs?",
+      "historical": "I've shared many historical sites! For more targeted suggestions, try:\n• \"Show me medieval churches\"\n• \"Find archaeological sites outside Yerevan\"\n• \"I want Soviet-era monuments\"\n• \"Show me ancient fortresses\"\nWhat specific historical period interests you?",
+      "hidden_gems": "I've revealed quite a few hidden gems! To discover more, try asking:\n• \"Show me hidden gems for photography\"\n• \"Find secret spots locals love\"\n• \"I want off-beat nature locations\"\n• \"Show me hidden gems for couples\"\nWhat kind of hidden experience are you seeking?",
+      "events": "I've suggested many events and activities! For more targeted options:\n• \"Show me evening entertainment\"\n• \"Find cultural events this weekend\"\n• \"I want outdoor activities\"\n• \"Show me family-friendly events\"\nWhat specific type of activity interests you?",
+      "photo_spots": "I've shown you plenty of photo spots! For more specific shots, try asking:\n• \"Show me sunset viewpoints\"\n• \"Find photo spots with city skyline views\"\n• \"I want quiet spots without crowds\"\n• \"Show me colorful streets for photos\"\nWhat kind of shot are you after?",
+      "shopping": "I've shown you quite a few shopping spots! For more specific finds, try asking:\n• \"Show me vintage clothing stores\"\n• \"Find handmade ceramics shops\"\n• \"I want a weekend flea market\"\n• \"Show me shops open late\"\nWhat exactly are you hoping to find?"
+    },
+    "view_more": {
+      "hint_first": "Need more options?",
+      "hint_second": "Still looking for something specific?",
+      "hint_last": "Last batch - or ask me specifically what you need!"
+    },
+    "session_titles": {
+      "nearby_restaurants": "Nearby Restaurants",
+      "restaurant_recommendations": "Restaurant Recommendations",
+      "nearby_hotels": "Nearby Hotels",
+      "hotel_suggestions": "Hotel Suggestions",
+      "hidden_gems": "Hidden Gems Discovery",
+      "historical": "Historical Places",
+      "events": "Local Events & Activities",
+      "photo_spots": "Photo Spots",
+      "shopping": "Shopping"
+    },
+    "ai_prompts": {
+      "restaurant": "Tell me about {name} - price range, key dishes, and how to make reservations",
+      "hotel": "Tell me about {name} - price range, key amenities, and booking information",
+      "event": "Tell me about {name} - ticket prices, schedule, and how to attend",
+      "historical": "Tell me about {name} - historical significance, visiting hours, and what to expect",
+      "hidden_gem": "Tell me about {name} - what makes it special, best time to visit, and insider tips",
+      "generic": "Tell me about {name}"
+    },
+    "switch_mode": {
+      "button": "Switch to Listing",
+      "switching": "Switching to Listing"
+    },
+    "event": {
+      "ended": "Ended",
+      "schedule": "Schedule",
+      "event_date": "Event date",
+      "weekly": "Weekly",
+      "every_day": "every {day}",
+      "all_day": "All day",
+      "starting": "starting {date}"
+    },
+    "quick_actions": {
+      "open_settings": "Open Settings",
+      "preferences": "Preferences"
+    },
+    "feedback": {
+      "like": "Like",
+      "dislike": "Dislike",
+      "good_response": "Good response",
+      "bad_response": "Bad response",
+      "share": "Share",
+      "copy_response": "Copy response",
+      "copy_message": "Copy message",
+      "copied": "Copied!"
+    },
+    "saved": {
+      "title": "Saved Places",
+      "empty_title": "No saved places yet.",
+      "empty_hint": "Tap the bookmark icon on any recommendation to save it here.",
+      "load_more": "Load more",
+      "save_place": "Save place",
+      "remove_saved": "Remove from saved"
+    },
+    "share": {
+      "preparing": "Preparing your share link…",
+      "fetching": "Fetching details — {current} of {total} places",
+      "almost": "Almost there…"
+    },
+    "itinerary": {
+      "nearby_confirm_title": "Build this itinerary in Nearby mode?",
+      "nearby_confirm_desc": "Nearby keeps every stop within your local radius. For a multi-day trip, Discovery usually explores more of the destination.",
+      "nearby_confirm_keep": "Keep Nearby",
+      "nearby_confirm_switch": "Use Discovery",
+      "days_prompt": "How many days is your trip?",
+      "hotel_prompt": "Where are you staying?",
+      "hotel_placeholder": "Hotel name (optional)",
+      "skip_hotel": "Skip - just build it",
+      "day": "day",
+      "days": "days",
+      "day_cap": "Day",
+      "start": "Build my itinerary",
+      "planning": "Planning your trip...",
+      "finding_hotels": "Finding hotels for you...",
+      "stopped": "Generation stopped.",
+      "loading": "Loading your trip...",
+      "add_stop": "Add stop",
+      "regenerate_day": "Regenerate day",
+      "move_to_day": "Move to another day",
+      "from_saved": "From saved",
+      "no_saved_nearby": "No saved places near this destination yet.",
+      "stage_planning": "planning",
+      "stage_enriching": "finding real places…",
+      "retry": "Try again",
+      "keep": "Keep this stop",
+      "move_up": "Move up",
+      "move_down": "Move down",
+      "replace": "Replace",
+      "remove": "Remove",
+      "view_photo": "View photo",
+      "not_verified": "Couldn't verify this place exists.",
+      "pick_stop": "Pick a stop",
+      "no_candidates": "Nothing found — try another category.",
+      "approx_path": "Approximate path",
+      "generic_error": "Something went wrong. Please try again.",
+      "find_replacement": "Find a replacement",
+      "pick_replacement": "Pick a replacement",
+      "details": "Details",
+      "directions": "Directions",
+      "transit": "Transit",
+      "call": "Call",
+      "website": "Website",
+      "suggest_hotels": "Suggest hotels",
+      "choose_hotel": "Choose your hotel",
+      "breakfast_q": "Breakfast at the hotel?",
+      "breakfast_yes": "Included",
+      "breakfast_no": "Not included",
+      "collecting": "Collecting the best places..."
+    }
+  },
+  "profile": {
+    "title": "Your Profile",
+    "default_name": "Profile",
+    "not_set": "Not set",
+    "not_specified": "Not specified",
+    "interests": "Interests",
+    "budget": "Budget",
+    "style": "Style",
+    "location": "Location",
+    "edit_preferences": "Preferences",
+    "plan": {
+      "label": "Plan",
+      "free": "Free",
+      "premium": "Premium",
+      "places": "Places today",
+      "requests": "Requests today",
+      "left": "left",
+      "resets_daily": "Resets every day at midnight UTC.",
+      "cooldown": "Daily limit reached — available again in about {hours}h.",
+      "upgrade": "Upgrade to Premium",
+      "unavailable": "Usage is unavailable right now.",
+      "upgrade_unconfigured": "Subscriptions aren't set up yet. Please check back soon.",
+      "days_left": "{days} days left",
+      "until": "until {date}"
+    },
+    "edit": "Edit"
+  },
+  "settings": {
+    "title": "Settings",
+    "search_languages": "Search languages...",
+    "location_alert": "Please turn off \"Use My Current Location\" to set a destination.",
+    "display": {
+      "title": "Display",
+      "language": "Language",
+      "theme": "Theme",
+      "theme_light": "Light",
+      "theme_dark": "Dark",
+      "theme_system": "System"
+    },
+    "search": {
+      "title": "Search Radius",
+      "description": "Control how far Jinni searches for recommendations in each mode",
+      "nearby_mode": "Nearby Mode",
+      "discovery_mode": "Discovery Mode",
+      "nearby_value": "{km} km",
+      "discovery_value": "{km} km",
+      "close": "Close",
+      "wide_area": "Wide Area"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "description": "Control how Jinni uses your location data",
+      "use_location": "Use My Current Location",
+      "location_help": "When enabled, Jinni will use your device GPS to show nearby places. When disabled, recommendations will be based on your selected travel destination."
+    },
+    "danger": {
+      "title": "Common Traps",
+      "delete_chats": {
+        "label": "Delete All Chats",
+        "description_before": "Permanently ",
+        "link": "delete all your chat sessions",
+        "description_after": ". This action cannot be undone.",
+        "confirm": "Are you sure you want to delete all chat sessions?",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "delete_account": {
+        "label": "Delete Account",
+        "description_before": "Permanently ",
+        "link": "delete your account and all associated data",
+        "description_after": ". This action cannot be undone.",
+        "confirm": "Are you sure you want to delete your account and <strong>all</strong> associated data?",
+        "type_confirm": "Type <strong>DELETE</strong> in uppercase to confirm:",
+        "type_placeholder": "DELETE",
+        "confirm_button": "Delete my account",
+        "cancel": "Cancel"
+      }
+    },
+    "gps_confirm": {
+      "turn_off": "GPS will be turned off. Would you like to set a travel destination now?",
+      "turn_on": "Turning on GPS will clear your current destination. Continue?"
+    },
+    "reset": "Reset to Defaults",
+    "saved": "Settings saved"
+  },
+  "place_info": {
+    "loading": "Loading details...",
+    "rating": "Rating",
+    "reviews": "({count} reviews)",
+    "phone": "Phone",
+    "website": "Website",
+    "visit_website": "Visit Website",
+    "hours": "Hours",
+    "address": "Address",
+    "get_directions": "Get Directions",
+    "search_online": "Search Online",
+    "show_more_days": "+ {count} more days",
+    "show_less": "Show less",
+    "highlights": "Highlights"
+  },
+  "usage": {
+    "cooldown": {
+      "short": "Limit reached. Try at {time}",
+      "long": "You've reached your limit. Try again at {time}",
+      "soon": "You've reached your limit. Try again soon",
+      "unknown_time": "Unknown"
+    },
+    "warning": {
+      "tokens": "You've used {percentage}% of your daily tokens.",
+      "places": "You've viewed {percentage}% of your daily places.",
+      "upgrade": "Consider upgrading to premium for higher limits."
+    }
+  },
+  "languages": {
+    "hy": "Armenian",
+    "en": "English",
+    "ru": "Russian",
+    "ar": "Arabic",
+    "fr": "French",
+    "zh": "Chinese"
+  },
+  "map": {
+    "show": "Show on map",
+    "hide": "Hide map",
+    "open_fullscreen": "Open full screen",
+    "close": "Close (Esc)",
+    "my_location": "My location",
+    "you_are_here": "You are here",
+    "location_denied": "Location is off. Turn it on for this site in your browser/phone settings to use this.",
+    "location_unavailable": "Couldn't get your location. Please try again.",
+    "location_unsupported": "This device can't pinpoint your location.",
+    "location_approx": "Using your approximate location.",
+    "route_from_me": "Route from here",
+    "clear_route": "Clear route",
+    "routing": "Finding route…",
+    "route_error": "Couldn't find a route.",
+    "tap_for_distance": "Tap for distance",
+    "mode_car": "Driving",
+    "mode_walk": "Walking",
+    "mode_cycle": "Cycling",
+    "details": "Details",
+    "filter_all": "All",
+    "tier_signature": "Jinni's Signature",
+    "tier_spotlight": "Jinni's Spotlight",
+    "tier_verified": "Jinni Verified",
+    "exit_route": "Exit route",
+    "arrived": "You've arrived",
+    "done": "Done",
+    "uturn": "Make a U-turn",
+    "wrong_way": "Turn around",
+    "wrong_way_hint": "You’re heading away from the route",
+    "directions": "Directions",
+    "transit": "Transit",
+    "call": "Call",
+    "website": "Website",
+    "place_fallback": "Place",
+    "units": {
+      "km": "km",
+      "m": "m",
+      "min": "min",
+      "hour": "h"
+    }
+  },
+  "time": {
+    "just_now": "Just now",
+    "minutes_ago": "{count}m ago",
+    "hours_ago": "{count}h ago",
+    "days_ago": "{count}d ago",
+    "months_ago": "{count}mo ago",
+    "daily": "Daily",
+    "closed": "Closed",
+    "open_24h": "Open 24 hours"
+  },
+  "businessLanding": {
+    "hero": {
+      "title": "When They Look, You're There",
+      "subtitle": "Jinni matches travelers to verified businesses",
+      "cta": "List Your Business ✨"
+    },
+    "features": {
+      "title": "How You Show Up"
+    },
+    "tiers": {
+      "verified": {
+        "label": "Jinni Verified",
+        "price": "Free",
+        "heading": "Get on the Map",
+        "description": "Listed in Discovery mode. Jinni finds and assigns your photos automatically. Verifies your business on submission.",
+        "cta": "Choose Verified"
+      },
+      "spotlight": {
+        "label": "Jinni Spotlight",
+        "price": "$29",
+        "priceSuffix": "/mo",
+        "heading": "Stay Visible",
+        "description": "Protected zone slot. Appear in Nearby mode when travelers are close. Add your own photos and descriptions.",
+        "cta": "Choose Spotlight"
+      },
+      "signature": {
+        "label": "Jinni Signature",
+        "price": "$49",
+        "priceSuffix": "/mo",
+        "heading": "Own Your Zone",
+        "description": "Top ranking in Discovery and Nearby modes. Highlights, social links, Hidden Gem category, and full analytics.",
+        "cta": "Choose Signature"
+      }
+    }
+  },
+  "share": {
+    "loading": "Loading…",
+    "link_expired": "This link has expired or doesn't exist.",
+    "discover": "Discover with Jinni",
+    "discover_places": "Discover places with Jinni",
+    "cta_question": "Want personalized recommendations?",
+    "more_info": "More info",
+    "ended": "Ended",
+    "event_date": "Event date",
+    "schedule": "Schedule",
+    "event": {
+      "weekly": "Weekly",
+      "every": "every {day}",
+      "all_day": "All day",
+      "starting": "starting {date}"
+    },
+    "itinerary": {
+      "day": "Day {n}",
+      "days": "{count} days",
+      "category": {
+        "restaurants": "Food",
+        "cafe": "Café",
+        "hotels": "Hotel",
+        "hidden_gems": "Hidden gem",
+        "historical": "Historical",
+        "museum": "Museum",
+        "events": "Event",
+        "photo_spots": "Photo spot",
+        "viewpoint": "Viewpoint",
+        "shopping": "Shopping",
+        "nature": "Nature"
+      }
+    },
+    "approximate_path": "Approximate path"
+  }
+}
