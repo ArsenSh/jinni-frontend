@@ -137,10 +137,10 @@
             </button>
             <button @click="goToExplore" class="profile-menu-item">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
-                <circle cx="12" cy="12" r="3"/>
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
               </svg>
-              <span v-if="sidebarOpen">{{ t('chat.profile.explore') || "Jinni's Eye" }}</span>
+              <span v-if="sidebarOpen">{{ t('chat.profile.explore') || "Jinni's Discoveries" }}</span>
             </button>
             <button @click="showSettings" class="profile-menu-item">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -935,6 +935,14 @@
               </button>
             </div>
             <div class="seg-group">
+              <button v-for="opt in placesExploreOpts" :key="opt.value"
+                class="seg-btn"
+                :class="{ 'seg-btn--active': placesExploreFilter === opt.value }"
+                @click="placesExploreFilter = opt.value; fetchPlaces(true)">
+                {{ opt.label }}
+              </button>
+            </div>
+            <div class="seg-group">
               <button v-for="opt in placesSortOpts" :key="opt.value"
                 class="seg-btn"
                 :class="{ 'seg-btn--active': placesSort === opt.value }"
@@ -942,6 +950,10 @@
                 {{ opt.label }}
               </button>
             </div>
+            <button class="purge-main" style="border-radius:8px; margin-right:8px" :disabled="backfillBusy"
+              @click="backfillRegions" title="Parse country / city for cached places that don't have them yet (needed once for staff Explore moderation scoping; safe to re-run)">
+              {{ backfillBusy ? 'Backfilling…' : 'Backfill regions' }}
+            </button>
             <div class="purge-split" v-click-outside="() => purgeDropdownOpen = false">
               <button class="purge-main" @click="purgeStale">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -996,6 +1008,16 @@
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div class="place-img-overlay">
+                  <button class="place-mod-btn place-mod-verify" :class="{ 'place-mod-btn--on': p.explore?.status === 'verified' }"
+                    @click="setExploreStatus(p, 'verified')"
+                    :title="p.explore?.status === 'verified' ? 'Unverify (back to visible)' : 'Verify for Explore (always shown, skips auto-rules)'">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </button>
+                  <button class="place-mod-btn place-mod-hide" :class="{ 'place-mod-btn--on': p.explore?.status === 'hidden' }"
+                    @click="setExploreStatus(p, 'hidden')"
+                    :title="p.explore?.status === 'hidden' ? 'Unhide (back to visible)' : 'Hide from Explore page'">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </button>
                   <button class="place-delete-btn" @click="deletePlace(p)" title="Remove from cache">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
@@ -1008,6 +1030,8 @@
                 <div class="place-meta">
                   <span class="badge" :class="p.imagesStored ? 'badge-ok' : 'badge-muted'">{{ p.imagesStored ? 'Image' : 'No img' }}</span>
                   <span class="badge" :class="p.hasDetailedInfo ? 'badge-ok' : 'badge-muted'">{{ p.hasDetailedInfo ? 'Detail' : 'Basic' }}</span>
+                  <span v-if="p.explore?.status === 'verified'" class="badge badge-ok" title="Human-verified — always on Explore">✓ Verified</span>
+                  <span v-else-if="p.explore?.status === 'hidden'" class="badge badge-hidden" title="Hidden from the Explore page">Hidden</span>
                   <span v-if="p.priceTier" class="badge pf-tier" :title="`Tier ${p.priceTier}/4 · from ${p.priceTierSource === 'price' ? 'Google price level' : 'lodging type'}`">
                     {{ p.priceTierLabel }}<template v-if="p.priceDollars"> · {{ p.priceDollars }}</template>
                   </span>
@@ -1543,6 +1567,7 @@
                     <div class="staff-perm-badges">
                       <span v-if="(s.staffAssignment?.permissions?.validateBusinesses ?? true)" class="staff-perm-badge staff-perm-badge--validate" title="Can validate business applications">validate</span>
                       <span v-if="s.staffAssignment?.permissions?.manageDestinations" class="staff-perm-badge staff-perm-badge--destinations" title="Can add and manage destinations">destinations</span>
+                      <span v-if="s.staffAssignment?.permissions?.moderateExplore" class="staff-perm-badge staff-perm-badge--explore" title="Can hide / verify Explore-page places">explore</span>
                     </div>
                     <span v-if="!(s.staffAssignment?.countries?.length || s.staffAssignment?.cities?.length)" class="assign-empty">no scope</span>
                     <span v-else class="assign-scope">
@@ -2751,8 +2776,15 @@
                     <span class="staff-perm-sub">Add, edit, and remove destinations (parks, museums, landmarks) inside their territory.</span>
                   </span>
                 </label>
+                <label class="staff-perm-row">
+                  <input type="checkbox" v-model="staffModal.form.permissions.moderateExplore" />
+                  <span class="staff-perm-body">
+                    <span class="staff-perm-title">Moderate Explore</span>
+                    <span class="staff-perm-sub">Hide low-quality places or verify good ones on the Explore page, inside their territory.</span>
+                  </span>
+                </label>
               </div>
-              <div v-if="!staffModal.form.permissions.validateBusinesses && !staffModal.form.permissions.manageDestinations"
+              <div v-if="!staffModal.form.permissions.validateBusinesses && !staffModal.form.permissions.manageDestinations && !staffModal.form.permissions.moderateExplore"
                    style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.1); color:#f59e0b; border-radius:6px; font-size:12.5px">
                 Pick at least one — a staff member with no permissions can't do anything.
               </div>
@@ -2903,8 +2935,15 @@
                     <span class="staff-perm-sub">Add, edit, and remove destinations inside their territory.</span>
                   </span>
                 </label>
+                <label class="staff-perm-row">
+                  <input type="checkbox" v-model="staffAssignModal.form.permissions.moderateExplore" />
+                  <span class="staff-perm-body">
+                    <span class="staff-perm-title">Moderate Explore</span>
+                    <span class="staff-perm-sub">Hide low-quality places or verify good ones on the Explore page, inside their territory.</span>
+                  </span>
+                </label>
               </div>
-              <div v-if="!staffAssignModal.form.permissions.validateBusinesses && !staffAssignModal.form.permissions.manageDestinations"
+              <div v-if="!staffAssignModal.form.permissions.validateBusinesses && !staffAssignModal.form.permissions.manageDestinations && !staffAssignModal.form.permissions.moderateExplore"
                    style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.1); color:#f59e0b; border-radius:6px; font-size:12.5px">
                 At least one permission must stay enabled.
               </div>
@@ -3115,6 +3154,12 @@ export default {
     const placesSearch = ref('')
     const placesImageFilter = ref('')
     const placesActionFilter = ref('')   // quick-action filter (hotels, events, …)
+    const placesExploreFilter = ref('')  // explore moderation filter ('', visible, hidden, verified)
+    const placesExploreOpts = [
+      { value: '', label: 'All' },
+      { value: 'verified', label: '✓ Verified' },
+      { value: 'hidden', label: 'Hidden' },
+    ]
     const placesSort = ref('useCount')
     const placesSummary = ref({})
     const userLocations = ref({ byCountry: [], byCity: [], total: 0, destinations: { byCountry: [], byCity: [], total: 0 } })
@@ -3189,11 +3234,12 @@ export default {
         priorityCitiesText: '',
         notes: '',
         // Permissions — admin checks what this staff member can do.
-        // Default: validate yes, destinations no (preserves existing behaviour
-        // for admins who don't touch this section).
+        // Default: validate yes, destinations/explore no (preserves existing
+        // behaviour for admins who don't touch this section).
         permissions: {
           validateBusinesses: true,
           manageDestinations: false,
+          moderateExplore: false,
         },
       },
     })
@@ -3215,6 +3261,7 @@ export default {
         permissions: {
           validateBusinesses: true,
           manageDestinations: false,
+          moderateExplore: false,
         },
       },
     })
@@ -3264,7 +3311,7 @@ export default {
     })
     const staffCanSubmit = computed(() => {
       const f = staffModal.value.form
-      const anyPerm = f.permissions?.validateBusinesses || f.permissions?.manageDestinations
+      const anyPerm = f.permissions?.validateBusinesses || f.permissions?.manageDestinations || f.permissions?.moderateExplore
       return f.email && f.tempPassword && !staffPwError.value && anyPerm
     })
 
@@ -3277,7 +3324,7 @@ export default {
           countriesText: '', citiesText: '',
           priorityCountriesText: '', priorityCitiesText: '',
           notes: '',
-          permissions: { validateBusinesses: true, manageDestinations: false },
+          permissions: { validateBusinesses: true, manageDestinations: false, moderateExplore: false },
         },
       }
     }
@@ -3315,6 +3362,7 @@ export default {
           permissions: {
             validateBusinesses: !!f.permissions?.validateBusinesses,
             manageDestinations: !!f.permissions?.manageDestinations,
+            moderateExplore:    !!f.permissions?.moderateExplore,
           },
         }
         const res = await apiFetch('/staff', {
@@ -3365,6 +3413,7 @@ export default {
             // staff's ability to validate.
             validateBusinesses: p.validateBusinesses !== false,
             manageDestinations: p.manageDestinations === true,
+            moderateExplore:    p.moderateExplore === true,
           },
         },
       }
@@ -3386,6 +3435,7 @@ export default {
           permissions: {
             validateBusinesses: !!m.form.permissions?.validateBusinesses,
             manageDestinations: !!m.form.permissions?.manageDestinations,
+            moderateExplore:    !!m.form.permissions?.moderateExplore,
           },
         }
         await apiFetch(`/staff/${m.target._id}/assignment`, {
@@ -3873,6 +3923,7 @@ export default {
           order: 'asc',
           hasImage: placesImageFilter.value,
           ...(placesActionFilter.value && { action: placesActionFilter.value }),
+          ...(placesExploreFilter.value && { explore: placesExploreFilter.value }),
           ...(isNeverUsed && { neverUsed: 'true' })
         })
         if (!isNeverUsed) params.set('order', 'desc')
@@ -3881,6 +3932,28 @@ export default {
         placesTotalPages.value = res.data.totalPages
         placesSummary.value = res.data.summary || {}
       } catch (e) { showToast(e.message, 'error') } finally { placesLoading.value = false }
+    }
+    // Parse country/city for legacy cache docs (idempotent; see backend route).
+    const backfillBusy = ref(false)
+    const backfillRegions = async () => {
+      backfillBusy.value = true
+      try {
+        const res = await apiFetch('/places/backfill-regions', { method: 'POST', body: JSON.stringify({}) })
+        showToast(`Regions backfilled: ${res.updated} updated, ${res.unparsed} unparsable of ${res.scanned} scanned`)
+      } catch (e) { showToast(e.message, 'error') } finally { backfillBusy.value = false }
+    }
+    // Toggle a place's Explore moderation status. Clicking the button of the
+    // current state reverts to 'visible' (e.g. verify on a verified place unverifies).
+    const setExploreStatus = async (place, status) => {
+      const next = place.explore?.status === status ? 'visible' : status
+      try {
+        const res = await apiFetch(`/places/${place.placeId}/explore-status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: next })
+        })
+        place.explore = res.place?.explore || { status: next }
+        showToast(res.message || `"${place.name}" → ${next}`)
+      } catch (e) { showToast(e.message, 'error') }
     }
     const deletePlace = async (place) => {
       if (!confirm(`Remove "${place.name}" from cache?`)) return
@@ -5306,7 +5379,7 @@ export default {
       togglePremium, toggleCooldown, deleteUser, clearCooldown,
       fetchUsers, fetchUserLocations, fetchAIUsage, fetchBusinesses, fetchDestinations, fetchPlaces, fetchGoogleUsage,
       toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
-      deletePlace, purgeStale, onImgError,
+      deletePlace, setExploreStatus, placesExploreFilter, placesExploreOpts, backfillRegions, backfillBusy, purgeStale, onImgError,
       purgeOpts, purgeDays, purgeDropdownOpen, purgeNeverUsed, selectedPurgeOpt,
       userFilterOpts, destFilterOpts, bizPartnerFilterOpts, bizStatusFilterOpts, placesImageFilterOpts, placesActionOpts, placesSortOpts,
       apiBase: API_BASE,
@@ -5830,6 +5903,7 @@ export default {
 .staff-perm-badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
 .staff-perm-badge--validate { background: rgba(99,102,241,0.14); color: #6366f1; }
 .staff-perm-badge--destinations { background: rgba(34,197,94,0.14); color: #22c55e; }
+.staff-perm-badge--explore { background: rgba(168,85,247,0.14); color: #c084fc; }
 
 /* Permission picker rows used in both staff modals */
 .staff-perms { display: flex; flex-direction: column; gap: 8px; }
@@ -5871,11 +5945,18 @@ export default {
 .place-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
 .place-card:hover .place-img { transform: scale(1.05); }
 .place-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 34px; }
-.place-img-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; display: flex; align-items: flex-start; justify-content: flex-end; padding: 8px; }
+.place-img-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; display: flex; align-items: flex-start; justify-content: flex-end; gap: 6px; padding: 8px; }
 .place-card:hover .place-img-overlay { opacity: 1; }
 .place-img-badge { position: absolute; bottom: 8px; left: 8px; padding: 3px 7px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; backdrop-filter: blur(6px); background: rgba(0,0,0,0.5); color: #f0ca5a; }
 .place-delete-btn { width: 26px; height: 26px; border-radius: 7px; border: none; cursor: pointer; display: grid; place-items: center; background: rgba(244,63,94,0.85); color: white; transition: all 0.15s; }
 .place-delete-btn:hover { background: #f43f5e; transform: scale(1.08); }
+/* Explore moderation toggles (verify / hide) — dim until active. */
+.place-mod-btn { width: 26px; height: 26px; border-radius: 7px; border: none; cursor: pointer; display: grid; place-items: center; background: rgba(30,30,30,0.6); color: rgba(255,255,255,0.85); transition: all 0.15s; }
+.place-mod-btn:hover { transform: scale(1.08); }
+.place-mod-verify:hover { background: rgba(34,197,94,0.75); }
+.place-mod-hide:hover { background: rgba(148,163,184,0.75); }
+.place-mod-verify.place-mod-btn--on { background: #22c55e; color: #fff; }
+.place-mod-hide.place-mod-btn--on { background: #64748b; color: #fff; }
 .place-info { padding: 12px 14px 13px; }
 .place-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .place-addr { font-size: 11px; font-family: 'DM Mono', monospace; margin-bottom: 8px; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
@@ -6019,6 +6100,7 @@ export default {
 .admin-shell.night-mode .badge-spotlight { background: rgba(59,158,221,0.12); color: #63b3ed }
 .admin-shell.night-mode .badge-free { background: rgba(139,92,246,0.08); color: #94a3b8 }
 .admin-shell.night-mode .badge-ok { background: rgba(34,197,94,0.1); color: #4ade80 }
+.admin-shell.night-mode .badge-hidden { background: rgba(244,63,94,0.12); color: #fb7185 }
 .admin-shell.night-mode .badge-muted { background: rgba(100,116,139,0.1); color: #94a3b8 }
 .admin-shell.night-mode .pf-like { background: rgba(34,197,94,0.1); color: #4ade80 }
 .admin-shell.night-mode .pf-dislike { background: rgba(239,68,68,0.12); color: #f87171 }
@@ -6130,6 +6212,7 @@ export default {
 .admin-shell.day-mode .badge-spotlight { background: rgba(59,158,221,0.1); color: #1a6fa8 }
 .admin-shell.day-mode .badge-free { background: rgba(139,69,19,0.06); color: #7a5c3e }
 .admin-shell.day-mode .badge-ok { background: rgba(34,197,94,0.08); color: #166534 }
+.admin-shell.day-mode .badge-hidden { background: rgba(244,63,94,0.09); color: #be123c }
 .admin-shell.day-mode .badge-muted { background: rgba(100,116,139,0.07); color: #64748b }
 .admin-shell.day-mode .pf-like { background: rgba(34,197,94,0.08); color: #166534 }
 .admin-shell.day-mode .pf-dislike { background: rgba(239,68,68,0.08); color: #b91c1c }

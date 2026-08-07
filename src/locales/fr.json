@@ -765,6 +765,7 @@
     "profile": {
       "profile": "Profil",
       "preferences": "Préférences",
+      "explore": "Découvertes de Jinni",
       "settings": "Paramètres",
       "contact_us": "Nous contacter",
       "logout": "Se déconnecter"
@@ -1069,6 +1070,24 @@
     "distance": "Distance",
     "price_level": "Niveau de prix",
     "highlights": "Points forts"
+  },
+  "explore": {
+    "title": "Découvertes de Jinni",
+    "back": "Retour",
+    "km": "km",
+    "not_explored": "Jinni n'a pas encore exploré {place}",
+    "this_area": "cette région",
+    "empty_sub": "Demandez à Jinni dans le chat de découvrir des lieux ici — ils apparaîtront sur cette page au fil de vos explorations.",
+    "ask_chat": "Demander à Jinni",
+    "cat": {
+      "restaurants": "Restaurants",
+      "hotels": "Hôtels",
+      "historical": "Sites historiques",
+      "events": "Événements",
+      "photo_spots": "Spots photo",
+      "hidden_gems": "Trésors cachés",
+      "shopping": "Boutiques"
+    }
   },
   "usage": {
     "cooldown": {

@@ -5,10 +5,10 @@
       <div class="page-header-left">
         <h1 class="page-title">
           <span class="page-title-mark">//</span>
-          {{ activeTab === 'destinations' ? 'Destinations' : 'Validation' }}<span v-if="userName" class="page-title-user"> — {{ userName }}</span>
+          {{ activeTab === 'destinations' ? 'Destinations' : activeTab === 'explore' ? 'Explore' : 'Validation' }}<span v-if="userName" class="page-title-user"> — {{ userName }}</span>
         </h1>
         <p class="page-subtitle">
-          {{ activeTab === 'destinations' ? 'Manage destinations in your scope' : 'Review and verify business applications' }}
+          {{ activeTab === 'destinations' ? 'Manage destinations in your scope' : activeTab === 'explore' ? 'Moderate Explore-page places in your scope' : 'Review and verify business applications' }}
         </p>
       </div>
       <div class="page-header-right">
@@ -1370,6 +1370,147 @@
          /DESTINATIONS TAB
          ════════════════════════════════════════════════════════════════ -->
 
+    <!-- ════════════════════════════════════════════════════════════════
+         EXPLORE MODERATION TAB
+         For staff with permissions.moderateExplore === true.
+         Post-moderation queue over the places cache: everything is visible
+         by default; staff bury garbage (Hide) or endorse places (Verify).
+         Sorted suspicion-first (most disliked → lowest rated) server-side.
+         ════════════════════════════════════════════════════════════════ -->
+    <template v-if="activeTab === 'explore'">
+
+    <div v-if="scopeBanner" class="scope-banner" :class="{ 'scope-banner--empty': scopeBanner.empty }">
+      <svg v-if="scopeBanner.empty" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      <div class="scope-banner-body">
+        <template v-if="scopeBanner.empty">
+          <strong>No territory assigned.</strong>
+          You can only moderate Explore places inside countries / cities your admin assigns to you.
+        </template>
+        <template v-else>
+          <span class="scope-banner-label">Moderating:</span>
+          <strong>{{ scopeBanner.countries.join(', ') || '—' }}</strong>
+          <span v-if="scopeBanner.cities.length" class="scope-banner-cities">+ cities: {{ scopeBanner.cities.join(', ') }}</span>
+        </template>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <div class="filter-chips">
+          <button v-for="opt in expStatusOpts" :key="opt.value"
+                  class="chip" :class="{ active: expStatus === opt.value }"
+                  @click="expStatus = opt.value; expPage = 1; loadExplorePlaces()">
+            {{ opt.label }}<span v-if="opt.countKey != null && expCounts[opt.countKey] != null" class="chip-count"> {{ fmt(expCounts[opt.countKey]) }}</span>
+          </button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <div class="filter-chips">
+          <button class="chip" :class="{ active: !expCategory }" @click="expCategory = ''; expPage = 1; loadExplorePlaces()">All</button>
+          <button v-for="c in expCategories" :key="c.value"
+                  class="chip" :class="{ active: expCategory === c.value }"
+                  @click="expCategory = c.value; expPage = 1; loadExplorePlaces()">
+            {{ c.label }}
+          </button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Search</label>
+        <input v-model="expSearchInput" type="text" class="filter-input" placeholder="Search places…" @input="onExpSearchInput" />
+      </div>
+    </div>
+
+    <main class="main-grid">
+      <section class="table-wrap">
+        <div v-if="expLoading && !expPlaces.length" class="table-empty">
+          <div class="spinner"/>
+          <span>Loading places…</span>
+        </div>
+
+        <div v-else-if="!expPlaces.length" class="table-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+          </svg>
+          <span>No cached places found in your scope.</span>
+        </div>
+
+        <table v-else class="biz-table biz-table--explore">
+          <thead>
+            <tr>
+              <th class="col-name">Place</th>
+              <th class="col-city">Location</th>
+              <th class="col-rating">Rating</th>
+              <th class="col-feedback">Feedback</th>
+              <th class="col-status">Status</th>
+              <th class="col-actions">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in expPlaces" :key="p.placeId" class="biz-row">
+              <td class="col-name" data-label="Place">
+                <div class="exp-place-cell">
+                  <img v-if="p.imagesStored" :src="`${apiRoot}/ai/place-image/${p.placeId}/0`" class="exp-thumb" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
+                  <div v-else class="exp-thumb exp-thumb--empty">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+                  </div>
+                  <div class="row-name">
+                    <span class="row-name-text">{{ p.name }}</span>
+                    <span class="exp-cats">{{ (p.actions || []).join(' · ') }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="col-city" data-label="Location">{{ p.city || p.country || p.details?.formatted_address || '—' }}</td>
+              <td class="col-rating" data-label="Rating">
+                <span v-if="Number.isFinite(p.rating)" :class="{ 'exp-rating-low': p.rating < 3.5 }">★ {{ p.rating.toFixed(1) }}</span>
+                <span v-else>—</span>
+              </td>
+              <td class="col-feedback" data-label="Feedback">
+                <span class="exp-fb">👍 {{ p.likes || 0 }}&nbsp;&nbsp;👎 {{ p.dislikes || 0 }}</span>
+              </td>
+              <td class="col-status" data-label="Status">
+                <span class="exp-status" :class="'exp-status--' + (p.explore?.status || 'visible')">
+                  {{ p.explore?.status === 'verified' ? '✓ Verified' : (p.explore?.status === 'hidden' ? 'Hidden' : 'Visible') }}
+                </span>
+              </td>
+              <td class="col-actions" data-label="Action">
+                <div class="action-group">
+                  <button v-if="p.explore?.status !== 'verified'" class="action-btn exp-btn-verify" :disabled="expBusy === p.placeId" @click="setExpStatus(p, 'verified')">Verify</button>
+                  <button v-if="p.explore?.status !== 'hidden'" class="action-btn exp-btn-hide" :disabled="expBusy === p.placeId" @click="setExpStatus(p, 'hidden')">Hide</button>
+                  <button v-if="p.explore?.status === 'hidden' || p.explore?.status === 'verified'" class="action-btn btn-muted" :disabled="expBusy === p.placeId" @click="setExpStatus(p, 'visible')">Reset</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <div v-if="expPlaces.length && expTotalPages > 1" class="pagination">
+      <button :disabled="expPage <= 1 || expLoading" @click="changeExpPage(-1)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Prev
+      </button>
+      <span>Page <strong>{{ expPage }}</strong> / {{ expTotalPages }} · {{ expTotal }} total</span>
+      <button :disabled="expPage >= expTotalPages || expLoading" @click="changeExpPage(1)">
+        Next <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    </template>
+    <!-- ════════════════════════════════════════════════════════════════
+         /EXPLORE MODERATION TAB
+         ════════════════════════════════════════════════════════════════ -->
+
     <!-- ── Confirm modal ────────────────────────────────────────────── -->
     <transition name="fade">
       <div v-if="confirmingAction" class="modal-overlay" @click.self="confirmingAction = null">
@@ -1646,7 +1787,7 @@ export default {
     const myAssignment = ref(null)
     const userName = ref('')
     const userRole = ref('user')           // 'staff' | 'admin' | 'user'
-    const myPermissions = ref({ validateBusinesses: true, manageDestinations: false })
+    const myPermissions = ref({ validateBusinesses: true, manageDestinations: false, moderateExplore: false })
     const meEndpointHit = ref(null)        // for debug visibility
     async function loadMyAssignment() {
       // Try our own staff /me first because it ships permissions in a
@@ -1730,13 +1871,18 @@ export default {
       if (myPermissions.value.manageDestinations) {
         tabs.push({ key: 'destinations', label: 'Destinations', count: destTotal.value || null })
       }
+      if (myPermissions.value.moderateExplore) {
+        tabs.push({ key: 'explore', label: 'Explore', count: expTotal.value || null })
+      }
       return tabs
     })
-    // Once permissions load, pick the right default tab. Without this, a
-    // destinations-only staff would land on 'validation' and see nothing.
+    // Once permissions load, land on the first tab the user is allowed to see.
+    // Without this, e.g. an explore-only staff would land on 'validation' and
+    // see nothing.
     watch(myPermissions, (p) => {
-      if (!p.validateBusinesses && p.manageDestinations) activeTab.value = 'destinations'
-      else if (p.validateBusinesses && !p.manageDestinations) activeTab.value = 'validation'
+      const order = [['validation', 'validateBusinesses'], ['destinations', 'manageDestinations'], ['explore', 'moderateExplore']]
+      const allowed = order.filter(([, perm]) => p[perm]).map(([tab]) => tab)
+      if (allowed.length && !allowed.includes(activeTab.value)) activeTab.value = allowed[0]
     }, { immediate: false })
 
     // ════════════════════════════════════════════════════════════════
@@ -1827,6 +1973,82 @@ export default {
       } finally {
         destLoading.value = false
       }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  EXPLORE MODERATION TAB STATE
+    // ════════════════════════════════════════════════════════════════
+    const apiRoot = API_URL   // template builds place-image URLs from this
+    const expPlaces = ref([])
+    const expTotal = ref(0)
+    const expPage = ref(1)
+    const expLimit = ref(24)
+    const expLoading = ref(false)
+    const expBusy = ref(null)          // placeId currently being updated
+    const expStatus = ref('')          // '', 'visible', 'hidden', 'verified'
+    const expCategory = ref('')
+    const expSearchInput = ref('')
+    const expSearchTerm = ref('')
+    let expSearchDebounce = null
+    const expCounts = ref({ visible: null, hidden: null, verified: null })
+    const expTotalPages = computed(() => Math.max(1, Math.ceil(expTotal.value / expLimit.value)))
+    const expStatusOpts = [
+      { value: '', label: 'All', countKey: null },
+      { value: 'visible', label: 'Visible', countKey: 'visible' },
+      { value: 'hidden', label: 'Hidden', countKey: 'hidden' },
+      { value: 'verified', label: 'Verified', countKey: 'verified' },
+    ]
+    const expCategories = [
+      { value: 'restaurants', label: 'Restaurants' }, { value: 'hotels', label: 'Hotels' },
+      { value: 'historical', label: 'Historical' }, { value: 'events', label: 'Events' },
+      { value: 'photo_spots', label: 'Photo spots' }, { value: 'hidden_gems', label: 'Hidden gems' },
+      { value: 'shopping', label: 'Shops' },
+    ]
+    const onExpSearchInput = () => {
+      clearTimeout(expSearchDebounce)
+      expSearchDebounce = setTimeout(() => {
+        expSearchTerm.value = expSearchInput.value.trim()
+        expPage.value = 1
+        loadExplorePlaces()
+      }, 300)
+    }
+    const changeExpPage = (delta) => {
+      const next = expPage.value + delta
+      if (next < 1 || next > expTotalPages.value) return
+      expPage.value = next
+      loadExplorePlaces()
+    }
+    async function loadExplorePlaces() {
+      if (!myPermissions.value.moderateExplore) return
+      expLoading.value = true
+      try {
+        const params = { page: expPage.value, limit: expLimit.value }
+        if (expStatus.value)     params.status = expStatus.value
+        if (expCategory.value)   params.category = expCategory.value
+        if (expSearchTerm.value) params.search = expSearchTerm.value
+        const { data } = await axios.get(`${API_URL}/staff/explore-places`, { params, headers: authHeader() })
+        expPlaces.value = data?.places || []
+        expTotal.value = data?.total || 0
+        if (data?.counts) expCounts.value = data.counts
+      } catch (err) {
+        console.error('[staff explore] load error:', err)
+        showToast(err.response?.data?.error || 'Failed to load places', 'error')
+        expPlaces.value = []
+        expTotal.value = 0
+      } finally { expLoading.value = false }
+    }
+    async function setExpStatus(place, status) {
+      expBusy.value = place.placeId
+      try {
+        const { data } = await axios.patch(`${API_URL}/staff/explore-places/${place.placeId}/status`, { status }, { headers: authHeader() })
+        // Instant local update; the refetch below refreshes the scope counts
+        // and re-applies the active status filter.
+        place.explore = data?.place?.explore || { status }
+        showToast(data?.message || `"${place.name}" → ${status}`)
+        loadExplorePlaces()
+      } catch (err) {
+        showToast(err.response?.data?.error || 'Failed to update place', 'error')
+      } finally { expBusy.value = null }
     }
 
     // True when the staff can edit/delete this row. Admins always can.
@@ -2495,6 +2717,9 @@ export default {
       if (tab === 'destinations' && !destinations.value.length && myPermissions.value.manageDestinations) {
         loadDestinations()
       }
+      if (tab === 'explore' && !expPlaces.value.length && myPermissions.value.moderateExplore) {
+        loadExplorePlaces()
+      }
     })
 
     // ── Selection / drawer ──────────────────────────────────────────
@@ -2866,6 +3091,10 @@ export default {
       destinations, destSummary, destTotal, destPage, destTotalPages,
       destLoading, destFilter, destFilterOpts, destMineOnly,
       destSearchInput, onDestSearchInput, loadDestinations, changeDestPage,
+      // Explore moderation tab
+      apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
+      expStatus, expStatusOpts, expCategory, expCategories, expCounts,
+      expSearchInput, onExpSearchInput, loadExplorePlaces, changeExpPage, setExpStatus,
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES,
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
@@ -3595,6 +3824,22 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .staff-val.day-mode .btn-warning { background: rgba(234,179,8,0.1); color: #b45309; }
 .staff-val.day-mode .btn-warning:hover { background: rgba(234,179,8,0.2); }
 .staff-val.day-mode .btn-delete { background: rgba(239,68,68,0.07); color: #b91c1c; }
+
+/* ── Explore moderation tab ─────────────────────────────────────────
+   Theme-agnostic: built on the page's CSS variables so night/day both work. */
+.exp-place-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.exp-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex: none; background: var(--bg-elev-2); }
+.exp-thumb--empty { display: grid; place-items: center; color: var(--text-faint); }
+.exp-cats { display: block; font-size: 11px; color: var(--text-faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.exp-rating-low { color: var(--bad); font-weight: 600; }
+.exp-fb { font-size: 12px; white-space: nowrap; }
+.exp-status { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.exp-status--visible  { background: var(--bg-elev-2); color: var(--text-mute); }
+.exp-status--hidden   { background: rgba(239,68,68,0.12); color: var(--bad); }
+.exp-status--verified { background: rgba(52,211,153,0.14); color: var(--good); }
+.exp-btn-verify { background: rgba(52,211,153,0.12); color: var(--good); }
+.exp-btn-hide   { background: rgba(239,68,68,0.10); color: var(--bad); }
+.chip-count { opacity: 0.65; font-variant-numeric: tabular-nums; margin-left: 4px; }
 .staff-val.day-mode .btn-delete:hover { background: rgba(239,68,68,0.15); }
 .staff-val.day-mode .btn-danger-outline:hover { background: rgba(229,62,62,0.07); }
 .staff-val.day-mode .pagination button { background: rgba(255,255,255,0.9); color: #5c3f2e }

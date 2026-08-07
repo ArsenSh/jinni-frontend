@@ -765,6 +765,7 @@
     "profile": {
       "profile": "Профиль",
       "preferences": "Предпочтения",
+      "explore": "Открытия Jinni",
       "settings": "Настройки",
       "contact_us": "Связаться",
       "logout": "Выйти"
@@ -1047,6 +1048,24 @@
     "show_more_days": "+ ещё {count} дней",
     "show_less": "Показать меньше",
     "highlights": "Особенности"
+  },
+  "explore": {
+    "title": "Открытия Jinni",
+    "back": "Назад",
+    "km": "км",
+    "not_explored": "Jinni ещё не исследовал {place}",
+    "this_area": "эти места",
+    "empty_sub": "Спросите Jinni в чате, чтобы открыть здесь новые места — они появятся на этой странице по мере ваших исследований.",
+    "ask_chat": "Спросить Jinni",
+    "cat": {
+      "restaurants": "Рестораны",
+      "hotels": "Отели",
+      "historical": "Исторические места",
+      "events": "События",
+      "photo_spots": "Фотоместа",
+      "hidden_gems": "Скрытые жемчужины",
+      "shopping": "Магазины"
+    }
   },
   "usage": {
     "cooldown": {

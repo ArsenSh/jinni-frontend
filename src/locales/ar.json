@@ -762,6 +762,7 @@
     "profile": {
       "profile": "الملف الشخصي",
       "preferences": "التفضيلات",
+      "explore": "اكتشافات Jinni",
       "settings": "الإعدادات",
       "contact_us": "اتصل بنا",
       "logout": "تسجيل الخروج"
@@ -1044,6 +1045,24 @@
     "show_more_days": "+ {count} أيام إضافية",
     "show_less": "عرض أقل",
     "highlights": "أبرز المميزات"
+  },
+  "explore": {
+    "title": "اكتشافات Jinni",
+    "back": "رجوع",
+    "km": "كم",
+    "not_explored": "لم يستكشف Jinni {place} بعد",
+    "this_area": "هذه المنطقة",
+    "empty_sub": "اسأل Jinni في الدردشة لاكتشاف أماكن هنا — ستظهر في هذه الصفحة كلما استكشفت المزيد.",
+    "ask_chat": "اسأل Jinni",
+    "cat": {
+      "restaurants": "مطاعم",
+      "hotels": "فنادق",
+      "historical": "مواقع تاريخية",
+      "events": "فعاليات",
+      "photo_spots": "أماكن للتصوير",
+      "hidden_gems": "جواهر خفية",
+      "shopping": "متاجر"
+    }
   },
   "usage": {
     "cooldown": {

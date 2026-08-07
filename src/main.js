@@ -7,10 +7,22 @@ import messages from './locales'
 import './assets/styles/genie-theme.css'
 import './assets/styles/animations.css'
 
+// The app persists the chosen language as 'jinni_language' (and inside
+// 'jinni_settings') — read those so views outside JinniChat mount in the
+// right language, with the legacy 'lang' key as a fallback.
+function savedLocale() {
+    try {
+        const s = JSON.parse(localStorage.getItem('jinni_settings') || '{}');
+        if (s.language) return s.language;
+    } catch (e) { /* ignore corrupt settings */ }
+    return localStorage.getItem('jinni_language') || localStorage.getItem('lang') || 'en';
+}
+
 const i18n = createI18n({
-    locale: localStorage.getItem('lang') || 'en',
+    locale: savedLocale(),
     fallbackLocale: 'en',
     legacy: false,
+    globalInjection: true,
     messages
 })
 

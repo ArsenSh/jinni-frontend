@@ -6,7 +6,7 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
       <div class="ex-head-main">
-        <h1 class="ex-title">{{ t('explore.title') || "Jinni's Eye" }}</h1>
+        <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
         <p class="ex-sub" v-if="location && (location.city || location.country)">
           {{ [location.city, location.country].filter(Boolean).join(', ') }}
         </p>
@@ -69,6 +69,8 @@
 </template>
 
 <script>
+import { isNightTime } from '../utils/timeUtils';
+
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || '';
 
 const CAT_LABELS = {
@@ -103,19 +105,33 @@ export default {
       const where = this.location && (this.location.city || this.location.country)
         ? [this.location.city, this.location.country].filter(Boolean).join(', ')
         : (this.t('explore.this_area') || 'this area');
-      const tpl = this.t('explore.not_explored') || "Jinni hasn’t been to {place} yet";
-      return tpl.replace('{place}', where);
+      return this.t('explore.not_explored', { place: where }) || `Jinni hasn’t been to ${where} yet`;
     },
   },
   mounted() {
-    this.theme = (localStorage.getItem('theme') === 'day' || document.documentElement.classList.contains('day-mode'))
-      ? 'day-mode' : 'night-mode';
+    this.theme = this.resolveTheme();
     this.load();
   },
   methods: {
     t(key, params) { return this.$t ? this.$t(key, params) : null; },
+    // Same resolution as JinniChat's currentTheme: explicit setting wins,
+    // 'auto' follows the time of day.
+    resolveTheme() {
+      try {
+        const s = JSON.parse(localStorage.getItem('jinni_settings') || '{}');
+        if (s.theme === 'light') return 'day-mode';
+        if (s.theme === 'dark') return 'night-mode';
+      } catch (e) { /* corrupt settings → fall through to auto */ }
+      return isNightTime() ? 'night-mode' : 'day-mode';
+    },
     imgUrl(u) { return u && u.startsWith('/api/') ? `${API_BASE}${u}` : u; },
-    catLabel(c) { return (this.$t && this.$t('explore.cat.' + c)) || CAT_LABELS[c] || c; },
+    catLabel(c) {
+      // $t returns the key itself when a message is missing (e.g. a new
+      // server-side category) — fall back to the English label then.
+      const key = 'explore.cat.' + c;
+      const s = this.$t ? this.$t(key) : null;
+      return (s && s !== key) ? s : (CAT_LABELS[c] || c);
+    },
     async load() {
       this.loading = true;
       try {
@@ -158,22 +174,30 @@ export default {
 </script>
 
 <style scoped>
-/* ── Glacier tokens — mirror JinniChat/ItineraryView ── */
+/* ── Glacier tokens — same palette as JinniChat ──
+   day: cream #f9f5eb bg, warm-white glass, #B7791F headings, gold actives
+   night: #0a0118 bg, violet glass rgba(40,30,62,…), #c084fc headings, purple actives */
 .explore.day-mode {
-  --ex-bg: #fbf7f2; --ex-heading: #8B4513; --ex-text: #3c2a1e; --ex-muted: #5a4a42;
-  --ex-glass: rgba(255,255,255,0.6); --ex-glass-2: rgba(255,255,255,0.85);
+  --ex-bg: #f9f5eb; --ex-heading: #B7791F; --ex-text: #3c2a1e; --ex-muted: #5a4a42;
+  --ex-glass: rgba(255,251,245,0.74); --ex-glass-2: rgba(255,255,255,0.85);
   --ex-ring: inset 0 0 0 1px rgba(255,255,255,0.7); --ex-line: rgba(160,82,45,0.18);
   --ex-chip: rgba(255,255,255,0.55); --ex-chip-text: rgba(92,74,66,0.9);
   --ex-shadow: 0 8px 24px rgba(120,80,30,0.10); --ex-shimmer: rgba(160,82,45,0.10); --ex-glint: rgba(255,255,255,0.6);
   --ex-accent: #A0522D;
+  --ex-active-grad: linear-gradient(135deg, rgba(212,175,55,0.85), rgba(255,140,0,0.85));
+  --ex-active-ring: inset 0 0 0 1px rgba(255,255,255,0.35);
+  --ex-active-shadow: 0 4px 14px rgba(212,175,55,0.35);
 }
 .explore.night-mode {
-  --ex-bg: #14101f; --ex-heading: #e8c766; --ex-text: #d5dce4; --ex-muted: #94a3b8;
-  --ex-glass: rgba(255,255,255,0.06); --ex-glass-2: rgba(255,255,255,0.10);
-  --ex-ring: inset 0 0 0 1px rgba(255,255,255,0.08); --ex-line: rgba(255,255,255,0.10);
-  --ex-chip: rgba(255,255,255,0.07); --ex-chip-text: #cbd5e1;
+  --ex-bg: #0a0118; --ex-heading: #c084fc; --ex-text: #d5dce4; --ex-muted: #94a3b8;
+  --ex-glass: rgba(40,30,62,0.55); --ex-glass-2: rgba(255,255,255,0.10);
+  --ex-ring: inset 0 0 0 1px rgba(167,139,250,0.14); --ex-line: rgba(255,255,255,0.10);
+  --ex-chip: rgba(40,30,62,0.62); --ex-chip-text: #cbd5e1;
   --ex-shadow: 0 8px 26px rgba(0,0,0,0.45); --ex-shimmer: rgba(255,255,255,0.06); --ex-glint: rgba(255,255,255,0.10);
   --ex-accent: #c084fc;
+  --ex-active-grad: linear-gradient(135deg, rgba(139,92,246,0.82), rgba(168,85,247,0.82));
+  --ex-active-ring: inset 0 0 0 1px rgba(255,255,255,0.18);
+  --ex-active-shadow: 0 4px 14px rgba(139,92,246,0.35);
 }
 
 .explore { min-height: 100vh; background: var(--ex-bg); color: var(--ex-text); padding: 0 0 40px; }
@@ -196,7 +220,7 @@ export default {
   font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--ex-chip-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s, color .18s; white-space: nowrap; }
 .ex-chip:hover { background: var(--ex-glass-2); }
-.ex-chip.active { color: #fff; background: linear-gradient(135deg, #D4AF37, #FF8C00); box-shadow: 0 4px 14px rgba(212,175,55,0.35); }
+.ex-chip.active { color: #fff; background: var(--ex-active-grad); box-shadow: var(--ex-active-ring), var(--ex-active-shadow); }
 .ex-chip-count { font-size: 0.72rem; font-weight: 700; opacity: 0.75; font-variant-numeric: tabular-nums; }
 .ex-chip.active .ex-chip-count { opacity: 0.9; }
 
@@ -228,7 +252,7 @@ export default {
 .ex-empty-title { font-size: 1.25rem; font-weight: 800; color: var(--ex-heading); margin: 0 0 8px; }
 .ex-empty-sub { font-size: 0.95rem; color: var(--ex-muted); line-height: 1.5; margin: 0 0 22px; }
 .ex-cta { padding: 11px 24px; border: none; border-radius: 999px; cursor: pointer; font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #fff;
-  background: linear-gradient(135deg, #D4AF37, #FF8C00); box-shadow: 0 6px 20px rgba(212,175,55,0.35); transition: filter .18s, transform .15s; }
+  background: var(--ex-active-grad); box-shadow: var(--ex-active-ring), 0 6px 20px rgba(0,0,0,0.18), var(--ex-active-shadow); transition: filter .18s, transform .15s; }
 .ex-cta:hover { filter: brightness(1.06); }
 .ex-cta:active { transform: scale(0.98); }
 

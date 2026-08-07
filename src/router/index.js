@@ -43,7 +43,7 @@ const routes = [
         path: '/explore',
         name: 'Explore',
         component: () => import('@/views/ExploreView.vue'),
-        meta: { title: "Jinni's Eye", requiresAuth: true }
+        meta: { title: "Jinni's Discoveries", requiresAuth: true }
     },
     {
         path: '/map-selector',

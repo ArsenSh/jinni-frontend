@@ -752,6 +752,7 @@
     "profile": {
       "profile": "Profile",
       "preferences": "Preferences",
+      "explore": "Jinni's Discoveries",
       "settings": "Settings",
       "contact_us": "Contact Us",
       "logout": "Log Out"
@@ -1049,6 +1050,24 @@
     "show_more_days": "+ {count} more days",
     "show_less": "Show less",
     "highlights": "Highlights"
+  },
+  "explore": {
+    "title": "Jinni's Discoveries",
+    "back": "Back",
+    "km": "km",
+    "not_explored": "Jinni hasn't been to {place} yet",
+    "this_area": "this area",
+    "empty_sub": "Ask Jinni in chat to discover places here — they'll appear on this page as you explore.",
+    "ask_chat": "Ask Jinni",
+    "cat": {
+      "restaurants": "Restaurants",
+      "hotels": "Hotels",
+      "historical": "Historical sites",
+      "events": "Events",
+      "photo_spots": "Photo spots",
+      "hidden_gems": "Hidden gems",
+      "shopping": "Shops"
+    }
   },
   "usage": {
     "cooldown": {

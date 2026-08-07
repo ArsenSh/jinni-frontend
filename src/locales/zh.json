@@ -771,6 +771,7 @@
     "profile": {
       "profile": "个人资料",
       "preferences": "偏好设置",
+      "explore": "Jinni 的探索",
       "settings": "设置",
       "contact_us": "联系我们",
       "logout": "退出登录"
@@ -1053,6 +1054,24 @@
     "show_more_days": "+ {count} 天",
     "show_less": "显示更少",
     "highlights": "亮点"
+  },
+  "explore": {
+    "title": "Jinni 的探索",
+    "back": "返回",
+    "km": "公里",
+    "not_explored": "Jinni 还没有探索过{place}",
+    "this_area": "这片区域",
+    "empty_sub": "在聊天中向 Jinni 询问，发现这里的好去处——随着你的探索，它们会出现在此页面。",
+    "ask_chat": "问问 Jinni",
+    "cat": {
+      "restaurants": "餐厅",
+      "hotels": "酒店",
+      "historical": "历史古迹",
+      "events": "活动",
+      "photo_spots": "拍照胜地",
+      "hidden_gems": "隐藏宝藏",
+      "shopping": "商店"
+    }
   },
   "usage": {
     "cooldown": {
