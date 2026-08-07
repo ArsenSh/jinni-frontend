@@ -1457,7 +1457,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="p in expPlaces" :key="p.placeId" class="biz-row">
+            <tr v-for="p in expPlaces" :key="p.placeId" class="biz-row exp-row" @click="openExpPlace(p)">
               <td class="col-name" data-label="Place">
                 <div class="exp-place-cell">
                   <img v-if="p.imagesStored" :src="`${apiRoot}/ai/place-image/${p.placeId}/0`" class="exp-thumb" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
@@ -1483,7 +1483,7 @@
                   {{ p.explore?.status === 'verified' ? '✓ Verified' : (p.explore?.status === 'hidden' ? 'Hidden' : 'Visible') }}
                 </span>
               </td>
-              <td class="col-actions" data-label="Action">
+              <td class="col-actions" data-label="Action" @click.stop>
                 <div class="action-group">
                   <button v-if="p.explore?.status !== 'verified'" class="action-btn exp-btn-verify" :disabled="expBusy === p.placeId" @click="setExpStatus(p, 'verified')">Verify</button>
                   <button v-if="p.explore?.status !== 'hidden'" class="action-btn exp-btn-hide" :disabled="expBusy === p.placeId" @click="setExpStatus(p, 'hidden')">Hide</button>
@@ -1505,6 +1505,63 @@
         Next <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
+
+    <!-- ── Place detail modal — click a row to inspect everything the cache
+         knows about a place (all stored images, contacts, hours, stats)
+         before deciding to hide or verify it. ── -->
+    <transition name="fade">
+      <div v-if="expSelected" class="modal-overlay" @click.self="expSelected = null">
+        <div class="exp-modal">
+          <button class="exp-modal-close" @click="expSelected = null" title="Close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+
+          <div v-if="expImages.length" class="exp-modal-imgs">
+            <img v-for="(im, i) in expImages" :key="i" :src="apiOrigin + im.url" class="exp-modal-img" loading="lazy" @error="$event.target.remove()"/>
+          </div>
+          <div v-else class="exp-modal-imgs exp-modal-imgs--empty">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>{{ expImagesLoading ? 'Loading images…' : 'No stored images' }}</span>
+          </div>
+
+          <div class="exp-modal-body">
+            <h3 class="exp-modal-title">
+              {{ expSelected.name }}
+              <span class="exp-status" :class="'exp-status--' + (expSelected.explore?.status || 'visible')">
+                {{ expSelected.explore?.status === 'verified' ? '✓ Verified' : (expSelected.explore?.status === 'hidden' ? 'Hidden' : 'Visible') }}
+              </span>
+            </h3>
+            <div class="exp-modal-cats">{{ (expSelected.actions || []).join(' · ') }}<template v-if="expSelected.primaryType"> — {{ expSelected.primaryType }}</template></div>
+
+            <dl class="exp-modal-info">
+              <template v-if="expSelected.details?.formatted_address"><dt>Address</dt><dd>{{ expSelected.details.formatted_address }}</dd></template>
+              <template v-if="Number.isFinite(expSelected.rating)"><dt>Rating</dt><dd><span :class="{ 'exp-rating-low': expSelected.rating < 3.5 }">★ {{ expSelected.rating.toFixed(1) }}</span></dd></template>
+              <dt>Feedback</dt><dd>👍 {{ expSelected.likes || 0 }} &nbsp; 👎 {{ expSelected.dislikes || 0 }}</dd>
+              <template v-if="expPrice(expSelected)"><dt>Price</dt><dd>{{ expPrice(expSelected) }}</dd></template>
+              <template v-if="expSelected.website"><dt>Website</dt><dd><a :href="expSelected.website" target="_blank" rel="noopener noreferrer">{{ expSelected.website }}</a></dd></template>
+              <template v-if="expSelected.formatted_phone_number || expSelected.international_phone_number"><dt>Phone</dt><dd>{{ expSelected.formatted_phone_number || expSelected.international_phone_number }}</dd></template>
+              <template v-if="expSelected.eventSchedule?.startDate"><dt>Event</dt><dd>{{ fmtD(expSelected.eventSchedule.startDate) }}<template v-if="expSelected.eventSchedule.endDate"> – {{ fmtD(expSelected.eventSchedule.endDate) }}</template><template v-if="expSelected.eventSchedule.isRecurring"> (recurring)</template></dd></template>
+              <template v-if="expSelected.types?.length"><dt>Google types</dt><dd class="exp-modal-types">{{ expSelected.types.join(', ') }}</dd></template>
+              <dt>Cache</dt><dd>Used {{ fmt(expSelected.useCount || 0) }}× · fetched {{ fmt(expSelected.fetchCount || 0) }}× · added {{ fmtD(expSelected.createdAt) }} · last used {{ fmtD(expSelected.lastUsed) }}</dd>
+              <template v-if="expSelected.explore?.reviewedAt"><dt>Reviewed</dt><dd>{{ fmtD(expSelected.explore.reviewedAt) }}</dd></template>
+            </dl>
+
+            <div v-if="expSelected.opening_hours?.weekday_text?.length" class="exp-modal-hours">
+              <div class="exp-modal-hours-title">Opening hours</div>
+              <div v-for="line in expSelected.opening_hours.weekday_text" :key="line" class="exp-modal-hours-line">{{ line }}</div>
+            </div>
+
+            <div class="exp-modal-actions">
+              <a v-if="expMapsUrl(expSelected)" class="action-btn btn-muted" :href="expMapsUrl(expSelected)" target="_blank" rel="noopener noreferrer">Open in Maps</a>
+              <span style="flex:1"></span>
+              <button v-if="expSelected.explore?.status !== 'verified'" class="action-btn exp-btn-verify" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'verified')">Verify</button>
+              <button v-if="expSelected.explore?.status !== 'hidden'" class="action-btn exp-btn-hide" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'hidden')">Hide</button>
+              <button v-if="expSelected.explore?.status === 'hidden' || expSelected.explore?.status === 'verified'" class="action-btn btn-muted" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'visible')">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
 
     </template>
     <!-- ════════════════════════════════════════════════════════════════
@@ -2005,6 +2062,38 @@ export default {
       { value: 'photo_spots', label: 'Photo spots' }, { value: 'hidden_gems', label: 'Hidden gems' },
       { value: 'shopping', label: 'Shops' },
     ]
+    // ── Place detail modal ──
+    const expSelected = ref(null)
+    const expImages = ref([])
+    const expImagesLoading = ref(false)
+    // API_URL already ends in /api and the images endpoint returns full
+    // '/api/ai/place-image/…' paths — strip the suffix to get the origin.
+    const apiOrigin = API_URL.replace(/\/api\/?$/, '')
+    async function openExpPlace(p) {
+      expSelected.value = p
+      expImages.value = []
+      expImagesLoading.value = true
+      try {
+        const { data } = await axios.get(`${API_URL}/ai/place-images/${p.placeId}`, { headers: authHeader() })
+        expImages.value = (data?.images || []).filter(im => im.hasStoredImage)
+      } catch { expImages.value = [] }
+      finally { expImagesLoading.value = false }
+    }
+    const PRICE_LABELS = {
+      PRICE_LEVEL_FREE: 'Free', PRICE_LEVEL_INEXPENSIVE: '$ · inexpensive',
+      PRICE_LEVEL_MODERATE: '$$ · moderate', PRICE_LEVEL_EXPENSIVE: '$$$ · expensive',
+      PRICE_LEVEL_VERY_EXPENSIVE: '$$$$ · very expensive',
+    }
+    const expPrice = (p) => PRICE_LABELS[p?.priceLevel] || null
+    const fmtD = (d) => { const t = d ? new Date(d) : null; return t && !isNaN(t) ? t.toLocaleDateString() : '—' }
+    const expMapsUrl = (p) => {
+      const loc = p?.details?.geometry?.location
+      if (loc && Number.isFinite(loc.lat) && Number.isFinite(loc.lng)) {
+        return `https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`
+      }
+      return p?.name ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + ' ' + (p.city || p.country || ''))}` : null
+    }
+
     const onExpSearchInput = () => {
       clearTimeout(expSearchDebounce)
       expSearchDebounce = setTimeout(() => {
@@ -3056,6 +3145,7 @@ export default {
     const onKey = (e) => {
       if (e.key === 'Escape') {
         if (destModal.value.lightboxOpen) { destModal.value.lightboxOpen = false; return }
+        if (expSelected.value)             { expSelected.value = null; return }
         if (confirmLogout.value)           { confirmLogout.value = false; return }
         if (confirmingAction.value)        { confirmingAction.value = null; return }
         if (destDeleteTarget.value)        { destDeleteTarget.value = null; return }
@@ -3096,6 +3186,7 @@ export default {
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
       expStatus, expStatusOpts, expCategory, expCategories, expCounts,
       expSearchInput, onExpSearchInput, loadExplorePlaces, changeExpPage, setExpStatus,
+      expSelected, expImages, expImagesLoading, openExpPlace, apiOrigin, expPrice, fmtD, expMapsUrl,
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES,
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
@@ -3841,6 +3932,30 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .exp-btn-verify { background: rgba(52,211,153,0.12); color: var(--good); }
 .exp-btn-hide   { background: rgba(239,68,68,0.10); color: var(--bad); }
 .chip-count { opacity: 0.65; font-variant-numeric: tabular-nums; margin-left: 4px; }
+.exp-row { cursor: pointer; }
+
+/* Place detail modal */
+.exp-modal { position: relative; width: min(680px, 94vw); max-height: 88vh; overflow-y: auto; border-radius: 16px;
+  background: var(--bg-elev); border: 1px solid var(--line-soft); box-shadow: 0 18px 60px rgba(0,0,0,0.35); }
+.exp-modal-close { position: absolute; top: 10px; right: 10px; z-index: 2; width: 30px; height: 30px; border-radius: 9px; border: none; cursor: pointer;
+  display: grid; place-items: center; background: rgba(0,0,0,0.35); color: #fff; transition: background 0.15s; }
+.exp-modal-close:hover { background: rgba(0,0,0,0.55); }
+.exp-modal-imgs { display: flex; gap: 6px; overflow-x: auto; background: var(--bg-elev-3); min-height: 120px; }
+.exp-modal-img { height: 220px; min-width: 160px; flex: 1 1 auto; object-fit: cover; }
+.exp-modal-imgs--empty { align-items: center; justify-content: center; gap: 10px; color: var(--text-faint); font-size: 13px; height: 120px; }
+.exp-modal-body { padding: 16px 20px 18px; }
+.exp-modal-title { margin: 0 0 4px; font-size: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.exp-modal-cats { font-size: 12px; color: var(--text-faint); margin-bottom: 12px; }
+.exp-modal-info { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 12px; font-size: 13px; }
+.exp-modal-info dt { color: var(--text-mute); font-weight: 600; white-space: nowrap; }
+.exp-modal-info dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.exp-modal-info a { color: var(--accent); }
+.exp-modal-types { color: var(--text-mute); font-size: 12px; }
+.exp-modal-hours { margin-bottom: 14px; font-size: 12.5px; }
+.exp-modal-hours-title { font-weight: 700; color: var(--text-mute); margin-bottom: 4px; }
+.exp-modal-hours-line { color: var(--text-mute); line-height: 1.5; }
+.exp-modal-actions { display: flex; gap: 8px; align-items: center; border-top: 1px solid var(--line-soft); padding-top: 14px; }
+.exp-modal-actions .action-btn { text-decoration: none; }
 .staff-val.day-mode .btn-delete:hover { background: rgba(239,68,68,0.15); }
 .staff-val.day-mode .btn-danger-outline:hover { background: rgba(229,62,62,0.07); }
 .staff-val.day-mode .pagination button { background: rgba(255,255,255,0.9); color: #5c3f2e }
