@@ -135,6 +135,13 @@
               </svg>
               <span v-if="sidebarOpen">{{ t('chat.profile.preferences') }}</span>
             </button>
+            <button @click="goToExplore" class="profile-menu-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span v-if="sidebarOpen">{{ t('chat.profile.explore') || "Jinni's Eye" }}</span>
+            </button>
             <button @click="showSettings" class="profile-menu-item">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="3"/>
@@ -3498,6 +3505,10 @@ export default {
       this.showProfileMenu = false;
       this.$router.push('/contact');
     },
+    goToExplore() {
+      this.showProfileMenu = false;
+      this.$router.push('/explore');
+    },
     async switchToListing() {
       this.isSwitching = true;
       await new Promise(resolve => setTimeout(resolve, 5000));
@@ -3988,11 +3999,12 @@ export default {
       const ctx = (loc && loc.city && loc.countryName) ? ` ${loc.city} ${loc.countryName}` : '';
       const q = encodeURIComponent(name + ctx);
       const url = `https://www.google.com/maps/search/?api=1&query=${q}`;
-      // Anchor-click rather than window.open: a synthesized anchor click from a
-      // real user click is not treated as a popup, so it isn't blocked.
-      const a = document.createElement('a');
-      a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      document.body.appendChild(a); a.click(); a.remove();
+      // window.open('_blank') — matches the app's other working map buttons and
+      // reliably opens a NEW TAB (a programmatic anchor click navigated the same
+      // tab in some browsers). Null the opener for security (no reverse
+      // tab-nabbing) without the 'noopener' feature string that popup-blocks.
+      const win = window.open(url, '_blank');
+      if (win) win.opener = null;
     },
     setupPreferenceButtonHandler() {window.openPreferences = () => {this.editPreferences()}},
     handleImageError(event) {

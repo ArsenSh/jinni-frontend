@@ -40,6 +40,12 @@ const routes = [
         meta: { title: 'Jinni', requiresAuth: true }
     },
     {
+        path: '/explore',
+        name: 'Explore',
+        component: () => import('@/views/ExploreView.vue'),
+        meta: { title: "Jinni's Eye", requiresAuth: true }
+    },
+    {
         path: '/map-selector',
         name: 'MapSelector',
         component: () => import('@/views/MapSelector.vue'),
