@@ -1,16 +1,15 @@
 <template>
   <div class="explore" :class="theme">
-    <!-- ═══ Header ═══ -->
+    <!-- ═══ Header — centered, chat-glacier back pill ═══ -->
     <header class="ex-head">
-      <button class="ex-back" @click="goBack" :title="t('explore.back') || 'Back'">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <button class="ex-back" @click="goBack">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        {{ t('explore.back_chat') || 'Back to Chat' }}
       </button>
-      <div class="ex-head-main">
-        <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
-        <p class="ex-sub" v-if="location && (location.city || location.country)">
-          {{ [location.city, location.country].filter(Boolean).join(', ') }}
-        </p>
-      </div>
+      <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
+      <p class="ex-sub" v-if="location && (location.city || location.country)">
+        {{ [location.city, location.country].filter(Boolean).join(', ') }}
+      </p>
     </header>
 
     <!-- ═══ Search — explore any city / region / country (TripAdvisor-style) ═══ -->
@@ -71,7 +70,6 @@
       <section v-for="c in orderedCategories" :key="c" :ref="el => catEls[c] = el" class="ex-section">
         <div class="ex-section-head">
           <h2 class="ex-section-title">{{ catLabel(c) }}</h2>
-          <span class="ex-section-count">{{ categories[c].length }}</span>
         </div>
         <div class="ex-rail-wrap">
           <button class="ex-rail-btn ex-rail-btn--prev" @click="scrollRail(c, -1)" tabindex="-1" aria-hidden="true">
@@ -80,7 +78,7 @@
           <button class="ex-rail-btn ex-rail-btn--next" @click="scrollRail(c, 1)" tabindex="-1" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </button>
-          <div class="ex-rail" :ref="el => railEls[c] = el">
+          <div class="ex-rail" :ref="el => railEls[c] = el" @scroll.passive="onRailScroll(c, $event)">
           <!-- TripAdvisor-style borderless tile: rounded image with actions on
                it, name + meta as plain text below on the page background. -->
           <div v-for="p in categories[c]" :key="c + p.placeId"
@@ -96,14 +94,20 @@
               <!-- Partner tier chip (same wording as the map tier labels) -->
               <span v-if="p.tier" class="ex-tier" :class="'ex-tier--' + p.tier">✦ {{ tierLabel(p.tier) }}</span>
 
-              <!-- Save — always visible, TripAdvisor-style single circle -->
-              <div class="ex-card-acts ex-card-acts--top" @click.stop>
-                <button class="ex-act" :class="{ 'ex-act--saved': !!saved[p.placeId] }"
-                        :title="saved[p.placeId] ? (t('chat.saved.remove_saved') || 'Remove from saved') : (t('chat.saved.save_place') || 'Save place')"
-                        @click="toggleSave(p, c)">
-                  <svg width="14" height="14" viewBox="0 0 24 24" :fill="saved[p.placeId] ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                </button>
-              </div>
+              <!-- Save — the chat's hanging ribbon bookmark, gold when saved -->
+              <button class="ex-save" :class="{ saved: !!saved[p.placeId] }" @click.stop="toggleSave(p, c)"
+                      :title="saved[p.placeId] ? (t('chat.saved.remove_saved') || 'Remove from saved') : (t('chat.saved.save_place') || 'Save place')">
+                <svg v-if="saved[p.placeId]" width="24" height="90" viewBox="0 0 24 90" fill="url(#exSaveGradient)" stroke="none">
+                  <defs>
+                    <linearGradient id="exSaveGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="rgb(212,175,55)"/>
+                      <stop offset="100%" stop-color="rgb(255,140,0)"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                </svg>
+                <svg v-else width="24" height="90" viewBox="0 0 24 90" fill="rgba(255,255,255,0.34)" stroke="none"><path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              </button>
               <!-- Photos / info — revealed on hover (always visible on touch) -->
               <div class="ex-card-acts ex-card-acts--bottom" @click.stop>
                 <button class="ex-act" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
@@ -120,6 +124,10 @@
               <span v-if="p.region" class="ex-card-region">{{ p.region }}</span><span v-if="p.region && Number.isFinite(p.distanceKm)"> · </span><span v-if="Number.isFinite(p.distanceKm)" class="ex-card-dist">{{ p.distanceKm }} {{ t('explore.km') || 'km' }}</span>
             </div>
           </div>
+          </div>
+          <!-- Slim scroll indicator — appears only while the rail is scrolling -->
+          <div class="ex-rail-scroll" :class="{ on: railBar[c] && railBar[c].on }">
+            <span class="ex-rail-thumb" :style="railBar[c] ? { width: railBar[c].w, left: railBar[c].x } : {}"></span>
           </div>
         </div>
       </section>
@@ -204,6 +212,8 @@ export default {
       serverOrder: null,
       catEls: {},
       railEls: {},
+      railBar: {},          // per-category scroll indicator state { w, x, on }
+      _railTimers: {},
       theme: 'night-mode',
       // placeId → SavedPlace _id (from GET /api/saves); presence = saved.
       saved: {},
@@ -244,7 +254,10 @@ export default {
     };
     window.addEventListener('keydown', this._onKey);
   },
-  beforeUnmount() { window.removeEventListener('keydown', this._onKey); },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this._onKey);
+    if (this._spy) this._spy.disconnect();
+  },
   methods: {
     t(key, params) { return this.$t ? this.$t(key, params) : null; },
     // Same resolution as JinniChat's currentTheme: explicit setting wins,
@@ -289,11 +302,40 @@ export default {
         this.categories = {};
       } finally {
         this.loading = false;
+        this.$nextTick(() => this.setupScrollSpy());
+      }
+    },
+    // Highlight the category chip of the section currently in view.
+    setupScrollSpy() {
+      if (this._spy) this._spy.disconnect();
+      if (typeof IntersectionObserver === 'undefined') return;
+      this._spy = new IntersectionObserver((entries) => {
+        for (const en of entries) {
+          if (!en.isIntersecting) continue;
+          const c = Object.keys(this.catEls).find(k => this.catEls[k] === en.target);
+          if (c) this.activeCat = c;
+        }
+      }, { rootMargin: '-15% 0px -70% 0px' });
+      for (const c of this.orderedCategories) {
+        if (this.catEls[c]) this._spy.observe(this.catEls[c]);
       }
     },
     scrollToCat(c) {
       this.activeCat = c;
       this.catEls[c]?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    },
+    // Slim per-rail scroll indicator: reflects position while scrolling,
+    // fades out ~1s after the last scroll event.
+    onRailScroll(c, e) {
+      const el = e.target;
+      if (!el || el.scrollWidth <= el.clientWidth) return;
+      const w = Math.max((el.clientWidth / el.scrollWidth) * 100, 8);
+      const x = (el.scrollLeft / el.scrollWidth) * 100;
+      this.railBar = { ...this.railBar, [c]: { w: w + '%', x: x + '%', on: true } };
+      clearTimeout(this._railTimers[c]);
+      this._railTimers[c] = setTimeout(() => {
+        if (this.railBar[c]) this.railBar = { ...this.railBar, [c]: { ...this.railBar[c], on: false } };
+      }, 1000);
     },
     // Desktop rail paging — one "page" of cards per click.
     scrollRail(c, dir) {
@@ -431,8 +473,10 @@ export default {
   --ex-act-bg: rgba(255,255,255,0.94); --ex-act-bg-hover: #ffffff; --ex-act-fg: #3c2a1e;
   --ex-arrow-bg: #ffffff; --ex-arrow-fg: #3c2a1e; --ex-arrow-line: rgba(160,82,45,0.22);
   --ex-bg-grad: linear-gradient(180deg, #f9f5eb 0%, #f5edda 55%, #efe4cf 100%);
-  --ex-chip-active-bg: #3c2a1e; --ex-chip-active-fg: #fff7e8;
-  --ex-search-bg: #ffffff;
+  /* Chat's glacier active recipe (settings theme-btn.active, day) */
+  --ex-chip-active-bg: rgba(255,255,255,0.92); --ex-chip-active-fg: #8a5a1e;
+  --ex-chip-active-shadow: 0 1px 4px rgba(120,80,30,0.16);
+  --ex-search-bg: rgba(255,255,255,0.6);
 }
 .explore.night-mode {
   --ex-bg: #0a0118; --ex-heading: #c084fc; --ex-text: #d5dce4; --ex-muted: #94a3b8;
@@ -447,14 +491,16 @@ export default {
   --ex-act-bg: rgba(18,12,34,0.78); --ex-act-bg-hover: rgba(18,12,34,0.95); --ex-act-fg: #ffffff;
   --ex-arrow-bg: #241a3f; --ex-arrow-fg: #e8e0f5; --ex-arrow-line: rgba(167,139,250,0.28);
   --ex-bg-grad: linear-gradient(180deg, #0a0118 0%, #1a0b2e 40%, #16213e 100%);
-  --ex-chip-active-bg: #ece4ff; --ex-chip-active-fg: #1a1030;
+  /* Chat's glacier active recipe (settings theme-btn.active, night) */
+  --ex-chip-active-bg: rgba(255,255,255,0.16); --ex-chip-active-fg: #d8b4fe;
+  --ex-chip-active-shadow: 0 1px 4px rgba(0,0,0,0.28);
   --ex-search-bg: rgba(255,255,255,0.08);
 }
 
 .explore { min-height: 100vh; background: var(--ex-bg-grad); background-attachment: fixed; color: var(--ex-text); padding: 0 0 40px; }
 
 /* Search — TripAdvisor-style pill */
-.ex-search { display: flex; align-items: center; gap: 10px; width: min(640px, calc(100% - 36px)); margin: 12px auto 2px;
+.ex-search { display: flex; align-items: center; gap: 10px; width: min(640px, calc(100% - 36px)); margin: 16px auto 0;
   padding: 6px 6px 6px 18px; border-radius: 999px; background: var(--ex-search-bg);
   box-shadow: var(--ex-ring), 0 8px 26px rgba(0,0,0,0.10); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); }
 .ex-search-icon { flex: none; color: var(--ex-muted); }
@@ -475,25 +521,26 @@ export default {
 .ex-showing-clear:hover { color: var(--ex-text); }
 .ex-showing--miss { color: var(--ex-muted); }
 
-/* Header */
-.ex-head { display: flex; align-items: center; gap: 12px; padding: 18px 18px 10px; max-width: 1200px; margin: 0 auto; }
-.ex-back { flex: none; width: 38px; height: 38px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  color: var(--ex-text); background: var(--ex-glass); box-shadow: var(--ex-ring); backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
+/* Header — centered column */
+.ex-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+  padding: 26px 18px 4px; max-width: 1200px; margin: 0 auto; }
+.ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 999px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 0.84rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
 .ex-back:hover { background: var(--ex-glass-2); }
-.ex-head-main { min-width: 0; }
-.ex-title { margin: 0; font-size: 1.55rem; font-weight: 800; letter-spacing: -0.01em;
+.ex-title { margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em;
   color: #D4AF37; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.ex-sub { margin: 2px 0 0; font-size: 0.88rem; color: var(--ex-muted); }
+.ex-sub { margin: -4px 0 0; font-size: 0.88rem; color: var(--ex-muted); }
 
 /* Sticky category nav */
-.ex-nav { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; overflow-x: auto; padding: 10px 18px; max-width: 1200px; margin: 0 auto;
-  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 82%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.ex-nav { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; overflow-x: auto; padding: 10px 18px; max-width: 1200px; margin: 12px auto 0;
+  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 45%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
 .ex-nav::-webkit-scrollbar { display: none; }
 .ex-chip { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: none; cursor: pointer;
   font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--ex-chip-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s, color .18s; white-space: nowrap; }
 .ex-chip:hover { background: var(--ex-glass-2); }
-.ex-chip.active { color: var(--ex-chip-active-fg); background: var(--ex-chip-active-bg); box-shadow: none; }
+.ex-chip.active { color: var(--ex-chip-active-fg); background: var(--ex-chip-active-bg); box-shadow: var(--ex-chip-active-shadow); }
 .ex-chip-count { font-size: 0.72rem; font-weight: 700; opacity: 0.75; font-variant-numeric: tabular-nums; }
 .ex-chip.active .ex-chip-count { opacity: 0.9; }
 
@@ -521,20 +568,30 @@ export default {
 .ex-card:hover .ex-card-img { filter: brightness(1.06) saturate(1.04); }
 .ex-card-imgless { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--ex-muted); }
 
-/* Card actions — TripAdvisor-style solid circles on the image (white by day,
-   dark by night); feedback is background/color only. */
+/* Card actions — the chat's glacier glass (text-action-btn.info-btn recipe):
+   translucent white glass with a hairline inset ring, on the image. */
 .ex-card-acts { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
 .ex-act { width: 31px; height: 31px; border-radius: 999px; border: none; cursor: pointer; display: grid; place-items: center;
-  color: var(--ex-act-fg); background: var(--ex-act-bg); box-shadow: 0 2px 8px rgba(0,0,0,0.22);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: background .18s, color .18s; }
-.ex-act:hover { background: var(--ex-act-bg-hover); }
-.ex-act--saved { color: #D4AF37; }
+  color: #fff; background: rgba(255,255,255,0.3); box-shadow: inset 0 0 0 0.6px rgba(255,255,255,0.6);
+  backdrop-filter: blur(2px) saturate(160%); -webkit-backdrop-filter: blur(2px) saturate(160%); transition: background .2s, box-shadow .2s; }
+.ex-act:hover { background: rgba(255,255,255,0.42); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.9); }
 .ex-card-acts--bottom { top: auto; bottom: 10px; }
 /* Photos / info stay quiet until the pointer is on the card (touch: always shown) */
 @media (hover: hover) and (pointer: fine) {
   .ex-card-acts--bottom { opacity: 0; transition: opacity .2s ease; }
   .ex-card:hover .ex-card-acts--bottom { opacity: 1; }
 }
+
+/* Save — the chat's hanging ribbon bookmark (rec-image-save-btn recipe) */
+.ex-save { position: absolute; top: -6px; right: 8px; width: 24px; height: 90px; border: none; border-radius: 8px; background: transparent;
+  cursor: pointer; display: flex; align-items: flex-start; justify-content: center; overflow: visible; color: #fff; z-index: 6; padding: 0;
+  opacity: 0.9; transition: opacity 0.25s ease; }
+@media (hover: hover) and (pointer: fine) {
+  .ex-save { opacity: 0; }
+  .ex-card:hover .ex-save { opacity: 0.85; }
+  .ex-card:hover .ex-save:hover { opacity: 1; }
+}
+.ex-save.saved { opacity: 1 !important; }
 
 /* Partner tier chip + card treatments — chat palette:
    verified green, spotlight blue #3b9fdd, signature gold. */
@@ -559,6 +616,13 @@ export default {
 .ex-rail-btn--prev { left: 0; }
 .ex-rail-btn--next { right: 0; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
+
+/* Slim scroll indicator — appears only while scrolling, fades out after */
+.ex-rail-scroll { position: relative; height: 4px; margin: -8px 16px 6px; border-radius: 999px;
+  background: color-mix(in srgb, var(--ex-line) 55%, transparent); opacity: 0; transition: opacity .35s ease; pointer-events: none; }
+.ex-rail-scroll.on { opacity: 1; }
+.ex-rail-thumb { position: absolute; top: 0; height: 100%; border-radius: 999px; min-width: 8%;
+  background: linear-gradient(90deg, var(--ex-accent), color-mix(in srgb, var(--ex-accent) 55%, transparent)); }
 
 .ex-card-name { font-size: 0.97rem; font-weight: 700; line-height: 1.3; color: var(--ex-text); margin-bottom: 2px;
   overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }

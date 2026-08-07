@@ -1071,7 +1071,8 @@
     "photos": "Photos",
     "search_ph": "Where to? City, region, country…",
     "search": "Search",
-    "search_none": "Couldn't find that place."
+    "search_none": "Couldn't find that place.",
+    "back_chat": "Back to Chat"
   },
   "usage": {
     "cooldown": {
