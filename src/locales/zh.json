@@ -1071,7 +1071,8 @@
       "photo_spots": "拍照胜地",
       "hidden_gems": "隐藏宝藏",
       "shopping": "商店"
-    }
+    },
+    "photos": "照片"
   },
   "usage": {
     "cooldown": {

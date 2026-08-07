@@ -1065,7 +1065,8 @@
       "photo_spots": "Фотоместа",
       "hidden_gems": "Скрытые жемчужины",
       "shopping": "Магазины"
-    }
+    },
+    "photos": "Фото"
   },
   "usage": {
     "cooldown": {

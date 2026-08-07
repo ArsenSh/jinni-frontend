@@ -1067,7 +1067,8 @@
       "photo_spots": "Photo spots",
       "hidden_gems": "Hidden gems",
       "shopping": "Shops"
-    }
+    },
+    "photos": "Photos"
   },
   "usage": {
     "cooldown": {

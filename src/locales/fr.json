@@ -1087,7 +1087,8 @@
       "photo_spots": "Spots photo",
       "hidden_gems": "Trésors cachés",
       "shopping": "Boutiques"
-    }
+    },
+    "photos": "Photos"
   },
   "usage": {
     "cooldown": {

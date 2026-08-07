@@ -1062,7 +1062,8 @@
       "photo_spots": "أماكن للتصوير",
       "hidden_gems": "جواهر خفية",
       "shopping": "متاجر"
-    }
+    },
+    "photos": "الصور"
   },
   "usage": {
     "cooldown": {
