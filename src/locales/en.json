@@ -1068,7 +1068,10 @@
       "hidden_gems": "Hidden gems",
       "shopping": "Shops"
     },
-    "photos": "Photos"
+    "photos": "Photos",
+    "search_ph": "Where to? City, region, country…",
+    "search": "Search",
+    "search_none": "Couldn't find that place."
   },
   "usage": {
     "cooldown": {

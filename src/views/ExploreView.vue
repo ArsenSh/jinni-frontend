@@ -13,6 +13,22 @@
       </div>
     </header>
 
+    <!-- ═══ Search — explore any city / region / country (TripAdvisor-style) ═══ -->
+    <form class="ex-search" @submit.prevent="searchPlace">
+      <svg class="ex-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input v-model="searchQ" class="ex-search-input" type="search" enterkeyhint="search"
+             :placeholder="t('explore.search_ph') || 'Where to? City, region, country…'"/>
+      <button type="submit" class="ex-search-btn" :disabled="searchBusy || !searchQ.trim()">
+        {{ searchBusy ? '…' : (t('explore.search') || 'Search') }}
+      </button>
+    </form>
+    <div v-if="override" class="ex-showing">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <strong>{{ override.label }}</strong>
+      <button class="ex-showing-clear" @click="clearSearch" :title="t('map.clear_route') || 'Clear'">✕</button>
+    </div>
+    <div v-else-if="searchMiss" class="ex-showing ex-showing--miss">{{ t('explore.search_none') || "Couldn't find that place." }}</div>
+
     <!-- ═══ Category nav (sticky) ═══ -->
     <nav v-if="hasAny" class="ex-nav">
       <button v-for="c in orderedCategories" :key="c"
@@ -80,13 +96,16 @@
               <!-- Partner tier chip (same wording as the map tier labels) -->
               <span v-if="p.tier" class="ex-tier" :class="'ex-tier--' + p.tier">✦ {{ tierLabel(p.tier) }}</span>
 
-              <!-- Actions — save / gallery / info -->
-              <div class="ex-card-acts" @click.stop>
+              <!-- Save — always visible, TripAdvisor-style single circle -->
+              <div class="ex-card-acts ex-card-acts--top" @click.stop>
                 <button class="ex-act" :class="{ 'ex-act--saved': !!saved[p.placeId] }"
                         :title="saved[p.placeId] ? (t('chat.saved.remove_saved') || 'Remove from saved') : (t('chat.saved.save_place') || 'Save place')"
                         @click="toggleSave(p, c)">
                   <svg width="14" height="14" viewBox="0 0 24 24" :fill="saved[p.placeId] ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                 </button>
+              </div>
+              <!-- Photos / info — revealed on hover (always visible on touch) -->
+              <div class="ex-card-acts ex-card-acts--bottom" @click.stop>
                 <button class="ex-act" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
                 </button>
@@ -189,6 +208,10 @@ export default {
       // placeId → SavedPlace _id (from GET /api/saves); presence = saved.
       saved: {},
       saveBusy: null,
+      searchQ: '',
+      searchBusy: false,
+      searchMiss: false,
+      override: null,   // { lat, lng, label } — explore a searched place instead of the user's area
       gallery: { open: false, images: [], idx: 0, name: '' },
       info: { open: false, loading: false, data: null, image: null, place: null },
     };
@@ -245,7 +268,10 @@ export default {
     async load() {
       this.loading = true;
       try {
-        const res = await fetch(`${API_BASE}/api/ai/explore`, {
+        const qs = this.override
+          ? `?lat=${this.override.lat}&lng=${this.override.lng}&label=${encodeURIComponent(this.override.label)}`
+          : '';
+        const res = await fetch(`${API_BASE}/api/ai/explore${qs}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
         });
         const data = await res.json().catch(() => ({}));
@@ -276,6 +302,28 @@ export default {
       rail.scrollBy({ left: dir * Math.round(rail.clientWidth * 0.85), behavior: 'smooth' });
     },
     authHeaders() { return { Authorization: `Bearer ${localStorage.getItem('authToken')}` }; },
+    // ── Search any destination (Nominatim — same geocoder the rest of the app uses) ──
+    async searchPlace() {
+      const q = this.searchQ.trim();
+      if (!q || this.searchBusy) return;
+      this.searchBusy = true;
+      this.searchMiss = false;
+      try {
+        const lang = (this.$i18n && this.$i18n.locale) || 'en';
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=${lang}&q=${encodeURIComponent(q)}`);
+        const rows = await res.json().catch(() => []);
+        if (Array.isArray(rows) && rows[0]) {
+          const label = String(rows[0].display_name || q).split(',').slice(0, 2).map(s => s.trim()).join(', ');
+          this.override = { lat: +rows[0].lat, lng: +rows[0].lon, label };
+          this.load();
+        } else {
+          this.searchMiss = true;
+          setTimeout(() => { this.searchMiss = false; }, 3000);
+        }
+      } catch (e) { console.error('Search failed:', e); }
+      finally { this.searchBusy = false; }
+    },
+    clearSearch() { this.override = null; this.searchQ = ''; this.searchMiss = false; this.load(); },
     tierLabel(tier) {
       return this.t('map.tier_' + tier)
         || ({ signature: "Jinni's Signature", spotlight: "Jinni's Spotlight", verified: 'Jinni Verified' })[tier] || tier;
@@ -382,6 +430,9 @@ export default {
   --ex-active-shadow: 0 4px 14px rgba(212,175,55,0.35);
   --ex-act-bg: rgba(255,255,255,0.94); --ex-act-bg-hover: #ffffff; --ex-act-fg: #3c2a1e;
   --ex-arrow-bg: #ffffff; --ex-arrow-fg: #3c2a1e; --ex-arrow-line: rgba(160,82,45,0.22);
+  --ex-bg-grad: linear-gradient(180deg, #f9f5eb 0%, #f5edda 55%, #efe4cf 100%);
+  --ex-chip-active-bg: #3c2a1e; --ex-chip-active-fg: #fff7e8;
+  --ex-search-bg: #ffffff;
 }
 .explore.night-mode {
   --ex-bg: #0a0118; --ex-heading: #c084fc; --ex-text: #d5dce4; --ex-muted: #94a3b8;
@@ -395,9 +446,34 @@ export default {
   --ex-active-shadow: 0 4px 14px rgba(139,92,246,0.35);
   --ex-act-bg: rgba(18,12,34,0.78); --ex-act-bg-hover: rgba(18,12,34,0.95); --ex-act-fg: #ffffff;
   --ex-arrow-bg: #241a3f; --ex-arrow-fg: #e8e0f5; --ex-arrow-line: rgba(167,139,250,0.28);
+  --ex-bg-grad: linear-gradient(180deg, #0a0118 0%, #1a0b2e 40%, #16213e 100%);
+  --ex-chip-active-bg: #ece4ff; --ex-chip-active-fg: #1a1030;
+  --ex-search-bg: rgba(255,255,255,0.08);
 }
 
-.explore { min-height: 100vh; background: var(--ex-bg); color: var(--ex-text); padding: 0 0 40px; }
+.explore { min-height: 100vh; background: var(--ex-bg-grad); background-attachment: fixed; color: var(--ex-text); padding: 0 0 40px; }
+
+/* Search — TripAdvisor-style pill */
+.ex-search { display: flex; align-items: center; gap: 10px; width: min(640px, calc(100% - 36px)); margin: 12px auto 2px;
+  padding: 6px 6px 6px 18px; border-radius: 999px; background: var(--ex-search-bg);
+  box-shadow: var(--ex-ring), 0 8px 26px rgba(0,0,0,0.10); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); }
+.ex-search-icon { flex: none; color: var(--ex-muted); }
+.ex-search-input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-family: inherit;
+  font-size: 0.95rem; color: var(--ex-text); padding: 9px 0; }
+.ex-search-input::placeholder { color: var(--ex-muted); }
+.ex-search-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.ex-search-btn { flex: none; border: none; cursor: pointer; font-family: inherit; font-size: 0.88rem; font-weight: 700;
+  padding: 10px 20px; border-radius: 999px; color: var(--ex-chip-active-fg); background: var(--ex-chip-active-bg); transition: filter .18s; }
+.ex-search-btn:hover:not(:disabled) { filter: brightness(1.12); }
+.ex-search-btn:disabled { opacity: 0.55; cursor: default; }
+.ex-showing { display: flex; align-items: center; gap: 7px; width: fit-content; max-width: calc(100% - 36px); margin: 10px auto 0;
+  padding: 6px 12px; border-radius: 999px; font-size: 0.84rem; color: var(--ex-text);
+  background: var(--ex-chip); box-shadow: var(--ex-ring); }
+.ex-showing svg { color: var(--ex-accent); flex: none; }
+.ex-showing strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ex-showing-clear { border: none; cursor: pointer; background: transparent; color: var(--ex-muted); font-size: 0.8rem; padding: 2px 4px; }
+.ex-showing-clear:hover { color: var(--ex-text); }
+.ex-showing--miss { color: var(--ex-muted); }
 
 /* Header */
 .ex-head { display: flex; align-items: center; gap: 12px; padding: 18px 18px 10px; max-width: 1200px; margin: 0 auto; }
@@ -417,19 +493,23 @@ export default {
   font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--ex-chip-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s, color .18s; white-space: nowrap; }
 .ex-chip:hover { background: var(--ex-glass-2); }
-.ex-chip.active { color: #fff; background: var(--ex-active-grad); box-shadow: var(--ex-active-ring), var(--ex-active-shadow); }
+.ex-chip.active { color: var(--ex-chip-active-fg); background: var(--ex-chip-active-bg); box-shadow: none; }
 .ex-chip-count { font-size: 0.72rem; font-weight: 700; opacity: 0.75; font-variant-numeric: tabular-nums; }
 .ex-chip.active .ex-chip-count { opacity: 0.9; }
 
 /* Sections + rails */
 .ex-section { max-width: 1200px; margin: 0 auto; padding: 22px 0 2px; scroll-margin-top: 64px; }
-.ex-section-head { display: flex; align-items: baseline; gap: 10px; margin: 0 18px 12px; }
+.ex-section-head { display: flex; align-items: baseline; gap: 10px; margin: 0 64px 12px; }
 .ex-section-title { margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; color: var(--ex-heading); }
 .ex-section-count { font-size: 0.82rem; color: var(--ex-muted); font-variant-numeric: tabular-nums; }
 
-/* Horizontal rail — snap scrolling, hidden scrollbar */
-.ex-rail { display: flex; gap: 14px; overflow-x: auto; padding: 2px 18px 16px;
-  scroll-snap-type: x proximity; scroll-padding-left: 18px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+/* Horizontal rail — snap scrolling, hidden scrollbar. The mask fades cards
+   out at both edges ("shadow borders") as they scroll under it, and the
+   wrap's side gutters keep the paging arrows clear of the images. */
+.ex-rail { display: flex; gap: 14px; overflow-x: auto; padding: 2px 16px 16px;
+  scroll-snap-type: x proximity; scroll-padding-left: 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); }
 .ex-rail::-webkit-scrollbar { display: none; }
 
 /* TripAdvisor-style borderless tile — rounded image block, plain text below
@@ -449,6 +529,12 @@ export default {
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: background .18s, color .18s; }
 .ex-act:hover { background: var(--ex-act-bg-hover); }
 .ex-act--saved { color: #D4AF37; }
+.ex-card-acts--bottom { top: auto; bottom: 10px; }
+/* Photos / info stay quiet until the pointer is on the card (touch: always shown) */
+@media (hover: hover) and (pointer: fine) {
+  .ex-card-acts--bottom { opacity: 0; transition: opacity .2s ease; }
+  .ex-card:hover .ex-card-acts--bottom { opacity: 1; }
+}
 
 /* Partner tier chip + card treatments — chat palette:
    verified green, spotlight blue #3b9fdd, signature gold. */
@@ -463,14 +549,15 @@ export default {
 .ex-card--signature .ex-card-imgwrap { box-shadow: inset 0 0 0 1.5px rgba(212,175,55,0.65), 0 0 18px rgba(212,175,55,0.22); }
 
 /* Rail paging arrows — TripAdvisor-style solid circles, always visible on
-   desktop pointer devices, vertically centered on the image row. */
+   desktop pointer devices, sitting in the side gutters OFF the images. */
 .ex-rail-wrap { position: relative; }
-.ex-rail-btn { position: absolute; top: 128px; z-index: 5; width: 40px; height: 40px; border-radius: 999px; cursor: pointer;
+@media (hover: hover) and (pointer: fine) { .ex-rail-wrap { padding: 0 48px; } }
+.ex-rail-btn { position: absolute; top: 118px; z-index: 5; width: 40px; height: 40px; border-radius: 999px; cursor: pointer;
   display: none; place-items: center; color: var(--ex-arrow-fg); background: var(--ex-arrow-bg);
   border: 1px solid var(--ex-arrow-line); box-shadow: 0 4px 14px rgba(0,0,0,0.18); transition: background .18s; }
 .ex-rail-btn:hover { background: var(--ex-act-bg-hover); }
-.ex-rail-btn--prev { left: 4px; }
-.ex-rail-btn--next { right: 4px; }
+.ex-rail-btn--prev { left: 0; }
+.ex-rail-btn--next { right: 0; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
 
 .ex-card-name { font-size: 0.97rem; font-weight: 700; line-height: 1.3; color: var(--ex-text); margin-bottom: 2px;
@@ -554,7 +641,9 @@ export default {
   .ex-section { padding: 16px 0 2px; }
   .ex-section-head { margin: 0 14px 10px; }
   .ex-head, .ex-nav { padding-left: 14px; padding-right: 14px; }
-  .ex-rail { gap: 11px; padding: 2px 14px 14px; scroll-padding-left: 14px; }
+  .ex-rail { gap: 11px; padding: 2px 14px 14px; scroll-padding-left: 14px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
   .ex-card { width: 46vw; }
   .ex-gallery-nav { width: 42px; height: 42px; }
   .ex-gallery-nav--prev { left: 10px; }

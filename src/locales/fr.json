@@ -1088,7 +1088,10 @@
       "hidden_gems": "Trésors cachés",
       "shopping": "Boutiques"
     },
-    "photos": "Photos"
+    "photos": "Photos",
+    "search_ph": "Où ? Ville, région, pays…",
+    "search": "Rechercher",
+    "search_none": "Impossible de trouver cet endroit."
   },
   "usage": {
     "cooldown": {
