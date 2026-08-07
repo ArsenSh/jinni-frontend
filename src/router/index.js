@@ -210,7 +210,7 @@ router.beforeEach(async (to, from, next) => {
     }
     // Business owners go to their dashboard, not traveler onboarding/chat
     if (user?.businessId && !user?.isAdmin) {
-        const bizRoutes = ['BusinessDashboard', 'BusinessApply', 'BusinessLanding', 'JinniChat', 'ContactUs', 'Onboarding', 'MapSelector', 'Terms', 'Privacy', 'BusinessPrivacy', 'BusinessTerms']
+        const bizRoutes = ['BusinessDashboard', 'BusinessApply', 'BusinessLanding', 'JinniChat', 'Explore', 'ContactUs', 'Onboarding', 'MapSelector', 'Terms', 'Privacy', 'BusinessPrivacy', 'BusinessTerms']
         if (!bizRoutes.includes(to.name)) { return next({ name: 'BusinessDashboard' }) }
         return next()
     }
