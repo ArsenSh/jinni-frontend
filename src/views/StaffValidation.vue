@@ -1818,10 +1818,11 @@ export default {
             myPermissions.value = {
               validateBusinesses: p.validateBusinesses !== false,
               manageDestinations: p.manageDestinations === true,
+              moderateExplore: p.moderateExplore === true,
             }
-            // Admin sees both regardless.
+            // Admin sees everything regardless.
             if (userRole.value === 'admin' || u.isAdmin) {
-              myPermissions.value = { validateBusinesses: true, manageDestinations: true }
+              myPermissions.value = { validateBusinesses: true, manageDestinations: true, moderateExplore: true }
             }
             meEndpointHit.value = path
             return
