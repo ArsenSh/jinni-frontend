@@ -3973,14 +3973,34 @@ export default {
        skips labels ("Important:") and sentences, so emphasis text is left
        alone. Rendered via v-html, so the click is handled by delegation. */
     linkifyPlaceNames(html) {
+      const makeLink = (t) => {
+        const enc = t.replace(/"/g, '&quot;');
+        return `<strong class="place-search" data-place="${enc}" title="${this.t('chat.search_place') || 'Look up'}">${t}</strong>`;
+      };
+      // 1) Authoritative: bolds the BACKEND marked as place names (invisible
+      //    U+2063 prefix, added when a verified-then-demoted card was restored
+      //    to prose). No guessing — always linked.
+      html = html.replace(/<strong>⁣\s*([^<]{1,90}?)<\/strong>/g, (m, name) => makeLink(name.trim()));
+      // 2) Heuristic fallback for unmarked bolds (prose-only answers where the
+      //    card pipeline never ran).
       return html.replace(/<strong>([^<]{2,60})<\/strong>/g, (m, name) => {
         const t = name.trim();
         if (/[.!?:]$/.test(t)) return m;              // labels / sentence-enders
         if (/[.!?]/.test(t)) return m;                // full sentences
-        if (!/^[A-Z\u00C0-\u024F\u0400-\u04FF0-9]/.test(t)) return m;  // starts capital/number (Latin+Cyrillic)
+        if (!/^[A-Z\u00C0-\u024F\u0400-\u04FF\u0531-\u05560-9]/.test(t)) return m; // starts capital/number
         if (t.split(/\s+/).length > 7) return m;      // too long to be a name
-        const enc = t.replace(/"/g, '&quot;');
-        return `<strong class="place-search" data-place="${enc}" title="${this.t('chat.search_place') || 'Look up'}">${name}</strong>`;
+        // Only NAME-like bolds get the link. Proper names carry \u22652 capitalized
+        // words ("Grand Hotel Yerevan", \u00AB\u0413\u0440\u0430\u043D\u0434 \u041E\u0442\u0435\u043B\u044C \u0415\u0440\u0435\u0432\u0430\u043D\u00BB) or are all-caps
+        // brands ("COBA"); section headings are sentence-case \u2014 only the first
+        // word capitalized (\u00AB\u0427\u0430\u0441\u044B \u0440\u0430\u0431\u043E\u0442\u044B\u00BB, \u00AB\u0420\u0430\u0441\u043F\u043E\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0438 \u043A\u043E\u043D\u0442\u0430\u043A\u0442\u044B\u00BB, "Opening
+        // hours") \u2014 or a lone common word (\u00AB\u0420\u0435\u0439\u0442\u0438\u043D\u0433\u00BB, \u00AB\u0410\u0442\u043C\u043E\u0441\u0444\u0435\u0440\u0430\u00BB).
+        const words = t.split(/\s+/);
+        const capWords = words.filter(w => /^[A-Z\u00C0-\u00DE\u0410-\u042F\u0401\u0531-\u05560-9]/.test(w)).length;
+        const isName = words.length === 1
+          ? (/^[A-Z\u0410-\u042F\u0401\u0531-\u0556]{3,}$/.test(t) || /\d/.test(t))   // all-caps brand or has digits
+          : capWords >= 2;
+        if (!isName) return m;
+        return makeLink(t);
       });
     },
     handlePlaceSearchClick(e) {
