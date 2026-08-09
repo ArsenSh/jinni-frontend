@@ -1687,7 +1687,7 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import axios from 'axios'
 import { isNightTime } from '@/utils/timeUtils'
-const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.15:5000/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.5:5000/api'
 // Status keys & labels — match Business.js enum
 // 'expired' was added when one-time events past their end-date became their
 // own first-class status (separate from the displacement-driven 'frozen'),

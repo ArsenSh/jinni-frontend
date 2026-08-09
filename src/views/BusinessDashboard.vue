@@ -1709,7 +1709,7 @@ import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import { isNightTime } from '@/utils/timeUtils'
 import SwitchModeOverlay from '@/components/ui/SwitchModeOverlay.vue'
-const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.15:5000/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.5:5000/api'
 
 const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
 

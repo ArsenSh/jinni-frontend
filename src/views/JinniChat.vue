@@ -1615,7 +1615,7 @@ import RecommendationMap from '@/components/ui/RecommendationMap.vue';
 import ItineraryView from '@/components/ui/ItineraryView.vue';
 import { isNightTime } from '@/utils/timeUtils';
 import { useI18n } from 'vue-i18n';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.15:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000';
 /** How long the preference bar stays visible after it reveals. */
 const PREFERENCE_BAR_HIDE_MS = 5000;
 /** How long the quota notice stays above the composer. */
@@ -4475,7 +4475,10 @@ export default {
                     document.body.style.overflow = 'hidden';
                   }
                   else if (data.type === 'image_single') {
-                    this.fullscreenImages.push({ url: this.getImageUrl(data.image.url), title: data.image.title || 'Image', caption: data.image.caption || '', source: data.image.source || 'google_places' });
+                    const resolvedUrl = this.getImageUrl(data.image.url);
+                    this.fullscreenImages.push({ url: resolvedUrl, title: data.image.title || 'Image', caption: data.image.caption || '', source: data.image.source || 'google_places' });
+                    // Warm the browser cache so flipping is instant.
+                    if (resolvedUrl && !resolvedUrl.startsWith('data:')) { const pre = new Image(); pre.src = resolvedUrl; }
                     if (data.progress.current === 1) {
                       this.currentFullscreenIndex = 0;
                       this.fullscreenLoading = false;
@@ -4619,9 +4622,13 @@ export default {
                 }
                 else if (data.type === 'image_single') {
                   progressiveImages.push(data.image);
-                  if (data.progress.current === 1) { this.openFullscreenModal([data.image]) } 
+                  if (data.progress.current === 1) { this.openFullscreenModal([data.image]) }
                   else {
-                    this.fullscreenImages.push({ ...data.image, url: this.getImageUrl(data.image.url || data.image.src) });
+                    const resolvedUrl = this.getImageUrl(data.image.url || data.image.src);
+                    this.fullscreenImages.push({ ...data.image, url: resolvedUrl });
+                    // Warm the browser cache now so flipping to this slot is
+                    // instant instead of a multi-second fetch at click time.
+                    if (resolvedUrl && !resolvedUrl.startsWith('data:')) { const pre = new Image(); pre.src = resolvedUrl; }
                     this.$forceUpdate();
                   }
                 }

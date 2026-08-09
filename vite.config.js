@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       proxy: {
         '/api': {
-          target: env.VITE_API_TARGET || 'http://192.168.1.15:5000',
+          target: env.VITE_API_TARGET || 'http://192.168.1.5:5000',
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path

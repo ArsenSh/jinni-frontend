@@ -243,7 +243,7 @@ export default {
       resetTimer: 0,
       resetInterval: null,
       formData: {name: '', email: '', password: ''},
-      API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.15:5000'
+      API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000'
     }
   },
   mounted() {
