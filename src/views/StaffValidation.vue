@@ -1517,6 +1517,7 @@
                 <span class="exp-status" :class="'exp-status--' + (p.explore?.status || 'visible')">
                   {{ p.explore?.status === 'verified' ? '✓ Verified' : (p.explore?.status === 'hidden' ? 'Hidden' : 'Visible') }}
                 </span>
+                <span v-if="p.aiBlocked" class="exp-status exp-status--hidden" title="Blocked from AI recommendations">AI ✕</span>
               </td>
               <td class="col-actions" data-label="Action" @click.stop>
                 <div class="action-group">
@@ -1578,6 +1579,17 @@
               <span v-if="expSelected.primaryType" class="exp-modal-primary">{{ expSelected.primaryType }}</span>
             </div>
             <div class="edit-help-sub" style="margin:-2px 0 10px">Click a category to add / remove this place from that Explore section. Removing all of them takes the place off Explore entirely.</div>
+            <!-- User-interest tags — help the system match this place to
+                 traveler preferences (nature, family, romantic, …). -->
+            <div class="exp-modal-cats">
+              <button v-for="t in EXPLORE_INTERESTS" :key="t" type="button"
+                      class="exp-cat-chip exp-int-chip" :class="{ 'exp-int-chip--on': (expSelected.interests || []).includes(t) }"
+                      :disabled="expBusy === expSelected.placeId"
+                      @click="toggleExpInterest(expSelected, t)">
+                {{ destTagLabel(t) }}
+              </button>
+            </div>
+            <div class="edit-help-sub" style="margin:-2px 0 10px">Interest tags — which traveler preferences this place fits.</div>
 
             <dl class="exp-modal-info">
               <template v-if="expSelected.details?.formatted_address"><dt>Address</dt><dd>{{ expSelected.details.formatted_address }}</dd></template>
@@ -1599,6 +1611,11 @@
 
             <div class="exp-modal-actions">
               <a v-if="expMapsUrl(expSelected)" class="action-btn btn-muted" :href="expMapsUrl(expSelected)" target="_blank" rel="noopener noreferrer">Open in Maps</a>
+              <button class="action-btn" :class="expSelected.aiBlocked ? 'exp-btn-hide' : 'btn-muted'"
+                      :disabled="expBusy === expSelected.placeId" @click="toggleAiBlock(expSelected)"
+                      :title="expSelected.aiBlocked ? 'AI recommendations are blocked for this place — click to allow again' : 'Stop the AI from ever recommending this place (all users, all categories)'">
+                {{ expSelected.aiBlocked ? 'AI: Blocked' : 'Block AI' }}
+              </button>
               <span style="flex:1"></span>
               <button v-if="expSelected.explore?.status !== 'verified'" class="action-btn exp-btn-verify" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'verified')">Verify</button>
               <button v-if="expSelected.explore?.status !== 'hidden'" class="action-btn exp-btn-hide" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'hidden')">Hide</button>
@@ -2181,6 +2198,32 @@ export default {
         expPlaces.value = []
         expTotal.value = 0
       } finally { expLoading.value = false }
+    }
+    const EXPLORE_INTERESTS = ['nature', 'family', 'romantic', 'art', 'cultural', 'history', 'adventure', 'relaxation', 'nightlife', 'food&drink', 'luxury', 'budget']
+    // Toggle one user-interest tag on a cached place.
+    async function toggleExpInterest(place, tag) {
+      const cur = Array.isArray(place.interests) ? [...place.interests] : []
+      const next = cur.includes(tag) ? cur.filter(t => t !== tag) : [...cur, tag]
+      expBusy.value = place.placeId
+      try {
+        const { data } = await axios.patch(`${API_URL}/staff/explore-places/${place.placeId}/actions`, { interests: next }, { headers: authHeader() })
+        place.interests = data?.place?.interests || next
+        showToast(data?.message || 'Interests updated')
+      } catch (err) {
+        showToast(err.response?.data?.error || 'Failed to update interests', 'error')
+      } finally { expBusy.value = null }
+    }
+    // Block / allow the AI recommending this place (all users, all pipelines).
+    async function toggleAiBlock(place) {
+      const next = !place.aiBlocked
+      expBusy.value = place.placeId
+      try {
+        const { data } = await axios.patch(`${API_URL}/staff/explore-places/${place.placeId}/actions`, { aiBlocked: next }, { headers: authHeader() })
+        place.aiBlocked = data?.place?.aiBlocked ?? next
+        showToast(place.aiBlocked ? `"${place.name}" blocked from AI recommendations` : `"${place.name}" allowed for AI again`)
+      } catch (err) {
+        showToast(err.response?.data?.error || 'Failed to update AI block', 'error')
+      } finally { expBusy.value = null }
     }
     // Toggle a place's membership in one Explore category (PATCHes the full
     // curated actions array; scope enforced server-side).
@@ -3300,6 +3343,7 @@ export default {
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
       expStatus, expStatusOpts, expCategory, expCategories, expCounts,
       expSearchInput, onExpSearchInput, loadExplorePlaces, changeExpPage, setExpStatus, toggleExpAction,
+      EXPLORE_INTERESTS, toggleExpInterest, toggleAiBlock,
       expSelected, expImages, expImagesLoading, openExpPlace, apiOrigin, expPrice, fmtD, expMapsUrl,
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES, DEST_PREFS, destTypeFilter, destPrefFilter, destTagLabel,
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
@@ -4065,6 +4109,7 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .exp-cat-chip--on { color: var(--good); background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.4); }
 .exp-cat-chip:disabled { opacity: 0.5; cursor: default; }
 .exp-modal-primary { font-size: 11px; color: var(--text-faint); margin-left: 4px; }
+.exp-int-chip--on { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 .exp-modal-info { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 12px; font-size: 13px; }
 .exp-modal-info dt { color: var(--text-mute); font-weight: 600; white-space: nowrap; }
 .exp-modal-info dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
