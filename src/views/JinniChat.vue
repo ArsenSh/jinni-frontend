@@ -4723,6 +4723,9 @@ export default {
             latitude: rec.latitude ?? null,
             longitude: rec.longitude ?? null,
             verifiedId: rec.verifiedId || null,
+            // Which collection verifiedId points to — destinations must not
+            // show the partner badge after a reload.
+            _verifiedModel: rec._verifiedModel || null,
             source: rec.source || null,
             isPartner: rec.isPartner || false,
             partnerTier: rec.partnerTier || null,
@@ -6125,10 +6128,12 @@ export default {
       if (this._usageNoticeAt != null && pct < this._usageNoticeAt + 10) return;
 
       const parts = [];
-      if (status.daily.tokens.percentage > 80) parts.push(this.t('chat.usage.warning.tokens', { percentage: status.daily.tokens.percentage }));
-      if (status.daily.places.percentage > 80) parts.push(this.t('chat.usage.warning.places', { percentage: status.daily.places.percentage }));
+      // NOTE: these live at TOP-LEVEL usage.warning.* in the locale files —
+      // 'chat.usage.…' doesn't exist and rendered as the raw key.
+      if (status.daily.tokens.percentage > 80) parts.push(this.t('usage.warning.tokens', { percentage: status.daily.tokens.percentage }));
+      if (status.daily.places.percentage > 80) parts.push(this.t('usage.warning.places', { percentage: status.daily.places.percentage }));
       if (!parts.length) return;
-      parts.push(this.t('chat.usage.warning.upgrade'));
+      parts.push(this.t('usage.warning.upgrade'));
 
       this._usageNoticeAt = pct;
       this.usageNotice = parts.join(' ');

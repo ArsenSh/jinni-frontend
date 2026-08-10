@@ -807,6 +807,22 @@
         </div>
       </div>
       <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <div class="filter-chips">
+          <button class="chip" :class="{ active: !destTypeFilter }" @click="destTypeFilter = ''; destPage = 1; loadDestinations()">All</button>
+          <button v-for="tp in DEST_PRIMARY" :key="tp" class="chip" :class="{ active: destTypeFilter === tp }"
+                  @click="destTypeFilter = destTypeFilter === tp ? '' : tp; destPage = 1; loadDestinations()">{{ destTagLabel(tp) }}</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Preference</label>
+        <div class="filter-chips">
+          <button class="chip" :class="{ active: !destPrefFilter }" @click="destPrefFilter = ''; destPage = 1; loadDestinations()">All</button>
+          <button v-for="tp in DEST_PREFS" :key="tp" class="chip" :class="{ active: destPrefFilter === tp }"
+                  @click="destPrefFilter = destPrefFilter === tp ? '' : tp; destPage = 1; loadDestinations()">{{ destTagLabel(tp) }}</button>
+        </div>
+      </div>
+      <div class="filter-group">
         <label class="filter-label">Search</label>
         <input v-model="destSearchInput" type="text" class="filter-input" placeholder="Search destinations…" @input="onDestSearchInput" />
       </div>
@@ -2006,6 +2022,13 @@ export default {
     const destMineOnly = ref(false)
     const destSearchInput = ref('')
     const destSearchTerm  = ref('')
+    // Tag filters over the destination `type` array: one category (restaurants,
+    // hotels, …) and one preference (nature, family, romantic, …); combined
+    // server-side with $all so both narrow the list.
+    const destTypeFilter = ref('')
+    const destPrefFilter = ref('')
+    const DEST_PREFS = ['cultural','history','adventure','relaxation','nature','art','nightlife','food&drink','family','romantic','luxury','budget']
+    const destTagLabel = (t) => String(t).replace(/_/g, ' ').replace(/&/g, ' & ').replace(/^\w/, c => c.toUpperCase())
     let destSearchDebounce = null
     const destTotalPages = computed(() => Math.max(1, Math.ceil(destTotal.value / destLimit.value)))
 
@@ -2035,6 +2058,8 @@ export default {
         if (destFilter.value)     params.filter = destFilter.value
         if (destSearchTerm.value) params.search = destSearchTerm.value
         if (destMineOnly.value)   params.mine   = 'true'
+        const destTags = [destTypeFilter.value, destPrefFilter.value].filter(Boolean)
+        if (destTags.length)      params.types  = destTags.join(',')
         const { data } = await axios.get(`${API_URL}/staff/destinations`, {
           params, headers: authHeader()
         })
@@ -2288,7 +2313,12 @@ export default {
     // / whitespace-only URL entries so the prev/next arrows don't land on
     // a blank slot. Same logic admin's gallery uses.
     const destGalleryImages = computed(() => {
+      // resolveImage prefixes the API origin onto server-relative paths
+      // (/api/ai/place-image/dest_…) — without it the browser resolves them
+      // against the FRONTEND origin, where no API answers, and the gallery
+      // renders nothing.
       return (destModal.value.form?.images || []).map(s => (s || '').trim()).filter(Boolean)
+        .map(u => resolveImage(u, destModal.value.id, 0))
     })
 
     function openDestCreate() {
@@ -3246,7 +3276,7 @@ export default {
       expStatus, expStatusOpts, expCategory, expCategories, expCounts,
       expSearchInput, onExpSearchInput, loadExplorePlaces, changeExpPage, setExpStatus,
       expSelected, expImages, expImagesLoading, openExpPlace, apiOrigin, expPrice, fmtD, expMapsUrl,
-      DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES,
+      DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES, DEST_PREFS, destTypeFilter, destPrefFilter, destTagLabel,
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
       toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords,
