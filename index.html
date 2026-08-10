@@ -9,7 +9,9 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <!-- v2 filename busts Safari/Cloudflare caches — the old URL may be
+         cached for a long time and kept serving the unbalanced icon. -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-v2.png">
 </head>
 <body>
 <div id="app"></div>
