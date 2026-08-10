@@ -1566,7 +1566,18 @@
                 {{ expSelected.explore?.status === 'verified' ? '✓ Verified' : (expSelected.explore?.status === 'hidden' ? 'Hidden' : 'Visible') }}
               </span>
             </h3>
-            <div class="exp-modal-cats">{{ (expSelected.actions || []).join(' · ') }}<template v-if="expSelected.primaryType"> — {{ expSelected.primaryType }}</template></div>
+            <!-- Category membership — click to add/remove this place from an
+                 Explore rail (fixes wrong AI tagging like historical+events). -->
+            <div class="exp-modal-cats">
+              <button v-for="c in expCategories" :key="c.value" type="button"
+                      class="exp-cat-chip" :class="{ 'exp-cat-chip--on': (expSelected.actions || []).includes(c.value) }"
+                      :disabled="expBusy === expSelected.placeId"
+                      @click="toggleExpAction(expSelected, c.value)">
+                {{ c.label }}
+              </button>
+              <span v-if="expSelected.primaryType" class="exp-modal-primary">{{ expSelected.primaryType }}</span>
+            </div>
+            <div class="edit-help-sub" style="margin:-2px 0 10px">Click a category to add / remove this place from that Explore section. Removing all of them takes the place off Explore entirely.</div>
 
             <dl class="exp-modal-info">
               <template v-if="expSelected.details?.formatted_address"><dt>Address</dt><dd>{{ expSelected.details.formatted_address }}</dd></template>
@@ -2170,6 +2181,20 @@ export default {
         expPlaces.value = []
         expTotal.value = 0
       } finally { expLoading.value = false }
+    }
+    // Toggle a place's membership in one Explore category (PATCHes the full
+    // curated actions array; scope enforced server-side).
+    async function toggleExpAction(place, cat) {
+      const cur = Array.isArray(place.actions) ? [...place.actions] : []
+      const next = cur.includes(cat) ? cur.filter(a => a !== cat) : [...cur, cat]
+      expBusy.value = place.placeId
+      try {
+        const { data } = await axios.patch(`${API_URL}/staff/explore-places/${place.placeId}/actions`, { actions: next }, { headers: authHeader() })
+        place.actions = data?.place?.actions || next
+        showToast(data?.message || 'Categories updated')
+      } catch (err) {
+        showToast(err.response?.data?.error || 'Failed to update categories', 'error')
+      } finally { expBusy.value = null }
     }
     async function setExpStatus(place, status) {
       expBusy.value = place.placeId
@@ -3274,7 +3299,7 @@ export default {
       // Explore moderation tab
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
       expStatus, expStatusOpts, expCategory, expCategories, expCounts,
-      expSearchInput, onExpSearchInput, loadExplorePlaces, changeExpPage, setExpStatus,
+      expSearchInput, onExpSearchInput, loadExplorePlaces, changeExpPage, setExpStatus, toggleExpAction,
       expSelected, expImages, expImagesLoading, openExpPlace, apiOrigin, expPrice, fmtD, expMapsUrl,
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES, DEST_PREFS, destTypeFilter, destPrefFilter, destTagLabel,
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
@@ -4034,7 +4059,12 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .exp-modal-imgs--empty { align-items: center; justify-content: center; gap: 10px; color: var(--text-faint); font-size: 13px; height: 120px; }
 .exp-modal-body { padding: 16px 20px 18px; }
 .exp-modal-title { margin: 0 0 4px; font-size: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.exp-modal-cats { font-size: 12px; color: var(--text-faint); margin-bottom: 12px; }
+.exp-modal-cats { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+.exp-cat-chip { padding: 4px 11px; border: 1px solid var(--line-soft); border-radius: 999px; cursor: pointer; font-family: inherit;
+  font-size: 11.5px; font-weight: 600; color: var(--text-faint); background: transparent; transition: background .15s, color .15s; }
+.exp-cat-chip--on { color: var(--good); background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.4); }
+.exp-cat-chip:disabled { opacity: 0.5; cursor: default; }
+.exp-modal-primary { font-size: 11px; color: var(--text-faint); margin-left: 4px; }
 .exp-modal-info { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 12px; font-size: 13px; }
 .exp-modal-info dt { color: var(--text-mute); font-weight: 600; white-space: nowrap; }
 .exp-modal-info dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
