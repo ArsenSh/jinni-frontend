@@ -786,6 +786,16 @@
       </div>
     </div>
 
+    <!-- ── Toolbar: search + add. Sits above the filters so the primary
+         actions don't drown in chip rows. ── -->
+    <div class="filter-bar dest-toolbar">
+      <input v-model="destSearchInput" type="text" class="filter-input dest-toolbar-search" placeholder="Search destinations…" @input="onDestSearchInput" />
+      <button class="ghost-btn" @click="openDestCreate" :disabled="scopeBanner?.empty" :title="scopeBanner?.empty ? 'Assign a territory first' : 'Add a new destination'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add destination
+      </button>
+    </div>
+
     <!-- ── Filter bar (validation-style — same .filter-bar / .chip pattern
          the validation tab uses, so the two tabs feel like one product). ── -->
     <div class="filter-bar">
@@ -821,16 +831,6 @@
           <button v-for="tp in DEST_PREFS" :key="tp" class="chip" :class="{ active: destPrefFilter === tp }"
                   @click="destPrefFilter = destPrefFilter === tp ? '' : tp; destPage = 1; loadDestinations()">{{ destTagLabel(tp) }}</button>
         </div>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Search</label>
-        <input v-model="destSearchInput" type="text" class="filter-input" placeholder="Search destinations…" @input="onDestSearchInput" />
-      </div>
-      <div class="filter-group filter-group--right">
-        <button class="ghost-btn" @click="openDestCreate" :disabled="scopeBanner?.empty" :title="scopeBanner?.empty ? 'Assign a territory first' : 'Add a new destination'">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add destination
-        </button>
       </div>
     </div>
 
@@ -2009,7 +2009,7 @@ export default {
       { value: '',           label: 'All' },
       { value: 'active',     label: 'Active' },
       { value: 'inactive',   label: 'Inactive' },
-      { value: 'hidden_gem', label: 'Hidden gems' },
+      // 'hidden_gem' intentionally absent — the Category chips cover it.
     ]
 
     const destinations = ref([])
@@ -4386,6 +4386,10 @@ select.edit-input { cursor: pointer; }
 .dest-map-coords { font-size: 11px; font-family: 'DM Mono', monospace }
 .edit-panel.night-mode .dest-map-coords { color: #94a3b8 }
 .edit-panel.day-mode   .dest-map-coords { color: #A0522D }
+
+/* Destinations toolbar — search grows, add button stays right */
+.dest-toolbar { display: flex; align-items: center; gap: 12px; }
+.dest-toolbar-search { flex: 1; min-width: 0; max-width: 480px; }
 
 /* Manual coordinate entry + apply-hours-to-all */
 .dest-map-manual { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
