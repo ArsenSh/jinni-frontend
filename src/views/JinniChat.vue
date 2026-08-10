@@ -3959,9 +3959,12 @@ export default {
       formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
       formatted = formatted.replace(/_(.+?)_/g, '<em>$1</em>');
       formatted = formatted.replace(/~~(.+?)~~/g, '<del>$1</del>');
-      formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-      formatted = formatted.replace(/\[(https?:\/\/[^\s\]]+)\]/g, '<a href="$1" target="_blank">$1</a>');
-      formatted = formatted.replace(/(?<!href="|">|<code>)(https?:\/\/[^\s<>"()]+)(?!<\/a>|<\/code>)/g, (match) => { return `<a href="${match}" target="_blank">${match}</a>` });
+      // NOTE: '|' is excluded from every URL class — newlines are still the
+      // |||NL||| marker at this stage, and letting '|' into a URL swallowed
+      // the marker into the href (rendered as a literal <br> inside the link).
+      formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)|]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+      formatted = formatted.replace(/\[(https?:\/\/[^\s\]|]+)\]/g, '<a href="$1" target="_blank">$1</a>');
+      formatted = formatted.replace(/(?<!href="|">|<code>)(https?:\/\/[^\s<>"()|]+)(?!<\/a>|<\/code>)/g, (match) => { return `<a href="${match}" target="_blank">${match}</a>` });
       formatted = formatted.replace(/\|\|\|NL\|\|\|/g, '<br>');
       formatted = formatted.replace(/(<br>){3,}/g, '<br><br>');
       return formatted;
@@ -3973,34 +3976,15 @@ export default {
        skips labels ("Important:") and sentences, so emphasis text is left
        alone. Rendered via v-html, so the click is handled by delegation. */
     linkifyPlaceNames(html) {
-      const makeLink = (t) => {
+      // A bold becomes a click-to-search link ONLY when the BACKEND marked it
+      // as a place name (invisible U+2063 prefix, added at the one moment the
+      // pipeline KNOWS the bold is a verified place whose card was demoted to
+      // prose). No frontend guessing: headings, emphasis and every other bold
+      // are left exactly as written.
+      return html.replace(/<strong>\u2063\s*([^<]{1,90}?)<\/strong>/g, (m, name) => {
+        const t = name.trim();
         const enc = t.replace(/"/g, '&quot;');
         return `<strong class="place-search" data-place="${enc}" title="${this.t('chat.search_place') || 'Look up'}">${t}</strong>`;
-      };
-      // 1) Authoritative: bolds the BACKEND marked as place names (invisible
-      //    U+2063 prefix, added when a verified-then-demoted card was restored
-      //    to prose). No guessing — always linked.
-      html = html.replace(/<strong>⁣\s*([^<]{1,90}?)<\/strong>/g, (m, name) => makeLink(name.trim()));
-      // 2) Heuristic fallback for unmarked bolds (prose-only answers where the
-      //    card pipeline never ran).
-      return html.replace(/<strong>([^<]{2,60})<\/strong>/g, (m, name) => {
-        const t = name.trim();
-        if (/[.!?:]$/.test(t)) return m;              // labels / sentence-enders
-        if (/[.!?]/.test(t)) return m;                // full sentences
-        if (!/^[A-Z\u00C0-\u024F\u0400-\u04FF\u0531-\u05560-9]/.test(t)) return m; // starts capital/number
-        if (t.split(/\s+/).length > 7) return m;      // too long to be a name
-        // Only NAME-like bolds get the link. Proper names carry \u22652 capitalized
-        // words ("Grand Hotel Yerevan", \u00AB\u0413\u0440\u0430\u043D\u0434 \u041E\u0442\u0435\u043B\u044C \u0415\u0440\u0435\u0432\u0430\u043D\u00BB) or are all-caps
-        // brands ("COBA"); section headings are sentence-case \u2014 only the first
-        // word capitalized (\u00AB\u0427\u0430\u0441\u044B \u0440\u0430\u0431\u043E\u0442\u044B\u00BB, \u00AB\u0420\u0430\u0441\u043F\u043E\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0438 \u043A\u043E\u043D\u0442\u0430\u043A\u0442\u044B\u00BB, "Opening
-        // hours") \u2014 or a lone common word (\u00AB\u0420\u0435\u0439\u0442\u0438\u043D\u0433\u00BB, \u00AB\u0410\u0442\u043C\u043E\u0441\u0444\u0435\u0440\u0430\u00BB).
-        const words = t.split(/\s+/);
-        const capWords = words.filter(w => /^[A-Z\u00C0-\u00DE\u0410-\u042F\u0401\u0531-\u05560-9]/.test(w)).length;
-        const isName = words.length === 1
-          ? (/^[A-Z\u0410-\u042F\u0401\u0531-\u0556]{3,}$/.test(t) || /\d/.test(t))   // all-caps brand or has digits
-          : capWords >= 2;
-        if (!isName) return m;
-        return makeLink(t);
       });
     },
     handlePlaceSearchClick(e) {

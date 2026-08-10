@@ -1097,9 +1097,20 @@
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>
                   {{ destMap.loading ? 'Searching…' : 'Re-locate from address' }}
                 </button>
-                <span v-if="destModal.form.location.coordinates.lat && destModal.form.location.coordinates.lng" class="dest-map-coords">
+                <span v-if="destModal.readOnly && destModal.form.location.coordinates.lat && destModal.form.location.coordinates.lng" class="dest-map-coords">
                   {{ Number(destModal.form.location.coordinates.lat).toFixed(5) }}, {{ Number(destModal.form.location.coordinates.lng).toFixed(5) }}
                 </span>
+              </div>
+              <!-- Manual coordinates — for places Nominatim can't find or puts
+                   in the wrong spot. Type lat/lng (or click the map / drag the
+                   pin) and the form uses these exact coordinates. -->
+              <div v-if="!destModal.readOnly" class="dest-map-manual">
+                <input class="edit-input dest-coord-input" type="number" step="0.000001" min="-90" max="90"
+                       v-model.number="destModal.form.location.coordinates.lat" placeholder="Latitude"/>
+                <input class="edit-input dest-coord-input" type="number" step="0.000001" min="-180" max="180"
+                       v-model.number="destModal.form.location.coordinates.lng" placeholder="Longitude"/>
+                <button type="button" class="action-btn btn-muted" @click="applyManualCoords">Set on map</button>
+                <span class="edit-help-sub" style="margin:0">or click the map to drop the pin</span>
               </div>
             </section>
 
@@ -1203,7 +1214,7 @@
                 <span class="edit-help-sub">Click if this place is open around the clock — per-day hours below will be hidden.</span>
               </div>
               <div v-if="!destModal.form.openingHours.is24Hours" class="edit-hours-list">
-                <div v-for="(d) in destModal.form.openingHours.days" :key="d.day" class="edit-hours-row">
+                <div v-for="(d, di) in destModal.form.openingHours.days" :key="d.day" class="edit-hours-row">
                   <span class="edit-hours-day">{{ d.day }}</span>
                   <div class="edit-hours-pills">
                     <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': !d.closed }" @click="d.closed = false">Open</button>
@@ -1213,6 +1224,10 @@
                   <span  v-if="!d.closed" class="edit-hours-sep">–</span>
                   <input v-if="!d.closed" type="time" v-model="d.close" class="edit-hours-time" />
                   <span  v-else class="edit-hours-closed-text">Closed all day</span>
+                  <button v-if="di === 0 && !d.closed" type="button" class="edit-hours-all-btn" @click="applyHoursToAllDays" title="Copy these hours to every day of the week">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Apply to all days
+                  </button>
                 </div>
               </div>
               <div v-else class="edit-help-sub">This place is open 24 hours a day, every day.</div>
@@ -1279,6 +1294,10 @@
             <!-- Images (URL list — admin's row layout with thumbnail + delete) -->
             <section class="edit-section">
               <div class="edit-section-title">Images</div>
+              <div class="edit-help-sub" style="margin-bottom:8px">
+                Leave empty to fetch photos from Google automatically (by name + address).
+                Pasted URLs are downloaded and stored on save — dead links are reported immediately — and always override the Google photos.
+              </div>
               <div class="edit-img-list">
                 <div v-for="(url, idx) in destModal.form.images" :key="idx" class="edit-img-row">
                   <div class="edit-img-thumb-wrap">
@@ -2379,6 +2398,28 @@ export default {
       }
     }
 
+    // Copy Monday's hours (open/close/closed) to every day of the week.
+    function applyHoursToAllDays() {
+      const days = destModal.value.form?.openingHours?.days
+      if (!Array.isArray(days) || !days.length) return
+      const first = days[0]
+      days.forEach(d => { d.closed = first.closed; d.open = first.open; d.close = first.close })
+    }
+
+    // Manually typed coordinates → validate and re-center the map/pin on them.
+    function applyManualCoords() {
+      const c = destModal.value.form?.location?.coordinates || {}
+      const lat = Number(c.lat), lng = Number(c.lng)
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+        destMap.value.statusClass = 'error'
+        destMap.value.statusText  = 'Enter valid coordinates (lat −90…90, lng −180…180)'
+        return
+      }
+      destMap.value.statusClass = 'found'
+      destMap.value.statusText  = 'Coordinates set manually'
+      destRenderMap({ lat, lng })
+    }
+
     function toggleDestType(t) {
       const arr = destModal.value.form.type
       const i = arr.indexOf(t)
@@ -2619,6 +2660,16 @@ export default {
             destMap.value.statusClass = 'found'
             destMap.value.statusText  = 'Pin moved — coordinates updated'
           })
+          // Click anywhere on the map to place the pin there — faster than
+          // dragging when the geocoder landed far from the real spot.
+          destLeafletMap.on('click', (e) => {
+            const ll = e.latlng
+            destMarker.setLatLng(ll)
+            destModal.value.form.location.coordinates.lat = +ll.lat.toFixed(6)
+            destModal.value.form.location.coordinates.lng = +ll.lng.toFixed(6)
+            destMap.value.statusClass = 'found'
+            destMap.value.statusText  = 'Pin placed — coordinates updated'
+          })
         }
       })
     }
@@ -2747,6 +2798,14 @@ export default {
           const i = list.findIndex(x => x._id === saved._id)
           if (i !== -1) list[i] = { ...list[i], ...saved }
           showToast(`"${saved.name}" updated`, 'success')
+        }
+        // Image mirroring report — tell the validator NOW if a URL is dead,
+        // instead of clients silently seeing a broken image later.
+        const rep = data?.imageReport
+        if (rep && rep.failed && rep.failed.length) {
+          showToast(`${rep.failed.length} image URL(s) could not be downloaded — check the gallery`, 'error')
+        } else if ((saved.images || []).length && (!payload.images || !payload.images.some(u => String(u || '').trim()))) {
+          showToast(`${saved.images.length} photos fetched from Google automatically`, 'success')
         }
         m.open = false
         // Refresh summary numbers in the background.
@@ -3190,7 +3249,7 @@ export default {
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES,
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
-      toggleDestType, destFormValid,
+      toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords,
       // Map (Leaflet)
       destMap, reGeocodeDestination,
       submitDest, toggleDest, canEditDest,
@@ -4297,6 +4356,13 @@ select.edit-input { cursor: pointer; }
 .dest-map-coords { font-size: 11px; font-family: 'DM Mono', monospace }
 .edit-panel.night-mode .dest-map-coords { color: #94a3b8 }
 .edit-panel.day-mode   .dest-map-coords { color: #A0522D }
+
+/* Manual coordinate entry + apply-hours-to-all */
+.dest-map-manual { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
+.dest-coord-input { width: 128px; font-size: 12.5px; padding: 7px 9px; font-variant-numeric: tabular-nums; }
+.edit-hours-all-btn { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; padding: 5px 10px; border: none; border-radius: 999px;
+  cursor: pointer; font-family: inherit; font-size: 11.5px; font-weight: 600; color: var(--accent); background: var(--bg-elev-2); transition: background .15s; }
+.edit-hours-all-btn:hover { background: var(--bg-elev-3); }
 
 /* Pulsing halo behind the gold destination pin. Referenced inline by the
    pinIcon HTML in destRenderMap(). Without this @keyframes block the pin
