@@ -15,8 +15,10 @@
 
           <!-- Tier selector -->
           <div class="tier-selector">
-            <div  class="tier-card"  :class="{ 'selected': form.tier === 'verified', 'zone-locked': zoneStatus.spotlightFull }"  @click="!zoneStatus.spotlightFull && selectTier('verified')">
-              <div v-if="zoneStatus.spotlightFull" class="zone-locked-overlay">
+            <!-- While PAID_TIERS_LOCKED, Verified must stay joinable even in a
+                 full zone — the paid escape hatch is unavailable. -->
+            <div  class="tier-card"  :class="{ 'selected': form.tier === 'verified', 'zone-locked': !PAID_TIERS_LOCKED && zoneStatus.spotlightFull }"  @click="(PAID_TIERS_LOCKED || !zoneStatus.spotlightFull) && selectTier('verified')">
+              <div v-if="!PAID_TIERS_LOCKED && zoneStatus.spotlightFull" class="zone-locked-overlay">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Zone requires Signature — 3 Spotlight slots taken
               </div>
@@ -37,8 +39,12 @@
                 <li class="tier-feature-limit">✗ Slot can be taken by paid listings</li>
               </ul>
             </div>
-            <div  class="tier-card spotlight-card"  :class="{ 'selected': form.tier === 'spotlight', 'zone-locked': zoneStatus.spotlightFull }"  @click="!zoneStatus.spotlightFull && selectTier('spotlight')">
-              <div v-if="zoneStatus.spotlightFull" class="zone-locked-overlay">
+            <div  class="tier-card spotlight-card"  :class="{ 'selected': form.tier === 'spotlight', 'zone-locked': PAID_TIERS_LOCKED || zoneStatus.spotlightFull }"  @click="!PAID_TIERS_LOCKED && !zoneStatus.spotlightFull && selectTier('spotlight')">
+              <div v-if="PAID_TIERS_LOCKED" class="zone-locked-overlay">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Subscriptions are under work — coming soon
+              </div>
+              <div v-else-if="zoneStatus.spotlightFull" class="zone-locked-overlay">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Zone full — 3 Spotlight listings
               </div>
@@ -71,7 +77,11 @@
                 <li>✓ Protected slot — displaces free listings in your zone</li>
               </ul>
             </div>
-            <div  class="tier-card signature-card"  :class="{ 'selected': form.tier === 'signature' }"  @click="selectTier('signature')">
+            <div  class="tier-card signature-card"  :class="{ 'selected': form.tier === 'signature', 'zone-locked': PAID_TIERS_LOCKED }"  @click="!PAID_TIERS_LOCKED && selectTier('signature')">
+              <div v-if="PAID_TIERS_LOCKED" class="zone-locked-overlay">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Subscriptions are under work — coming soon
+              </div>
               <div class="tier-badge signature-badge-display">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -1041,7 +1051,13 @@ export default {
     const currencies = ['USD', 'EUR', 'GBP', 'RUB', 'AED']
     const highlightPlaceholders = ['Award-winning chef', 'Stunning views', 'Live music', 'Locally sourced ingredients']
     
+    // Paid tiers barrier — payments aren't configured yet. Flip to false to
+    // re-enable Spotlight/Signature selection (backend clamp must be lifted
+    // too — see businessRoutes /apply).
+    const PAID_TIERS_LOCKED = true
+
     function selectTier(tier) {
+      if (PAID_TIERS_LOCKED && tier !== 'verified') return
       form.tier = tier
       const maxStyles    = tier === 'signature' ? 3 : tier === 'spotlight' ? 2 : 0
       const maxInterests = tier === 'signature' ? 3 : tier === 'spotlight' ? 2 : 0
@@ -2193,7 +2209,7 @@ export default {
       currentTheme, form, errors, zoneStatus,
       coreBusinessTypes, travelerInterests, travelerStyles,
       currencies, highlightPlaceholders,
-      selectTier, selectBusinessType, toggleInterest, toggleStyle, hasPrimaryType,
+      selectTier, selectBusinessType, toggleInterest, toggleStyle, hasPrimaryType, PAID_TIERS_LOCKED,
       addHighlight, removeHighlight,
       handleImageUpload, clearImage, validateImageUrl,
       clearError, capitalizeFirst, submitApplication, doSubmit, goHome, scrollToTop, formatExpiry,
