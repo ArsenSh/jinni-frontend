@@ -7,6 +7,12 @@
         {{ t('explore.back_chat') || 'Back to Chat' }}
       </button>
       <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
+      <!-- Framed as an open, growing set rather than a finished one. Saying
+           Jinni "already analysed/visited" these places would read as a closed
+           list and make a region look thin when it only holds a few finds;
+           "so far / keeps growing" says the same thing while making clear
+           Jinni is still enriching itself. -->
+      <p class="ex-intro">{{ t('explore.intro') || 'Places Jinni has discovered here so far — the list keeps growing.' }}</p>
       <p class="ex-sub" v-if="location && (location.city || location.country)">
         {{ [location.city, location.country].filter(Boolean).join(', ') }}
       </p>
@@ -531,6 +537,18 @@ export default {
 .ex-title { margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em;
   color: #D4AF37; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .ex-sub { margin: -4px 0 0; font-size: 0.88rem; color: var(--ex-muted); }
+/* Intro line under the title. Sits above .ex-sub (the city/country line) and
+   is deliberately quieter than it — it's framing, not data. max-width keeps
+   the sentence from stretching edge-to-edge on desktop, where a full-width
+   single line reads as a banner rather than a caption. */
+.ex-intro {
+  margin: 2px auto 0;
+  max-width: 34rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--ex-muted);
+  opacity: 0.85;
+}
 
 /* Sticky category nav */
 .ex-nav { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; overflow-x: auto; padding: 10px 18px; max-width: 1200px; margin: 12px auto 0;
