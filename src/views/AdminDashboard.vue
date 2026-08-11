@@ -225,8 +225,15 @@
               <!-- Travel Style donut -->
               <div class="pref-tile">
                 <div class="pref-tile-head">
-                  <span class="pref-tile-title">Travel Style</span>
-                  <span class="pref-tile-meta">{{ prefStats.travelStyles?.length || 0 }} options</span>
+                  <!-- Was "Travel Style". That field is now the PRICE axis
+                       only — onboarding offers exactly luxury vs budget, and
+                       family/romantic moved into Interests. Legacy accounts
+                       still carry solo/family/romantic here, and the
+                       recommendation engine explicitly discards those
+                       (proximityService GATING_STYLE_TAGS), so they are
+                       labelled as legacy rather than shown as live values. -->
+                  <span class="pref-tile-title">Price Preference</span>
+                  <span class="pref-tile-meta">luxury vs budget</span>
                 </div>
                 <div class="pref-tile-body pref-tile-body--donut">
                   <div class="pref-donut-wrap">
@@ -250,7 +257,13 @@
                   <div class="pref-legend">
                     <div v-for="(s, i) in prefStats.travelStyles?.slice(0,5)" :key="s._id" class="pref-legend-item">
                       <span class="pref-legend-dot" :style="{ background: PREF_DOT_COLORS[i % PREF_DOT_COLORS.length] }"></span>
-                      <span class="pref-legend-label">{{ s._id }}</span>
+                      <span class="pref-legend-label">
+                        {{ s._id }}
+                        <!-- Anything that isn't luxury/budget predates the
+                             change and is ignored by the recommendation engine.
+                             Marked so nobody reads it as a live segment. -->
+                        <span v-if="!LIVE_PRICE_STYLES.includes(s._id)" class="pref-legend-legacy">legacy</span>
+                      </span>
                       <span class="pref-legend-count">{{ s.count }}</span>
                     </div>
                   </div>
@@ -3863,6 +3876,12 @@ export default {
         return seg
       })
     }
+    // The only values `preferences.travelStyle` can hold today. Onboarding
+    // offers just these two (locales onboarding.styles), and proximityService
+    // gates on exactly this set — anything else in the data is a pre-migration
+    // leftover (solo / family / romantic) that the engine ignores.
+    const LIVE_PRICE_STYLES = ['luxury', 'budget']
+
     const travelStyleSegments = computed(() => {
       const items = prefStats.value.travelStyles || []
       const total = items.reduce((s, i) => s + i.count, 0)
@@ -5572,7 +5591,7 @@ export default {
       places, placesLoading, placesPage, placesTotalPages, placesSearch, placesImageFilter, placesActionFilter, placesSort, placesSummary,
       googleUsage, googleTopPlaces, googleLoading, googleDailyStats, googleChartDays, googleChartMax, googleTotalCost, googleMonthCost, googleTodayCost, googleSkuRows,
       quickActionStats,
-      prefStats, PREF_COLORS, PREF_DOT_COLORS, travelStyleSegments, currencySegments, travelStyleTopPct, currencyTopPct, prefLocTotal, prefBudgetTotal, budgetBucketColor, budgetRangeHint,
+      prefStats, PREF_COLORS, PREF_DOT_COLORS, LIVE_PRICE_STYLES, travelStyleSegments, currencySegments, travelStyleTopPct, currencyTopPct, prefLocTotal, prefBudgetTotal, budgetBucketColor, budgetRangeHint,
       prices, dbStats, mongoBilling, fetchMongoBilling, prettySku, projectedMongoCostStr, monthlyAiCost, monthlyGoogleCost, monthlyMongoCost, monthlyTotal, monthlyRevenue,
       toast, fetchAll, fetchDbStats, fmt, fmtK, initials, shortDate, eventDateLabel, relativeTime, isToday,
       splitDateTime, combineDateTime, eventScheduleSummary,
@@ -5927,6 +5946,17 @@ export default {
 .edit-an-hero-tile-label { font-size: 10.5px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.04em; }
 .edit-an-hero-tile-val { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; line-height: 1.1; }
 .edit-an-hero-tile-hint { font-size: 10px; opacity: 0.55; font-family: 'DM Mono', monospace; }
+/* Marks a preference value the recommendation engine no longer honours, so a
+   leftover from before the styles/interests split can't be mistaken for a
+   live segment. */
+.pref-legend-legacy {
+  margin-left: 5px; padding: 1px 5px; border-radius: 4px;
+  font-size: 8.5px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; vertical-align: middle; opacity: 0.75;
+}
+.night-mode .pref-legend-legacy { background: rgba(148,163,184,0.18); color: #94a3b8; }
+.day-mode   .pref-legend-legacy { background: rgba(120,80,50,0.12);  color: #8a6a4f; }
+
 /* ── B-F. SHARED SUBSECTION STYLES ────────────────────────────────────── */
 .edit-an-subsection { margin-top: 18px; }
 .edit-an-subsection:first-of-type { margin-top: 0; }
