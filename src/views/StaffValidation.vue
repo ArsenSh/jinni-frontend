@@ -1232,8 +1232,8 @@
                     </div>
                   </div>
                   <span class="edit-help-sub">
-                    Both optional. Leave them empty for a single-day event — it stays listed for the rest of the start day and disappears overnight.
-                    Set an end date only if the event runs across several days, or an end time if you want it to drop off at a precise moment.
+                    Both optional. Leave them empty and the event stops showing at its <strong>start time</strong> — set an end time if it should stay listed while it runs.
+                    Use the end date only for events spanning several days. An all-day event (no start time) stays listed until midnight.
                   </span>
                 </div>
 
@@ -2630,13 +2630,13 @@ export default {
       const es = destModal.value?.form?.eventSchedule
       if (!destIsEvent.value || !es || es.isRecurring || !es.startDate) return false
       const tz = es.timezone || destBrowserTz()
-      // Mirrors the server's implicit end: with no end date/time the event runs
-      // to the close of its start day, so pass an empty time and let the 23:59
-      // fallback apply. Using startTime here would have warned "already past"
-      // for a 20:00 concert from 20:01 onwards, when it is in fact still live.
+      // Mirrors exactly what submitDest will send, so the warning can never
+      // disagree with the saved result: an explicit end wins; an all-day event
+      // (no start time) runs to 23:59; otherwise the event ends at its start.
+      const allDay = !es.startTime && !es.endDate && !es.endTime
       const endIso = (es.endDate || es.endTime)
         ? destCombineDateTime(es.endDate || es.startDate, es.endTime, '23:59', tz)
-        : destCombineDateTime(es.startDate, '', '23:59', tz)
+        : destCombineDateTime(es.startDate, allDay ? '' : es.startTime, '23:59', tz)
       if (!endIso) return false
       return new Date(endIso).getTime() < Date.now()
     })
@@ -3288,7 +3288,17 @@ export default {
             delete payload.eventSchedule
           } else {
             const tz = es.timezone || destBrowserTz()
-            const endDateRaw = recurring ? '' : (es.endDate || (es.endTime ? es.startDate : ''))
+            // No end given → leave it empty so the event expires at its start
+            // time (a concert that has begun is no longer a recommendation).
+            //
+            // Except for ALL-DAY events — a date with no start time begins at
+            // local midnight, so expiring at the start would hide it for the
+            // whole day it runs. Those get an explicit 23:59 end on the start
+            // date, which is what "all day" actually means.
+            const allDay = !recurring && !es.startTime && !es.endDate && !es.endTime
+            const endDateRaw = recurring
+              ? ''
+              : (es.endDate || (es.endTime ? es.startDate : (allDay ? es.startDate : '')))
             payload.eventSchedule = {
               startDate: recurring ? null : (destCombineDateTime(es.startDate, es.startTime, '00:00', tz) || null),
               endDate:   recurring ? null : (destCombineDateTime(endDateRaw, es.endTime, '23:59', tz) || null),
