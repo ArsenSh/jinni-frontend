@@ -425,6 +425,9 @@
                         <svg v-if="u.aiLimits?.onCooldown" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>
                         <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                       </button>
+                      <button class="action-btn action-btn--icon btn-muted" @click="openChatLog(u)" title="View chat sessions (read-only)" aria-label="View chat sessions">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      </button>
                       <button class="action-btn action-btn--icon btn-delete" @click="deleteUser(u)" title="Delete user" aria-label="Delete user">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                       </button>
@@ -2956,6 +2959,73 @@
     </transition>
     <!-- ── /STAFF ASSIGNMENT EDIT MODAL ──────────────────────────────── -->
 
+    <!-- ── CHAT TRANSCRIPT VIEWER (READ-ONLY) ─────────────────────────
+         Support view of what a user actually saw: their sessions on the
+         left, the selected transcript on the right. Renders the stored
+         messages + recommendation cards in a compact form — deliberately
+         NOT a copy of JinniChat (7k lines of live chat behaviour that
+         would rot out of sync); nothing here can write. -->
+    <transition name="fade">
+      <div v-if="chatLog.open" class="edit-overlay" @click.self="closeChatLog">
+        <div class="edit-panel chatlog-panel" :class="theme">
+          <div class="edit-header">
+            <div>
+              <div class="edit-title">Chat sessions — {{ chatLog.user?.name || chatLog.user?.email || 'user' }}</div>
+              <div class="edit-sub">Read-only transcript · {{ chatLog.total }} session{{ chatLog.total === 1 ? '' : 's' }}</div>
+            </div>
+            <button class="edit-close" @click="closeChatLog">✕</button>
+          </div>
+
+          <div class="chatlog-body">
+            <!-- Session list -->
+            <aside class="chatlog-list">
+              <div v-if="chatLog.loading && !chatLog.sessions.length" class="chatlog-empty">Loading…</div>
+              <div v-else-if="!chatLog.sessions.length" class="chatlog-empty">This user has no chat sessions.</div>
+              <button v-for="s in chatLog.sessions" :key="s._id" class="chatlog-item"
+                      :class="{ 'chatlog-item--active': chatLog.sessionId === s._id }"
+                      @click="openChatSession(s._id)">
+                <span class="chatlog-item-title">{{ s.title || 'Untitled chat' }}</span>
+                <span class="chatlog-item-meta">{{ s.messageCount }} msg · {{ shortDate(s.updatedAt) }}</span>
+              </button>
+            </aside>
+
+            <!-- Transcript -->
+            <section class="chatlog-transcript">
+              <div v-if="chatLog.msgLoading" class="chatlog-empty">Loading transcript…</div>
+              <div v-else-if="!chatLog.messages.length" class="chatlog-empty">Select a session to read its transcript.</div>
+              <template v-else>
+                <div v-for="(m, i) in chatLog.messages" :key="m.id || i" class="cl-msg" :class="m.sender === 'user' ? 'cl-msg--user' : 'cl-msg--ai'">
+                  <div class="cl-msg-head">
+                    <span class="cl-msg-who">{{ m.sender === 'user' ? (chatLog.user?.name || 'User') : 'Jinni' }}</span>
+                    <span class="cl-msg-time">{{ shortDate(m.timestamp) }}</span>
+                  </div>
+                  <div v-if="m.text" class="cl-msg-text">{{ m.text }}</div>
+                  <!-- Recommendation cards exactly as stored for this message -->
+                  <div v-if="(m.recommendations || []).length" class="cl-recs">
+                    <div v-for="(r, ri) in m.recommendations" :key="ri" class="cl-rec">
+                      <img v-if="r.image" :src="resolveImage(r.image, r.placeId, 0)" class="cl-rec-img" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
+                      <div class="cl-rec-body">
+                        <div class="cl-rec-name">{{ r.name }}</div>
+                        <div v-if="r.type || r.category" class="cl-rec-type">{{ r.type || r.category }}</div>
+                        <div v-if="r.description" class="cl-rec-desc">{{ r.description }}</div>
+                        <div class="cl-rec-meta">
+                          <span v-if="r.address || r.location">{{ r.address || r.location }}</span>
+                          <span v-if="r.distance">· {{ r.distance }}</span>
+                          <span v-if="r.rating">· ★ {{ r.rating }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="m.itineraryId" class="cl-msg-note">Itinerary rendered here (id {{ m.itineraryId }})</div>
+                </div>
+              </template>
+            </section>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <!-- ── /CHAT TRANSCRIPT VIEWER ────────────────────────────────────── -->
+
   </div>
 </template>
 
@@ -4052,6 +4122,38 @@ export default {
       try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchDbStats()]) }
       catch (e) { showToast(e.message, 'error') } finally { loading.value = false }
     }
+    // Stored rec images are either absolute URLs or API-relative paths
+    // (/api/ai/place-image/…) — the latter must be prefixed with the API
+    // origin or the browser resolves them against the admin page's origin.
+    const resolveImage = (img) => {
+      if (!img || typeof img !== 'string') return ''
+      if (/^https?:\/\//.test(img) || img.startsWith('data:')) return img
+      return img.startsWith('/') ? `${API}${img}` : img
+    }
+
+    // ── Chat transcript viewer (read-only) ──────────────────────────────
+    const chatLog = ref({ open: false, user: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false })
+    const openChatLog = async (user) => {
+      chatLog.value = { open: true, user, sessions: [], total: 0, sessionId: null, messages: [], loading: true, msgLoading: false }
+      try {
+        const res = await apiFetch(`/users/${user._id}/chat-sessions?limit=50`)
+        chatLog.value.sessions = res.data?.sessions || []
+        chatLog.value.total = res.data?.total || 0
+        // Auto-open the most recent session — the common support case.
+        if (chatLog.value.sessions.length) openChatSession(chatLog.value.sessions[0]._id)
+      } catch (e) { showToast(e.message, 'error') } finally { chatLog.value.loading = false }
+    }
+    const openChatSession = async (id) => {
+      chatLog.value.sessionId = id
+      chatLog.value.msgLoading = true
+      chatLog.value.messages = []
+      try {
+        const res = await apiFetch(`/chat-sessions/${id}`)
+        chatLog.value.messages = res.data?.messages || []
+      } catch (e) { showToast(e.message, 'error') } finally { chatLog.value.msgLoading = false }
+    }
+    const closeChatLog = () => { chatLog.value = { open: false, user: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false } }
+
     const togglePremium = async (user) => {
       try { await apiFetch(`/users/${user._id}/premium`, { method: 'PATCH', body: JSON.stringify({ isPremium: !user.isPremium }) }); user.isPremium = !user.isPremium; showToast(`${user.name} ${user.isPremium ? 'upgraded to Premium' : 'downgraded to Free'}`) }
       catch (e) { showToast(e.message, 'error') }
@@ -5384,6 +5486,7 @@ export default {
       fetchUsers, fetchUserLocations, fetchAIUsage, fetchBusinesses, fetchDestinations, fetchPlaces, fetchGoogleUsage,
       toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
       deletePlace, setExploreStatus, placesExploreFilter, placesExploreOpts, backfillRegions, backfillBusy, purgeStale, onImgError,
+      chatLog, openChatLog, openChatSession, closeChatLog, resolveImage,
       purgeOpts, purgeDays, purgeDropdownOpen, purgeNeverUsed, selectedPurgeOpt,
       userFilterOpts, destFilterOpts, bizPartnerFilterOpts, bizStatusFilterOpts, placesImageFilterOpts, placesActionOpts, placesSortOpts,
       apiBase: API_BASE,
@@ -5908,6 +6011,39 @@ export default {
 .staff-perm-badge--validate { background: rgba(99,102,241,0.14); color: #6366f1; }
 .staff-perm-badge--destinations { background: rgba(34,197,94,0.14); color: #22c55e; }
 .staff-perm-badge--explore { background: rgba(168,85,247,0.14); color: #c084fc; }
+
+/* ── Chat transcript viewer (read-only) ───────────────────────────────── */
+.chatlog-panel { width: min(1040px, 96vw); max-height: 88vh; display: flex; flex-direction: column; }
+.chatlog-body { display: flex; gap: 0; flex: 1; min-height: 0; }
+.chatlog-list { width: 260px; flex: none; overflow-y: auto; border-right: 1px solid rgba(128,128,128,0.18); padding: 8px; }
+.chatlog-item { display: block; width: 100%; text-align: left; padding: 9px 11px; margin-bottom: 4px; border: none; border-radius: 9px;
+  background: transparent; cursor: pointer; font-family: inherit; color: inherit; transition: background 0.15s; }
+.chatlog-item:hover { background: rgba(128,128,128,0.10); }
+.chatlog-item--active { background: rgba(212,175,55,0.14); }
+.chatlog-item-title { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chatlog-item-meta { display: block; font-size: 11px; opacity: 0.6; margin-top: 2px; }
+.chatlog-transcript { flex: 1; min-width: 0; overflow-y: auto; padding: 16px 20px; }
+.chatlog-empty { padding: 24px; font-size: 13px; opacity: 0.6; text-align: center; }
+.cl-msg { margin-bottom: 18px; max-width: 760px; }
+.cl-msg--user { margin-left: auto; }
+.cl-msg-head { display: flex; gap: 8px; align-items: baseline; margin-bottom: 4px; }
+.cl-msg-who { font-size: 12px; font-weight: 700; }
+.cl-msg-time { font-size: 11px; opacity: 0.5; }
+.cl-msg-text { font-size: 13.5px; line-height: 1.55; white-space: pre-wrap; padding: 10px 13px; border-radius: 12px; background: rgba(128,128,128,0.10); }
+.cl-msg--user .cl-msg-text { background: rgba(212,175,55,0.13); }
+.cl-msg-note { font-size: 11.5px; opacity: 0.6; margin-top: 6px; font-style: italic; }
+.cl-recs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.cl-rec { display: flex; gap: 10px; width: 340px; max-width: 100%; padding: 9px; border-radius: 11px; background: rgba(128,128,128,0.08); }
+.cl-rec-img { width: 72px; height: 72px; flex: none; object-fit: cover; border-radius: 8px; }
+.cl-rec-body { min-width: 0; }
+.cl-rec-name { font-size: 13px; font-weight: 700; }
+.cl-rec-type { font-size: 11px; opacity: 0.7; margin-bottom: 3px; }
+.cl-rec-desc { font-size: 11.5px; line-height: 1.45; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cl-rec-meta { font-size: 11px; opacity: 0.6; margin-top: 4px; }
+@media (max-width: 720px) {
+  .chatlog-body { flex-direction: column; }
+  .chatlog-list { width: auto; max-height: 160px; border-right: none; border-bottom: 1px solid rgba(128,128,128,0.18); }
+}
 
 /* Permission picker rows used in both staff modals */
 .staff-perms { display: flex; flex-direction: column; gap: 8px; }
