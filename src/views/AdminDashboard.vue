@@ -2999,24 +2999,52 @@
                     <span class="cl-msg-who">{{ m.sender === 'user' ? (chatLog.user?.name || 'User') : 'Jinni' }}</span>
                     <span class="cl-msg-time">{{ shortDate(m.timestamp) }}</span>
                   </div>
-                  <div v-if="m.text" class="cl-msg-text">{{ m.text }}</div>
-                  <!-- Recommendation cards exactly as stored for this message -->
-                  <div v-if="(m.recommendations || []).length" class="cl-recs">
-                    <div v-for="(r, ri) in m.recommendations" :key="ri" class="cl-rec">
-                      <img v-if="r.image" :src="resolveImage(r.image, r.placeId, 0)" class="cl-rec-img" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
-                      <div class="cl-rec-body">
-                        <div class="cl-rec-name">{{ r.name }}</div>
-                        <div v-if="r.type || r.category" class="cl-rec-type">{{ r.type || r.category }}</div>
-                        <div v-if="r.description" class="cl-rec-desc">{{ r.description }}</div>
-                        <div class="cl-rec-meta">
-                          <span v-if="r.address || r.location">{{ r.address || r.location }}</span>
-                          <span v-if="r.distance">· {{ r.distance }}</span>
-                          <span v-if="r.rating">· ★ {{ r.rating }}</span>
+                  <!-- contentParts preserve the ORDER the user saw: prose and
+                       recommendation cards interleaved. Fall back to plain
+                       text + all cards for messages saved before that field. -->
+                  <template v-if="(m.contentParts || []).length">
+                    <template v-for="(part, pi) in m.contentParts" :key="pi">
+                      <div v-if="part.type === 'text' && part.content" class="cl-msg-text">{{ part.content }}</div>
+                      <div v-else-if="part.type === 'recommendation' && m.recommendations?.[part.index]" class="cl-recs">
+                        <div class="cl-rec">
+                          <img v-if="m.recommendations[part.index].image" :src="resolveImage(m.recommendations[part.index].image)" class="cl-rec-img" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
+                          <div class="cl-rec-body">
+                            <div class="cl-rec-name">{{ m.recommendations[part.index].name }}</div>
+                            <div v-if="m.recommendations[part.index].type || m.recommendations[part.index].category" class="cl-rec-type">{{ m.recommendations[part.index].type || m.recommendations[part.index].category }}</div>
+                            <div v-if="m.recommendations[part.index].description" class="cl-rec-desc">{{ m.recommendations[part.index].description }}</div>
+                            <div class="cl-rec-meta">
+                              <span v-if="m.recommendations[part.index].address || m.recommendations[part.index].location">{{ m.recommendations[part.index].address || m.recommendations[part.index].location }}</span>
+                              <span v-if="m.recommendations[part.index].distance"> · {{ m.recommendations[part.index].distance }}</span>
+                              <span v-if="m.recommendations[part.index].rating"> · ★ {{ m.recommendations[part.index].rating }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+                  <template v-else>
+                    <div v-if="m.text" class="cl-msg-text">{{ m.text }}</div>
+                    <div v-if="(m.recommendations || []).length" class="cl-recs">
+                      <div v-for="(r, ri) in m.recommendations" :key="ri" class="cl-rec">
+                        <img v-if="r.image" :src="resolveImage(r.image)" class="cl-rec-img" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
+                        <div class="cl-rec-body">
+                          <div class="cl-rec-name">{{ r.name }}</div>
+                          <div v-if="r.type || r.category" class="cl-rec-type">{{ r.type || r.category }}</div>
+                          <div v-if="r.description" class="cl-rec-desc">{{ r.description }}</div>
+                          <div class="cl-rec-meta">
+                            <span v-if="r.address || r.location">{{ r.address || r.location }}</span>
+                            <span v-if="r.distance"> · {{ r.distance }}</span>
+                            <span v-if="r.rating"> · ★ {{ r.rating }}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  </template>
+                  <!-- The real itinerary component, restored by id — same
+                       rendering the user saw, read-only here. -->
+                  <div v-if="m.itineraryId" class="cl-itinerary">
+                    <ItineraryView :itinerary-id="m.itineraryId" :theme="theme" />
                   </div>
-                  <div v-if="m.itineraryId" class="cl-msg-note">Itinerary rendered here (id {{ m.itineraryId }})</div>
                 </div>
               </template>
             </section>
@@ -3033,6 +3061,9 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
+// Same component the chat uses — the transcript viewer restores an itinerary
+// by id so admins see exactly what the user saw, not a summary of it.
+import ItineraryView from '@/components/ui/ItineraryView.vue'
 
 const API = import.meta.env.VITE_API_URL || '/api'
 const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
@@ -3056,6 +3087,7 @@ function debounce(fn, ms = 400) {
 
 export default {
   name: 'AdminDashboard',
+  components: { ItineraryView },
   props: { currentUser: { type: Object, default: null } },
   directives: {
     clickOutside: {
@@ -6040,6 +6072,9 @@ export default {
 .cl-rec-type { font-size: 11px; opacity: 0.7; margin-bottom: 3px; }
 .cl-rec-desc { font-size: 11.5px; line-height: 1.45; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .cl-rec-meta { font-size: 11px; opacity: 0.6; margin-top: 4px; }
+/* Itineraries render through the real component; keep them inside the panel
+   and non-interactive so the read-only view can't trigger regeneration. */
+.cl-itinerary { margin-top: 10px; max-width: 100%; overflow-x: auto; pointer-events: none; }
 @media (max-width: 720px) {
   .chatlog-body { flex-direction: column; }
   .chatlog-list { width: auto; max-height: 160px; border-right: none; border-bottom: 1px solid rgba(128,128,128,0.18); }
