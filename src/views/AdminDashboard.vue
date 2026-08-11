@@ -3016,7 +3016,7 @@
                        text + all cards for messages saved before that field. -->
                   <template v-if="(m.contentParts || []).length">
                     <template v-for="(part, pi) in m.contentParts" :key="pi">
-                      <div v-if="part.type === 'text' && part.content" class="cl-msg-text">{{ part.content }}</div>
+                      <div v-if="part.type === 'text' && part.content" class="cl-msg-text" v-html="fmtMsg(part.content)"></div>
                       <!-- Chat's LARGE card: image on top, details below —
                            the inline form the user actually saw. -->
                       <div v-else-if="part.type === 'recommendation' && m.recommendations?.[part.index]" class="cl-reccard">
@@ -3039,20 +3039,26 @@
                       </div>
                     </template>
                   </template>
+                  <!-- Fallback: quick-action replies (and older messages) carry
+                       no contentParts — same LARGE card design, so both stream
+                       types look identical in the transcript. -->
                   <template v-else>
-                    <div v-if="m.text" class="cl-msg-text">{{ m.text }}</div>
-                    <div v-if="(m.recommendations || []).length" class="cl-recs">
-                      <div v-for="(r, ri) in m.recommendations" :key="ri" class="cl-rec">
-                        <img v-if="r.image" :src="resolveImage(r.image)" class="cl-rec-img" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
-                        <div class="cl-rec-body">
-                          <div class="cl-rec-name">{{ r.name }}</div>
-                          <div v-if="r.type || r.category" class="cl-rec-type">{{ r.type || r.category }}</div>
-                          <div v-if="r.description" class="cl-rec-desc">{{ r.description }}</div>
-                          <div class="cl-rec-meta">
-                            <span v-if="r.address || r.location">{{ r.address || r.location }}</span>
-                            <span v-if="r.distance"> · {{ r.distance }}</span>
-                            <span v-if="r.rating"> · ★ {{ r.rating }}</span>
-                          </div>
+                    <div v-if="m.text" class="cl-msg-text" v-html="fmtMsg(m.text)"></div>
+                    <div v-for="(r, ri) in (m.recommendations || [])" :key="ri" class="cl-reccard">
+                      <div class="cl-reccard-img">
+                        <img v-if="r.image" :src="resolveImage(r.image)" loading="lazy" @error="$event.target.style.display='none'"/>
+                        <div v-else class="cl-reccard-noimg">
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                        </div>
+                      </div>
+                      <div class="cl-reccard-details">
+                        <div class="cl-reccard-name">{{ r.name }}</div>
+                        <div v-if="r.type || r.category" class="cl-reccard-type">{{ r.type || r.category }}</div>
+                        <div v-if="r.description" class="cl-reccard-desc">{{ r.description }}</div>
+                        <div class="cl-reccard-meta">
+                          <span v-if="r.distance" class="cl-reccard-dist">{{ r.distance }}</span>
+                          <span v-if="r.address || r.location">{{ r.address || r.location }}</span>
+                          <span v-if="r.rating">★ {{ r.rating }}</span>
                         </div>
                       </div>
                     </div>
@@ -4184,6 +4190,16 @@ export default {
       // card images). Strip the suffix to get the plain origin.
       const origin = API.replace(/\/api\/?$/, '')
       return img.startsWith('/') ? `${origin}${img}` : img
+    }
+
+    // Render stored message text the way the chat did: strip the invisible
+    // U+2063 place-name marker, escape HTML, then apply **bold**. Anything
+    // else (links, lists) stays literal — this is a transcript, not the chat.
+    const fmtMsg = (t) => {
+      if (!t) return ''
+      const esc = String(t).replace(/⁣/g, '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return esc.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     }
 
     // ── Chat transcript viewer (read-only) ──────────────────────────────
@@ -5565,7 +5581,7 @@ export default {
       fetchUsers, fetchUserLocations, fetchAIUsage, fetchBusinesses, fetchDestinations, fetchPlaces, fetchGoogleUsage,
       toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
       deletePlace, setExploreStatus, placesExploreFilter, placesExploreOpts, backfillRegions, backfillBusy, purgeStale, onImgError,
-      chatLog, openChatLog, openChatSession, closeChatLog, resolveImage,
+      chatLog, openChatLog, openChatSession, closeChatLog, resolveImage, fmtMsg,
       purgeOpts, purgeDays, purgeDropdownOpen, purgeNeverUsed, selectedPurgeOpt,
       userFilterOpts, destFilterOpts, bizPartnerFilterOpts, bizStatusFilterOpts, placesImageFilterOpts, placesActionOpts, placesSortOpts,
       apiBase: API_BASE,
@@ -6126,9 +6142,18 @@ export default {
 .cl-rec-type { font-size: 11px; opacity: 0.7; margin-bottom: 3px; }
 .cl-rec-desc { font-size: 11.5px; line-height: 1.45; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .cl-rec-meta { font-size: 11px; opacity: 0.6; margin-top: 4px; }
-/* Itineraries render through the real component — interactive so the admin
-   can switch days; the endpoint is GET-only, so nothing can be written. */
+/* Itineraries render through the real component. Day tabs, the map and photos
+   stay usable, but every WRITE affordance is removed so an admin can't edit a
+   user's itinerary by accident (rename day, reorder/remove/replace a stop,
+   like/dislike, add stop, regenerate, "Ask AI"). The admin token also can't
+   PATCH these routes — this is the visual half of the same rule. */
 .cl-itinerary { margin-top: 10px; max-width: 100%; overflow-x: auto; }
+.cl-itinerary .itin-slot-actions,
+.cl-itinerary .itin-day-actions,
+.cl-itinerary .itin-day-title-edit,
+.cl-itinerary .itin-card-overlay,
+.cl-itinerary .itin-add,
+.cl-itinerary .itin-map-card-route { display: none !important; }
 
 /* Transcript header — JinniChat's gold gradient title */
 .chatlog-panel .edit-title { font-size: 1.25rem; font-weight: 700; margin: 0;
@@ -6156,8 +6181,24 @@ export default {
 .cl-reccard-meta { display: flex; flex-direction: column; gap: 3px; font-size: 0.8rem; opacity: 0.65; }
 .cl-reccard-dist { font-weight: 600; opacity: 0.85; }
 @media (max-width: 720px) {
+  /* Mobile: full-screen panel, sessions become a horizontal strip so the
+     transcript keeps the vertical space. */
+  .chatlog-panel { width: 100vw; max-width: 100vw; max-height: 100vh; height: 100vh; border-radius: 0; }
+  .chatlog-panel .edit-header { padding: 12px 14px; }
+  .chatlog-panel .edit-title { font-size: 1.02rem; }
+  .cl-prefs { padding: 8px 14px; gap: 5px; max-height: 92px; overflow-y: auto; }
+  .cl-pref { font-size: 10.5px; padding: 3px 8px; }
   .chatlog-body { flex-direction: column; }
-  .chatlog-list { width: auto; max-height: 160px; border-right: none; border-bottom: 1px solid rgba(128,128,128,0.18); }
+  .chatlog-list { width: auto; display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden;
+    border-right: none; border-bottom: 1px solid rgba(128,128,128,0.18); padding: 8px 10px; }
+  .chatlog-item { flex: 0 0 auto; width: 170px; margin-bottom: 0; }
+  .chatlog-transcript { padding: 12px 14px; }
+  .cl-msg { max-width: 100%; }
+  .cl-msg-text { font-size: 13px; padding: 9px 11px; }
+  .cl-reccard { max-width: 100%; }
+  .cl-reccard-img { height: 140px; }
+  /* The itinerary map is fixed-height and wide — let it fit the screen. */
+  .cl-itinerary .itin-map-canvas { min-height: 220px; }
 }
 
 /* Permission picker rows used in both staff modals */
