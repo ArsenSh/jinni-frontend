@@ -1140,6 +1140,116 @@
               </div>
             </section>
 
+            <!-- ── Event Schedule ─────────────────────────────────────────
+                 Appears only when the 'events' chip is selected above. Mirrors
+                 the admin's business event editor (AdminDashboard.vue) field
+                 for field, so an event added here is indistinguishable from one
+                 an organiser registered through onboarding.
+
+                 Dates and times are entered in the EVENT's timezone — never the
+                 validator's browser zone. A validator in Yerevan scheduling a
+                 concert in Lisbon types Lisbon time, and every traveler sees
+                 Lisbon time. The zone is auto-resolved from the map pin and
+                 stays editable in case geocoding lands just across a border. -->
+            <section v-if="destIsEvent" class="edit-section">
+              <div class="edit-section-title">Event Schedule</div>
+
+              <!-- Live summary of what's currently entered, so the validator can
+                   sanity-check the date at a glance before saving. -->
+              <div class="edit-event-summary">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>{{ eventScheduleSummary(destModal.form.eventSchedule) }}</span>
+              </div>
+
+              <!-- Mode picker: one-time/multi-day vs repeats weekly. -->
+              <div class="edit-field" style="margin-bottom: 4px">
+                <label class="edit-label">Schedule Type</label>
+                <div class="edit-event-mode">
+                  <button type="button" class="edit-event-mode-btn"
+                          :class="{ 'edit-event-mode-btn--active': !destModal.form.eventSchedule.isRecurring }"
+                          @click="destModal.form.eventSchedule.isRecurring = false">
+                    One-time / multi-day
+                  </button>
+                  <button type="button" class="edit-event-mode-btn"
+                          :class="{ 'edit-event-mode-btn--active': destModal.form.eventSchedule.isRecurring }"
+                          @click="destModal.form.eventSchedule.isRecurring = true">
+                    Repeats weekly
+                  </button>
+                </div>
+                <span class="edit-help-sub">
+                  {{ destModal.form.eventSchedule.isRecurring
+                      ? 'This event runs on a weekly cycle — set the days and times in the Opening Hours section below. It stays listed indefinitely.'
+                      : 'This event happens on a specific date and disappears from the app once it ends. Add an end date if it spans multiple days; leave a time empty if it runs all day.' }}
+                </span>
+              </div>
+
+              <template v-if="!destModal.form.eventSchedule.isRecurring">
+                <!-- Timezone — auto-set from the map pin, editable. -->
+                <div class="edit-event-block">
+                  <div class="edit-event-block-label">Timezone</div>
+                  <div class="edit-field">
+                    <select class="edit-input" v-model="destModal.form.eventSchedule.timezone">
+                      <option value="">Automatic — from the location on the map</option>
+                      <option v-for="tz in destTimezoneOptions" :key="tz" :value="tz">
+                        {{ tz.replace(/_/g, ' ') }}
+                      </option>
+                    </select>
+                    <span class="edit-help-sub">
+                      Event times are entered in this timezone, and every traveler sees them as the local time at the venue. Leave it on Automatic unless the map pin sits on the wrong side of a timezone border.
+                    </span>
+                  </div>
+                </div>
+
+                <div class="edit-event-block">
+                  <div class="edit-event-block-label">
+                    Starts
+                    <span v-if="destModal.form.eventSchedule.timezone" class="edit-event-optional">
+                      {{ tzShortLabel(destModal.form.eventSchedule.timezone) }} time
+                    </span>
+                  </div>
+                  <div class="edit-grid-2">
+                    <div class="edit-field">
+                      <label class="edit-label">Start Date *</label>
+                      <input class="edit-input" type="date" v-model="destModal.form.eventSchedule.startDate" />
+                    </div>
+                    <div class="edit-field">
+                      <label class="edit-label">Start Time</label>
+                      <input class="edit-input" type="time" v-model="destModal.form.eventSchedule.startTime" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="edit-event-block">
+                  <div class="edit-event-block-label">Ends <span class="edit-event-optional">optional</span></div>
+                  <div class="edit-grid-2">
+                    <div class="edit-field">
+                      <label class="edit-label">End Date</label>
+                      <input class="edit-input" type="date" v-model="destModal.form.eventSchedule.endDate" :min="destModal.form.eventSchedule.startDate || ''" />
+                    </div>
+                    <div class="edit-field">
+                      <label class="edit-label">End Time</label>
+                      <input class="edit-input" type="time" v-model="destModal.form.eventSchedule.endTime" />
+                    </div>
+                  </div>
+                  <span class="edit-help-sub">Leave the end date empty for a single-day event. An end time on its own is treated as the close time on the start date.</span>
+                </div>
+
+                <!-- Honest warning rather than a hard block: a validator may
+                     legitimately be back-filling an event that already happened
+                     (e.g. correcting last week's listing). We just make sure
+                     they know it won't be shown to anyone. -->
+                <div v-if="destEventEndsInPast" class="edit-warn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  This event's end time is already in the past — it will be saved but never shown to travelers.
+                </div>
+              </template>
+
+              <div v-else class="edit-event-recurring-note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                <span>This event repeats every week, so it never expires. Set its running days and times in the <strong>Opening Hours</strong> section below.</span>
+              </div>
+            </section>
+
             <!-- Description -->
             <section class="edit-section">
               <div class="edit-section-title">Description</div>
@@ -2323,6 +2433,189 @@ export default {
       return s.startsWith('+') ? s : `+${s}`
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    //  EVENT SCHEDULE HELPERS
+    //
+    //  A destination tagged 'events' is a concert / festival / one-off with a
+    //  real date, and it stops being shown to travelers once that date passes
+    //  (enforced server-side by proximityService.eventFreshnessClause).
+    //
+    //  Storage vs. editing:
+    //    - STORED as absolute UTC instants + the event's IANA timezone.
+    //    - EDITED as separate date + time strings expressed in that timezone,
+    //      because that is what the validator actually knows ("the concert
+    //      starts at 20:00 local") and what date/time inputs speak.
+    //
+    //  Everything here converts against the EVENT's zone, never the browser's.
+    //  The app is used worldwide: a validator in one country routinely adds an
+    //  event in another, and anchoring to their own zone would shift the time
+    //  by however far apart the two are.
+    // ════════════════════════════════════════════════════════════════════════
+
+    // The validator's own IANA zone. Used only as a display fallback when an
+    // event has no timezone chosen yet (i.e. "Automatic"), never for storage.
+    const destBrowserTz = () => {
+      try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' }
+      catch { return 'UTC' }
+    }
+
+    // Full IANA zone list where the browser can provide it, so any country on
+    // earth is selectable. The fallback list is only for old browsers without
+    // Intl.supportedValuesOf and is deliberately spread across continents.
+    const DEST_TIMEZONE_LIST = (() => {
+      try {
+        if (typeof Intl.supportedValuesOf === 'function') return Intl.supportedValuesOf('timeZone')
+      } catch (_e) { /* fall through */ }
+      return [
+        'UTC',
+        'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Madrid',
+        'Europe/Rome', 'Europe/Moscow', 'Europe/Istanbul', 'Europe/Kyiv',
+        'Africa/Cairo', 'Africa/Lagos', 'Africa/Nairobi', 'Africa/Johannesburg',
+        'Asia/Yerevan', 'Asia/Tbilisi', 'Asia/Baku', 'Asia/Dubai',
+        'Asia/Tehran', 'Asia/Karachi', 'Asia/Kolkata', 'Asia/Bangkok',
+        'Asia/Shanghai', 'Asia/Tokyo', 'Asia/Seoul', 'Asia/Singapore',
+        'Australia/Perth', 'Australia/Sydney', 'Pacific/Auckland',
+        'America/New_York', 'America/Chicago', 'America/Denver',
+        'America/Los_Angeles', 'America/Mexico_City', 'America/Bogota',
+        'America/Sao_Paulo', 'America/Buenos_Aires'
+      ]
+    })()
+    // Guarantees the currently-stored zone is present even if it's an exotic or
+    // deprecated one the list doesn't carry, so editing never silently drops it.
+    const destTimezoneOptions = computed(() => {
+      const current = destModal.value?.form?.eventSchedule?.timezone
+      if (current && !DEST_TIMEZONE_LIST.includes(current)) return [current, ...DEST_TIMEZONE_LIST]
+      return DEST_TIMEZONE_LIST
+    })
+
+    // Wall-clock parts that `timeZone` shows for an absolute Date.
+    const destZonedParts = (date, timeZone) => {
+      const dtf = new Intl.DateTimeFormat('en-US', {
+        timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      })
+      const p = {}
+      for (const part of dtf.formatToParts(date)) {
+        if (part.type !== 'literal') p[part.type] = parseInt(part.value, 10)
+      }
+      if (p.hour === 24) p.hour = 0
+      return p
+    }
+    // Offset (minutes, east-positive) of `timeZone` at instant `date`.
+    const destTzOffsetMinutes = (date, timeZone) => {
+      const p = destZonedParts(date, timeZone)
+      const asUTC = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second)
+      return Math.round((asUTC - date.getTime()) / 60000)
+    }
+    // Absolute UTC value -> { date:'YYYY-MM-DD', time:'HH:MM' } in `timeZone`.
+    // This is what fills the modal's inputs when editing an existing event.
+    const destSplitDateTime = (value, timeZone) => {
+      if (!value) return { date: '', time: '' }
+      const tz = timeZone || destBrowserTz()
+      const d = value instanceof Date ? value : new Date(value)
+      if (isNaN(d.getTime())) return { date: '', time: '' }
+      let p
+      try { p = destZonedParts(d, tz) }
+      catch (_e) { p = destZonedParts(d, 'UTC') }
+      const pad = (n) => String(n).padStart(2, '0')
+      return { date: `${p.year}-${pad(p.month)}-${pad(p.day)}`, time: `${pad(p.hour)}:${pad(p.minute)}` }
+    }
+    // { date, time } in `timeZone` -> absolute UTC ISO string. Sent on save.
+    // The offset is applied twice so events landing on a DST boundary — where
+    // the offset itself changes across the instant — still resolve correctly.
+    const destCombineDateTime = (dateStr, timeStr, fallbackTime, timeZone) => {
+      if (!dateStr) return ''
+      const tz = timeZone || destBrowserTz()
+      const t = (timeStr && /^\d{1,2}:\d{2}$/.test(timeStr)) ? timeStr : fallbackTime
+      const [y, mo, d] = String(dateStr).split('-').map(Number)
+      const [h, mi] = t.split(':').map(Number)
+      if (!y || !mo || !d) return ''
+      const utcGuess = Date.UTC(y, mo - 1, d, h, mi, 0)
+      try {
+        let off = destTzOffsetMinutes(new Date(utcGuess), tz)
+        let result = new Date(utcGuess - off * 60000)
+        const off2 = destTzOffsetMinutes(result, tz)
+        if (off2 !== off) result = new Date(utcGuess - off2 * 60000)
+        return result.toISOString()
+      } catch (_e) {
+        // Unknown zone — treat the entry as UTC rather than losing the date.
+        return new Date(utcGuess).toISOString()
+      }
+    }
+    // "Europe/Lisbon" -> "Lisbon"
+    const tzShortLabel = (tz) => {
+      if (!tz) return ''
+      const leaf = String(tz).split('/').pop() || tz
+      return leaf.replace(/_/g, ' ')
+    }
+
+    // One-line summary of the schedule as currently entered. Reads the FORM
+    // shape (date/time strings already in the event's zone), so it needs no
+    // conversion — it just formats what the validator typed.
+    const eventScheduleSummary = (es) => {
+      if (!es) return '—'
+      if (es.isRecurring) return 'Repeats weekly — days and times come from Opening Hours'
+      if (!es.startDate) return 'No date set yet'
+      const dayLabel = (iso) => {
+        const d = new Date(`${iso}T00:00:00`)
+        if (isNaN(d.getTime())) return iso
+        return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+      }
+      const to12h = (t) => {
+        if (!t) return ''
+        const [h, m] = t.split(':').map(Number)
+        if (!Number.isFinite(h) || !Number.isFinite(m)) return ''
+        const ampm = h < 12 ? 'AM' : 'PM'
+        const h12 = h % 12 === 0 ? 12 : h % 12
+        return `${h12}:${String(m).padStart(2, '0')} ${ampm}`
+      }
+      const zoneTag = es.timezone ? ` (${tzShortLabel(es.timezone)})` : ' (zone set from location)'
+      const startTxt = dayLabel(es.startDate) + (es.startTime ? ` · ${to12h(es.startTime)}` : ' · All day')
+      // Single-day: no end date, or an end date equal to the start date.
+      if (!es.endDate || es.endDate === es.startDate) {
+        if (es.startTime && es.endTime) {
+          return `${dayLabel(es.startDate)} · ${to12h(es.startTime)} – ${to12h(es.endTime)}${zoneTag}`
+        }
+        return startTxt + zoneTag
+      }
+      return `${startTxt}  →  ${dayLabel(es.endDate)}${es.endTime ? ` · ${to12h(es.endTime)}` : ''}${zoneTag}`
+    }
+
+    // Is the 'events' chip selected? Drives the whole schedule section.
+    const destIsEvent = computed(() => (destModal.value?.form?.type || []).includes('events'))
+
+    // Would this event already be over the moment it's saved? Used for an
+    // advisory warning, not a hard block — back-filling a past event is a
+    // legitimate correction, it just won't be shown to anyone.
+    const destEventEndsInPast = computed(() => {
+      const es = destModal.value?.form?.eventSchedule
+      if (!destIsEvent.value || !es || es.isRecurring || !es.startDate) return false
+      const tz = es.timezone || destBrowserTz()
+      const endIso = es.endDate || es.endTime
+        ? destCombineDateTime(es.endDate || es.startDate, es.endTime, '23:59', tz)
+        : destCombineDateTime(es.startDate, es.startTime, '23:59', tz)
+      if (!endIso) return false
+      return new Date(endIso).getTime() < Date.now()
+    })
+
+    // Normalises whatever the API returned into the modal's form shape. Legacy
+    // destinations tagged 'events' before schedules existed come back with no
+    // eventSchedule at all — they get empty fields, and the validator is free
+    // to save without filling them (the backend leaves untouched schedules
+    // alone), so old rows stay editable.
+    const destScheduleToForm = (es) => {
+      if (!es) return { startDate: '', startTime: '', endDate: '', endTime: '', isRecurring: false, timezone: '' }
+      const tz = es.timezone || ''
+      const s = destSplitDateTime(es.startDate, tz || destBrowserTz())
+      const e = destSplitDateTime(es.endDate, tz || destBrowserTz())
+      return {
+        startDate: s.date, startTime: s.time,
+        endDate: e.date,   endTime: e.time,
+        isRecurring: !!es.isRecurring,
+        timezone: tz
+      }
+    }
+
     // ── Destination modal (add / edit) ──────────────────────────────────────
     const blankDest = () => {
       const a = myAssignment.value || {}
@@ -2349,6 +2642,23 @@ export default {
         },
         pricing: { isFree: true, min: null, max: null, average: null, currency: 'USD' },
         images: [],
+        // ── Event schedule (only sent when the 'events' chip is selected) ────
+        // Held as separate date / time strings in the EVENT's timezone, which
+        // is what <input type="date"> and <input type="time"> speak. submitDest
+        // combines them into absolute UTC instants against `timezone` before
+        // sending — the same round-trip AdminDashboard and BusinessOnboarding
+        // perform.
+        eventSchedule: {
+          startDate: '', startTime: '',
+          endDate: '', endTime: '',
+          isRecurring: false,
+          // '' means "resolve it from the map pin" — the backend does that with
+          // tz-lookup, which covers every country. Defaulting to the
+          // validator's OWN browser zone would be wrong the moment they add an
+          // event in a city they aren't sitting in, which for a globally-used
+          // app is the normal case rather than the exception.
+          timezone: ''
+        },
         // Same per-day defaults as a fresh business in AdminDashboard — admin
         // can toggle 24/7 or mark a day closed. Sunday closed by default to
         // mirror onboarding. Mirrors AdminDashboard.blankDestination().
@@ -2425,6 +2735,8 @@ export default {
       form.pricing = form.pricing || { isFree: true, currency: 'USD' }
       form.type = form.type || []
       form.images = form.images || []
+      // Stored UTC instants -> date/time strings in the event's own timezone.
+      form.eventSchedule = destScheduleToForm(form.eventSchedule)
       // Opening hours: older destination docs may have no openingHours field
       // at all, or have it with an empty `days` array. Seed both cases with
       // the same 7-day defaults a fresh form uses so the edit modal can show
@@ -2479,6 +2791,8 @@ export default {
       form.pricing = form.pricing || { isFree: true, currency: 'USD' }
       form.type = form.type || []
       form.images = form.images || []
+      // Stored UTC instants -> date/time strings in the event's own timezone.
+      form.eventSchedule = destScheduleToForm(form.eventSchedule)
       if (!form.openingHours || typeof form.openingHours !== 'object') {
         form.openingHours = { is24Hours: false, days: [] }
       }
@@ -2551,6 +2865,14 @@ export default {
       if (!f?.name?.trim()) return false
       if (!Array.isArray(f.type) || !f.type.length) return false
       if (!f.location?.country && !f.location?.city) return false
+      // A one-time event without a start date has nothing to expire on, which
+      // is exactly the dateless-forever-event this feature exists to prevent.
+      // Recurring events are perpetual and need no date. Legacy rows opened
+      // for editing are exempt: they were saved before schedules existed, and
+      // blocking Save would strand them (the backend leaves an untouched
+      // schedule alone, so saving them changes nothing about the schedule).
+      if (destIsEvent.value && !f.eventSchedule?.isRecurring
+          && !f.eventSchedule?.startDate && destModal.value.isNew) return false
       return true
     })
 
@@ -2896,6 +3218,48 @@ export default {
         }
         // Keep isHiddenGem in sync with the chip (defence in depth).
         payload.isHiddenGem = (payload.type || []).includes('hidden_gems')
+
+        // ── Event schedule ────────────────────────────────────────────────
+        // The form holds date/time strings in the EVENT's timezone; the API
+        // stores absolute UTC instants. Convert against that same zone here so
+        // the round-trip is lossless no matter where the validator is sitting.
+        //
+        // An empty timezone means "Automatic" — we ship '' and the backend
+        // resolves it from the coordinates with tz-lookup, which works for any
+        // country. Conversion still needs a concrete zone, so for that case we
+        // convert against the browser's and let the backend's stored zone
+        // govern display; the validator can pin an explicit zone whenever the
+        // pin sits near a border.
+        //
+        // Non-events ship no schedule at all, and the backend clears any stale
+        // one when the 'events' chip is removed.
+        if ((payload.type || []).includes('events')) {
+          const es = payload.eventSchedule || {}
+          const recurring = !!es.isRecurring
+          if (!recurring && !es.startDate) {
+            // Pre-feature row tagged 'events' with no date, and none entered
+            // now. Omitting the field entirely tells the backend to leave the
+            // stored schedule alone, so the rest of the edit still saves.
+            // New destinations can't reach this branch — destFormValid blocks
+            // Save until a start date is picked.
+            delete payload.eventSchedule
+          } else {
+            const tz = es.timezone || destBrowserTz()
+            const endDateRaw = recurring ? '' : (es.endDate || (es.endTime ? es.startDate : ''))
+            payload.eventSchedule = {
+              startDate: recurring ? null : (destCombineDateTime(es.startDate, es.startTime, '00:00', tz) || null),
+              endDate:   recurring ? null : (destCombineDateTime(endDateRaw, es.endTime, '23:59', tz) || null),
+              isRecurring: recurring,
+              // '' is meaningful — it asks the backend to derive the zone from
+              // the coordinates rather than trusting the validator's own.
+              timezone: es.timezone || ''
+            }
+          }
+        } else {
+          // Not an event. Omitting the field lets the backend clear any stale
+          // schedule left behind by removing the 'events' chip.
+          delete payload.eventSchedule
+        }
 
         const url = m.isNew
           ? `${API_URL}/staff/destinations`
@@ -3365,6 +3729,7 @@ export default {
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
       toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords, isDay24h, setDay24h,
+      destIsEvent, destEventEndsInPast, destTimezoneOptions, tzShortLabel, eventScheduleSummary,
       // Map (Leaflet)
       destMap, reGeocodeDestination,
       submitDest, toggleDest, canEditDest,
@@ -4332,6 +4697,52 @@ select.edit-input { cursor: pointer; }
 .edit-panel.day-mode  .edit-warn { background: rgba(245,158,11,0.10); color: #b45309; }
 
 .edit-error-banner { padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin-top: 8px; }
+
+/* ── Edit modal: event schedule ─────────────────────────────────────────── */
+/* Mirrors AdminDashboard.vue's event-schedule styling so the validator's form
+   and the admin's form are visually identical. */
+/* Read-only summary line — shows the entered event day/time at a glance. */
+.edit-event-summary {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-radius: 8px; margin-bottom: 14px;
+  font-size: 12.5px; font-weight: 500;
+}
+.edit-event-summary svg { flex-shrink: 0; opacity: 0.7; }
+.edit-panel.night-mode .edit-event-summary { background: rgba(124,58,237,0.12); color: #d8b4fe; }
+.edit-panel.day-mode   .edit-event-summary { background: rgba(160,82,45,0.08);  color: #8a4520; }
+/* Two-button schedule-type picker (one-time vs recurring). */
+.edit-event-mode { display: inline-flex; border-radius: 8px; overflow: hidden; gap: 2px; padding: 3px; }
+.edit-panel.night-mode .edit-event-mode { background: rgba(255,255,255,0.05); }
+.edit-panel.day-mode   .edit-event-mode { background: rgba(0,0,0,0.05); }
+.edit-event-mode-btn {
+  padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+  background: transparent; white-space: nowrap; transition: background-color 0.15s, color 0.15s;
+}
+.edit-panel.night-mode .edit-event-mode-btn { color: #94a3b8; }
+.edit-panel.day-mode   .edit-event-mode-btn { color: #5c3f2e; }
+.edit-panel.night-mode .edit-event-mode-btn.edit-event-mode-btn--active { background: #7c3aed; color: #fff; }
+.edit-panel.day-mode   .edit-event-mode-btn.edit-event-mode-btn--active { background: linear-gradient(135deg,#D4AF37,#C09040); color: #fff; }
+/* Start / End grouping blocks for one-time events. */
+.edit-event-block { margin-top: 12px; }
+.edit-event-block-label {
+  font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 7px;
+}
+.edit-panel.night-mode .edit-event-block-label { color: #c084fc; }
+.edit-panel.day-mode   .edit-event-block-label { color: #A0522D; }
+.edit-event-optional {
+  font-size: 9.5px; font-weight: 600; opacity: 0.55;
+  text-transform: none; letter-spacing: 0; margin-left: 4px;
+}
+/* Note shown in place of the date fields when the event is recurring. */
+.edit-event-recurring-note {
+  display: flex; align-items: flex-start; gap: 8px; margin-top: 10px;
+  padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5;
+}
+.edit-event-recurring-note svg { flex-shrink: 0; margin-top: 1px; opacity: 0.75; }
+.edit-panel.night-mode .edit-event-recurring-note { background: rgba(255,255,255,0.04); color: #94a3b8; }
+.edit-panel.day-mode   .edit-event-recurring-note { background: rgba(0,0,0,0.04);    color: #5c3f2e; }
 .edit-panel.night-mode .edit-error-banner { background: rgba(239,68,68,0.12); color: #fca5a5; }
 .edit-panel.day-mode  .edit-error-banner { background: rgba(239,68,68,0.10); color: #b91c1c; }
 
