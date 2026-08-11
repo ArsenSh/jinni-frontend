@@ -4179,7 +4179,11 @@ export default {
     const resolveImage = (img) => {
       if (!img || typeof img !== 'string') return ''
       if (/^https?:\/\//.test(img) || img.startsWith('data:')) return img
-      return img.startsWith('/') ? `${API}${img}` : img
+      // API already ends in '/api' and stored paths start with '/api/…' —
+      // concatenating both produced '…/api/api/ai/place-image/…' (404, blank
+      // card images). Strip the suffix to get the plain origin.
+      const origin = API.replace(/\/api\/?$/, '')
+      return img.startsWith('/') ? `${origin}${img}` : img
     }
 
     // ── Chat transcript viewer (read-only) ──────────────────────────────
@@ -5629,6 +5633,13 @@ export default {
 .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 /* ── TOPBAR ── */
 .topbar { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; position: sticky; top: 0; z-index: 10; transition: all 0.3s; }
+/* The translucent backdrop lives on a pseudo-element (same trick JinniChat's
+   modal header uses) so the fade mask applies to the GLASS only — masking
+   .topbar itself would fade the title and buttons out too. */
+.topbar::before { content: ''; position: absolute; inset: 0; z-index: -1; background: inherit;
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 58%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 58%, transparent 100%); }
 .topbar-breadcrumb { font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0; text-transform: none; margin-bottom: 4px; opacity: 0.45; font-weight: 400; }
 .topbar-breadcrumb span { opacity: 1; font-weight: 600; color: inherit; }
 .topbar-title h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.2px; line-height: 1; }
@@ -6290,7 +6301,10 @@ export default {
 .admin-shell.night-mode .chip-name { color: #e2e8f0; }
 .admin-shell.night-mode .chip-role { color: #94a3b8; }
 .admin-shell.night-mode .chip-dot { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
-.admin-shell.night-mode .topbar { background: #0a0118 }
+/* Transparent header, JinniChat's .fixed-header recipe: the page colour
+   fades to nothing downward, so content scrolls UNDER the bar instead of
+   hitting a solid block. Set on ::before via background:inherit. */
+.admin-shell.night-mode .topbar { background: linear-gradient(to bottom, rgba(10,1,24,0.94) 0%, rgba(10,1,24,0.75) 58%, rgba(10,1,24,0) 100%); }
 .admin-shell.night-mode .topbar-title h1 { color: #e2e8f0; }
 .admin-shell.night-mode .topbar-date { color: #94a3b8; }
 .admin-shell.night-mode .topbar-breadcrumb { color: #94a3b8; }
@@ -6406,7 +6420,7 @@ export default {
 .admin-shell.day-mode .chip-name { color: #3c2a1e; }
 .admin-shell.day-mode .chip-role { color: #A0522D; }
 .admin-shell.day-mode .chip-dot { background: #22c55e; }
-.admin-shell.day-mode .topbar { background: #f4efe4 }
+.admin-shell.day-mode .topbar { background: linear-gradient(to bottom, rgba(244,239,228,0.94) 0%, rgba(244,239,228,0.75) 58%, rgba(244,239,228,0) 100%); }
 .admin-shell.day-mode .topbar-title h1 { color: #2c1e10; }
 .admin-shell.day-mode .topbar-date { color: #A0522D; }
 .admin-shell.day-mode .topbar-breadcrumb { color: #A0522D }
