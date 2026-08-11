@@ -1233,13 +1233,17 @@
                 <div v-for="(d, di) in destModal.form.openingHours.days" :key="d.day" class="edit-hours-row">
                   <span class="edit-hours-day">{{ d.day }}</span>
                   <div class="edit-hours-pills">
-                    <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': !d.closed }" @click="d.closed = false">Open</button>
+                    <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': !d.closed && !isDay24h(d) }" @click="d.closed = false; if (isDay24h(d)) { d.open = '09:00'; d.close = '18:00' }">Open</button>
+                    <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': isDay24h(d) }" @click="setDay24h(d)" title="Open around the clock on this day">24h</button>
                     <button type="button" class="edit-hours-pill edit-hours-pill--close" :class="{ 'edit-hours-pill--active': d.closed }" @click="d.closed = true">Closed</button>
                   </div>
-                  <input v-if="!d.closed" type="time" v-model="d.open"  class="edit-hours-time" />
-                  <span  v-if="!d.closed" class="edit-hours-sep">–</span>
-                  <input v-if="!d.closed" type="time" v-model="d.close" class="edit-hours-time" />
-                  <span  v-else class="edit-hours-closed-text">Closed all day</span>
+                  <template v-if="!d.closed && !isDay24h(d)">
+                    <input type="time" v-model="d.open"  class="edit-hours-time" />
+                    <span class="edit-hours-sep">–</span>
+                    <input type="time" v-model="d.close" class="edit-hours-time" />
+                  </template>
+                  <span v-else-if="isDay24h(d)" class="edit-hours-closed-text">Open 24 hours</span>
+                  <span v-else class="edit-hours-closed-text">Closed all day</span>
                   <button v-if="di === 0 && !d.closed" type="button" class="edit-hours-all-btn" @click="applyHoursToAllDays" title="Copy these hours to every day of the week">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     Apply to all days
@@ -2009,7 +2013,7 @@ export default {
     // ════════════════════════════════════════════════════════════════
     //  DESTINATIONS TAB STATE
     // ════════════════════════════════════════════════════════════════
-    const DEST_PRIMARY   = ['restaurants', 'hotels', 'historical', 'events', 'hidden_gems']
+    const DEST_PRIMARY   = ['restaurants', 'hotels', 'historical', 'events', 'hidden_gems', 'photo_spots', 'market', 'mall']
     const DEST_INTERESTS = ['cultural','history','adventure','relaxation','nature','art','nightlife','food&drink']
     const DEST_STYLES    = ['family','romantic','luxury','budget']
 
@@ -2019,7 +2023,13 @@ export default {
     const ALL_DEST_TYPES = [
       'cultural','history','adventure','relaxation','nature','art','nightlife','food&drink',
       'family','romantic','luxury','budget',
-      'restaurants','hotels','historical','events','hidden_gems'
+      'restaurants','hotels','historical','events','hidden_gems',
+      // Photo spots + shopping. NOTE: there is no plain 'shopping' tag by
+      // design (see Destination schema) — "Shopping" is the quick-action
+      // button, and a shop destination carries its concrete sub-type, which
+      // is what the shopping search actually matches on.
+      'photo_spots',
+      'market','mall','souvenirs','clothing','jewelry','food'
     ]
 
     // Pricing currencies — same set as AdminDashboard.PRICING_CURRENCIES.
@@ -2495,6 +2505,12 @@ export default {
         form
       }
     }
+
+    // Per-day round-the-clock: 00:00–23:59 is the convention the rest of the
+    // app already renders as "24 / 7" (see BusinessOnboarding.hoursDisplay),
+    // so a single day can be 24h while the others keep normal hours.
+    const isDay24h = (d) => !d.closed && d.open === '00:00' && (d.close === '23:59' || d.close === '24:00')
+    function setDay24h(d) { d.closed = false; d.open = '00:00'; d.close = '23:59' }
 
     // Copy Monday's hours (open/close/closed) to every day of the week.
     function applyHoursToAllDays() {
@@ -3348,7 +3364,7 @@ export default {
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES, DEST_PREFS, destTypeFilter, destPrefFilter, destTagLabel,
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
-      toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords,
+      toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords, isDay24h, setDay24h,
       // Map (Leaflet)
       destMap, reGeocodeDestination,
       submitDest, toggleDest, canEditDest,

@@ -4104,7 +4104,11 @@ export default {
     const ALL_TYPES = [
       'cultural','history','adventure','relaxation','nature','art','nightlife','food&drink',
       'family','romantic','luxury','budget',
-      'restaurants','hotels','historical','events','hidden_gems'
+      'restaurants','hotels','historical','events','hidden_gems',
+      // Parity with StaffValidation: photo spots + shopping sub-types (there
+      // is no plain 'shopping' tag — see the Destination schema comment).
+      'photo_spots',
+      'market','mall','souvenirs','clothing','jewelry','food'
     ]
     // Currencies match BusinessOnboarding.vue (USD/EUR/GBP/RUB/AED) plus AMD,
     // since several admin-facing listings are local Armenian businesses.
