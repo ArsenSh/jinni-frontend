@@ -2969,11 +2969,23 @@
       <div v-if="chatLog.open" class="edit-overlay" @click.self="closeChatLog">
         <div class="edit-panel chatlog-panel" :class="theme">
           <div class="edit-header">
-            <div>
-              <div class="edit-title">Chat sessions — {{ chatLog.user?.name || chatLog.user?.email || 'user' }}</div>
+            <div class="edit-header-left">
+              <h2 class="edit-title">Chat sessions — {{ chatLog.user?.name || chatLog.user?.email || 'user' }}</h2>
               <div class="edit-sub">Read-only transcript · {{ chatLog.total }} session{{ chatLog.total === 1 ? '' : 's' }}</div>
             </div>
-            <button class="edit-close" @click="closeChatLog">✕</button>
+            <div class="edit-header-actions">
+              <button class="edit-close-btn" @click="closeChatLog" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- User preferences snapshot — what this user chose on the
+               Preferences page, plus their resolved location. -->
+          <div v-if="chatLog.prefs" class="cl-prefs">
+            <span v-for="(p, pi) in chatLog.prefs" :key="pi" class="cl-pref">
+              <b>{{ p.k }}</b> {{ p.v }}
+            </span>
           </div>
 
           <div class="chatlog-body">
@@ -3005,18 +3017,23 @@
                   <template v-if="(m.contentParts || []).length">
                     <template v-for="(part, pi) in m.contentParts" :key="pi">
                       <div v-if="part.type === 'text' && part.content" class="cl-msg-text">{{ part.content }}</div>
-                      <div v-else-if="part.type === 'recommendation' && m.recommendations?.[part.index]" class="cl-recs">
-                        <div class="cl-rec">
-                          <img v-if="m.recommendations[part.index].image" :src="resolveImage(m.recommendations[part.index].image)" class="cl-rec-img" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
-                          <div class="cl-rec-body">
-                            <div class="cl-rec-name">{{ m.recommendations[part.index].name }}</div>
-                            <div v-if="m.recommendations[part.index].type || m.recommendations[part.index].category" class="cl-rec-type">{{ m.recommendations[part.index].type || m.recommendations[part.index].category }}</div>
-                            <div v-if="m.recommendations[part.index].description" class="cl-rec-desc">{{ m.recommendations[part.index].description }}</div>
-                            <div class="cl-rec-meta">
-                              <span v-if="m.recommendations[part.index].address || m.recommendations[part.index].location">{{ m.recommendations[part.index].address || m.recommendations[part.index].location }}</span>
-                              <span v-if="m.recommendations[part.index].distance"> · {{ m.recommendations[part.index].distance }}</span>
-                              <span v-if="m.recommendations[part.index].rating"> · ★ {{ m.recommendations[part.index].rating }}</span>
-                            </div>
+                      <!-- Chat's LARGE card: image on top, details below —
+                           the inline form the user actually saw. -->
+                      <div v-else-if="part.type === 'recommendation' && m.recommendations?.[part.index]" class="cl-reccard">
+                        <div class="cl-reccard-img">
+                          <img v-if="m.recommendations[part.index].image" :src="resolveImage(m.recommendations[part.index].image)" loading="lazy" @error="$event.target.style.display='none'"/>
+                          <div v-else class="cl-reccard-noimg">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                          </div>
+                        </div>
+                        <div class="cl-reccard-details">
+                          <div class="cl-reccard-name">{{ m.recommendations[part.index].name }}</div>
+                          <div v-if="m.recommendations[part.index].type || m.recommendations[part.index].category" class="cl-reccard-type">{{ m.recommendations[part.index].type || m.recommendations[part.index].category }}</div>
+                          <div v-if="m.recommendations[part.index].description" class="cl-reccard-desc">{{ m.recommendations[part.index].description }}</div>
+                          <div class="cl-reccard-meta">
+                            <span v-if="m.recommendations[part.index].distance" class="cl-reccard-dist">{{ m.recommendations[part.index].distance }}</span>
+                            <span v-if="m.recommendations[part.index].address || m.recommendations[part.index].location">{{ m.recommendations[part.index].address || m.recommendations[part.index].location }}</span>
+                            <span v-if="m.recommendations[part.index].rating">★ {{ m.recommendations[part.index].rating }}</span>
                           </div>
                         </div>
                       </div>
@@ -3042,6 +3059,8 @@
                   </template>
                   <!-- The real itinerary component, restored by id — same
                        rendering the user saw, read-only here. -->
+                  <!-- Interactive on purpose: the admin must be able to switch
+                       days. It only reads (GET by id); nothing here writes. -->
                   <div v-if="m.itineraryId" class="cl-itinerary">
                     <ItineraryView :itinerary-id="m.itineraryId" :theme="theme" />
                   </div>
@@ -4164,9 +4183,33 @@ export default {
     }
 
     // ── Chat transcript viewer (read-only) ──────────────────────────────
-    const chatLog = ref({ open: false, user: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false })
+    const chatLog = ref({ open: false, user: null, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false })
+    // Flatten the user's Preferences-page choices + resolved location into
+    // simple label/value chips for the transcript header.
+    const buildPrefChips = (u) => {
+      const p = u?.preferences || {}, s = u?.settings || {}
+      const loc = s.location || p.destination || {}
+      const c = loc.coordinates || {}
+      const chips = []
+      if (p.interests?.length) chips.push({ k: 'Interests', v: p.interests.join(', ') })
+      if (p.travelStyle) chips.push({ k: 'Style', v: p.travelStyle })
+      if (p.budget?.min != null || p.budget?.max != null) chips.push({ k: 'Budget', v: `${p.budget.min ?? '—'}–${p.budget.max ?? '—'} ${p.budget.currency || ''}`.trim() })
+      if (p.accessibility?.length) chips.push({ k: 'Accessibility', v: p.accessibility.join(', ') })
+      if (p.languages?.length || s.language) chips.push({ k: 'Language', v: s.language || p.languages.join(', ') })
+      const place = [loc.city, loc.countryName || loc.country].filter(Boolean).join(', ')
+      if (place) chips.push({ k: 'Location', v: place })
+      if (Number.isFinite(c.lat) && Number.isFinite(c.lng) && (c.lat || c.lng)) chips.push({ k: 'Coords', v: `${Number(c.lat).toFixed(5)}, ${Number(c.lng).toFixed(5)}` })
+      if (s.searchRadius) chips.push({ k: 'Radius', v: `nearby ${s.searchRadius.nearby ?? '—'}km · discovery ${s.searchRadius.discovery ?? '—'}km` })
+      if (s.theme) chips.push({ k: 'Theme', v: s.theme })
+      return chips.length ? chips : null
+    }
+
     const openChatLog = async (user) => {
-      chatLog.value = { open: true, user, sessions: [], total: 0, sessionId: null, messages: [], loading: true, msgLoading: false }
+      chatLog.value = { open: true, user, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: true, msgLoading: false }
+      // Full user doc — the list payload omits preferences/settings.
+      apiFetch(`/users/${user._id}`)
+        .then(r => { chatLog.value.prefs = buildPrefChips(r.data || user) })
+        .catch(() => { chatLog.value.prefs = buildPrefChips(user) })
       try {
         const res = await apiFetch(`/users/${user._id}/chat-sessions?limit=50`)
         chatLog.value.sessions = res.data?.sessions || []
@@ -4184,7 +4227,7 @@ export default {
         chatLog.value.messages = res.data?.messages || []
       } catch (e) { showToast(e.message, 'error') } finally { chatLog.value.msgLoading = false }
     }
-    const closeChatLog = () => { chatLog.value = { open: false, user: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false } }
+    const closeChatLog = () => { chatLog.value = { open: false, user: null, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false } }
 
     const togglePremium = async (user) => {
       try { await apiFetch(`/users/${user._id}/premium`, { method: 'PATCH', body: JSON.stringify({ isPremium: !user.isPremium }) }); user.isPremium = !user.isPremium; showToast(`${user.name} ${user.isPremium ? 'upgraded to Premium' : 'downgraded to Free'}`) }
@@ -6072,9 +6115,35 @@ export default {
 .cl-rec-type { font-size: 11px; opacity: 0.7; margin-bottom: 3px; }
 .cl-rec-desc { font-size: 11.5px; line-height: 1.45; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .cl-rec-meta { font-size: 11px; opacity: 0.6; margin-top: 4px; }
-/* Itineraries render through the real component; keep them inside the panel
-   and non-interactive so the read-only view can't trigger regeneration. */
-.cl-itinerary { margin-top: 10px; max-width: 100%; overflow-x: auto; pointer-events: none; }
+/* Itineraries render through the real component — interactive so the admin
+   can switch days; the endpoint is GET-only, so nothing can be written. */
+.cl-itinerary { margin-top: 10px; max-width: 100%; overflow-x: auto; }
+
+/* Transcript header — JinniChat's gold gradient title */
+.chatlog-panel .edit-title { font-size: 1.25rem; font-weight: 700; margin: 0;
+  color: #D4AF37; background: linear-gradient(45deg, #D4AF37, #FF8C00);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.chatlog-panel .edit-header { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 18px; border-bottom: 1px solid rgba(128,128,128,0.18); }
+.chatlog-panel .edit-sub { font-size: 11.5px; opacity: 0.6; margin-top: 2px; }
+
+/* User preference snapshot chips */
+.cl-prefs { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 18px; border-bottom: 1px solid rgba(128,128,128,0.14); }
+.cl-pref { font-size: 11px; padding: 4px 10px; border-radius: 999px; background: rgba(128,128,128,0.10); }
+.cl-pref b { font-weight: 700; opacity: 0.65; margin-right: 4px; }
+
+/* Chat's LARGE recommendation card — image on top, details below */
+.cl-reccard { max-width: 420px; margin: 10px 0; border-radius: 12px; overflow: hidden;
+  background: rgba(128,128,128,0.09); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
+.cl-reccard-img { height: 170px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(128,128,128,0.10); }
+.cl-reccard-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cl-reccard-noimg { opacity: 0.4; }
+.cl-reccard-details { padding: 13px 15px 15px; }
+.cl-reccard-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 5px; }
+.cl-reccard-type { font-size: 0.85rem; font-weight: 500; opacity: 0.75; margin-bottom: 6px; }
+.cl-reccard-desc { font-size: 0.85rem; line-height: 1.5; opacity: 0.9; margin-bottom: 8px; }
+.cl-reccard-meta { display: flex; flex-direction: column; gap: 3px; font-size: 0.8rem; opacity: 0.65; }
+.cl-reccard-dist { font-weight: 600; opacity: 0.85; }
 @media (max-width: 720px) {
   .chatlog-body { flex-direction: column; }
   .chatlog-list { width: auto; max-height: 160px; border-right: none; border-bottom: 1px solid rgba(128,128,128,0.18); }
