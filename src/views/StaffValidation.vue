@@ -1231,7 +1231,10 @@
                       <input class="edit-input" type="time" v-model="destModal.form.eventSchedule.endTime" />
                     </div>
                   </div>
-                  <span class="edit-help-sub">Leave the end date empty for a single-day event. An end time on its own is treated as the close time on the start date.</span>
+                  <span class="edit-help-sub">
+                    Both optional. Leave them empty for a single-day event — it stays listed for the rest of the start day and disappears overnight.
+                    Set an end date only if the event runs across several days, or an end time if you want it to drop off at a precise moment.
+                  </span>
                 </div>
 
                 <!-- Honest warning rather than a hard block: a validator may
@@ -1325,9 +1328,35 @@
               </div>
             </section>
 
-            <!-- Opening Hours (admin's exact 24/7 button + day rows) -->
-            <section class="edit-section">
+            <!-- ── Opening Hours / Weekly Schedule ────────────────────────
+                 Three modes, because "opening hours" means something different
+                 depending on what this destination is:
+
+                   • normal place      → Opening Hours, exactly as before
+                   • recurring event   → the weekly grid IS the event's schedule
+                                         (every Friday 20:00–23:00), so it is
+                                         relabelled and its hint rewritten
+                   • one-time event    → meaningless. A concert on Sep 14 at
+                                         20:00 does not have Monday–Sunday
+                                         hours; its Event Schedule already says
+                                         everything. The section is replaced by
+                                         a short note, and submitDest clears any
+                                         stale hours so the place card can never
+                                         show "Open 09:00–18:00" for a concert.
+            -->
+            <section v-if="destIsOneTimeEvent" class="edit-section">
               <div class="edit-section-title">Opening Hours</div>
+              <div class="edit-event-recurring-note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+                <span>Not needed for a one-time event — the <strong>Event Schedule</strong> above already defines when it runs. Weekly opening hours would only confuse travelers, so none are saved.</span>
+              </div>
+            </section>
+
+            <section v-else class="edit-section">
+              <div class="edit-section-title">{{ destIsEvent ? 'Weekly Schedule' : 'Opening Hours' }}</div>
+              <div v-if="destIsEvent" class="edit-help-sub" style="margin: -4px 0 12px">
+                This event repeats weekly — mark the days it runs and the times for each. Days marked Closed are days it does not run.
+              </div>
               <div class="edit-field" style="margin-bottom: 12px">
                 <label class="edit-label">Availability</label>
                 <button type="button" class="edit-free-btn"
@@ -1335,9 +1364,13 @@
                         @click="destModal.form.openingHours.is24Hours = !destModal.form.openingHours.is24Hours">
                   <svg v-if="destModal.form.openingHours.is24Hours" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="20 6 9 17 4 12"/></svg>
                   <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
-                  Open 24/7
+                  {{ destIsEvent ? 'Runs 24/7' : 'Open 24/7' }}
                 </button>
-                <span class="edit-help-sub">Click if this place is open around the clock — per-day hours below will be hidden.</span>
+                <span class="edit-help-sub">
+                  {{ destIsEvent
+                      ? 'Click if this event runs continuously, every day — per-day times below will be hidden.'
+                      : 'Click if this place is open around the clock — per-day hours below will be hidden.' }}
+                </span>
               </div>
               <div v-if="!destModal.form.openingHours.is24Hours" class="edit-hours-list">
                 <div v-for="(d, di) in destModal.form.openingHours.days" :key="d.day" class="edit-hours-row">
@@ -2584,6 +2617,12 @@ export default {
     // Is the 'events' chip selected? Drives the whole schedule section.
     const destIsEvent = computed(() => (destModal.value?.form?.type || []).includes('events'))
 
+    // A one-time / multi-day event: has a fixed date window and therefore no
+    // weekly opening hours. A RECURRING event is the opposite — its weekly grid
+    // is precisely where its schedule lives — so it keeps the hours section.
+    const destIsOneTimeEvent = computed(() =>
+      destIsEvent.value && !destModal.value?.form?.eventSchedule?.isRecurring)
+
     // Would this event already be over the moment it's saved? Used for an
     // advisory warning, not a hard block — back-filling a past event is a
     // legitimate correction, it just won't be shown to anyone.
@@ -2591,9 +2630,13 @@ export default {
       const es = destModal.value?.form?.eventSchedule
       if (!destIsEvent.value || !es || es.isRecurring || !es.startDate) return false
       const tz = es.timezone || destBrowserTz()
-      const endIso = es.endDate || es.endTime
+      // Mirrors the server's implicit end: with no end date/time the event runs
+      // to the close of its start day, so pass an empty time and let the 23:59
+      // fallback apply. Using startTime here would have warned "already past"
+      // for a 20:00 concert from 20:01 onwards, when it is in fact still live.
+      const endIso = (es.endDate || es.endTime)
         ? destCombineDateTime(es.endDate || es.startDate, es.endTime, '23:59', tz)
-        : destCombineDateTime(es.startDate, es.startTime, '23:59', tz)
+        : destCombineDateTime(es.startDate, '', '23:59', tz)
       if (!endIso) return false
       return new Date(endIso).getTime() < Date.now()
     })
@@ -3261,6 +3304,18 @@ export default {
           delete payload.eventSchedule
         }
 
+        // ── Opening hours vs. event schedule ──────────────────────────────
+        // A one-time event has no weekly hours — its Event Schedule says when
+        // it runs. A fresh form carries the default Mon–Sat 09:00–18:00 rows,
+        // and an existing place re-tagged as an event carries its old ones, so
+        // without this a concert would render "Open 09:00–18:00" on its card.
+        // Sent as an explicit empty set rather than omitted: on PATCH, omitting
+        // the key leaves the stored hours in place, which is the bug we're
+        // avoiding. Recurring events keep their grid — it IS their schedule.
+        if ((payload.type || []).includes('events') && !payload.eventSchedule?.isRecurring) {
+          payload.openingHours = { is24Hours: false, days: [] }
+        }
+
         const url = m.isNew
           ? `${API_URL}/staff/destinations`
           : `${API_URL}/staff/destinations/${m.id}`
@@ -3729,7 +3784,7 @@ export default {
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
       toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords, isDay24h, setDay24h,
-      destIsEvent, destEventEndsInPast, destTimezoneOptions, tzShortLabel, eventScheduleSummary,
+      destIsEvent, destIsOneTimeEvent, destEventEndsInPast, destTimezoneOptions, tzShortLabel, eventScheduleSummary,
       // Map (Leaflet)
       destMap, reGeocodeDestination,
       submitDest, toggleDest, canEditDest,

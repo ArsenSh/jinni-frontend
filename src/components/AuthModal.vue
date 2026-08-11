@@ -283,6 +283,24 @@ export default {
     }
   },
   methods: {
+    // The UI language this visitor is currently browsing in — the one they
+    // picked on the landing page. Sent along with signup so the new account
+    // starts in that language rather than the server's 'en' default, which
+    // otherwise wins over the browser's copy as soon as JinniChat loads.
+    //
+    // Reads the Vuex i18n locale first (the live value the picker sets), then
+    // the localStorage keys the i18n store mirrors it into, so it still works
+    // if this modal is opened before the store has hydrated.
+    currentLanguage() {
+      try {
+        const fromStore = this.$store?.state?.i18n?.locale
+        if (fromStore) return fromStore
+        const settings = JSON.parse(localStorage.getItem('jinni_settings') || '{}')
+        return settings.language || localStorage.getItem('jinni_language') || localStorage.getItem('lang') || 'en'
+      } catch (_e) {
+        return 'en'
+      }
+    },
     // Keep the browser chrome (mobile address-bar) + page background in sync with
     // the day/night look — same colors/approach App.vue + LandingPage use. Harmless
     // no-op when this modal is overlaid on an already-themed page; matters if /auth
@@ -389,7 +407,7 @@ export default {
       this.success = ''
       try {
         this.validateForm()
-        const response = await axios.post(`${this.API_BASE_URL}/api/auth/send-verification`,{name: this.formData.name.trim(), email: this.formData.email.toLowerCase().trim(), password: this.formData.password},{headers: {'Content-Type': 'application/json'}})
+        const response = await axios.post(`${this.API_BASE_URL}/api/auth/send-verification`,{name: this.formData.name.trim(), email: this.formData.email.toLowerCase().trim(), password: this.formData.password, language: this.currentLanguage()},{headers: {'Content-Type': 'application/json'}})
         this.pendingEmail = response.data.email
         this.showVerification = true
         this.startResendTimer()
@@ -407,7 +425,7 @@ export default {
       this.isLoading = true
       this.error = ''
       try {
-        const response = await axios.post(`${this.API_BASE_URL}/api/auth/verify-email`,{email: this.pendingEmail,code: this.verificationCode},{headers: {'Content-Type': 'application/json'}})
+        const response = await axios.post(`${this.API_BASE_URL}/api/auth/verify-email`,{email: this.pendingEmail,code: this.verificationCode, language: this.currentLanguage()},{headers: {'Content-Type': 'application/json'}})
         if (response.data.token) {
           localStorage.setItem('authToken', response.data.token)
           localStorage.setItem('user', JSON.stringify(response.data.user))
@@ -496,7 +514,10 @@ export default {
       this.error = ''
       this.isLoading = true
       this.loadingProvider = 'google'
-      try { window.location.href = `${this.API_BASE_URL}/auth/google` } 
+      // Pass the chosen language across the Google round-trip — the server
+      // can't read localStorage, so without it a Google signup always lands
+      // on the English default.
+      try { window.location.href = `${this.API_BASE_URL}/auth/google?lang=${encodeURIComponent(this.currentLanguage() || 'en')}` }
       catch (error) {
         console.error('Google login error:', error)
         this.error = this.$t('auth.google_error')
