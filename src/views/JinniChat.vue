@@ -5332,6 +5332,13 @@ export default {
             action: actionId,
             count: viewMoreBatchSize,
             actionType: 'view_more',
+            // The backend decides "has this event already passed?" against the
+            // start of TODAY IN THE USER'S OWN DAY. Only chat-stream ever sent
+            // this, so every quick-action tap fell back to UTC — and in any zone
+            // ahead of UTC that made yesterday's all-day events look current
+            // during the first hours of each day (three stale Aug-12 cards at
+            // 02:35 in Yerevan).
+            userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             // Which View More tap this is (1 = first View More, 2 = second, …).
             // The backend uses this to gate web search to the FIRST request only
             // and to prefer cache on refills. currentCount was already incremented
@@ -5541,7 +5548,9 @@ export default {
             if (location) { this.userLocation = location }
           }
         }
-        const requestBody = { action: actionId, count: count, actionType: 'quick_action', excludePlaceIds: [...new Set(excludePlaceIds)], excludeNames: [...new Set(excludeNames)], nearbyMode: this.nearbyMode, ...(subType && { subType }) };
+        // userTimezone: the events past-filter needs the user's own day boundary,
+        // not UTC — see the note on the View More body above.
+        const requestBody = { action: actionId, count: count, actionType: 'quick_action', userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone, excludePlaceIds: [...new Set(excludePlaceIds)], excludeNames: [...new Set(excludeNames)], nearbyMode: this.nearbyMode, ...(subType && { subType }) };
         if (location) { 
           requestBody.location = { 
             lat: location.lat, 
