@@ -458,9 +458,25 @@
                       <div class="recommendation-grid">
                         <div v-for="(rec, recIndex) in message.recommendations" :key="recIndex" :class="['rec-card-wrapper', getPartnerWrapperClass(rec)]">
                           <div class="recommendation-card" @touchstart="handleCardTouchStart(rec, $event)" @touchend="handleCardTouchEnd(rec, $event)">
-                            <div class="rec-image" :class="{'loading-skeleton': rec.isStreaming || !rec.image}">
+                            <!-- An event with a date but no image is a DATE-CARD: the event
+                                 is real and its schedule is real, but it has no Google
+                                 place to take a photo from (a street festival has no venue
+                                 photo). That is a FINAL state, not a pending one — so it
+                                 gets a static event mark instead of the loading shimmer,
+                                 which would otherwise animate forever and read as broken. -->
+                            <div class="rec-image"
+                                 :class="{
+                                   'loading-skeleton': (rec.isStreaming || !rec.image) && !(!rec.image && !rec.isStreaming && rec.eventSchedule),
+                                   'rec-image--event': !rec.image && !rec.isStreaming && rec.eventSchedule
+                                 }">
                               <img v-if="rec.image" :src="getImageUrl(rec.image)" :alt="rec.name" @error="handleImageError" loading="lazy">
-                              <div v-if="!rec.image" class="skeleton-shimmer"></div>
+                              <div v-if="!rec.image && !rec.isStreaming && rec.eventSchedule" class="rec-image-event-mark">
+                                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                  <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                              </div>
+                              <div v-else-if="!rec.image" class="skeleton-shimmer"></div>
                               <div v-if="rec.image" class="image-overlay">
                                 <div class="overlay-actions">
                                   <button @click.stop="showPlaceInfo(rec)" class="text-action-btn info-btn" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }">
@@ -6753,6 +6769,14 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .card-glow--spotlight .recommendation-card{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)}
 .card-glow--signature .recommendation-card{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)}
 .rec-image.loading-skeleton{background-size:200% 100%;animation:shimmer 2s infinite;position:relative;overflow:hidden}
+/* Date-card: a settled, non-animated state — deliberately static so it reads as
+   "this event has no photo", not "the photo is still loading". */
+.rec-image--event{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.rec-image-event-mark{display:flex;align-items:center;justify-content:center;opacity:.45}
+.genie-chat-container.night-mode .rec-image--event{background:rgba(255,255,255,0.06)}
+.genie-chat-container.night-mode .rec-image-event-mark{color:rgba(255,255,255,0.75)}
+.genie-chat-container.day-mode .rec-image--event{background:rgba(160,82,45,0.10)}
+.genie-chat-container.day-mode .rec-image-event-mark{color:rgba(160,82,45,0.85)}
 .skeleton-shimmer{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center}
 .image-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.3));display:flex;align-items:center;justify-content:center;opacity:0;z-index:2}
 .recommendation-card:hover .image-overlay{opacity:1}
