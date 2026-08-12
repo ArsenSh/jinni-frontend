@@ -531,6 +531,18 @@
                                 </div>
                                 <span v-if="rec._isExpired" class="rec-event-ended">{{ t('chat.event.ended') }}</span>
                               </div>
+                              <!-- Where the date came from. An AI-found event's date is
+                                   recalled, not verified — live checks found one feast a
+                                   day early and one concert three weeks early — so the
+                                   listing the model read is offered for the user to
+                                   confirm. Only present when a real http(s) URL survived
+                                   validation server-side. -->
+                              <a v-if="rec.sourceUrl" :href="rec.sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source" @click.stop>
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                                </svg>
+                                <span>{{ t('chat.event.check_listing') || 'Check listing' }}</span>
+                              </a>
                               <div class="rec-metadata">
                                 <div v-if="rec.distance && rec.distance !== 'Near you km'" class="rec-distance">
                                   {{ rec.distance }}
@@ -6773,6 +6785,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .card-glow--spotlight .recommendation-card{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)}
 .card-glow--signature .recommendation-card{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)}
 .rec-image.loading-skeleton{background-size:200% 100%;animation:shimmer 2s infinite;position:relative;overflow:hidden}
+/* Source link on an AI-found event — quiet by default, since it is a verification
+   affordance rather than a call to action. */
+.rec-event-source{display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:2px 0 4px;text-decoration:none;opacity:.72}
+.rec-event-source:hover{opacity:1;text-decoration:underline}
+.genie-chat-container.night-mode .rec-event-source{color:rgba(255,255,255,0.72)}
+.genie-chat-container.day-mode .rec-event-source{color:rgba(160,82,45,0.9)}
 /* Date-card: a settled, non-animated state — deliberately static so it reads as
    "this event has no photo", not "the photo is still loading". */
 .rec-image--event{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
