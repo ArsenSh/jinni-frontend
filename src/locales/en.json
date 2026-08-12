@@ -864,6 +864,7 @@
       "switching": "Switching to Listing"
     },
     "event": {
+      "check_listing": "Check listing",
       "ended": "Ended",
       "schedule": "Schedule",
       "event_date": "Event date",

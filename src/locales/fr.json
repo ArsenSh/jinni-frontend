@@ -871,6 +871,7 @@
       "switching": "Passage à l'établissement…"
     },
     "event": {
+      "check_listing": "Vérifier l'annonce",
       "ended": "Terminé",
       "schedule": "Horaire",
       "event_date": "Date de l'événement",

@@ -868,6 +868,7 @@
       "switching": "正在切换到商家页面…"
     },
     "event": {
+      "check_listing": "查看来源",
       "ended": "已结束",
       "schedule": "日程",
       "event_date": "活动日期",
