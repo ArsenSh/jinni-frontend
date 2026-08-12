@@ -4847,7 +4847,11 @@ export default {
             console.log('🖼️ [IMAGE BTN] extracted verifiedId from id field:', resolvedVerifiedId);
           }
         }
-        const imagePayload = { imageRequest: { placeName: recommendation.name, placeId: recommendation.placeId, verifiedId: resolvedVerifiedId, location: this.userLocation } };
+        // An event resolved through its venue has no placeId of its own (the venue's
+        // id is deliberately NOT adopted as the event's identity), but it does carry
+        // venuePlaceId. Fall back to it so "more images" returns the venue's photos
+        // instead of searching Google for an event name that has no listing.
+        const imagePayload = { imageRequest: { placeName: recommendation.name, placeId: recommendation.placeId || recommendation.venuePlaceId || null, verifiedId: resolvedVerifiedId, location: this.userLocation } };
         console.log('🖼️ [IMAGE BTN] recommendation object:', JSON.stringify({ name: recommendation.name, placeId: recommendation.placeId, verifiedId: resolvedVerifiedId, source: recommendation.source }, null, 2));
         console.log('🖼️ [IMAGE BTN] sending payload:', JSON.stringify(imagePayload, null, 2));
         const response = await fetch(`${API_BASE_URL}/api/ai/image-request-only`, {
