@@ -2157,6 +2157,11 @@ export default {
     canShare() { return !!navigator.share },
   },
   watch: {
+    // Live location moved (or first fix): refresh the reverse-geocoded
+    // city/country that searchPlace appends to Maps queries — in the
+    // background, never on the click path, where an await before
+    // window.open would risk the popup blocker.
+    userLocation(loc) { this.refreshLiveGeoContext(loc) },
     // When the preference bar reveals, auto-hide it after PREFERENCE_BAR_HIDE_MS.
     // A fresh reveal (e.g. reopening the actions popover or typing after
     // clearing) restarts it. 3s was not long enough to read the chips while
@@ -4052,6 +4057,30 @@ export default {
       const name = el.getAttribute('data-place');
       if (name) this.searchPlace(name);
     },
+    /* Reverse-geocoded city/country for the CURRENT live coordinates.
+       userSettings.location is complete (onboarding reverse-geocodes even the
+       GPS path) but written ONCE, at onboarding/settings time — a GPS user who
+       onboarded in Yerevan and is now in Dubai would get "Sky Bar Yerevan
+       Armenia" appended to the Maps query. This cache follows the live fix
+       instead: same Nominatim service onboarding already uses, refreshed only
+       when the fix moves ~25km, fire-and-forget so any failure simply leaves
+       the settings fallback in place. */
+    refreshLiveGeoContext(loc) {
+      if (!loc || !Number.isFinite(loc.lat) || !Number.isFinite(loc.lng)) return;
+      const g = this._liveGeo;
+      if (g && Math.abs(g.lat - loc.lat) < 0.22 && Math.abs(g.lng - loc.lng) < 0.22) return;  // ~<25km: still current
+      if (this._liveGeoPending) return;
+      this._liveGeoPending = true;
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${loc.lat}&lon=${loc.lng}&format=json`)
+        .then(r => r.json())
+        .then(d => {
+          const a = (d && d.address) || {};
+          const city = a.city || a.town || a.village || '';
+          if (city || a.country) this._liveGeo = { lat: loc.lat, lng: loc.lng, city, country: a.country || '' };
+        })
+        .catch(() => {})
+        .finally(() => { this._liveGeoPending = false; });
+    },
     searchPlace(name) {
       // Add city/country context so a bare "Sky Bar" resolves to the right
       // place. Google MAPS search (not plain web) — drops the venue on the map
@@ -4059,7 +4088,14 @@ export default {
       // For plain web search instead, swap the URL for
       //   https://www.google.com/search?q=${q}
       const loc = this.userSettings && this.userSettings.location;
-      const ctx = (loc && loc.city && loc.countryName) ? ` ${loc.city} ${loc.countryName}` : '';
+      let ctx = (loc && loc.city && loc.countryName) ? ` ${loc.city} ${loc.countryName}` : '';
+      // Prefer the live fix's city when we hold one for roughly where the
+      // user is NOW (~25km); warm the cache for next click either way.
+      this.refreshLiveGeoContext(this.userLocation);
+      const g = this._liveGeo, cur = this.userLocation;
+      if (g && cur && Math.abs(g.lat - cur.lat) < 0.22 && Math.abs(g.lng - cur.lng) < 0.22 && (g.city || g.country)) {
+        ctx = ` ${[g.city, g.country].filter(Boolean).join(' ')}`;
+      }
       const q = encodeURIComponent(name + ctx);
       const url = `https://www.google.com/maps/search/?api=1&query=${q}`;
       // window.open('_blank') — matches the app's other working map buttons and

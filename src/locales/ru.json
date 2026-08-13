@@ -431,7 +431,8 @@
     "styles": {
       "luxury": "Люкс",
       "budget": "Бюджетный"
-    }
+    },
+    "location_app_toggle_off": "Определение местоположения отключено в настройках Jinni -"
   },
   "contact": {
     "back": "Назад",

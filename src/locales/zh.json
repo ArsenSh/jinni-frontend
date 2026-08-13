@@ -431,7 +431,8 @@
     "styles": {
       "luxury": "豪华",
       "budget": "经济"
-    }
+    },
+    "location_app_toggle_off": "您已在 Jinni 设置中关闭了定位 -"
   },
   "contact": {
     "back": "返回",

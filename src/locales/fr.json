@@ -431,7 +431,8 @@
     "styles": {
       "luxury": "Luxe",
       "budget": "Économique"
-    }
+    },
+    "location_app_toggle_off": "La localisation est désactivée dans les réglages de Jinni -"
   },
   "contact": {
     "back": "Retour",

@@ -431,7 +431,8 @@
     "styles": {
       "luxury": "Luxury",
       "budget": "Budget"
-    }
+    },
+    "location_app_toggle_off": "Location is turned off in Jinni's settings -"
   },
   "contact": {
     "back": "Back",

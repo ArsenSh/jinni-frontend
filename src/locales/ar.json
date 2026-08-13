@@ -428,7 +428,8 @@
     "styles": {
       "luxury": "فاخر",
       "budget": "اقتصادي"
-    }
+    },
+    "location_app_toggle_off": "تم إيقاف تحديد الموقع في إعدادات Jinni -"
   },
   "contact": {
     "back": "رجوع",

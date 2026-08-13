@@ -150,6 +150,16 @@
               <div v-if="locationDenied" class="location-permission-warning location-denied-warning">
                 <span>{{ $t(locationHelpKey) }}</span>
               </div>
+              <!-- Deliberate in-app switch-off is its own story: telling this user
+                   "GPS permission required" (OS phrasing) sends them hunting through
+                   iPhone Settings for a permission that is still granted. autoDetect
+                   defaults to true, so an explicit false can only mean the app-level
+                   toggle — Permit restores both flags, no OS prompt involved. -->
+              <div v-else-if="gpsManuallyDisabled" class="location-permission-warning">
+                <span>{{ $t('onboarding.location_app_toggle_off') }}
+                  <span class="permit-link" @click="requestLocationPermission">{{ $t('onboarding.location_permission_grant') }}</span>
+                </span>
+              </div>
               <div v-else-if="!hasLocationPermission" class="location-permission-warning">
                 <span>{{ $t('onboarding.location_permission_required') }}
                   <span class="permit-link" @click="requestLocationPermission">{{ $t('onboarding.location_permission_grant') }}</span>
@@ -498,6 +508,13 @@ export default {
         } catch (e) { return false }
       }
       return false;
+    },
+    gpsManuallyDisabled() {
+      void this.permissionGranted;
+      try {
+        const parsed = JSON.parse(localStorage.getItem('jinni_settings') || '{}');
+        return parsed.privacy?.autoDetectLocation === false && parsed.privacy?.locationPermissionGranted !== true;
+      } catch (e) { return false }
     },
     isLocationCompleted() {
       if (this.locationMode === 'gps') {return this.hasLocationPermission && this.preferences.useGPS}
