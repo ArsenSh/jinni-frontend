@@ -4233,7 +4233,11 @@ export default {
       try {
         // console.log('streamAIResponse');
         // console.log('📊 Initial state:', {isStreaming: this.isStreaming, isRequestPending: this.isRequestPending, isTyping: this.isTyping});
-        this.abortController = new AbortController();
+        /* Same local-controller rule as the quick-action handlers: awaits for
+         * geolocation and IP fallback sit between here and the fetch, and
+         * stopStreaming() nulls the shared field mid-flight. */
+        const reqController = new AbortController();
+        this.abortController = reqController;
         // console.log('🎮 Abort controller created');
         if (this.isRequestingImages) {
           await this.processImageStream(response);
@@ -4261,7 +4265,7 @@ export default {
         else {locationMode = 'unknown'}
         const requestBody = { message: userInput, userTimezone: deviceTimezone, destinationInfo: { city: destCity, country: destCountry, mode: locationMode }, actionType: 'general_query', sessionId: this.activeSessionId, nearbyMode: this.nearbyMode, settings: { language: this.userSettings.language, currency: this.userSettings.currency, distanceUnit: this.userSettings.distanceUnit }, context: { userPreferences: this.userPreferences }};
         if (location) { requestBody.location = { lat: parseFloat(location.lat), lng: parseFloat(location.lng), radius: this.getSearchRadius(), source: location.source || 'unknown' } }
-        const response = await fetch(`${API_BASE_URL}/api/ai/chat-stream`, {method: 'POST',headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },body: JSON.stringify(requestBody),signal: this.abortController.signal });
+        const response = await fetch(`${API_BASE_URL}/api/ai/chat-stream`, {method: 'POST',headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },body: JSON.stringify(requestBody),signal: reqController.signal });
         this.applyUsageHeaders(response.headers);    
         if (response.status === 400) {
           const errorData = await response.json();
@@ -5276,7 +5280,11 @@ export default {
       } catch (_) {}
       this.isRequestPending = true;
       this.isStreaming = true;
-      this.abortController = new AbortController();
+      /* Local controller for THIS refill — see the note in the quick-action
+       * handler below. stopStreaming() nulls the shared field, and the awaits
+       * before the fetch make that a live race, not a theoretical one. */
+      const reqController = new AbortController();
+      this.abortController = reqController;
       try {
         const actionId = message.actionType;
         const currentCount = message.viewMoreCount || 0;
@@ -5353,7 +5361,7 @@ export default {
           };
           if (location) { requestBody.location = { lat: location.lat, lng: location.lng, radius: location.source === 'ip' ? 50000 : 20000, source: location.source } }
           const token = localStorage.getItem('authToken');
-          const response = await fetch(`${API_BASE_URL}/api/ai/quick-action-stream`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(requestBody), signal: this.abortController.signal });
+          const response = await fetch(`${API_BASE_URL}/api/ai/quick-action-stream`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(requestBody), signal: reqController.signal });
           this.applyUsageHeaders(response.headers);
           if (!response.ok) { throw new Error(`Server responded with ${response.status}: ${response.statusText}`) }
           await this.processViewMoreStream(response, originalMessageIndex);
@@ -5478,7 +5486,20 @@ export default {
         return;
       }
       this.isStreaming = true;
-      this.abortController = new AbortController();
+      /* Hold THIS request's controller in a local, and abort on the local.
+       *
+       * `this.abortController` is set to null by stopStreaming(), and several
+       * awaits sit between here and the fetch below — setSessionTitle() (a
+       * network call), location acquisition (which can wait on the geolocation
+       * permission prompt), and two $nextTicks. A Stop tap, or starting another
+       * action, anywhere in that window nulled the field before the fetch read
+       * it, and `signal: this.abortController.signal` threw
+       * "TypeError: null is not an object (evaluating 'this.abortController.signal')".
+       *
+       * The shared field still drives Stop; the local is only what this one
+       * fetch listens to, so it cannot be pulled out from under itself. */
+      const reqController = new AbortController();
+      this.abortController = reqController;
       const modeText = this.nearbyMode ? this.t('chat.input.mode_nearby') : this.t('chat.input.mode_discovery');
       // For shopping the bubble shows the chosen sub-type ("Discovery · Souvenirs")
       // so the conversation reads naturally; other actions just show the label.
@@ -5564,7 +5585,7 @@ export default {
           this.handleTokenExpiration();
           return;
         }
-        const response = await fetch(`${API_BASE_URL}/api/ai/quick-action-stream`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(requestBody), signal: this.abortController.signal });
+        const response = await fetch(`${API_BASE_URL}/api/ai/quick-action-stream`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(requestBody), signal: reqController.signal });
           this.applyUsageHeaders(response.headers);
         if (response.status === 401) {
           this.handleTokenExpiration();
