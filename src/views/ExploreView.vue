@@ -2,8 +2,8 @@
   <div class="explore" :class="theme">
     <!-- ═══ Header — centered, chat-glacier back pill ═══ -->
     <header class="ex-head">
+      <!-- No back arrow: "Meet Jinni" is an invitation, not a return trip. -->
       <button class="ex-back" @click="goBack">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         {{ t('explore.back_chat') || 'Meet Jinni' }}
       </button>
       <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
@@ -35,12 +35,12 @@
     <div v-else-if="searchMiss" class="ex-showing ex-showing--miss">{{ t('explore.search_none') || "Couldn't find that place." }}</div>
 
     <!-- ═══ Category nav (sticky) ═══ -->
-    <nav v-if="hasAny" class="ex-nav">
+    <nav v-if="hasAny" class="ex-nav" ref="navEl">
       <!-- Inner track: width max-content + margin auto centers the chips when
            they fit the viewport and still scrolls cleanly when they overflow
            (justify-content:center would clip the left end instead). -->
       <div class="ex-nav-inner">
-        <button v-for="c in orderedCategories" :key="c"
+        <button v-for="c in orderedCategories" :key="c" :ref="el => chipEls[c] = el"
                 class="ex-chip" :class="{ active: activeCat === c }"
                 @click="scrollToCat(c)">
           {{ catLabel(c) }}
@@ -225,6 +225,7 @@ export default {
       serverOrder: null,
       catEls: {},
       railEls: {},
+      chipEls: {},
       railBar: {},          // per-category scroll indicator state { w, x, on }
       _railTimers: {},
       theme: 'night-mode',
@@ -326,16 +327,25 @@ export default {
         for (const en of entries) {
           if (!en.isIntersecting) continue;
           const c = Object.keys(this.catEls).find(k => this.catEls[k] === en.target);
-          if (c) this.activeCat = c;
+          if (c && c !== this.activeCat) { this.activeCat = c; this.centerActiveChip(c); }
         }
       }, { rootMargin: '-15% 0px -70% 0px' });
       for (const c of this.orderedCategories) {
         if (this.catEls[c]) this._spy.observe(this.catEls[c]);
       }
     },
+    /* Keep the highlighted chip visible as the page scrollspy moves through
+       categories — on mobile the active chip otherwise drifts off the right
+       edge of the nav while the page scrolls, and the bar looks stuck. */
+    centerActiveChip(c) {
+      const nav = this.$refs.navEl, chip = this.chipEls[c];
+      if (!nav || !chip || nav.scrollWidth <= nav.clientWidth) return;   // chips all fit — nothing to follow
+      nav.scrollTo({ left: chip.offsetLeft - (nav.clientWidth - chip.offsetWidth) / 2, behavior: 'smooth' });
+    },
     scrollToCat(c) {
       this.activeCat = c;
       this.catEls[c]?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+      this.centerActiveChip(c);
     },
     // Slim per-rail scroll indicator: reflects position while scrolling,
     // fades out ~1s after the last scroll event.
@@ -562,8 +572,7 @@ export default {
    instead of floating as a 1200px translucent band over the gradient (the
    "different background" strip), and a hairline grounds it while stuck. */
 .ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 12px 0 0;
-  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border-bottom: 1px solid var(--ex-line); }
+  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
 .ex-nav-inner { display: flex; gap: 8px; width: max-content; margin-inline: auto; padding-inline: 18px; }
 .ex-nav::-webkit-scrollbar { display: none; }
 .ex-chip { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: none; cursor: pointer;
