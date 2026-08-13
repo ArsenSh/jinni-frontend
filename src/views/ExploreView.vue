@@ -4,7 +4,7 @@
     <header class="ex-head">
       <button class="ex-back" @click="goBack">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        {{ t('explore.back_chat') || 'Back to Chat' }}
+        {{ t('explore.back_chat') || 'Meet Jinni' }}
       </button>
       <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
       <!-- Framed as an open, growing set rather than a finished one. Saying
@@ -36,12 +36,17 @@
 
     <!-- ═══ Category nav (sticky) ═══ -->
     <nav v-if="hasAny" class="ex-nav">
-      <button v-for="c in orderedCategories" :key="c"
-              class="ex-chip" :class="{ active: activeCat === c }"
-              @click="scrollToCat(c)">
-        {{ catLabel(c) }}
-        <span class="ex-chip-count">{{ categories[c].length }}</span>
-      </button>
+      <!-- Inner track: width max-content + margin auto centers the chips when
+           they fit the viewport and still scrolls cleanly when they overflow
+           (justify-content:center would clip the left end instead). -->
+      <div class="ex-nav-inner">
+        <button v-for="c in orderedCategories" :key="c"
+                class="ex-chip" :class="{ active: activeCat === c }"
+                @click="scrollToCat(c)">
+          {{ catLabel(c) }}
+          <span class="ex-chip-count">{{ categories[c].length }}</span>
+        </button>
+      </div>
     </nav>
 
     <!-- ═══ Loading ═══ -->
@@ -87,11 +92,13 @@
           <div class="ex-rail" :ref="el => railEls[c] = el" @scroll.passive="onRailScroll(c, $event)">
           <!-- TripAdvisor-style borderless tile: rounded image with actions on
                it, name + meta as plain text below on the page background. -->
-          <div v-for="p in categories[c]" :key="c + p.placeId"
+          <div v-for="(p, pi) in categories[c]" :key="c + p.placeId"
                class="ex-card" :class="p.tier ? 'ex-card--' + p.tier : ''"
                @click="openPlace(p)">
             <div class="ex-card-imgwrap">
-              <img v-if="p.image" class="ex-card-img" :src="imgUrl(p.image)" :alt="p.name" loading="lazy"
+              <img v-if="p.image" class="ex-card-img" :src="imgUrl(p.image)" :alt="p.name"
+                   :loading="pi < 4 ? 'eager' : 'lazy'" decoding="async"
+                   @load="$event.target.classList.add('ex-img-in')"
                    @error="$event.target.style.display='none'"/>
               <div v-else class="ex-card-imgless">
                 <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -503,7 +510,7 @@ export default {
   --ex-search-bg: rgba(255,255,255,0.08);
 }
 
-.explore { min-height: 100vh; background: var(--ex-bg-grad); background-attachment: fixed; color: var(--ex-text); padding: 0 0 40px; }
+.explore { min-height: 100vh; background: var(--ex-bg-grad); color: var(--ex-text); padding: 0 0 40px; }
 
 /* Search — TripAdvisor-style pill */
 .ex-search { display: flex; align-items: center; gap: 10px; width: min(640px, calc(100% - 36px)); margin: 16px auto 0;
@@ -551,8 +558,13 @@ export default {
 }
 
 /* Sticky category nav */
-.ex-nav { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; overflow-x: auto; padding: 10px 18px; max-width: 1200px; margin: 12px auto 0;
-  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 45%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
+/* Full-bleed sticky bar: the frosted background now spans the whole viewport
+   instead of floating as a 1200px translucent band over the gradient (the
+   "different background" strip), and a hairline grounds it while stuck. */
+.ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 12px 0 0;
+  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-bottom: 1px solid var(--ex-line); }
+.ex-nav-inner { display: flex; gap: 8px; width: max-content; margin-inline: auto; padding-inline: 18px; }
 .ex-nav::-webkit-scrollbar { display: none; }
 .ex-chip { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: none; cursor: pointer;
   font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--ex-chip-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
@@ -582,7 +594,9 @@ export default {
 .ex-card { position: relative; flex: none; width: 252px; cursor: pointer; scroll-snap-align: start; }
 .ex-card-imgwrap { position: relative; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden; margin-bottom: 9px;
   background: var(--ex-glass-2); box-shadow: var(--ex-ring); }
-.ex-card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transition: filter .25s ease; }
+.ex-card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+  opacity: 0; transition: opacity .3s ease, filter .25s ease; }
+.ex-card-img.ex-img-in { opacity: 1; }
 .ex-card:hover .ex-card-img { filter: brightness(1.06) saturate(1.04); }
 .ex-card-imgless { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--ex-muted); }
 
@@ -722,7 +736,8 @@ export default {
   .ex-title { font-size: 1.35rem; }
   .ex-section { padding: 16px 0 2px; }
   .ex-section-head { margin: 0 14px 10px; }
-  .ex-head, .ex-nav { padding-left: 14px; padding-right: 14px; }
+  .ex-head { padding-left: 14px; padding-right: 14px; }
+  .ex-nav-inner { padding-inline: 14px; }
   .ex-rail { gap: 11px; padding: 2px 14px 14px; scroll-padding-left: 14px;
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
     mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
