@@ -2248,6 +2248,7 @@ export default {
     document.addEventListener('touchstart', this._clearTouchedMessage, { passive: true });
   },
   beforeUnmount() {
+    this.closeContextMenu();   // clears the 5s timer + document click listener
     document.removeEventListener('click', this.handlePlaceSearchClick);
     clearTimeout(this._usageNoticeTimer);
     if (this.barAutoHideTimer) { clearTimeout(this.barAutoHideTimer) }
@@ -3549,11 +3550,12 @@ export default {
       this.$router.push('/business/dashboard');
     },
     toggleSidebar() {
+      this.closeContextMenu();
       if (!this.isDesktop) { this.mobileSidebarOpen = !this.mobileSidebarOpen } 
       else { this.sidebarOpen = !this.sidebarOpen }      
       this.showProfileMenu = false;
     },
-    handleOverlayClick() { if (this.mobileSidebarOpen && !this.isDesktop) { this.mobileSidebarOpen = false } },
+    handleOverlayClick() { this.closeContextMenu(); if (this.mobileSidebarOpen && !this.isDesktop) { this.mobileSidebarOpen = false } },
     toggleMobileActionsPopover(event) {
       this.showMobileActions = !this.showMobileActions;
       if (this.showMobileActions && event) {
@@ -3654,9 +3656,32 @@ export default {
       // clamp vertically so it never runs off the bottom
       if (y + menuHeight > window.innerHeight) { y = window.innerHeight - menuHeight - margin }
       this.contextMenu = { sessionId: session.id, x: Math.max(margin, x), y: Math.max(margin, y) };
+      /* The little rename/delete/close row must never linger: it previously
+       * stayed open until explicitly cancelled — surviving clicks anywhere
+       * else and even a sidebar close/reopen. Three exits now:
+       *   • 5s of doing nothing → closes itself;
+       *   • a click anywhere outside the row → closes (the row's own buttons
+       *     use @click.stop, so their clicks never reach this listener);
+       *   • the sidebar closing → closes (see toggleSidebar/handleOverlayClick).
+       * The opener ⋮ also uses @click.stop, so the opening click can't
+       * immediately re-close the menu it just opened. */
+      clearTimeout(this._ctxMenuTimer);
+      this._ctxMenuTimer = setTimeout(() => this.closeContextMenu(), 5000);
+      if (!this._ctxMenuOutside) {
+        this._ctxMenuOutside = () => this.closeContextMenu();
+        document.addEventListener('click', this._ctxMenuOutside);
+      }
     },
     toggleContextMenu(session, event) { if (this.contextMenu.sessionId === session.id) { this.closeContextMenu() } else { this.openContextMenu(session, event) } },
-    closeContextMenu() { this.contextMenu.sessionId = null },
+    closeContextMenu() {
+      this.contextMenu.sessionId = null;
+      clearTimeout(this._ctxMenuTimer);
+      this._ctxMenuTimer = null;
+      if (this._ctxMenuOutside) {
+        document.removeEventListener('click', this._ctxMenuOutside);
+        this._ctxMenuOutside = null;
+      }
+    },
     toggleEditSession(session) {
       this.closeContextMenu();
       this.editingSessionId = session.id;
