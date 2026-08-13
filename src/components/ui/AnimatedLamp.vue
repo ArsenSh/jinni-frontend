@@ -15,14 +15,14 @@
           v-for="(smoke, index) in smokeParticles"
           :key="index"
           class="smoke-particle"
-          :class="[smoke.type, { 'accelerating': isAccelerating }]"
+          :class="[smoke.type]"
           :style="{
             width: smoke.size + 'px',
             height: smoke.size + 'px',
             left: smoke.left + '%',
             bottom: smoke.bottom + '%',
             filter: `blur(${smoke.blur}px) drop-shadow(0 0 5px ${smoke.glowColor})`,
-            animation: `smoke-rise ${smoke.duration}s linear ${smoke.delay}s infinite`,
+            animation: `smoke-rise ${smoke.duration}s linear ${smoke.delay}s 1`,
             opacity: 0
           }"
       ></div>
@@ -50,7 +50,6 @@ export default {
         document.documentElement.getAttribute('dir') === 'rtl'
     }
     const isCollapsing = ref(false)
-    const isAccelerating = ref(false)
     const bottleOpacity = ref(0.1)
     const isVanishing = ref(false)
     let interval = null
@@ -151,15 +150,22 @@ export default {
         clearInterval(interval)
         interval = null
       }
-      // Fade bottle out over 0.5s
+      /* Fade bottle out over 0.5s. Generation stopped above, in the same
+       * frame — that IS the "lamp and smoke stop together" rule.
+       *
+       * What was here before broke it twice over. `isAccelerating` re-timed
+       * every running animation to 2s; the particles were `infinite`, so any
+       * particle older than 2s wrapped to a NEW cycle and replayed from the
+       * spout — fresh-looking smoke pouring from a lamp already gone. Then a
+       * 2500ms timer wiped all particles mid-air in one frame. Lamp gone at
+       * ~500ms, wipe at 2500ms: the exact 2-second gap Arsen measured.
+       *
+       * Now: nothing is re-timed, nothing is wiped. Each particle finishes
+       * its own rise (already fading along the keyframes) and its own removal
+       * timer cleans it up; the container collapse at 1.5s dissolves whatever
+       * still lingers, gently, while it rises. */
       isVanishing.value = true
       bottleOpacity.value = 0
-      isAccelerating.value = true
-      clearParticlesTimer = setTimeout(() => {
-        smokeParticles.value = []
-        isAccelerating.value = false
-        clearParticlesTimer = null
-      }, 2500)
     }
     watch(() => props.isLoading, (newValue) => {
       if (newValue) {
@@ -176,7 +182,6 @@ export default {
         clearParticlesTimer = null
         collapseTimer = null
         isCollapsing.value = false
-        isAccelerating.value = false
         startAnimation()
       } else {
         stopAnimation()
@@ -219,7 +224,7 @@ export default {
       }
       smokeParticles.value = []
     })
-    return {smokeParticles, isCollapsing, isAccelerating, currentGlowColor, bottleOpacity, isVanishing, isRtl}
+    return {smokeParticles, isCollapsing, currentGlowColor, bottleOpacity, isVanishing, isRtl}
   }
 }
 </script>
@@ -237,7 +242,6 @@ export default {
    container's collapse transform. */
 .genie-bottle.rtl-flip,.smoke-container.rtl-flip {transform: scaleX(-1)}
 .smoke-particle {position: absolute; border-radius: 60% 40% 80% 20%; will-change: transform, opacity; transform-origin: center bottom}
-.smoke-particle.accelerating {animation-duration: 2s !important; animation-timing-function: ease-out !important}
 .smoke-particle.light-amber {background: radial-gradient(circle, rgba(243, 231, 201, 0.6) 0%, rgba(230, 192, 103, 0.35) 45%, rgba(217, 151, 6, 0.15) 75%, transparent 100%)}
 .smoke-particle.deep-amber {background: radial-gradient(circle, rgba(230, 192, 103, 0.85) 0%, rgba(255, 183, 77, 0.55) 50%, rgba(201, 162, 39, 0.25) 80%, transparent 100%)}
 .smoke-particle.golden {background: radial-gradient(circle, rgba(255, 183, 77, 0.75) 0%, rgba(217, 119, 6, 0.45) 55%, rgba(153, 101, 21, 0.2) 80%, transparent 100%)}

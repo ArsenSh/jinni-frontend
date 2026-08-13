@@ -645,7 +645,13 @@
                        is for text streams; here the skeleton is the content).
                        Hidden while the hotel chooser is open — the lamp's dust
                        was covering the first hotel cards. -->
-                  <AnimatedLamp v-if="message.itineraryStreaming && !message.itineraryHotelChoosing" :isLoading="true" class="streaming-lamp itin-lamp" :theme="resolveTheme()" />
+                  <!-- Kept mounted through itineraryLampExiting so the lamp can play its
+                       exit (fade 0.5s → collapse at 1.5s over 1.2s) instead of being
+                       unmounted in one frame — the other lamps are prop-driven and always
+                       had this; the hardwired :isLoading="true" + v-if made this one
+                       vanish instantly. Hotel-choosing still hides it instantly on
+                       purpose (its dust would cover the first hotel cards). -->
+                  <AnimatedLamp v-if="(message.itineraryStreaming || message.itineraryLampExiting) && !message.itineraryHotelChoosing" :isLoading="!!message.itineraryStreaming" class="streaming-lamp itin-lamp" :theme="resolveTheme()" />
 
                   <!-- Message feedback (only after the response has fully arrived —
                        i.e. streaming finished AND the lamp/bottle animation ended) -->
@@ -5096,7 +5102,26 @@ export default {
       // itineraryStreaming (not streaming) so the big top lamp stays off — a
       // small lamp renders BELOW the itinerary instead. Never serialized
       // (serializeMessagesForSave field-picks), so it can't stick after reload.
-      if (idx !== -1) this.messages[idx].itineraryStreaming = active;
+      if (idx !== -1) {
+        const msg = this.messages[idx];
+        msg.itineraryStreaming = active;
+        if (active) {
+          // Re-run while an exit is still playing: cancel the exit so the
+          // lamp continues seamlessly instead of unmounting mid-restart.
+          msg.itineraryLampExiting = false;
+        } else {
+          // Keep the lamp mounted just long enough to play its full exit
+          // (0.5s fade + collapse ending ~2.7s), then release the DOM.
+          // Transient like itineraryStreaming — never serialized.
+          msg.itineraryLampExiting = true;
+          setTimeout(() => {
+            const i = this.messages.findIndex(m => m.id === message.id);
+            if (i !== -1 && !this.messages[i].itineraryStreaming) {
+              this.messages[i].itineraryLampExiting = false;
+            }
+          }, 2800);
+        }
+      }
       this.isStreaming = active;
       if (!active) this.isRequestPending = false;
     },
