@@ -227,4 +227,32 @@ router.beforeEach(async (to, from, next) => {
     next();
 });
 
+/* ── Stale-chunk recovery ────────────────────────────────────────────────────
+ * After a redeploy, a browser still holding the previous index.html asks for
+ * route chunks that no longer exist; Caddy answers with the SPA fallback
+ * (text/html), the dynamic import throws "'text/html' is not a valid
+ * JavaScript MIME type", and the navigation silently dies — the user logs in,
+ * sees "Welcome back", and stays on the auth page until a manual refresh.
+ * A full reload at the SAME destination fetches the fresh index.html and its
+ * new chunk names, which is exactly what that manual refresh was doing.
+ * One attempt per minute, so a genuinely broken deploy can't reload-loop. */
+const CHUNK_ERR = /error loading dynamically imported module|failed to fetch dynamically imported module|importing a module script failed|not a valid javascript mime type/i;
+function recoverFromStaleChunk(to) {
+    const last = Number(sessionStorage.getItem('jinni_chunk_reload') || 0);
+    if (Date.now() - last < 60000) return;             // already tried — don't loop
+    sessionStorage.setItem('jinni_chunk_reload', String(Date.now()));
+    window.location.href = to || window.location.href; // full reload → fresh index.html
+}
+router.onError((error, to) => {
+    if (CHUNK_ERR.test(String(error && error.message))) {
+        recoverFromStaleChunk(to && to.fullPath);
+    }
+});
+// Vite fires this for failed preloads (CSS and sibling chunks) that never
+// reach router.onError.
+window.addEventListener('vite:preloadError', (event) => {
+    event.preventDefault();
+    recoverFromStaleChunk();
+});
+
 export default router;

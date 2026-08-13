@@ -5945,7 +5945,10 @@ export default {
     async getLocationFromIP() {
       try {
         const token = localStorage.getItem('authToken');
-        const r = await fetch('/api/ai/location/detect', {headers: { 'Authorization': `Bearer ${token}` }, signal: AbortSignal.timeout(5000)});
+        // Absolute API host: the relative path went to jinni.travel (the SPA),
+        // Caddy served index.html, and JSON.parse failed with "The string did
+        // not match the expected pattern" — the IP fallback never worked.
+        const r = await fetch(`${API_BASE_URL}/api/ai/location/detect`, {headers: { 'Authorization': `Bearer ${token}` }, signal: AbortSignal.timeout(5000)});
         const d = await r.json();
         if (d.success && d.lat && d.lng) {return { lat: d.lat, lng: d.lng, accuracy: 10000, city: d.city, country: d.country, source: 'server', timestamp: Date.now() }}
       } catch (e) {console.warn('Backend location detect failed:', e.message)}
