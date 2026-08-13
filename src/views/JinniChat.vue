@@ -4404,9 +4404,15 @@ export default {
                     } else { console.log('⏭️ Skipped empty section:', JSON.stringify(currentTextSection)) }
                     currentTextSection = '';
                     if (!this.messages[messageIndex].recommendations) { this.messages[messageIndex].recommendations = [] }
-                    const existingIndex = this.messages[messageIndex].recommendations.findIndex(rec => rec.id === data.recommendation.id);
-                    if (existingIndex === -1) { this.messages[messageIndex].recommendations.push(data.recommendation) } 
-                    else { this.messages[messageIndex].recommendations[existingIndex] = data.recommendation }
+                    const existingIndex = this.messages[messageIndex].recommendations.findIndex(rec => rec.id === data.recommendation.id || rec.name === data.recommendation.name);
+                    if (existingIndex === -1) { this.messages[messageIndex].recommendations.push(data.recommendation) }
+                    else {
+                      // A live placeholder already streamed this card's description —
+                      // merge the official record in, keep the id the description
+                      // tokens are addressed to and the text already on screen.
+                      const existing = this.messages[messageIndex].recommendations[existingIndex];
+                      this.messages[messageIndex].recommendations[existingIndex] = { ...data.recommendation, id: existing.id, description: existing.description || data.recommendation.description };
+                    }
                     this.messages[messageIndex].textSections = [...textSections];
                     this.messages[messageIndex].currentText = ''; 
                     this.messages[messageIndex].isChatRecommendation = true;
@@ -4414,7 +4420,35 @@ export default {
                   }
                   else if (data.type === 'description_token') {
                     if (!this.messages[messageIndex].recommendations) { this.messages[messageIndex].recommendations = [] }
-                    const rec = this.messages[messageIndex].recommendations.find( r => r.id === data.recommendationId || r.name === data.recommendationName );
+                    let rec = this.messages[messageIndex].recommendations.find( r => r.id === data.recommendationId || r.name === data.recommendationName );
+                    /* The card is born HERE, at arrow-open — not after the block closes.
+                     * The server names the card on every description_token, but the
+                     * official streaming_recommendation can only fire after the closing ←
+                     * (its regex needs the finished block) — so every live description
+                     * token used to arrive before any card existed and was dropped on the
+                     * floor. The description then got REPLAYED into the late card at
+                     * 20ms/word: fake typing. Creating the placeholder from the first
+                     * orphan token makes the middle of the answer stream for real, on
+                     * both providers — Claude's burst just fills it faster. */
+                    if (!rec && data.recommendationName) {
+                      const trimmedText = currentTextSection.trim();
+                      if (trimmedText && !trimmedText.match(/^[\s\n\r<br>]+$/)) {
+                        textSections.push({ type: 'text', content: currentTextSection, position: this.messages[messageIndex].recommendations.length });
+                      }
+                      currentTextSection = '';
+                      rec = {
+                        id: `live-rec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        name: data.recommendationName,
+                        description: '', category: 'Searching...', region: 'Searching location...',
+                        location: 'Searching...', image: null, source: 'ai', placeId: null,
+                        isChatRecommendation: true, isLargeCard: true, appearsInline: true, isStreaming: true,
+                        metadata: { hasAIDescription: true, sourceDescription: 'ai_generated', streaming: true, enrichmentDeferred: true }
+                      };
+                      this.messages[messageIndex].recommendations.push(rec);
+                      this.messages[messageIndex].textSections = [...textSections];
+                      this.messages[messageIndex].currentText = '';
+                      this.messages[messageIndex].isChatRecommendation = true;
+                    }
                     if (rec) {
                       rec.description = (rec.description || '') + data.content;
                       rec.isStreaming = true;
