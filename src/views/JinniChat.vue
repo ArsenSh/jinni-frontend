@@ -7715,7 +7715,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* ==================================================================================================== */
 /*                                        DESKTOP STYLES
 /* ==================================================================================================== */
-@media (min-width:769px){.main-chat-area{max-width:800px;margin:0 auto}.chat-header{max-width:800px;margin:0 auto;justify-content:center}.chat-messages{max-width:800px;margin:0 auto;width:100%}.chat-input-container{margin:0}}
+/* Desktop: the 800px column must NOT clip sideways — the lamp's serpent dust
+   swings past its edges. .chat-messages never scrolls itself (all scroll code
+   drives .scrollable-content), so its overflow and fade mask are vestigial
+   here: overflow opens up, and the mask moves to the real (full-width)
+   scroller, whose clip edge is the screen edge. Mobile keeps the base rules. */
+@media (min-width:769px){.main-chat-area{max-width:800px;margin:0 auto;overflow:visible}.chat-header{max-width:800px;margin:0 auto;justify-content:center}.chat-messages{max-width:800px;margin:0 auto;width:100%;overflow:visible;-webkit-mask-image:none;mask-image:none}.scrollable-content{-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.1) 6px,rgba(0,0,0,0.4) 13px,rgba(0,0,0,0.78) 19px,#000 26px,#000 calc(100% - 26px),rgba(0,0,0,0.78) calc(100% - 19px),rgba(0,0,0,0.4) calc(100% - 13px),rgba(0,0,0,0.1) calc(100% - 6px),transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.1) 6px,rgba(0,0,0,0.4) 13px,rgba(0,0,0,0.78) 19px,#000 26px,#000 calc(100% - 26px),rgba(0,0,0,0.78) calc(100% - 19px),rgba(0,0,0,0.4) calc(100% - 13px),rgba(0,0,0,0.1) calc(100% - 6px),transparent 100%)}.chat-input-container{margin:0}}
 /* ==================================================================================================== */
 /*                                        MOBILE STYLES
 /* ==================================================================================================== */
