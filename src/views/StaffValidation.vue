@@ -3907,7 +3907,7 @@ export default {
       destLoading, destFilter, destFilterOpts, destMineOnly,
       destSearchInput, onDestSearchInput, loadDestinations, changeDestPage,
       // Found by Jinni (AI-served events queue — 'Jinni events' category in the Explore tab)
-      aiEvents, aiEvLoaded, aiEvDates, approveAiEvent, hideAiEvent, dismissAiEvent,
+      aiEvents, aiEvLoaded, loadAiEvents, aiEvDates, approveAiEvent, hideAiEvent, dismissAiEvent,
       filteredAiEvents, openAiEventRow,
       // Explore moderation tab
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
