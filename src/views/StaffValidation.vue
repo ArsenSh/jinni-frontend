@@ -1640,7 +1640,7 @@
               <tr v-for="ev in filteredAiEvents" :key="ev._id" class="biz-row exp-row" @click="openAiEventRow(ev)">
                 <td class="col-name" data-label="Event">
                   <div class="exp-place-cell">
-                    <img v-if="ev.venue?.imagesStored" :src="`${apiRoot}/ai/place-image/${ev.placeId}/0`" class="exp-thumb" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
+                    <img v-if="aiEvImg(ev)" :src="aiEvImg(ev)" class="exp-thumb" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
                     <div v-else class="exp-thumb exp-thumb--empty">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </div>
@@ -3475,6 +3475,13 @@ export default {
         aiEvLoaded.value = true
       } catch (e) { console.warn('[ai-events] load failed:', e?.response?.data?.error || e.message) }
     }
+    // Row thumbnail: the event's own poster (what the chat card showed) wins;
+    // venue photo is the fallback. Relative /api/… paths need the API origin.
+    const aiEvImg = (ev) => {
+      const u = ev.image || (ev.venue?.imagesStored ? `/api/ai/place-image/${ev.placeId}/0` : null)
+      if (!u) return null
+      return u.startsWith('/api/') ? `${API_URL.replace(/\/api\/?$/, '')}${u}` : u
+    }
     const aiEvDates = (ev) => {
       const f = d => new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
       if (!ev?.startDate) return '—'
@@ -3907,7 +3914,7 @@ export default {
       destLoading, destFilter, destFilterOpts, destMineOnly,
       destSearchInput, onDestSearchInput, loadDestinations, changeDestPage,
       // Found by Jinni (AI-served events queue — 'Jinni events' category in the Explore tab)
-      aiEvents, aiEvLoaded, loadAiEvents, aiEvDates, approveAiEvent, hideAiEvent, dismissAiEvent,
+      aiEvents, aiEvLoaded, loadAiEvents, aiEvDates, aiEvImg, approveAiEvent, hideAiEvent, dismissAiEvent,
       filteredAiEvents, openAiEventRow,
       // Explore moderation tab
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,

@@ -4869,6 +4869,10 @@ export default {
             // survives a save → reload cycle. Spread conditionally so
             // non-event recs don't carry empty keys.
             ...(rec.eventSchedule && { eventSchedule: rec.eventSchedule }),
+            // The "Check listing" source link on event cards. ChatSession's
+            // schema stores it (recommendationSchema.sourceUrl) — it was this
+            // whitelist that dropped it, killing the link on every reload.
+            ...(rec.sourceUrl && { sourceUrl: rec.sourceUrl }),
             ...(rec._isExpired != null && { _isExpired: rec._isExpired }),
             ...(rec._action && { _action: rec._action }),
             feedback: rec.feedback || null
@@ -5845,13 +5849,21 @@ export default {
     },
     openInMaps() {
       this.trackInteraction(this.selectedPlace, 'map_open');
-      if (this.placeDetails?.geometry?.location) {
-        const { lat, lng } = this.placeDetails.geometry.location;
-        const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-        window.open(url, '_blank');
-      } else if (this.selectedPlace?.name) {
-        const query = encodeURIComponent(this.selectedPlace.name + ' Armenia');
-        window.open(`https://www.google.com/maps/search/${query}`, '_blank');
+      /* Coordinates FIRST, from either source. Events have no placeId (so no
+       * placeDetails), but venue resolution gave the rec itself lat/lng — a
+       * name search like "Horizon Festival" finds nothing on Maps, while the
+       * venue pin (Garni temple) is exactly where the user must go. */
+      const sp = this.selectedPlace || {};
+      const g = this.placeDetails?.geometry?.location;
+      const lat = g?.lat ?? sp.latitude, lng = g?.lng ?? sp.longitude;
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+      } else if (sp.name) {
+        // No hardcoded country — the card's own address/location is the
+        // context, wherever in the world the user is.
+        const ctx = sp.location || sp.address || sp.region || '';
+        const query = encodeURIComponent(`${sp.name} ${ctx}`.trim());
+        window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
       }
     },
     searchOnline() {
