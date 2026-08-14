@@ -1640,17 +1640,17 @@
               <tr v-for="ev in filteredAiEvents" :key="ev._id" class="biz-row exp-row" @click="openAiEventRow(ev)">
                 <td class="col-name" data-label="Event">
                   <div class="exp-place-cell">
-                    <img v-if="ev.placeId" :src="`${apiRoot}/ai/place-image/${ev.placeId}/0`" class="exp-thumb" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
+                    <img v-if="ev.venue?.imagesStored" :src="`${apiRoot}/ai/place-image/${ev.placeId}/0`" class="exp-thumb" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
                     <div v-else class="exp-thumb exp-thumb--empty">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </div>
                     <div class="row-name">
                       <span class="row-name-text">{{ ev.name }}</span>
-                      <span class="exp-cats">jinni event · via {{ ev.sourceTier }}</span>
+                      <span class="exp-cats">jinni event · via {{ ev.sourceTier }}<template v-if="ev.venue"> · {{ ev.venue.name }}</template></span>
                     </div>
                   </div>
                 </td>
-                <td class="col-city" data-label="Location">{{ ev.venueName || ev.city || ev.address || '—' }}</td>
+                <td class="col-city" data-label="Location">{{ ev.venue?.city || ev.city || ev.venueName || ev.address || '—' }}</td>
                 <td class="col-rating" data-label="Dates"><span class="aiev-dates">{{ aiEvDates(ev) }}</span></td>
                 <td class="col-feedback" data-label="Shown"><span class="exp-fb">👁 {{ ev.timesShown }}×</span></td>
                 <td class="col-status" data-label="Source">
@@ -3509,11 +3509,15 @@ export default {
       return aiEvents.value.filter(ev =>
         [ev.name, ev.venueName, ev.address, ev.city].some(s => s && s.toLowerCase().includes(q)))
     })
-    // Row click: the venue resolved → open the normal place drawer (image
-    // gallery + details); no venue → the source listing is the best detail
-    // view there is.
+    // Row click: the venue resolved → open the normal place drawer with the
+    // venue's REAL PlaceCache row (the backend attaches it as ev.venue), so
+    // the modal behaves exactly like every other category — gallery, rating,
+    // feedback, cache stats. No venue → the source listing is the best
+    // detail view there is.
     function openAiEventRow(ev) {
-      if (ev.placeId) {
+      if (ev.venue) {
+        openExpPlace(ev.venue)
+      } else if (ev.placeId) {
         openExpPlace({ placeId: ev.placeId, name: ev.name, actions: ['events'], explore: {}, city: ev.city, country: ev.country })
       } else if (ev.sourceUrl) {
         window.open(ev.sourceUrl, '_blank', 'noopener')
