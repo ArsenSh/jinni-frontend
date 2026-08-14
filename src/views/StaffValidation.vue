@@ -796,36 +796,6 @@
       </button>
     </div>
 
-    <!-- ── Found by Jinni: every dated event the AI actually served to users,
-         recorded for review. Approve → becomes a curated destination below;
-         Hide → Jinni never recommends it again; Dismiss → drop from queue. -->
-    <div v-if="aiEvents.length" class="aiev-panel">
-      <button class="aiev-head" type="button" @click="aiEvOpen = !aiEvOpen">
-        <span class="aiev-title">Found by Jinni — AI-recommended events</span>
-        <span class="aiev-count">{{ aiEvents.length }}</span>
-        <svg class="aiev-chev" :class="{ open: aiEvOpen }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div v-if="aiEvOpen" class="aiev-list">
-        <div v-for="ev in aiEvents" :key="ev._id" class="aiev-row">
-          <div class="aiev-main">
-            <div class="aiev-name">{{ ev.name }}</div>
-            <div class="aiev-meta">
-              <span class="aiev-dates">{{ aiEvDates(ev) }}</span>
-              <span v-if="ev.venueName || ev.address || ev.city"> · {{ ev.venueName || ev.address || ev.city }}</span>
-              <span> · shown {{ ev.timesShown }}×</span>
-              <span> · via {{ ev.sourceTier }}</span>
-              <a v-if="ev.sourceUrl" :href="ev.sourceUrl" target="_blank" rel="noopener noreferrer" class="aiev-src">source ↗</a>
-            </div>
-          </div>
-          <div class="aiev-actions">
-            <button class="ghost-btn aiev-btn aiev-btn--approve" title="Create a curated event destination from this" @click="approveAiEvent(ev)">Approve</button>
-            <button class="ghost-btn aiev-btn aiev-btn--hide" title="Blocklist: Jinni will never recommend this event again" @click="hideAiEvent(ev)">Hide</button>
-            <button class="ghost-btn aiev-btn" title="Remove from this queue (may reappear if found again)" @click="dismissAiEvent(ev)">Dismiss</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- ── Filter bar (validation-style — same .filter-bar / .chip pattern
          the validation tab uses, so the two tabs feel like one product). ── -->
     <div class="filter-bar">
@@ -1611,6 +1581,39 @@
           <strong>{{ scopeBanner.countries.join(', ') || '—' }}</strong>
           <span v-if="scopeBanner.cities.length" class="scope-banner-cities">+ cities: {{ scopeBanner.cities.join(', ') }}</span>
         </template>
+      </div>
+    </div>
+
+    <!-- ── Found by Jinni: every dated event the AI actually served to users,
+         recorded for review. Approve → becomes a curated event destination;
+         Hide → Jinni never recommends it again; Dismiss → drop from queue. -->
+    <div class="aiev-panel">
+      <button class="aiev-head" type="button" @click="aiEvOpen = !aiEvOpen">
+        <span class="aiev-title">Found by Jinni — AI-recommended events</span>
+        <span class="aiev-count">{{ aiEvents.length }}</span>
+        <svg class="aiev-chev" :class="{ open: aiEvOpen }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div v-if="aiEvOpen && !aiEvents.length" class="aiev-empty">
+        {{ aiEvLoaded ? 'No AI-found events waiting for review. New ones appear here whenever Jinni recommends a dated event to a user in your territory.' : 'Loading…' }}
+      </div>
+      <div v-if="aiEvOpen && aiEvents.length" class="aiev-list">
+        <div v-for="ev in aiEvents" :key="ev._id" class="aiev-row">
+          <div class="aiev-main">
+            <div class="aiev-name">{{ ev.name }}</div>
+            <div class="aiev-meta">
+              <span class="aiev-dates">{{ aiEvDates(ev) }}</span>
+              <span v-if="ev.venueName || ev.address || ev.city"> · {{ ev.venueName || ev.address || ev.city }}</span>
+              <span> · shown {{ ev.timesShown }}×</span>
+              <span> · via {{ ev.sourceTier }}</span>
+              <a v-if="ev.sourceUrl" :href="ev.sourceUrl" target="_blank" rel="noopener noreferrer" class="aiev-src">source ↗</a>
+            </div>
+          </div>
+          <div class="aiev-actions">
+            <button class="ghost-btn aiev-btn aiev-btn--approve" title="Create a curated event destination from this" @click="approveAiEvent(ev)">Approve</button>
+            <button class="ghost-btn aiev-btn aiev-btn--hide" title="Blocklist: Jinni will never recommend this event again" @click="hideAiEvent(ev)">Hide</button>
+            <button class="ghost-btn aiev-btn" title="Remove from this queue (may reappear if found again)" @click="dismissAiEvent(ev)">Dismiss</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -3479,11 +3482,11 @@ export default {
       if (tab === 'destinations' && !destinations.value.length && myPermissions.value.manageDestinations) {
         loadDestinations()
       }
-      if (tab === 'destinations' && !aiEvLoaded.value && myPermissions.value.manageDestinations) {
-        loadAiEvents()
-      }
       if (tab === 'explore' && !expPlaces.value.length && myPermissions.value.moderateExplore) {
         loadExplorePlaces()
+      }
+      if (tab === 'explore' && !aiEvLoaded.value && (myPermissions.value.moderateExplore || myPermissions.value.manageDestinations)) {
+        loadAiEvents()
       }
     })
 
@@ -3858,7 +3861,7 @@ export default {
       destLoading, destFilter, destFilterOpts, destMineOnly,
       destSearchInput, onDestSearchInput, loadDestinations, changeDestPage,
       // Found by Jinni (AI-served events queue)
-      aiEvents, aiEvOpen, aiEvDates, approveAiEvent, hideAiEvent, dismissAiEvent,
+      aiEvents, aiEvOpen, aiEvLoaded, aiEvDates, approveAiEvent, hideAiEvent, dismissAiEvent,
       // Explore moderation tab
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
       expStatus, expStatusOpts, expCategory, expCategories, expCounts,
@@ -3924,6 +3927,7 @@ export default {
 .aiev-chev{margin-left:auto;transition:transform 0.2s;color:var(--text-mute)}
 .aiev-chev.open{transform:rotate(180deg)}
 .aiev-list{padding:0 14px 10px 14px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto}
+.aiev-empty{padding:0 14px 12px 14px;font-size:12.5px;color:var(--text-mute);line-height:1.5}
 .aiev-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg);flex-wrap:wrap}
 .aiev-main{flex:1;min-width:220px}
 .aiev-name{font-size:13px;font-weight:600;color:var(--text)}
