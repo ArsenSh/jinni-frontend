@@ -1661,7 +1661,7 @@
                   <div class="action-group">
                     <button class="action-btn exp-btn-verify" title="Create a curated event destination from this" @click="approveAiEvent(ev)">Approve</button>
                     <button class="action-btn exp-btn-hide" title="Blocklist: Jinni will never recommend this event again" @click="hideAiEvent(ev)">Hide</button>
-                    <button class="action-btn btn-muted" title="Remove from this queue (may reappear if found again)" @click="dismissAiEvent(ev)">Dismiss</button>
+                    <button class="action-btn btn-muted" title="Delete this record (the event may reappear here if Jinni finds it again — use Hide to block it permanently)" @click="dismissAiEvent(ev)">Delete</button>
                   </div>
                 </td>
               </tr>
