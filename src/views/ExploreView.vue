@@ -133,6 +133,7 @@
             </div>
 
             <div class="ex-card-name">{{ p.name }}</div>
+            <div v-if="p.eventDates" class="ex-card-dates">{{ evDates(p.eventDates) }}</div>
             <div class="ex-card-sub">
               <span v-if="p.region" class="ex-card-region">{{ p.region }}</span><span v-if="p.region && Number.isFinite(p.distanceKm)"> · </span><span v-if="Number.isFinite(p.distanceKm)" class="ex-card-dist">{{ p.distanceKm }} {{ t('explore.km') || 'km' }}</span>
             </div>
@@ -285,6 +286,13 @@ export default {
       return isNightTime() ? 'night-mode' : 'day-mode';
     },
     imgUrl(u) { return u && u.startsWith('/api/') ? `${API_BASE}${u}` : u; },
+    // "Thu, Aug 20 → Sun, Aug 23" (single day: just the start) — same shape as
+    // the chat event cards, in the browser's locale.
+    evDates(ed) {
+      const f = d => new Date(d).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      if (!ed?.start) return '';
+      return ed.end && f(ed.end) !== f(ed.start) ? `${f(ed.start)} → ${f(ed.end)}` : f(ed.start);
+    },
     catLabel(c) {
       // $t returns the key itself when a message is missing (e.g. a new
       // server-side category) — fall back to the English label then.
@@ -668,6 +676,7 @@ export default {
 .ex-card-name { font-size: 0.97rem; font-weight: 700; line-height: 1.3; color: var(--ex-text); margin-bottom: 2px;
   overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .ex-card-sub { font-size: 0.8rem; color: var(--ex-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ex-card-dates { font-size: 0.78rem; color: var(--ex-accent, #b8860b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ex-card-dist { font-variant-numeric: tabular-nums; }
 
 /* Empty / not explored */

@@ -796,6 +796,36 @@
       </button>
     </div>
 
+    <!-- ── Found by Jinni: every dated event the AI actually served to users,
+         recorded for review. Approve → becomes a curated destination below;
+         Hide → Jinni never recommends it again; Dismiss → drop from queue. -->
+    <div v-if="aiEvents.length" class="aiev-panel">
+      <button class="aiev-head" type="button" @click="aiEvOpen = !aiEvOpen">
+        <span class="aiev-title">Found by Jinni — AI-recommended events</span>
+        <span class="aiev-count">{{ aiEvents.length }}</span>
+        <svg class="aiev-chev" :class="{ open: aiEvOpen }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div v-if="aiEvOpen" class="aiev-list">
+        <div v-for="ev in aiEvents" :key="ev._id" class="aiev-row">
+          <div class="aiev-main">
+            <div class="aiev-name">{{ ev.name }}</div>
+            <div class="aiev-meta">
+              <span class="aiev-dates">{{ aiEvDates(ev) }}</span>
+              <span v-if="ev.venueName || ev.address || ev.city"> · {{ ev.venueName || ev.address || ev.city }}</span>
+              <span> · shown {{ ev.timesShown }}×</span>
+              <span> · via {{ ev.sourceTier }}</span>
+              <a v-if="ev.sourceUrl" :href="ev.sourceUrl" target="_blank" rel="noopener noreferrer" class="aiev-src">source ↗</a>
+            </div>
+          </div>
+          <div class="aiev-actions">
+            <button class="ghost-btn aiev-btn aiev-btn--approve" title="Create a curated event destination from this" @click="approveAiEvent(ev)">Approve</button>
+            <button class="ghost-btn aiev-btn aiev-btn--hide" title="Blocklist: Jinni will never recommend this event again" @click="hideAiEvent(ev)">Hide</button>
+            <button class="ghost-btn aiev-btn" title="Remove from this queue (may reappear if found again)" @click="dismissAiEvent(ev)">Dismiss</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Filter bar (validation-style — same .filter-bar / .chip pattern
          the validation tab uses, so the two tabs feel like one product). ── -->
     <div class="filter-bar">
@@ -3405,9 +3435,52 @@ export default {
     }
 
     // Auto-load when the tab opens for the first time.
+    // ── Found by Jinni: AI-served events review queue ───────────────
+    // Lives in the destinations tab — the validators who curate events
+    // review what the AI recommended, in the same place.
+    const aiEvents = ref([])
+    const aiEvOpen = ref(true)
+    const aiEvLoaded = ref(false)
+    async function loadAiEvents() {
+      try {
+        const { data } = await axios.get(`${API_URL}/staff/ai-events`, { params: { status: 'new' }, headers: authHeader() })
+        aiEvents.value = data?.data || []
+        aiEvLoaded.value = true
+      } catch (e) { console.warn('[ai-events] load failed:', e?.response?.data?.error || e.message) }
+    }
+    const aiEvDates = (ev) => {
+      const f = d => new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      if (!ev?.startDate) return '—'
+      return ev.endDate && f(ev.endDate) !== f(ev.startDate) ? `${f(ev.startDate)} → ${f(ev.endDate)}` : f(ev.startDate)
+    }
+    async function approveAiEvent(ev) {
+      if (!confirm(`Approve "${ev.name}" as a curated event destination?`)) return
+      try {
+        await axios.post(`${API_URL}/staff/ai-events/${ev._id}/approve`, {}, { headers: authHeader() })
+        aiEvents.value = aiEvents.value.filter(x => x._id !== ev._id)
+        loadDestinations()                     // the new destination appears in the list below
+      } catch (e) { alert(e?.response?.data?.error || 'Approve failed') }
+    }
+    async function hideAiEvent(ev) {
+      if (!confirm(`Hide "${ev.name}"?\n\nJinni will NEVER recommend this event again (in any language).`)) return
+      try {
+        await axios.patch(`${API_URL}/staff/ai-events/${ev._id}`, { status: 'hidden' }, { headers: authHeader() })
+        aiEvents.value = aiEvents.value.filter(x => x._id !== ev._id)
+      } catch (e) { alert(e?.response?.data?.error || 'Hide failed') }
+    }
+    async function dismissAiEvent(ev) {
+      try {
+        await axios.delete(`${API_URL}/staff/ai-events/${ev._id}`, { headers: authHeader() })
+        aiEvents.value = aiEvents.value.filter(x => x._id !== ev._id)
+      } catch (e) { alert(e?.response?.data?.error || 'Dismiss failed') }
+    }
+
     watch(activeTab, (tab) => {
       if (tab === 'destinations' && !destinations.value.length && myPermissions.value.manageDestinations) {
         loadDestinations()
+      }
+      if (tab === 'destinations' && !aiEvLoaded.value && myPermissions.value.manageDestinations) {
+        loadAiEvents()
       }
       if (tab === 'explore' && !expPlaces.value.length && myPermissions.value.moderateExplore) {
         loadExplorePlaces()
@@ -3784,6 +3857,8 @@ export default {
       destinations, destSummary, destTotal, destPage, destTotalPages,
       destLoading, destFilter, destFilterOpts, destMineOnly,
       destSearchInput, onDestSearchInput, loadDestinations, changeDestPage,
+      // Found by Jinni (AI-served events queue)
+      aiEvents, aiEvOpen, aiEvDates, approveAiEvent, hideAiEvent, dismissAiEvent,
       // Explore moderation tab
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
       expStatus, expStatusOpts, expCategory, expCategories, expCounts,
@@ -3842,6 +3917,24 @@ export default {
 .count-pill--readonly:hover{background:var(--bg-elev);color:var(--text-mute)}
 /* ── Scope banner ────────────────────────────────────────────────── */
 .scope-banner{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg-elev);border-left:3px solid var(--accent);border-radius:10px;margin-bottom:12px;font-size:13px;line-height:1.5;color:var(--text)}
+/* ── Found by Jinni (AI-served events queue) ── */
+.aiev-panel{background:var(--bg-elev);border-left:3px solid var(--accent);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.aiev-head{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;background:transparent;border:none;cursor:pointer;color:var(--text);font:inherit;font-size:13px;font-weight:600;text-align:left}
+.aiev-count{background:var(--accent);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700}
+.aiev-chev{margin-left:auto;transition:transform 0.2s;color:var(--text-mute)}
+.aiev-chev.open{transform:rotate(180deg)}
+.aiev-list{padding:0 14px 10px 14px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto}
+.aiev-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg);flex-wrap:wrap}
+.aiev-main{flex:1;min-width:220px}
+.aiev-name{font-size:13px;font-weight:600;color:var(--text)}
+.aiev-meta{font-size:12px;color:var(--text-mute);display:flex;flex-wrap:wrap;gap:2px 4px;align-items:baseline}
+.aiev-dates{color:var(--accent);font-weight:600}
+.aiev-src{color:var(--accent);text-decoration:none;margin-left:4px}
+.aiev-src:hover{text-decoration:underline}
+.aiev-actions{display:flex;gap:6px;flex-shrink:0}
+.aiev-btn{font-size:12px;padding:5px 10px}
+.aiev-btn--approve{color:#2e9e5b;border-color:rgba(46,158,91,0.45)}
+.aiev-btn--hide{color:#c4554d;border-color:rgba(196,85,77,0.45)}
 .scope-banner svg{flex-shrink:0;margin-top:2px;color:var(--accent)}
 .scope-banner-body{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline}
 .scope-banner-label{color:var(--text-mute);font-size:12px;text-transform:uppercase;letter-spacing:0.05em}
