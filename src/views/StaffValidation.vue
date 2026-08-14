@@ -1584,39 +1584,6 @@
       </div>
     </div>
 
-    <!-- ── Found by Jinni: every dated event the AI actually served to users,
-         recorded for review. Approve → becomes a curated event destination;
-         Hide → Jinni never recommends it again; Dismiss → drop from queue. -->
-    <div class="aiev-panel">
-      <button class="aiev-head" type="button" @click="aiEvOpen = !aiEvOpen">
-        <span class="aiev-title">Found by Jinni — AI-recommended events</span>
-        <span class="aiev-count">{{ aiEvents.length }}</span>
-        <svg class="aiev-chev" :class="{ open: aiEvOpen }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div v-if="aiEvOpen && !aiEvents.length" class="aiev-empty">
-        {{ aiEvLoaded ? 'No AI-found events waiting for review. New ones appear here whenever Jinni recommends a dated event to a user in your territory.' : 'Loading…' }}
-      </div>
-      <div v-if="aiEvOpen && aiEvents.length" class="aiev-list">
-        <div v-for="ev in aiEvents" :key="ev._id" class="aiev-row">
-          <div class="aiev-main">
-            <div class="aiev-name">{{ ev.name }}</div>
-            <div class="aiev-meta">
-              <span class="aiev-dates">{{ aiEvDates(ev) }}</span>
-              <span v-if="ev.venueName || ev.address || ev.city"> · {{ ev.venueName || ev.address || ev.city }}</span>
-              <span> · shown {{ ev.timesShown }}×</span>
-              <span> · via {{ ev.sourceTier }}</span>
-              <a v-if="ev.sourceUrl" :href="ev.sourceUrl" target="_blank" rel="noopener noreferrer" class="aiev-src">source ↗</a>
-            </div>
-          </div>
-          <div class="aiev-actions">
-            <button class="ghost-btn aiev-btn aiev-btn--approve" title="Create a curated event destination from this" @click="approveAiEvent(ev)">Approve</button>
-            <button class="ghost-btn aiev-btn aiev-btn--hide" title="Blocklist: Jinni will never recommend this event again" @click="hideAiEvent(ev)">Hide</button>
-            <button class="ghost-btn aiev-btn" title="Remove from this queue (may reappear if found again)" @click="dismissAiEvent(ev)">Dismiss</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="filter-bar">
       <div class="filter-group">
         <label class="filter-label">Status</label>
@@ -1633,9 +1600,9 @@
         <div class="filter-chips">
           <button class="chip" :class="{ active: !expCategory }" @click="expCategory = ''; expPage = 1; loadExplorePlaces()">All</button>
           <button v-for="c in expCategories" :key="c.value"
-                  class="chip" :class="{ active: expCategory === c.value }"
-                  @click="expCategory = c.value; expPage = 1; loadExplorePlaces()">
-            {{ c.label }}
+                  class="chip" :class="{ active: expCategory === c.value, 'chip--jinni': c.value === 'jinni_events' }"
+                  @click="expCategory = c.value; expPage = 1; c.value === 'jinni_events' ? loadAiEvents() : loadExplorePlaces()">
+            {{ c.label }}<span v-if="c.value === 'jinni_events' && aiEvents.length" class="chip-count"> {{ aiEvents.length }}</span>
           </button>
         </div>
       </div>
@@ -1647,7 +1614,62 @@
 
     <main class="main-grid">
       <section class="table-wrap">
-        <div v-if="expLoading && !expPlaces.length" class="table-empty">
+        <!-- ── Jinni events: dated events the AI actually served to users,
+             recorded for review. Same table dress as cached places; different
+             data + actions. Approve → curated event destination; Hide →
+             permanent blocklist; Dismiss → drop from queue. -->
+        <template v-if="expCategory === 'jinni_events'">
+          <div v-if="!filteredAiEvents.length" class="table-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>{{ aiEvLoaded ? 'No AI-found events waiting for review. New ones appear whenever Jinni recommends a dated event in your territory.' : 'Loading…' }}</span>
+          </div>
+          <table v-else class="biz-table biz-table--explore">
+            <thead>
+              <tr>
+                <th class="col-name">Event</th>
+                <th class="col-city">Location</th>
+                <th class="col-rating">Dates</th>
+                <th class="col-feedback">Shown</th>
+                <th class="col-status">Source</th>
+                <th class="col-actions">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="ev in filteredAiEvents" :key="ev._id" class="biz-row exp-row" @click="openAiEventRow(ev)">
+                <td class="col-name" data-label="Event">
+                  <div class="exp-place-cell">
+                    <img v-if="ev.placeId" :src="`${apiRoot}/ai/place-image/${ev.placeId}/0`" class="exp-thumb" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
+                    <div v-else class="exp-thumb exp-thumb--empty">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <div class="row-name">
+                      <span class="row-name-text">{{ ev.name }}</span>
+                      <span class="exp-cats">jinni event · via {{ ev.sourceTier }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="col-city" data-label="Location">{{ ev.venueName || ev.city || ev.address || '—' }}</td>
+                <td class="col-rating" data-label="Dates"><span class="aiev-dates">{{ aiEvDates(ev) }}</span></td>
+                <td class="col-feedback" data-label="Shown"><span class="exp-fb">👁 {{ ev.timesShown }}×</span></td>
+                <td class="col-status" data-label="Source">
+                  <a v-if="ev.sourceUrl" :href="ev.sourceUrl" target="_blank" rel="noopener noreferrer" class="aiev-src" @click.stop>source ↗</a>
+                  <span v-else>—</span>
+                </td>
+                <td class="col-actions" data-label="Action" @click.stop>
+                  <div class="action-group">
+                    <button class="action-btn exp-btn-verify" title="Create a curated event destination from this" @click="approveAiEvent(ev)">Approve</button>
+                    <button class="action-btn exp-btn-hide" title="Blocklist: Jinni will never recommend this event again" @click="hideAiEvent(ev)">Hide</button>
+                    <button class="action-btn btn-muted" title="Remove from this queue (may reappear if found again)" @click="dismissAiEvent(ev)">Dismiss</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+
+        <div v-else-if="expLoading && !expPlaces.length" class="table-empty">
           <div class="spinner"/>
           <span>Loading places…</span>
         </div>
@@ -1712,7 +1734,7 @@
       </section>
     </main>
 
-    <div v-if="expPlaces.length && expTotalPages > 1" class="pagination">
+    <div v-if="expCategory !== 'jinni_events' && expPlaces.length && expTotalPages > 1" class="pagination">
       <button :disabled="expPage <= 1 || expLoading" @click="changeExpPage(-1)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Prev
       </button>
@@ -2319,6 +2341,9 @@ export default {
       { value: 'historical', label: 'Historical' }, { value: 'events', label: 'Events' },
       { value: 'photo_spots', label: 'Photo spots' }, { value: 'hidden_gems', label: 'Hidden gems' },
       { value: 'shopping', label: 'Shops' },
+      // Not a PlaceCache category: switches the table to the AiFoundEvent
+      // review queue (dated events the AI actually served to users).
+      { value: 'jinni_events', label: 'Jinni events' },
     ]
     // ── Place detail modal ──
     const expSelected = ref(null)
@@ -3442,7 +3467,6 @@ export default {
     // Lives in the destinations tab — the validators who curate events
     // review what the AI recommended, in the same place.
     const aiEvents = ref([])
-    const aiEvOpen = ref(true)
     const aiEvLoaded = ref(false)
     async function loadAiEvents() {
       try {
@@ -3476,6 +3500,24 @@ export default {
         await axios.delete(`${API_URL}/staff/ai-events/${ev._id}`, { headers: authHeader() })
         aiEvents.value = aiEvents.value.filter(x => x._id !== ev._id)
       } catch (e) { alert(e?.response?.data?.error || 'Dismiss failed') }
+    }
+    // The shared Search box filters this queue too (client-side — the queue
+    // is small by construction, TTL prunes ended events).
+    const filteredAiEvents = computed(() => {
+      const q = (expSearchInput.value || '').trim().toLowerCase()
+      if (!q) return aiEvents.value
+      return aiEvents.value.filter(ev =>
+        [ev.name, ev.venueName, ev.address, ev.city].some(s => s && s.toLowerCase().includes(q)))
+    })
+    // Row click: the venue resolved → open the normal place drawer (image
+    // gallery + details); no venue → the source listing is the best detail
+    // view there is.
+    function openAiEventRow(ev) {
+      if (ev.placeId) {
+        openExpPlace({ placeId: ev.placeId, name: ev.name, actions: ['events'], explore: {}, city: ev.city, country: ev.country })
+      } else if (ev.sourceUrl) {
+        window.open(ev.sourceUrl, '_blank', 'noopener')
+      }
     }
 
     watch(activeTab, (tab) => {
@@ -3860,8 +3902,9 @@ export default {
       destinations, destSummary, destTotal, destPage, destTotalPages,
       destLoading, destFilter, destFilterOpts, destMineOnly,
       destSearchInput, onDestSearchInput, loadDestinations, changeDestPage,
-      // Found by Jinni (AI-served events queue)
-      aiEvents, aiEvOpen, aiEvLoaded, aiEvDates, approveAiEvent, hideAiEvent, dismissAiEvent,
+      // Found by Jinni (AI-served events queue — 'Jinni events' category in the Explore tab)
+      aiEvents, aiEvLoaded, aiEvDates, approveAiEvent, hideAiEvent, dismissAiEvent,
+      filteredAiEvents, openAiEventRow,
       // Explore moderation tab
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
       expStatus, expStatusOpts, expCategory, expCategories, expCounts,
@@ -3920,25 +3963,10 @@ export default {
 .count-pill--readonly:hover{background:var(--bg-elev);color:var(--text-mute)}
 /* ── Scope banner ────────────────────────────────────────────────── */
 .scope-banner{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--bg-elev);border-left:3px solid var(--accent);border-radius:10px;margin-bottom:12px;font-size:13px;line-height:1.5;color:var(--text)}
-/* ── Found by Jinni (AI-served events queue) ── */
-.aiev-panel{background:var(--bg-elev);border-left:3px solid var(--accent);border-radius:10px;margin-bottom:12px;overflow:hidden}
-.aiev-head{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;background:transparent;border:none;cursor:pointer;color:var(--text);font:inherit;font-size:13px;font-weight:600;text-align:left}
-.aiev-count{background:var(--accent);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700}
-.aiev-chev{margin-left:auto;transition:transform 0.2s;color:var(--text-mute)}
-.aiev-chev.open{transform:rotate(180deg)}
-.aiev-list{padding:0 14px 10px 14px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto}
-.aiev-empty{padding:0 14px 12px 14px;font-size:12.5px;color:var(--text-mute);line-height:1.5}
-.aiev-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg);flex-wrap:wrap}
-.aiev-main{flex:1;min-width:220px}
-.aiev-name{font-size:13px;font-weight:600;color:var(--text)}
-.aiev-meta{font-size:12px;color:var(--text-mute);display:flex;flex-wrap:wrap;gap:2px 4px;align-items:baseline}
-.aiev-dates{color:var(--accent);font-weight:600}
-.aiev-src{color:var(--accent);text-decoration:none;margin-left:4px}
+/* ── Jinni events rows (AI-served events queue in the Explore table) ── */
+.aiev-dates{color:var(--accent);font-weight:600;font-size:12.5px;white-space:nowrap}
+.aiev-src{color:var(--accent);text-decoration:none;font-size:12.5px}
 .aiev-src:hover{text-decoration:underline}
-.aiev-actions{display:flex;gap:6px;flex-shrink:0}
-.aiev-btn{font-size:12px;padding:5px 10px}
-.aiev-btn--approve{color:#2e9e5b;border-color:rgba(46,158,91,0.45)}
-.aiev-btn--hide{color:#c4554d;border-color:rgba(196,85,77,0.45)}
 .scope-banner svg{flex-shrink:0;margin-top:2px;color:var(--accent)}
 .scope-banner-body{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline}
 .scope-banner-label{color:var(--text-mute);font-size:12px;text-transform:uppercase;letter-spacing:0.05em}
