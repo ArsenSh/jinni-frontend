@@ -7013,22 +7013,6 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .overlay-actions{display:flex;gap:10px}
 .text-action-btn{padding:8px;border:none;border-radius:25px;cursor:pointer;font-size:0.8rem;font-weight:500;transition:all 0.25s ease;min-width:80px;text-align:center;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
 .rec-details{padding:8px 12px 6px 12px}
-/* Mirror seam — the photo REFLECTS onto the top of the details panel: a real
-   mirrored copy of its lower edge, faded out fast, so the picture looks like it
-   sits on a glossy surface and flows into the info below (not just a shadow).
-   -webkit-box-reflect covers Chrome/Safari/Edge incl. mobile; Firefox simply
-   shows no reflection — graceful. It's paint-only (no layout shift): the
-   reflection sits over the card glass in the panel but UNDER the title text,
-   so the name stays crisp. Reflects the visible photo, so no theme colors needed. */
-/* Water reflection at the SEAM (the details edge that touches the photo). The
-   reflection paints ON TOP of the panel (box-reflect can't paint behind a later
-   sibling), so it's kept SEMI-transparent (max ~0.55) and faded out by ~52px —
-   it reads as a reflected waterline at the upper edge while the title below stays
-   readable through it. PX stops keep the band height equal on ordinary (190px)
-   and large (380px) images. Tuned live on real cards. */
-.large-card .rec-image,.recommendation-grid .rec-image{-webkit-box-reflect:below 0 linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.22) 20px,rgba(0,0,0,0) 52px)}
-.large-card .rec-details{padding-top:22px}
-.recommendation-grid .rec-details{padding-top:22px}
 .rec-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .rec-name{font-weight:500;margin-bottom:4px;flex:1;line-height:1.3}
 .image-request-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s ease;flex-shrink:0;position:relative;overflow:hidden;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
