@@ -1693,11 +1693,15 @@ export default {
      ~214px mobile (~380w). */
   width: 100%; aspect-ratio: 16 / 9;
   border-radius: 0; overflow: hidden; flex: none;
+  /* Water reflection — the photo mirrors onto the top edge of the info panel,
+     fading out fast (same recipe as the chat cards). Chrome/Safari/Edge; Firefox
+     degrades to no reflection. Paint-only, sits under the title text. */
+  -webkit-box-reflect: below 0 linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.32) 15px, rgba(0,0,0,0) 44px);
 }
 .itin-card-img {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
-.itin-card-info { padding: 8px 12px 10px; }
+.itin-card-info { padding: 24px 12px 10px; }  /* 24px top: room for the reflection waterline above the title */
 .itin-card--sk .itin-card-lines { padding: 10px 12px; }
 .itin-card--failed { padding: 10px 12px; }
 
@@ -1779,7 +1783,7 @@ export default {
   .itin-card.touch-active .itin-card-save.saved,
   .itin-card:active .itin-card-save.saved { opacity: 1; }
   .itin-card.touch-active { transform: scale(0.98); transition: transform 0.1s ease; }
-  .itin-overlay-actions { flex-direction: column; gap: 8px; }
+  .itin-overlay-actions { flex-direction: row; gap: 8px; }
   .itin-overlay-btn { padding: 10px 14px; border-radius: 20px; }
 }
 
