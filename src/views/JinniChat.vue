@@ -4145,6 +4145,9 @@ export default {
         this.showCooldownMessage(this.usageStatus);
         return;
       }
+      // Opening the detail modal IS the "watched" signal — the user deliberately
+      // opened this place's full page, whether or not they click anything inside.
+      try { this.trackInteraction(place, 'info_open'); } catch (e) {}
       console.log('🔍 [MORE BTN] place object:', JSON.stringify(place, null, 2));
       // verifiedId may be missing on old saved sessions — extract it from the id field
       // id format for DB records: "db-<24hexMongoId>-<index>"
@@ -6442,15 +6445,19 @@ export default {
         const candidate = rec.id.split('-').find(p => /^[a-f0-9]{24}$/i.test(p));
         if (candidate) resolvedVerifiedId = candidate;
       }
-      if (!resolvedVerifiedId) return;
+      const placeId = rec?.placeId || null;
+      // Track when we have EITHER a verified DB id (for business analytics) OR a
+      // Google placeId (for the per-user watched/view signal). Previously this
+      // returned on no verifiedId, so Google places were never tracked at all.
+      if (!resolvedVerifiedId && !placeId) return;
       // Build the list of other businesses interacted with this session (for crossInteractions)
-      const otherSessionIds = this.sessionBusinessIds.filter(id => id !== resolvedVerifiedId);
+      const otherSessionIds = resolvedVerifiedId ? this.sessionBusinessIds.filter(id => id !== resolvedVerifiedId) : [];
       // Add this business to the session list if not already there
-      if (!this.sessionBusinessIds.includes(resolvedVerifiedId)) {this.sessionBusinessIds.push(resolvedVerifiedId)}
-      try { await fetch(`${API_BASE_URL}/api/ai/track-interaction`, {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}`}, body: JSON.stringify({verifiedId: resolvedVerifiedId, placeName: rec.name, interactionType, sessionBusinessIds: otherSessionIds})}) }
+      if (resolvedVerifiedId && !this.sessionBusinessIds.includes(resolvedVerifiedId)) {this.sessionBusinessIds.push(resolvedVerifiedId)}
+      try { await fetch(`${API_BASE_URL}/api/ai/track-interaction`, {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}`}, body: JSON.stringify({verifiedId: resolvedVerifiedId, placeId, placeName: rec.name, interactionType, sessionBusinessIds: otherSessionIds})}) }
       catch (e) {}
       // Directly notify other businesses in the session about this cross-interaction
-      if (otherSessionIds.length) {
+      if (resolvedVerifiedId && otherSessionIds.length) {
         try {
           fetch(`${API_BASE_URL}/api/business/${resolvedVerifiedId}/track`, {method: 'POST',  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },  body: JSON.stringify({ event: 'view', sessionBusinessIds: otherSessionIds })}).catch(() => {});
         } catch (e) {}
