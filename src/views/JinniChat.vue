@@ -7013,21 +7013,14 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .overlay-actions{display:flex;gap:10px}
 .text-action-btn{padding:8px;border:none;border-radius:25px;cursor:pointer;font-size:0.8rem;font-weight:500;transition:all 0.25s ease;min-width:80px;text-align:center;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
 .rec-details{padding:8px 12px 6px 12px}
-/* Seam depth — the photo casts a soft shadow onto the top of the info panel, so
-   image + details read as one solid object instead of two stacked blocks. Sits
-   over the panel's top padding only (pointer-events:none), so it never touches
-   the text; theme-aware so it deepens the night glass and warms the day glass. */
-.rec-details{position:relative}
-.rec-details::before{content:'';position:absolute;top:0;left:0;right:0;height:12px;pointer-events:none;z-index:2}
-.genie-chat-container.night-mode .rec-details::before{background:linear-gradient(to bottom,rgba(0,0,0,0.32),rgba(0,0,0,0))}
-.genie-chat-container.day-mode .rec-details::before{background:linear-gradient(to bottom,rgba(60,35,10,0.13),rgba(60,35,10,0))}
-/* Photo melt — the picture dissolves into the panel at its lower edge instead of
-   a hard cut, so image + details flow as one. z-index:1 keeps it BELOW the hover
-   overlay (More/Ask) and the save ribbon; pointer-events:none so taps pass through.
-   Theme-aware: sinks into the dark night glass, lifts into the light day glass. */
-.rec-image::after{content:'';position:absolute;left:0;right:0;bottom:0;height:56px;pointer-events:none;z-index:1}
-.genie-chat-container.night-mode .rec-image::after{background:linear-gradient(to bottom,rgba(26,18,48,0) 0%,rgba(26,18,48,0.55) 100%)}
-.genie-chat-container.day-mode .rec-image::after{background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0.42) 100%)}
+/* Mirror seam — the photo REFLECTS onto the top of the details panel: a real
+   mirrored copy of its lower edge, faded out fast, so the picture looks like it
+   sits on a glossy surface and flows into the info below (not just a shadow).
+   -webkit-box-reflect covers Chrome/Safari/Edge incl. mobile; Firefox simply
+   shows no reflection — graceful. It's paint-only (no layout shift): the
+   reflection sits over the card glass in the panel but UNDER the title text,
+   so the name stays crisp. Reflects the visible photo, so no theme colors needed. */
+.large-card .rec-image,.recommendation-grid .rec-image{-webkit-box-reflect:below 0 linear-gradient(to bottom,rgba(0,0,0,0.65),rgba(0,0,0,0.28) 8%,rgba(0,0,0,0) 20%)}
 .rec-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .rec-name{font-weight:500;margin-bottom:4px;flex:1;line-height:1.3}
 .image-request-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s ease;flex-shrink:0;position:relative;overflow:hidden;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
