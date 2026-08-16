@@ -7020,12 +7020,15 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    shows no reflection — graceful. It's paint-only (no layout shift): the
    reflection sits over the card glass in the panel but UNDER the title text,
    so the name stays crisp. Reflects the visible photo, so no theme colors needed. */
-.large-card .rec-image,.recommendation-grid .rec-image{-webkit-box-reflect:below 0 linear-gradient(rgba(0,0,0,0.85),rgba(0,0,0,0.32) 15px,rgba(0,0,0,0) 44px)}
-/* Give the info panel top room so the ~44px reflection "waterline" sits ABOVE the
-   title instead of behind it. PX stops (not %) keep the band the same height on
-   ordinary (190px) and large (380px) images. Tuned live on real cards. */
-.large-card .rec-details{padding-top:24px}
-.recommendation-grid .rec-details{padding-top:24px}
+/* Water reflection at the SEAM (the details edge that touches the photo). The
+   reflection paints ON TOP of the panel (box-reflect can't paint behind a later
+   sibling), so it's kept SEMI-transparent (max ~0.55) and faded out by ~52px —
+   it reads as a reflected waterline at the upper edge while the title below stays
+   readable through it. PX stops keep the band height equal on ordinary (190px)
+   and large (380px) images. Tuned live on real cards. */
+.large-card .rec-image,.recommendation-grid .rec-image{-webkit-box-reflect:below 0 linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.22) 20px,rgba(0,0,0,0) 52px)}
+.large-card .rec-details{padding-top:22px}
+.recommendation-grid .rec-details{padding-top:22px}
 .rec-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .rec-name{font-weight:500;margin-bottom:4px;flex:1;line-height:1.3}
 .image-request-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s ease;flex-shrink:0;position:relative;overflow:hidden;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}

@@ -1696,12 +1696,12 @@ export default {
   /* Water reflection — the photo mirrors onto the top edge of the info panel,
      fading out fast (same recipe as the chat cards). Chrome/Safari/Edge; Firefox
      degrades to no reflection. Paint-only, sits under the title text. */
-  -webkit-box-reflect: below 0 linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.32) 15px, rgba(0,0,0,0) 44px);
+  -webkit-box-reflect: below 0 linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.22) 20px, rgba(0,0,0,0) 52px);
 }
 .itin-card-img {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
-.itin-card-info { padding: 24px 12px 10px; }  /* 24px top: room for the reflection waterline above the title */
+.itin-card-info { padding: 22px 12px 10px; }  /* 22px top: room for the reflection waterline above the title */
 .itin-card--sk .itin-card-lines { padding: 10px 12px; }
 .itin-card--failed { padding: 10px 12px; }
 
