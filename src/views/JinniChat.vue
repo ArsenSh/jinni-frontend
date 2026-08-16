@@ -2187,11 +2187,6 @@ export default {
     canShare() { return !!navigator.share },
   },
   watch: {
-    // Live location moved (or first fix): refresh the reverse-geocoded
-    // city/country that searchPlace appends to Maps queries — in the
-    // background, never on the click path, where an await before
-    // window.open would risk the popup blocker.
-    userLocation(loc) { this.refreshLiveGeoContext(loc) },
     // When the preference bar reveals, auto-hide it after PREFERENCE_BAR_HIDE_MS.
     // A fresh reveal (e.g. reopening the actions popover or typing after
     // clearing) restarts it. 3s was not long enough to read the chips while
@@ -4085,52 +4080,36 @@ export default {
       const el = e.target.closest && e.target.closest('.place-search');
       if (!el) return;
       const name = el.getAttribute('data-place');
-      if (name) this.searchPlace(name);
+      if (!name) return;
+      // Context = the DESTINATION this answer is about, NOT where the user is
+      // standing. These click-to-search names are places the AI mentioned but
+      // did NOT render as a card; appending the user's HOME city (e.g. Yerevan)
+      // sent a Dubai place to the wrong country (aqua park in Armenia). Read the
+      // city/country from a verified card in the SAME message — those carry the
+      // real destination — and fall back to the bare name (a distinctive place
+      // resolves on its own) rather than the home city. Near-me chats are handled
+      // too: there the sibling cards are already in the user's own city.
+      let ctx = '';
+      const bubble = el.closest('.message-bubble');
+      const locEl = bubble && bubble.querySelector('.rec-location');
+      if (locEl && locEl.textContent) {
+        const segs = locEl.textContent.split(/\s+-\s+|,\s*/).map(s => s.trim()).filter(Boolean);
+        if (segs.length) ctx = segs.slice(-2).join(' ');   // e.g. "Dubai United Arab Emirates"
+      }
+      this.searchPlace(name, ctx);
     },
-    /* Reverse-geocoded city/country for the CURRENT live coordinates.
-       userSettings.location is complete (onboarding reverse-geocodes even the
-       GPS path) but written ONCE, at onboarding/settings time — a GPS user who
-       onboarded in Yerevan and is now in Dubai would get "Sky Bar Yerevan
-       Armenia" appended to the Maps query. This cache follows the live fix
-       instead: same Nominatim service onboarding already uses, refreshed only
-       when the fix moves ~25km, fire-and-forget so any failure simply leaves
-       the settings fallback in place. */
-    refreshLiveGeoContext(loc) {
-      if (!loc || !Number.isFinite(loc.lat) || !Number.isFinite(loc.lng)) return;
-      const g = this._liveGeo;
-      if (g && Math.abs(g.lat - loc.lat) < 0.22 && Math.abs(g.lng - loc.lng) < 0.22) return;  // ~<25km: still current
-      if (this._liveGeoPending) return;
-      this._liveGeoPending = true;
-      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${loc.lat}&lon=${loc.lng}&format=json`)
-        .then(r => r.json())
-        .then(d => {
-          const a = (d && d.address) || {};
-          const city = a.city || a.town || a.village || '';
-          if (city || a.country) this._liveGeo = { lat: loc.lat, lng: loc.lng, city, country: a.country || '' };
-        })
-        .catch(() => {})
-        .finally(() => { this._liveGeoPending = false; });
-    },
-    searchPlace(name) {
-      // Add city/country context so a bare "Sky Bar" resolves to the right
-      // place. Google MAPS search (not plain web) — drops the venue on the map
-      // with photos, reviews and directions, which is what a traveler wants.
+    searchPlace(name, ctx = '') {
+      // Google MAPS search (not plain web) — drops the venue on the map with
+      // photos, reviews, hours and directions, which is what a traveler wants.
+      // `ctx` is the answer's destination (from a sibling card), so a bare
+      // "Sky Bar" resolves in the RIGHT city; with no card context we send the
+      // name alone rather than guessing the user's home location.
       // For plain web search instead, swap the URL for
       //   https://www.google.com/search?q=${q}
-      const loc = this.userSettings && this.userSettings.location;
-      let ctx = (loc && loc.city && loc.countryName) ? ` ${loc.city} ${loc.countryName}` : '';
-      // Prefer the live fix's city when we hold one for roughly where the
-      // user is NOW (~25km); warm the cache for next click either way.
-      this.refreshLiveGeoContext(this.userLocation);
-      const g = this._liveGeo, cur = this.userLocation;
-      if (g && cur && Math.abs(g.lat - cur.lat) < 0.22 && Math.abs(g.lng - cur.lng) < 0.22 && (g.city || g.country)) {
-        ctx = ` ${[g.city, g.country].filter(Boolean).join(' ')}`;
-      }
-      const q = encodeURIComponent(name + ctx);
+      const q = encodeURIComponent(ctx ? `${name} ${ctx}` : name);
       const url = `https://www.google.com/maps/search/?api=1&query=${q}`;
       // window.open('_blank') — matches the app's other working map buttons and
-      // reliably opens a NEW TAB (a programmatic anchor click navigated the same
-      // tab in some browsers). Null the opener for security (no reverse
+      // reliably opens a NEW TAB. Null the opener for security (no reverse
       // tab-nabbing) without the 'noopener' feature string that popup-blocks.
       const win = window.open(url, '_blank');
       if (win) win.opener = null;
@@ -6987,7 +6966,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .inline-recommendation-wrapper .recommendation-card{margin-left:0;float:left;max-width:100%;display:block}
 .inline-card{width:100%}
 .large-card{display:flex;flex-direction:column;border-radius:12px;overflow:hidden;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
-.large-card .rec-image{height:250px}
+.large-card .rec-image{height:auto;aspect-ratio:3 / 2;max-height:480px}
 .large-card .rec-details{padding:16px}
 .large-card .rec-name{font-size:1.3rem;font-weight:600;margin-bottom:8px}
 .large-card .rec-type{font-size:1rem;margin-bottom:5px;font-weight:500}
@@ -7815,7 +7794,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* ==================================================================================================== */
 /*                                        MOBILE STYLES
 /* ==================================================================================================== */
-@media (max-width:768px){.mobile-nav,.mobile-new-chat{z-index:1001 !important;position:relative}.app-header{padding:0 15px}.app-brand{gap:15px}.sidebar-header{padding:5px 16px 3px 16px}.sidebar:not(.sidebar-open){transform:translateX(-100%)}.sidebar.sidebar-open{transform:translateX(0)}.fullscreen-image{min-width:250px;min-height:150px}.rec-header{gap:8px}.image-request-btn{width:32px;height:32px}.image-request-btn svg{width:16px;height:16px}.large-card .rec-image{height:140px}.fullscreen-nav-btn{width:50px;height:50px}.fullscreen-prev{left:15px}.fullscreen-next{right:15px}.fullscreen-close-btn{top:15px;right:15px;width:40px;height:40px;font-size:1.2rem}.fullscreen-counter{bottom:15px;padding:6px 12px;font-size:0.8rem}.mobile-actions-popover{right:35px}.ai-greeting{font-size:1rem;font-weight:130;padding:0 10px 10px 10px;gap:10px}.greeting-icon{width:50px;height:50px}.greeting{font-size:1.2rem}.ai-note{font-size:0.7rem;padding:0 10px}.input-wrapper textarea{padding:15px 50px 15px 15px}.edit-prefs-btn{padding:10px}.modal-header{padding:10px 12px!important}.profile-details h4{font-size:1.1rem}.modal-body{padding:8px 20px 20px 20px}.profile-info{padding:0 10px 0 16px!important}.recommendation-card.touch-active .image-overlay,.recommendation-card:active .image-overlay{opacity:1;visibility:visible;z-index:10}.recommendation-card.touch-active .rec-image-save-btn,.recommendation-card:active .rec-image-save-btn{opacity:0.55}.recommendation-card.touch-active .rec-image-save-btn.saved,.recommendation-card:active .rec-image-save-btn.saved{opacity:1}.recommendation-card.touch-active{transform:scale(0.98);transition:transform 0.1s ease}.overlay-actions{flex-direction:column;gap:8px}.text-action-btn{padding:10px 14px;border-radius:20px}.chat-input-container{max-height:none;overflow:visible}.chat-input-container,.chat-header{z-index:100;position:relative}.sidebar{height:100%;width:80vw;position:fixed;left:0;top:0;bottom:0;z-index:1000;overflow:hidden;transform:translateX(-100%);-webkit-overflow-scrolling:touch;overflow-y:auto}.chat-history{-webkit-overflow-scrolling:touch;padding:20px 10px 15px 10px}.mobile-mode-toggle{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:20px;border:none;cursor:pointer;transition:all 0.3s ease;flex:1;font-weight:600;font-size:0.9rem;min-width:130px;max-width:130px}.sidebar-overlay{z-index:999}.new-chat-btn{font-size:0.8rem}.chat-header{padding:env(safe-area-inset-top,0px) 15px 0;align-items:center;min-height:calc(56px + env(safe-area-inset-top,0px));justify-content:center;z-index:1001}.current-session-title{flex:1;font-size:1.2rem;margin:0 50px 0 50px}.mobile-nav{position:absolute;left:15px;top:calc(50% + env(safe-area-inset-top,0px) / 2);transform:translateY(-50%)}.context-menu{max-width:80vw}.context-menu button{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mobile-new-chat{position:absolute;right:15px;top:calc(50% + env(safe-area-inset-top,0px) / 2);transform:translateY(-50%)}.mobile-nav .mobile-menu-btn,.mobile-new-chat .mobile-menu-btn{background:transparent;border:none;font-size:1.2rem;font-weight:400;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all 0.2s ease;font-family:inherit;line-height:1;padding:0;margin:0}.mobile-nav .mobile-menu-btn:focus,.mobile-new-chat .mobile-menu-btn:focus{outline-offset:2px}.mobile-menu-btn svg,.mobile-menu-btn::before,.mobile-menu-btn::after{display:block;margin:0 auto}}
+@media (max-width:768px){.mobile-nav,.mobile-new-chat{z-index:1001 !important;position:relative}.app-header{padding:0 15px}.app-brand{gap:15px}.sidebar-header{padding:5px 16px 3px 16px}.sidebar:not(.sidebar-open){transform:translateX(-100%)}.sidebar.sidebar-open{transform:translateX(0)}.fullscreen-image{min-width:250px;min-height:150px}.rec-header{gap:8px}.image-request-btn{width:32px;height:32px}.image-request-btn svg{width:16px;height:16px}.fullscreen-nav-btn{width:50px;height:50px}.fullscreen-prev{left:15px}.fullscreen-next{right:15px}.fullscreen-close-btn{top:15px;right:15px;width:40px;height:40px;font-size:1.2rem}.fullscreen-counter{bottom:15px;padding:6px 12px;font-size:0.8rem}.mobile-actions-popover{right:35px}.ai-greeting{font-size:1rem;font-weight:130;padding:0 10px 10px 10px;gap:10px}.greeting-icon{width:50px;height:50px}.greeting{font-size:1.2rem}.ai-note{font-size:0.7rem;padding:0 10px}.input-wrapper textarea{padding:15px 50px 15px 15px}.edit-prefs-btn{padding:10px}.modal-header{padding:10px 12px!important}.profile-details h4{font-size:1.1rem}.modal-body{padding:8px 20px 20px 20px}.profile-info{padding:0 10px 0 16px!important}.recommendation-card.touch-active .image-overlay,.recommendation-card:active .image-overlay{opacity:1;visibility:visible;z-index:10}.recommendation-card.touch-active .rec-image-save-btn,.recommendation-card:active .rec-image-save-btn{opacity:0.55}.recommendation-card.touch-active .rec-image-save-btn.saved,.recommendation-card:active .rec-image-save-btn.saved{opacity:1}.recommendation-card.touch-active{transform:scale(0.98);transition:transform 0.1s ease}.overlay-actions{flex-direction:column;gap:8px}.text-action-btn{padding:10px 14px;border-radius:20px}.chat-input-container{max-height:none;overflow:visible}.chat-input-container,.chat-header{z-index:100;position:relative}.sidebar{height:100%;width:80vw;position:fixed;left:0;top:0;bottom:0;z-index:1000;overflow:hidden;transform:translateX(-100%);-webkit-overflow-scrolling:touch;overflow-y:auto}.chat-history{-webkit-overflow-scrolling:touch;padding:20px 10px 15px 10px}.mobile-mode-toggle{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:20px;border:none;cursor:pointer;transition:all 0.3s ease;flex:1;font-weight:600;font-size:0.9rem;min-width:130px;max-width:130px}.sidebar-overlay{z-index:999}.new-chat-btn{font-size:0.8rem}.chat-header{padding:env(safe-area-inset-top,0px) 15px 0;align-items:center;min-height:calc(56px + env(safe-area-inset-top,0px));justify-content:center;z-index:1001}.current-session-title{flex:1;font-size:1.2rem;margin:0 50px 0 50px}.mobile-nav{position:absolute;left:15px;top:calc(50% + env(safe-area-inset-top,0px) / 2);transform:translateY(-50%)}.context-menu{max-width:80vw}.context-menu button{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mobile-new-chat{position:absolute;right:15px;top:calc(50% + env(safe-area-inset-top,0px) / 2);transform:translateY(-50%)}.mobile-nav .mobile-menu-btn,.mobile-new-chat .mobile-menu-btn{background:transparent;border:none;font-size:1.2rem;font-weight:400;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all 0.2s ease;font-family:inherit;line-height:1;padding:0;margin:0}.mobile-nav .mobile-menu-btn:focus,.mobile-new-chat .mobile-menu-btn:focus{outline-offset:2px}.mobile-menu-btn svg,.mobile-menu-btn::before,.mobile-menu-btn::after{display:block;margin:0 auto}}
 @supports (-webkit-touch-callout:none){.genie-chat-container{position:fixed;width:100%;height:100%;overflow:hidden}.chat-messages{padding:74px 20px 108px 20px;overflow-y:scroll;-webkit-overflow-scrolling:touch;transform:translate3d(0,0,0)}}
 @keyframes fadeIn{to{opacity:1}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}

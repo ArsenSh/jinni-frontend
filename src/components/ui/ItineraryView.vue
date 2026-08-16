@@ -1686,7 +1686,12 @@ export default {
 .itin-card--failed:hover { background: rgba(224,85,85,0.06); }
 .itin-card-imgwrap {
   position: relative;
-  width: 100%; height: 140px;
+  /* Width-driven height (like the chat card / Explore grid) so the photo keeps
+     its shape instead of being zoom-cropped into a fixed 140px letterbox. 16:9
+     is deliberately shorter than the chat card's 3:2 — the itinerary is a DENSE
+     list of many stops, so compact beats tall here. ~225px desktop (400w),
+     ~214px mobile (~380w). */
+  width: 100%; aspect-ratio: 16 / 9;
   border-radius: 0; overflow: hidden; flex: none;
 }
 .itin-card-img {
