@@ -6966,7 +6966,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .inline-recommendation-wrapper .recommendation-card{margin-left:0;float:left;max-width:100%;display:block}
 .inline-card{width:100%}
 .large-card{display:flex;flex-direction:column;border-radius:12px;overflow:hidden;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
-.large-card .rec-image{height:auto;aspect-ratio:3 / 2;max-height:480px}
+.large-card .rec-image{height:auto;aspect-ratio:3 / 2;max-height:380px;width:100%;box-sizing:border-box}
 .large-card .rec-details{padding:16px}
 .large-card .rec-name{font-size:1.3rem;font-weight:600;margin-bottom:8px}
 .large-card .rec-type{font-size:1rem;margin-bottom:5px;font-weight:500}
@@ -7318,6 +7318,11 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .recommendations{margin-top:24px;padding-top:15px}
 .streaming-recommendations{opacity:1;transition:opacity 0.3s ease}
 .recommendation-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));justify-content:center;align-items:stretch;gap:15px;margin-top:10px}
+/* Ordinary grid cards. Mobile mirrors the itinerary card's 16:9 (proportional,
+   no zoom, ~200px) — height:auto lets aspect-ratio govern over the base 140px.
+   Desktop overrides with a fixed 190px (a tuned value; easy to change later). */
+.recommendation-grid .rec-image{height:auto;aspect-ratio:16 / 9}
+@media (min-width:769px){.recommendation-grid .rec-image{height:190px}}
 .disabled-cooldown .overlay-actions{opacity:0.5}
 .genie-chat-container.night-mode .input-wrapper textarea.input-disabled::placeholder{color:rgba(226,232,240,0.5);opacity:1}
 .genie-chat-container.day-mode .input-wrapper textarea.input-disabled::placeholder{color:#8B4513;opacity:0.9}
