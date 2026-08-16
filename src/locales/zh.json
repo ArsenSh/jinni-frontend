@@ -915,7 +915,7 @@
       "budget_total": "总预算",
       "budget_amount": "金额",
       "budget_people": "出行人数",
-      "budget_hint": "Jinni 会挑选符合此预算的地点——仅为大致估算，并非精确。",
+      "budget_hint": "Jinni 会挑选符合此预算的地点——仅为大致估算。",
       "budget_continue": "继续",
       "budget_skip": "跳过预算",
       "hotel_prompt": "您住在哪里？",

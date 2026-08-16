@@ -911,7 +911,7 @@
       "budget_total": "Total budget",
       "budget_amount": "Amount",
       "budget_people": "Travelers",
-      "budget_hint": "Jinni will pick places to fit this — shown approximately, never exact.",
+      "budget_hint": "Jinni will pick places to fit this — shown approximately.",
       "budget_continue": "Continue",
       "budget_skip": "Skip budget",
       "hotel_prompt": "Where are you staying?",

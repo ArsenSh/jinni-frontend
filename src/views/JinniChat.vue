@@ -7062,6 +7062,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .itin-budget-cur{font-size:0.8rem;font-weight:600;opacity:0.7}
 .itin-budget-people{width:64px;border-radius:12px;border:none;outline:none;padding:9px 10px;font-size:0.95rem;color:inherit;font-family:inherit;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .itin-budget-hint{font-size:0.72rem;opacity:0.6;margin:2px 0 8px}
+/* Hide the native number-input spinner arrows — they look cheap. Inputs stay
+   numeric via type=number + inputmode. */
+.itin-budget-input input::-webkit-outer-spin-button,.itin-budget-input input::-webkit-inner-spin-button,.itin-budget-people::-webkit-outer-spin-button,.itin-budget-people::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.itin-budget-input input,.itin-budget-people{-moz-appearance:textfield;appearance:textfield}
 .chip-primary{font-weight:600}
 .genie-chat-container.night-mode .itin-budget-input,.genie-chat-container.night-mode .itin-budget-people{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
 .genie-chat-container.day-mode .itin-budget-input,.genie-chat-container.day-mode .itin-budget-people{background:rgba(255,255,255,0.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6)}

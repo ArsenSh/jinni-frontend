@@ -918,7 +918,7 @@
       "budget_total": "Budget total",
       "budget_amount": "Montant",
       "budget_people": "Voyageurs",
-      "budget_hint": "Jinni choisira des lieux adaptés à ce budget — indiqué à titre approximatif, jamais exact.",
+      "budget_hint": "Jinni choisira des lieux adaptés à ce budget — indiqué à titre approximatif.",
       "budget_continue": "Continuer",
       "budget_skip": "Ignorer le budget",
       "hotel_prompt": "Où logez-vous ?",
