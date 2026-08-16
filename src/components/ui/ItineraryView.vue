@@ -10,6 +10,12 @@
           <span v-if="stage === 'planning'" class="itin-stage">{{ L.stagePlanning }}</span>
           <span v-else-if="stage === 'enriching'" class="itin-stage">{{ L.stageEnriching }}</span>
         </div>
+        <!-- Approximate per-day cost from validator-priced stops. Deliberately
+             "~approx" and only shown when real prices exist (never invented). -->
+        <div v-if="itinerary && itinerary.costEstimate && itinerary.costEstimate.perPersonPerDay > 0" class="itin-estimate">
+          ≈ {{ itinerary.costEstimate.perPersonPerDay }} {{ itinerary.costEstimate.currency }} {{ L.perPersonDay }}
+          <span class="itin-estimate-note">{{ L.estimateApprox }}</span>
+        </div>
       </div>
     </div>
 
@@ -166,6 +172,7 @@
             <div class="itin-slot-body">
               <div class="itin-slot-top">
                 <span v-if="slot.time" class="itin-slot-time">{{ slot.time }}</span>
+                <span v-else-if="slot.place && slot.place.eventSchedule && slot.place.eventSchedule.startDate" class="itin-slot-time itin-slot-time--allday">{{ L.allDay }}</span>
                 <span class="itin-slot-cat">{{ L.cat[slot.category] || slot.category }}</span>
               </div>
 
@@ -455,6 +462,9 @@ const DEFAULT_LABELS = {
     historical: 'Historical', museum: 'Museum', events: 'Event',
     photo_spots: 'Photo spot', viewpoint: 'Viewpoint', shopping: 'Shopping', nature: 'Nature',
   },
+  allDay: 'All day',
+  perPersonDay: 'per person / day',
+  estimateApprox: '· approximate',
 };
 
 export default {
@@ -816,6 +826,9 @@ export default {
               // caller entirely — forwarding this is what lets a request ask
               // for a fuller (or lighter) day on the pool path.
               pace: this.req?.pace || 'balanced',
+              // Whole-trip budget (distinct from the per-place preference
+              // budget) — the pool build filters/steers stops to fit it.
+              tripBudget: this.req?.tripBudget || null,
               foodPass,
               pool,
             }),
@@ -1537,6 +1550,8 @@ export default {
 .itin-head-main { flex: 1; min-width: 0; }
 .itin-title { font-weight: 800; font-size: 16px; line-height: 1.3; color: var(--it-heading); }
 .itin-sub { font-size: 12.5px; color: var(--it-muted); margin-top: 2px; }
+.itin-estimate { font-size: 12.5px; font-weight: 700; color: var(--it-heading); margin-top: 3px; }
+.itin-estimate-note { font-weight: 400; color: var(--it-muted); font-size: 11.5px; }
 .itin-stage { margin-left: 8px; font-style: italic; animation: itin-pulse 1.4s ease-in-out infinite; }
 @keyframes itin-pulse { 50% { opacity: 0.35; } }
 

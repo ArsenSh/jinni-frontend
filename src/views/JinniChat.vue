@@ -808,6 +808,36 @@
                 </div>
               </template>
 
+              <!-- STEP 1b: whole-trip budget (budget-style travelers only) -->
+              <template v-else-if="itineraryStep === 'budget'">
+                <div class="input-clarifier-head">
+                  <span class="input-clarifier-title">{{ t('chat.itinerary.budget_prompt') || 'Set a budget for the whole trip? (optional)' }}</span>
+                  <button @click="cancelItinerary" class="input-clarifier-close" :aria-label="t('common.close') || 'Close'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                <div class="itin-budget-fields">
+                  <label class="itin-budget-field">
+                    <span class="itin-budget-label">{{ t('chat.itinerary.budget_total') || 'Total budget' }}</span>
+                    <span class="itin-budget-input">
+                      <input type="number" min="0" inputmode="numeric" v-model.number="itineraryDraft.tripBudgetTotal"
+                             :placeholder="t('chat.itinerary.budget_amount') || 'Amount'" @keyup.enter="submitItineraryBudget" />
+                      <span class="itin-budget-cur">{{ tripBudgetCurrency() }}</span>
+                    </span>
+                  </label>
+                  <label class="itin-budget-field">
+                    <span class="itin-budget-label">{{ t('chat.itinerary.budget_people') || 'Travelers' }}</span>
+                    <input class="itin-budget-people" type="number" min="1" max="20" inputmode="numeric" v-model.number="itineraryDraft.people" />
+                  </label>
+                </div>
+                <p class="itin-budget-hint">{{ t('chat.itinerary.budget_hint') || 'Jinni will pick places to fit this — shown approximately, never exact.' }}</p>
+                <div class="input-clarifier-chips">
+                  <button class="action-chip chip-primary" :disabled="isStreaming || isRequestPending || isOnCooldown" @click="submitItineraryBudget">
+                    {{ itineraryDraft.tripBudgetTotal > 0 ? (t('chat.itinerary.budget_continue') || 'Continue') : (t('chat.itinerary.budget_skip') || 'Skip budget') }}
+                  </button>
+                </div>
+              </template>
+
               <!-- STEP 2: where are you staying (hotel) -->
               <template v-else-if="itineraryStep === 'hotel'">
                 <div class="input-clarifier-head">
@@ -1769,7 +1799,7 @@ export default {
       // step: null (closed) | 'days' | 'hotel'. Destination is NOT asked —
       // it comes from the user's onboarding destination / effective location.
       itineraryStep: null,
-      itineraryDraft: { daysCount: 3, hotelName: '', pickHotel: false, hotelBreakfast: false },
+      itineraryDraft: { daysCount: 3, hotelName: '', pickHotel: false, hotelBreakfast: false, tripBudgetTotal: null, people: 2 },
       // Briefly forces the preference bar closed so it can finish collapsing
       // before the shopping clarifier opens in the same slot (sequenced, not
       // simultaneous). See triggerQuickAction's clarify branch.
@@ -4564,7 +4594,7 @@ export default {
                     this.showShoppingClarifier = false;
                     this.itineraryDraft = {
                       daysCount: data.prefill?.daysCount || 3,
-                      hotelName: '', pickHotel: false, hotelBreakfast: false,
+                      hotelName: '', pickHotel: false, hotelBreakfast: false, tripBudgetTotal: null, people: 2,
                     };
                     this.abortHotelPrefetch();
                     // Destination named in chat ("… in Paris") — carried into
@@ -5035,6 +5065,25 @@ export default {
     // Step 1 answered → advance to the hotel step.
     pickItineraryDays(n) {
       this.itineraryDraft.daysCount = n;
+      // Budget-style travelers get a whole-trip budget step; everyone else
+      // skips straight to the hotel step (budget matters only when they asked
+      // to travel on a budget).
+      this.itineraryStep = (this.userPreferences.travelStyle === 'budget') ? 'budget' : 'hotel';
+      this.$nextTick(() => this.scrollToBottom(true));
+    },
+    // Currency the budget is entered in — the user's preference-budget currency,
+    // else their display currency, else USD.
+    tripBudgetCurrency() {
+      return (this.userPreferences.budget && this.userPreferences.budget.currency)
+        || this.userSettings.currency || 'USD';
+    },
+    // Budget step answered → continue to the hotel step (budget optional).
+    submitItineraryBudget() {
+      this.itineraryStep = 'hotel';
+      this.$nextTick(() => this.scrollToBottom(true));
+    },
+    skipItineraryBudget() {
+      this.itineraryDraft.tripBudgetTotal = null;
       this.itineraryStep = 'hotel';
       this.$nextTick(() => this.scrollToBottom(true));
     },
@@ -5181,6 +5230,14 @@ export default {
           pickHotel: !hotel && this.itineraryDraft.pickHotel,
           prefetchedHotels,
           hotelBreakfast: this.itineraryDraft.hotelBreakfast,
+          // Whole-trip budget (distinct from the preference budget). Only set
+          // when a budget-style traveler entered one. Flows to BOTH build paths
+          // (generate-stream via {...req}, build-from-pool explicitly).
+          ...(this.itineraryDraft.tripBudgetTotal > 0 ? { tripBudget: {
+            total: Number(this.itineraryDraft.tripBudgetTotal),
+            currency: this.tripBudgetCurrency(),
+            people: Math.max(1, parseInt(this.itineraryDraft.people, 10) || 1),
+          } } : {}),
         },
         itineraryId: null,
       };
@@ -6997,6 +7054,17 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .input-clarifier-title{font-size:0.9rem;font-weight:500}
 .input-clarifier-close{background:transparent;border:none;color:#aaa;border-radius:8px;padding:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s ease;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .input-clarifier-chips{display:flex;flex-wrap:wrap;gap:8px}
+.itin-budget-fields{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 4px}
+.itin-budget-field{display:flex;flex-direction:column;gap:4px}
+.itin-budget-label{font-size:0.78rem;opacity:0.75}
+.itin-budget-input{display:inline-flex;align-items:center;gap:6px;border-radius:12px;padding:0 10px;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+.itin-budget-input input{width:110px;background:transparent;border:none;outline:none;padding:9px 0;font-size:0.95rem;color:inherit;font-family:inherit}
+.itin-budget-cur{font-size:0.8rem;font-weight:600;opacity:0.7}
+.itin-budget-people{width:64px;border-radius:12px;border:none;outline:none;padding:9px 10px;font-size:0.95rem;color:inherit;font-family:inherit;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+.itin-budget-hint{font-size:0.72rem;opacity:0.6;margin:2px 0 8px}
+.chip-primary{font-weight:600}
+.genie-chat-container.night-mode .itin-budget-input,.genie-chat-container.night-mode .itin-budget-people{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
+.genie-chat-container.day-mode .itin-budget-input,.genie-chat-container.day-mode .itin-budget-people{background:rgba(255,255,255,0.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6)}
 .genie-chat-container.night-mode .input-clarifier-title{color:#94a3b8}
 .genie-chat-container.night-mode .input-clarifier-close{background:rgba(255,255,255,0.06);color:#94a3b8;box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .input-clarifier-close:hover{background:rgba(255,255,255,0.14);box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.1)}
