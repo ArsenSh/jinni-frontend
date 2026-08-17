@@ -1531,8 +1531,8 @@ export default {
   --it-muted: #94a3b8;
   --it-glass: rgba(255,255,255,0.08); 
   --it-glass-hover: rgba(255,255,255,0.14);
-  --it-ring: inset 0 0 0 1.5px rgba(255,255,255,0.1);
-  --it-ring-hover: inset 0 0 0 1.5px rgba(255,255,255,0.1);
+  --it-ring: inset 0 0 0 1px rgba(255,255,255,0.1);
+  --it-ring-hover: inset 0 0 0 1px rgba(255,255,255,0.1);
   --it-chip-ring: inset 0 0 0 0.7px rgba(255,255,255,0.1);
   --it-chip-bg: rgba(255,255,255,0.06); 
   --it-chip-bg-hover: rgba(255,255,255,0.14);

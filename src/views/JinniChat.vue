@@ -514,10 +514,12 @@
                                   </svg>
                                 </button>
                               </div>
-                              <div class="rec-type">
+                              <!-- For events WITH a date, the schedule row below replaces the
+                                   plain "Event" type (the date is the more useful label). -->
+                              <div v-if="!(isEventRec(rec) && formatEventScheduleCard(rec))" class="rec-type">
                                 <span>{{ rec.category || rec.type }}</span>
                               </div>
-                              <!-- Event date/time row (events only). -->
+                              <!-- Event date/time row (events only) — shown in place of the type. -->
                               <div v-if="isEventRec(rec) && formatEventScheduleCard(rec)" class="rec-event-schedule">
                                 <svg class="rec-event-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -6993,11 +6995,11 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
 .rec-event-source{display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:2px 0 4px;text-decoration:none;opacity:.72}
-/* Source moved BELOW the card (into .rec-card-bottom, beside the partner badge):
-   drop the in-panel margins so it aligns in that row. Footer's margin-left:auto
-   keeps the feedback buttons on the right, source on the left like the badge. */
-.rec-event-source--below{margin:0}
-.rec-event-source:hover{opacity:1;text-decoration:underline}
+/* Source moved BELOW the card (into .rec-card-bottom). Absolutely centered in
+   that row so "Check listing" sits in the MIDDLE under the card, independent of
+   the partner badge (left) and the feedback buttons (right, margin-left:auto). */
+.rec-event-source--below{margin:0;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.rec-event-source:hover{opacity:1}
 .genie-chat-container.night-mode .rec-event-source{color:rgba(255,255,255,0.72)}
 .genie-chat-container.day-mode .rec-event-source{color:rgba(160,82,45,0.9)}
 /* Date-card: a settled, non-animated state — deliberately static so it reads as
