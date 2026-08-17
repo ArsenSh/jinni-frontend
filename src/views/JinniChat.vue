@@ -7313,12 +7313,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .profile-modal .modal-content{animation:profileModalIn 0.38s cubic-bezier(0.22,1,0.36,1)}
 @keyframes profileOverlayIn{from{opacity:0}to{opacity:1}}
 .info-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100000}
-.info-modal{border-radius:12px;max-width:500px;width:90%;overflow:hidden;position:relative}
+.info-modal{border-radius:12px;max-width:500px;width:90%;overflow:hidden;position:relative;display:flex;flex-direction:column}
 .modal-body{padding:0 20px 20px 20px;max-height:60vh;overflow-y:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 /* Info-modal: transparent floating header — body scrolls underneath and dissolves (like the other panels) */
-.info-modal .modal-header{position:absolute;top:0;left:0;right:0;z-index:4;background:transparent;border:none;pointer-events:none;padding:14px 20px 8px 20px}
+.info-modal .modal-header{position:relative;z-index:4;background:transparent;border:none;padding:14px 20px 8px 20px;flex-shrink:0}
 .info-modal .modal-header h3{pointer-events:auto;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
-.info-modal .modal-body{padding-top:70px;-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.4) 24px,#000 66px,#000 calc(100% - 16px),rgba(0,0,0,0.45) calc(100% - 6px),transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.4) 24px,#000 66px,#000 calc(100% - 16px),rgba(0,0,0,0.45) calc(100% - 6px),transparent 100%)}
+.info-modal .modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding-top:2px;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 14px),transparent 100%);mask-image:linear-gradient(to bottom,#000 calc(100% - 14px),transparent 100%)}
 .place-details{display:flex;flex-direction:column;gap:12px}
 .info-row{display:flex;flex-direction:column}
 .see-more-btn{background:none;border:none;color:#D4AF37;cursor:pointer;font-size:0.875rem;padding:4px 0;text-decoration:underline}

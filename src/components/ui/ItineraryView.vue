@@ -1798,7 +1798,7 @@ export default {
 .itin-img-btn:hover:not(.is-loading) { background: var(--it-glass-hover); box-shadow: var(--it-ring-hover); }
 .itin-img-btn.is-loading { cursor: default; }
 .itin-card-name { font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--it-biz); }
-.itin-card-region { font-size: 12px; color: var(--it-muted); margin-top: -15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.itin-card-region { font-size: 12px; color: var(--it-muted); margin-top: -15px; margin-right: 42px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-card-note { font-size: 12px; color: var(--it-muted); margin-top: 4px; font-style: italic; }
 .itin-card--failed { flex-direction: column; align-items: flex-start; gap: 6px;
   background: rgba(224,85,85,0.06); box-shadow: none; }
