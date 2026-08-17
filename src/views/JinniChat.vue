@@ -201,7 +201,7 @@
 
           <div class="main-chat-area" ref="mainChatArea">
             <div class="chat-messages" ref="chatMessages">
-              <div v-for="(message, index) in messages" :key="message.id || index" v-show="!message.hidden" :class="['message-bubble', message.sender, { 'touched': touchedMessageId === (message.id || index) }]" @touchstart="message.sender === 'user' && (touchedMessageId = (message.id || index))" @touchend.passive="true">
+              <div v-for="(message, index) in messages" :key="message.id || index" v-show="!message.hidden" :class="['message-bubble', message.sender, { 'touched': touchedMessageId === (message.id || index), 'msg-complete': !message.streaming }]" @touchstart="message.sender === 'user' && (touchedMessageId = (message.id || index))" @touchend.passive="true">
                 <div class="content">
                   <!-- ============= STREAMING MODE ============= -->
                   <template v-if="message.streaming || streamingLampAnimatingIds.has(message.id)">
@@ -6983,6 +6983,11 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .large-card .rec-distance,.large-card .rec-location{font-size:0.9rem}
 .large-card .text-action-btn{padding:10px 16px}
 .large-card .overlay-actions{gap:15px}
+/* Desktop: while streaming, the large card shrinks-to-fit (float) so it grows live with
+   the text. Once the message finishes (msg-complete), settle every large card to a uniform
+   full width so a short description no longer leaves a half-sized card. Mobile already
+   stacks full-width, so this is desktop-only. */
+@media (min-width:769px){.msg-complete .large-card{width:100%}}
 .rec-image{height:140px;overflow:hidden;position:relative;flex-shrink:0}
 .rec-image img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s ease;opacity:0;animation:fadeIn 0.5s ease-in forwards}
 .rec-image-placeholder{height:120px;background:rgba(255,255,255,0.1);align-items:center;justify-content:center;color:rgba(255,255,255,0.5);border-radius:8px 8px 0 0}
@@ -7369,7 +7374,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* ==================================================================================================== */
 /*                                        NIGHT-MODE STYLES
 /* ==================================================================================================== */
-.genie-chat-container.night-mode{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%);color:#94a3b8}
+.genie-chat-container.night-mode{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%);color:#aeb8c7}
 .genie-chat-container.night-mode .sidebar{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%)}
 .genie-chat-container.night-mode .fixed-header.with-shadow::after{background:transparent}
 .genie-chat-container.night-mode .fixed-header.with-shadow{background:linear-gradient(to bottom,rgba(10,1,24,10) 0%,rgba(10,1,24,1) 1%,rgba(10,1,24,0) 100%)}
@@ -7425,7 +7430,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .genie-chat-container.night-mode .text-action-btn.info-btn:hover{background:rgba(255,255,255,0.35);color:#f1f5f9;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .text-action-btn.ask-btn{background:linear-gradient(45deg,rgba(212,175,55,0.6),rgba(255,140,0,0.6));color:white;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .text-action-btn.ask-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.7),rgba(255,140,0,0.7));box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.2)}
-.genie-chat-container.night-mode .loading-sessions,.genie-chat-container.night-mode .message-bubble.ai .content,.genie-chat-container.night-mode .message-bubble.ai .text,.genie-chat-container.night-mode .message-bubble.ai .content .text,.genie-chat-container.night-mode .session-title,.genie-chat-container.night-mode .current-session-title,.genie-chat-container.night-mode .greeting,.genie-chat-container.night-mode .large-card .rec-description,.genie-chat-container.night-mode .loading-more-text{color:#94a3b8}
+.genie-chat-container.night-mode .loading-sessions,.genie-chat-container.night-mode .message-bubble.ai .content,.genie-chat-container.night-mode .message-bubble.ai .text,.genie-chat-container.night-mode .message-bubble.ai .content .text,.genie-chat-container.night-mode .session-title,.genie-chat-container.night-mode .current-session-title,.genie-chat-container.night-mode .greeting,.genie-chat-container.night-mode .large-card .rec-description,.genie-chat-container.night-mode .loading-more-text{color:#aeb8c7}
 .genie-chat-container.night-mode .session-date,.genie-chat-container.night-mode .view-more-hint,.genie-chat-container.night-mode .ai-note{color:#94a3b8}
 .genie-chat-container.night-mode .message-bubble.ai .text :deep(strong),.genie-chat-container.night-mode .message-bubble.ai .text :deep(a),.genie-chat-container.night-mode .message-bubble .text :deep(.section-header),.genie-chat-container.night-mode .message-bubble .text :deep(.destination-link){color:#c084fc}
 .genie-chat-container.night-mode .text :deep(hr){border-top:1px solid #c084fc}
