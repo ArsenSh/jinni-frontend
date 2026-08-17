@@ -4391,19 +4391,17 @@ export default {
         }
         if (response.status === 429) {
           const errorData = await response.json().catch(() => ({}));
-          console.log('🚫 Daily limit / cooldown hit — rolling back optimistic messages');
-          // Roll back exactly like the 400 handlers above: this request was never
-          // processed, so the optimistic user message must not survive (it used to
-          // get persisted by the finally-save, leaving orphan messages with no
-          // reply — and duplicates when the user retried after a refresh).
-          const userMsgIndex429 = [...this.messages].reverse().findIndex(m => m.text === userInput && m.sender === 'user');
-          if (userMsgIndex429 !== -1) {
-            const actualIndex429 = this.messages.length - 1 - userMsgIndex429;
-            this.messages.splice(actualIndex429, 1);
+          console.log('🚫 Daily limit / cooldown hit — keeping the user message, replying with a cooldown notice (option B: never yank what was shown)');
+          // Option (b): do NOT roll back the user's message. Keep it, and turn the
+          // empty AI placeholder (the genie-lamp) into a cooldown REPLY, so nothing
+          // flashes in and then vanishes. The message now has a reply (the notice),
+          // so it is not the orphan the old rollback was guarding against.
+          const aiMsg429 = this.messages.find(m => m.id === aiMessage.id);
+          if (aiMsg429) {
+            aiMsg429.streaming = false;
+            aiMsg429.text = errorData.message || this.cooldownMessage || 'You have reached your daily limit. Please try again later.';
+            aiMsg429.isLimitReached = true;
           }
-          const aiMsgIndex429 = this.messages.findIndex(m => m.id === aiMessage.id);
-          if (aiMsgIndex429 !== -1) { this.messages.splice(aiMsgIndex429, 1) }
-          this.userInput = userInput;   // give the user their typed text back for later
           this.showCooldownMessage({ cooldown: { active: true, until: errorData.cooldownUntil || null, hoursRemaining: errorData.cooldownUntil ? Math.ceil((new Date(errorData.cooldownUntil) - new Date()) / (1000 * 60 * 60)) : 4, reason: errorData.reason } });
           this.$forceUpdate();
           this.isTyping = false;
