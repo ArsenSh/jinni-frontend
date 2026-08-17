@@ -5967,6 +5967,15 @@ export default {
       } catch (error) { console.warn('Error cleaning cache:', error) }
     },
     async getCurrentLocation() {
+      // Respect the onboarding choice. If auto-detect (GPS) is explicitly OFF — the
+      // user picked a fixed DESTINATION, not "use my location" — never call the
+      // browser geolocation API, which is what pops the "allow location" prompt.
+      // Return null so callers fall through to the chosen destination. This one
+      // guard covers every caller (the on-entry warm-up AND each message send), so
+      // the prompt can't appear in destination mode. `=== false` (not `!`) keeps GPS
+      // working for users whose settings are default/missing (app default is on),
+      // and turning GPS on in settings sets the flag true first, so opt-in still works.
+      if (this.userSettings?.privacy?.autoDetectLocation === false) return null;
       if (!window.isSecureContext) {
         // console.log('⚠️ Not in secure context, using IP-based location');
         const ipLocation = await this.getLocationFromIP();
