@@ -6774,7 +6774,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .session-limit-modal.day-mode .btn-primary.large:hover{background:linear-gradient(135deg,rgba(199,158,46,0.95) 0%,rgba(230,125,0,0.95) 100%)}
 .session-limit-modal.day-mode .btn-secondary{color:#6b5840;font-weight:600;background-color:rgba(255,255,255,0.5)}
 .session-limit-modal.day-mode .btn-secondary:hover{background-color:rgba(255,255,255,0.78);color:#B7791F}
-.genie-chat-container.night-mode .session-warning-banner{background:rgba(40,30,62,0.62);backdrop-filter:blur(5px) saturate(190%);-webkit-backdrop-filter:blur(5px) saturate(190%);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
+.genie-chat-container.night-mode .session-warning-banner{background:rgba(255,255,255,0.06);backdrop-filter:blur(2px) saturate(180%);-webkit-backdrop-filter:blur(2px) saturate(180%);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .warning-icon{background:linear-gradient(135deg,rgba(139,92,246,0.82),rgba(168,85,247,0.82));color:white;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18)}
 .genie-chat-container.night-mode .warning-title{color:#c084fc;font-weight:700}
 .genie-chat-container.night-mode .warning-message{color:#e2e8f0;font-weight:500}
