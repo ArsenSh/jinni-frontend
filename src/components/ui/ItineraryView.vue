@@ -1536,8 +1536,8 @@ export default {
   --it-chip-ring: inset 0 0 0 0.7px rgba(255,255,255,0.1);
   --it-chip-bg: rgba(255,255,255,0.06); 
   --it-chip-bg-hover: rgba(255,255,255,0.14);
-  --it-card-bg: rgba(255,255,255,0.06);
-  --it-card-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.1);
+  --it-card-bg: rgba(139,92,246,0.15);
+  --it-card-shadow: 0 0 1px rgba(0,0,0,0.50), inset 0 0 0 0.7px rgba(255,255,255,0.05);
   --it-line: rgba(255,255,255,0.14);
   --it-shimmer: rgba(255,255,255,0.08); 
   --it-shimmer-glint: rgba(255,255,255,0.08);
@@ -1977,8 +1977,8 @@ export default {
 .itin.night-mode .itin-tier--verified .itin-icon--fb:hover:not(:disabled) { color: #22c556b1; }
 .itin.night-mode .itin-tier--verified .itin-icon--fb.is-liked,
 .itin.night-mode .itin-tier--verified .itin-icon--fb.is-disliked { color: #22c556b1; background: rgba(34,197,94,0.14); box-shadow: inset 0 0 0 1px rgba(34,197,94,0.16); }
-.itin.night-mode .itin-tier--verified .itin-img-btn { color: #22c5567c; background: rgba(34,197,94,0.1); box-shadow: inset 0 0 0 1.5px rgba(34,197,94,0.09); }
-.itin.night-mode .itin-tier--verified .itin-img-btn:hover:not(.is-loading) { background: rgba(34,197,94,0.2) !important; box-shadow: inset 0 0 0 1.5px rgba(34,197,94,0.1) !important; }
+.itin.night-mode .itin-tier--verified .itin-img-btn { color: #22c5567c; background: rgba(34,197,94,0.1); box-shadow: inset 0 0 0 1px rgba(34,197,94,0.09); }
+.itin.night-mode .itin-tier--verified .itin-img-btn:hover:not(.is-loading) { background: rgba(34,197,94,0.2) !important; box-shadow: inset 0 0 0 1px rgba(34,197,94,0.1) !important; }
 .itin.night-mode .itin-tier--verified .itin-overlay-btn--info { background: rgba(34,197,94,0.3); box-shadow: inset 0 0 0 0.7px rgba(34,197,94,0.3); }
 .itin.night-mode .itin-tier--verified .itin-overlay-btn--info:hover { background: rgba(34,197,94,0.35); box-shadow: inset 0 0 0 1px rgba(34,197,94,0.4); }
 .itin.night-mode .itin-tier--verified .itin-slot-actions .itin-icon:not(.is-on):not(.is-liked):not(.is-disliked):not(.is-saved):not(.itin-icon--danger) { background: rgba(34,197,94,0.10); box-shadow: inset 0 0 0 0.7px rgba(34,197,94,0.14); }
@@ -1989,8 +1989,8 @@ export default {
 .itin.night-mode .itin-tier--spotlight .itin-icon--fb:hover:not(:disabled) { color: #3b9fdda2; }
 .itin.night-mode .itin-tier--spotlight .itin-icon--fb.is-liked,
 .itin.night-mode .itin-tier--spotlight .itin-icon--fb.is-disliked { color: #3b9fdda2; background: rgba(59,158,221,0.14); box-shadow: inset 0 0 0 1px rgba(59,158,221,0.16); }
-.itin.night-mode .itin-tier--spotlight .itin-img-btn { color: #3b9fdda2; background: rgba(59,158,221,0.1); box-shadow: inset 0 0 0 1.5px rgba(59,158,221,0.09); }
-.itin.night-mode .itin-tier--spotlight .itin-img-btn:hover:not(.is-loading) { background: rgba(59,158,221,0.2) !important; box-shadow: inset 0 0 0 1.5px rgba(59,158,221,0.1) !important; }
+.itin.night-mode .itin-tier--spotlight .itin-img-btn { color: #3b9fdda2; background: rgba(59,158,221,0.1); box-shadow: inset 0 0 0 1px rgba(59,158,221,0.09); }
+.itin.night-mode .itin-tier--spotlight .itin-img-btn:hover:not(.is-loading) { background: rgba(59,158,221,0.2) !important; box-shadow: inset 0 0 0 1px rgba(59,158,221,0.1) !important; }
 .itin.night-mode .itin-tier--spotlight .itin-overlay-btn--info { background: rgba(59,158,221,0.3); box-shadow: inset 0 0 0 0.7px rgba(59,158,221,0.3); }
 .itin.night-mode .itin-tier--spotlight .itin-overlay-btn--info:hover { background: rgba(59,158,221,0.4); box-shadow: inset 0 0 0 1px rgba(59,158,221,0.4); }
 .itin.night-mode .itin-tier--spotlight .itin-slot-actions .itin-icon:not(.is-on):not(.is-liked):not(.is-disliked):not(.is-saved):not(.itin-icon--danger) { background: rgba(59,158,221,0.10); box-shadow: inset 0 0 0 0.7px rgba(59,158,221,0.14); }
@@ -2001,8 +2001,8 @@ export default {
 .itin.night-mode .itin-tier--signature .itin-icon--fb:hover:not(:disabled) { color: #ffbf0085; }
 .itin.night-mode .itin-tier--signature .itin-icon--fb.is-liked,
 .itin.night-mode .itin-tier--signature .itin-icon--fb.is-disliked { color: #ffbf0085; background: rgba(212,175,55,0.14); box-shadow: inset 0 0 0 1px rgba(212,175,55,0.16); }
-.itin.night-mode .itin-tier--signature .itin-img-btn { color: #ffbf0085; background: rgba(212,175,55,0.1); box-shadow: inset 0 0 0 1.5px rgba(212,175,55,0.09); }
-.itin.night-mode .itin-tier--signature .itin-img-btn:hover:not(.is-loading) { background: rgba(212,175,55,0.2) !important; box-shadow: inset 0 0 0 1.5px rgba(212,175,55,0.1) !important; }
+.itin.night-mode .itin-tier--signature .itin-img-btn { color: #ffbf0085; background: rgba(212,175,55,0.1); box-shadow: inset 0 0 0 1px rgba(212,175,55,0.09); }
+.itin.night-mode .itin-tier--signature .itin-img-btn:hover:not(.is-loading) { background: rgba(212,175,55,0.2) !important; box-shadow: inset 0 0 0 1px rgba(212,175,55,0.1) !important; }
 .itin.night-mode .itin-tier--signature .itin-overlay-btn--info { background: rgba(212,175,55,0.3); box-shadow: inset 0 0 0 0.7px rgba(212,175,55,0.3); }
 .itin.night-mode .itin-tier--signature .itin-overlay-btn--info:hover { background: rgba(212,175,55,0.4); box-shadow: inset 0 0 0 0.8px rgba(212,175,55,0.6); }
 .itin.night-mode .itin-tier--signature .itin-slot-actions .itin-icon:not(.is-on):not(.is-liked):not(.is-disliked):not(.is-saved):not(.itin-icon--danger) { background: rgba(212,175,55,0.10); box-shadow: inset 0 0 0 0.7px rgba(212,175,55,0.14); }
