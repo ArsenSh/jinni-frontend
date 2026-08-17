@@ -4644,8 +4644,21 @@ export default {
                   }
                   else if (data.type === 'error') {
                     console.error('Stream error:', data.message);
-                    this.messages[messageIndex].text = data.message;
+                    // Never surface a raw internal/provider error (e.g. "Daily token limit
+                    // reached.", rate-limit strings) to the user — show a friendly line.
+                    // If the server flags it as a capacity/limit issue (reason/code), cool
+                    // the input down at the same moment so the user isn't retrying into a
+                    // capped provider. (The real fix is the Claude→DeepSeek failover, which
+                    // avoids this error path entirely.)
+                    const capacity = data.reason === 'capacity' || data.reason === 'daily_limit' || data.code === 429 || data.code === 529;
+                    this.messages[messageIndex].text = capacity
+                      ? (this.cooldownMessage || 'Jinni is at capacity right now — please try again a little later.')
+                      : (this.t('chat.messages.connection_error') || 'Jinni had a brief hiccup — please try again in a moment.');
                     this.messages[messageIndex].streaming = false;
+                    if (capacity) {
+                      this.messages[messageIndex].isLimitReached = true;
+                      this.showCooldownMessage({ cooldown: { active: true, hoursRemaining: 4, reason: 'capacity' } });
+                    }
                     this.$forceUpdate();
                   }
                 } catch (e) { console.warn('Failed to parse streaming data:', line, e) }
