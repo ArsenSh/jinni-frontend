@@ -1697,7 +1697,7 @@ export default {
 .itin-card-img {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
-.itin-card-info { padding: 8px 12px 10px; }
+.itin-card-info { padding: 12px 12px 10px; }
 .itin-card--sk .itin-card-lines { padding: 10px 12px; }
 .itin-card--failed { padding: 10px 12px; }
 
@@ -1798,7 +1798,7 @@ export default {
 .itin-img-btn:hover:not(.is-loading) { background: var(--it-glass-hover); box-shadow: var(--it-ring-hover); }
 .itin-img-btn.is-loading { cursor: default; }
 .itin-card-name { font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--it-biz); }
-.itin-card-region { font-size: 12px; color: var(--it-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.itin-card-region { font-size: 12px; color: var(--it-muted); margin-top: -15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-card-note { font-size: 12px; color: var(--it-muted); margin-top: 4px; font-style: italic; }
 .itin-card--failed { flex-direction: column; align-items: flex-start; gap: 6px;
   background: rgba(224,85,85,0.06); box-shadow: none; }

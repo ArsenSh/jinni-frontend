@@ -531,18 +531,6 @@
                                 </div>
                                 <span v-if="rec._isExpired" class="rec-event-ended">{{ t('chat.event.ended') }}</span>
                               </div>
-                              <!-- Where the date came from. An AI-found event's date is
-                                   recalled, not verified — live checks found one feast a
-                                   day early and one concert three weeks early — so the
-                                   listing the model read is offered for the user to
-                                   confirm. Only present when a real http(s) URL survived
-                                   validation server-side. -->
-                              <a v-if="rec.sourceUrl" :href="rec.sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source" @click.stop>
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                  <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                                </svg>
-                                <span>{{ t('chat.event.check_listing') || 'Check listing' }}</span>
-                              </a>
                               <div class="rec-metadata">
                                 <div v-if="rec.distance && rec.distance !== 'Near you km'" class="rec-distance">
                                   {{ rec.distance }}
@@ -555,6 +543,15 @@
                           </div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
                             <div v-if="(rec.verifiedId || rec.id?.startsWith('db-')) && rec._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(rec)]" v-html="getPartnerIcon(rec) + ' ' + getPartnerLabel(rec)"></div>
+                            <!-- Event source ("Check listing") — placed BELOW the card like the
+                                 partner badge, so it reads as a footnote to the whole card, not
+                                 a line inside the details. Only when a validated http(s) URL exists. -->
+                            <a v-if="rec.sourceUrl" :href="rec.sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                              </svg>
+                              <span>{{ t('chat.event.check_listing') || 'Check listing' }}</span>
+                            </a>
                             <div class="rec-card-footer">
                               <div class="rec-footer-actions">
                                 <button @click.stop="toggleRecFeedback(rec, 'like', $event, message)" class="feedback-btn rec-footer-btn" :class="{ active: getRecFeedback(rec) === 'like' }" :title="t('chat.feedback.like')">
@@ -6996,6 +6993,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
 .rec-event-source{display:inline-flex;align-items:center;gap:4px;font-size:11px;margin:2px 0 4px;text-decoration:none;opacity:.72}
+/* Source moved BELOW the card (into .rec-card-bottom, beside the partner badge):
+   drop the in-panel margins so it aligns in that row. Footer's margin-left:auto
+   keeps the feedback buttons on the right, source on the left like the badge. */
+.rec-event-source--below{margin:0}
 .rec-event-source:hover{opacity:1;text-decoration:underline}
 .genie-chat-container.night-mode .rec-event-source{color:rgba(255,255,255,0.72)}
 .genie-chat-container.day-mode .rec-event-source{color:rgba(160,82,45,0.9)}
@@ -7012,7 +7013,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .recommendation-card:hover .image-overlay{opacity:1}
 .overlay-actions{display:flex;gap:10px}
 .text-action-btn{padding:8px;border:none;border-radius:25px;cursor:pointer;font-size:0.8rem;font-weight:500;transition:all 0.25s ease;min-width:80px;text-align:center;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
-.rec-details{padding:8px 12px 6px 12px}
+.rec-details{padding:12px 12px 6px 12px}
 .rec-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .rec-name{font-weight:500;margin-bottom:4px;flex:1;line-height:1.3}
 .image-request-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s ease;flex-shrink:0;position:relative;overflow:hidden;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
@@ -7093,7 +7094,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* ── Event date/time row on the rec card.
    A dedicated row directly under the category line so the date/time
    reads as the event's primary fact. Single line: date + time inline. */
-.rec-event-schedule{display:flex; align-items:center; gap:5px; margin-top:3px; font-variant-numeric:tabular-nums}
+.rec-event-schedule{display:flex; align-items:center; gap:5px; margin-top:1px; font-variant-numeric:tabular-nums}
 .rec-event-icon{flex-shrink:0;opacity:0.85}
 .rec-event-schedule-text{display:flex;align-items:baseline;gap:6px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .rec-event-schedule-primary{font-size:0.8rem;font-weight:600}
@@ -7375,7 +7376,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .genie-chat-container.night-mode .profile-btn .default-avatar{color:#94a3b8;border:none;background:transparent;box-shadow:none}
 .genie-chat-container.night-mode .profile-btn-collapsed .default-avatar{background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .sidebar .default-avatar svg{color:#94a3b8;stroke:#94a3b8}
-.genie-chat-container.night-mode .recommendation-card,.genie-chat-container.night-mode .large-card{background:rgba(139,92,246,0.10);box-shadow:0 0 1px rgba(0,0,0,0.45),inset 0 0 0 0.7px rgba(255,255,255,0.1)}
+.genie-chat-container.night-mode .recommendation-card,.genie-chat-container.night-mode .large-card{background:rgba(139,92,246,0.15);box-shadow:0 0 1px rgba(0,0,0,0.50),inset 0 0 0 0.7px rgba(255,255,255,0.05)}
 .genie-chat-container.night-mode .chat-input-container{background:rgba(139,92,246,0.10);box-shadow:0 0 1px rgba(0,0,0,0.45),inset 0 0 0 0.8px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .rec-card-wrapper{background:transparent}
 .genie-chat-container.night-mode .view-more-btn,.genie-chat-container.night-mode .image-request-btn{background:rgba(255,255,255,0.08);color:#c084fc;border:none;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.1)}
