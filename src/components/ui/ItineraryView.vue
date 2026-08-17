@@ -1787,7 +1787,7 @@ export default {
 .itin-card-info { min-width: 0; }
 /* Header row — name + round image button, the chat card's .rec-header/.image-request-btn recipe. */
 .itin-card-header { display: flex; align-items: flex-start; gap: 8px; }
-.itin-card-header .itin-card-name { flex: 1; }
+.itin-card-header .itin-card-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-img-btn {
   width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;

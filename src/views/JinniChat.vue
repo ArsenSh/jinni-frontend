@@ -1497,7 +1497,7 @@
       </div>
       <div class="modal-body">
         <div class="limit-explanation">
-          <p v-html="t('chat.session.limit_modal.explanation', { count: sessionHealth.messageCount })"></p>
+          <p v-html="t('chat.session.limit_modal.explanation', { count: Math.ceil((sessionHealth.messageCount || 0) / 2) })"></p>
         </div>
         <p class="limit-reason">{{ t('chat.session.limit_modal.reasons_title') }}</p>
         <ul class="limit-reasons">
@@ -2137,7 +2137,22 @@ export default {
       });
       return status;
     },
-    isOnCooldown() { return this.usageStatus?.cooldown?.active || false },
+    isOnCooldown() {
+      if (this.usageStatus?.cooldown?.active) return true;
+      // A daily-token/request limit returns 429 but has NO rolling cooldown window, so
+      // `cooldown.active` gets flipped back to false by the next usage refresh — the ~1s
+      // flash that let the user keep typing. Also lock when the daily budget is SPENT.
+      // Check both sources: `usage` (the meter, updated from the 429's response headers,
+      // so it's exhausted immediately) and `usageStatus`. `remaining`/`estimatedRemaining`
+      // stay <=0 until the midnight-UTC reset, so the lock is stable and auto-clears then.
+      for (const d of [this.usage?.daily, this.usageStatus?.daily]) {
+        if (!d) continue;
+        if (d.tokens && Number.isFinite(d.tokens.remaining) && d.tokens.remaining <= 0) return true;         // internal token budget
+        if (d.requests && Number.isFinite(d.requests.estimatedRemaining) && d.requests.estimatedRemaining <= 0) return true;  // search/request count
+        if (d.places && Number.isFinite(d.places.remaining) && d.places.remaining <= 0) return true;         // places-viewed cap (100/200)
+      }
+      return false;
+    },
     cooldownEndTime() {
       if (!this.usageStatus?.cooldown?.active) return null;
       const cd = this.usageStatus.cooldown;
@@ -2177,10 +2192,14 @@ export default {
     },
     shouldShowSessionWarning() { return this.sessionHealth.shouldWarn && !this.sessionHealth.warningDismissed },
     sessionWarningMessage() {
+      // The user counts in EXCHANGES (their message + Jinni's reply), but messageCount /
+      // remainingMessages count BOTH — so a 20-exchange chat reads as "40". Divide by 2
+      // for display so the number matches what a human counts.
       const remaining = this.sessionHealth.remainingMessages;
+      const toTurns = (n) => Math.max(0, Math.ceil((n || 0) / 2));
       if (remaining <= 0) { return this.t('chat.session.warning.message_limit') }
-      if (remaining <= 3) { return this.t('chat.session.warning.message_remaining', { count: remaining }) }
-      return this.t('chat.session.warning.message', { count: this.sessionHealth.messageCount });
+      if (remaining <= 6) { return this.t('chat.session.warning.message_remaining', { count: toTurns(remaining) }) }
+      return this.t('chat.session.warning.message', { count: toTurns(this.sessionHealth.messageCount) });
     },
     MAX_INPUT_LENGTH() { return MAX_INPUT_LENGTH },
     canShare() { return !!navigator.share },
@@ -7298,8 +7317,8 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .modal-body{padding:0 20px 20px 20px;max-height:60vh;overflow-y:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 /* Info-modal: transparent floating header — body scrolls underneath and dissolves (like the other panels) */
 .info-modal .modal-header{position:absolute;top:0;left:0;right:0;z-index:4;background:transparent;border:none;pointer-events:none;padding:14px 20px 8px 20px}
-.info-modal .modal-header h3{pointer-events:auto;margin:0}
-.info-modal .modal-body{padding-top:54px;-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.4) 20px,#000 52px,#000 calc(100% - 16px),rgba(0,0,0,0.45) calc(100% - 6px),transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.4) 20px,#000 52px,#000 calc(100% - 16px),rgba(0,0,0,0.45) calc(100% - 6px),transparent 100%)}
+.info-modal .modal-header h3{pointer-events:auto;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
+.info-modal .modal-body{padding-top:70px;-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.4) 24px,#000 66px,#000 calc(100% - 16px),rgba(0,0,0,0.45) calc(100% - 6px),transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,0.4) 24px,#000 66px,#000 calc(100% - 16px),rgba(0,0,0,0.45) calc(100% - 6px),transparent 100%)}
 .place-details{display:flex;flex-direction:column;gap:12px}
 .info-row{display:flex;flex-direction:column}
 .see-more-btn{background:none;border:none;color:#D4AF37;cursor:pointer;font-size:0.875rem;padding:4px 0;text-decoration:underline}
