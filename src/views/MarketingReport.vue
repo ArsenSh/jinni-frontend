@@ -3,7 +3,10 @@
     <header class="mr-head">
       <div class="mr-head-top">
         <div>
-          <div class="mr-brand">Jinni</div>
+          <div class="mr-brandrow">
+            <img src="/images/bottle.png" class="mr-appicon" alt="Jinni" />
+            <span class="mr-brand">Jinni</span>
+          </div>
           <h1>Growth &amp; Retention</h1>
         </div>
         <div class="mr-head-actions">
@@ -15,6 +18,7 @@
           <button v-if="authedMode && report" class="mr-signout" @click="signOut">Sign out</button>
         </div>
       </div>
+      <p v-if="viewerName" class="mr-welcome">Welcome, <b>{{ viewerName }}</b> — here's how Jinni is growing.</p>
       <p v-if="report" class="mr-sub">
         Live report · updated {{ fmtTime(report.generatedAt) }} · last {{ report.windowDays }} days ·
         aggregate numbers only, no personal data
@@ -138,6 +142,46 @@
         <div v-else class="mr-note">Cohorts appear once there is activity history.</div>
       </section>
 
+      <!-- Where users are vs where they explore — side by side to compare -->
+      <section class="mr-card">
+        <h2>Where users are vs where they explore</h2>
+        <p class="mr-desc">Left: GPS mode — physically there, sharing location. Right: destination mode — browsing a place they chose, without GPS. Same rows, side by side, so the two markets compare at a glance.</p>
+        <div class="mr-compare">
+          <div class="mr-compare-col">
+            <h3 class="mr-compare-head">📍 GPS mode</h3>
+            <div class="mr-compare-sub">Countries</div>
+            <div v-for="c in report.locations.byCountry" :key="'gc' + c.key" class="hbar-row">
+              <span class="hbar-label" :title="c.key">{{ c.key }}</span>
+              <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.byCountry) }"></div></div>
+              <span class="hbar-val">{{ c.users }}</span>
+            </div>
+            <div v-if="!report.locations.byCountry.length" class="mr-note-sm">No GPS users yet.</div>
+            <div class="mr-compare-sub" style="margin-top:14px">Top cities</div>
+            <div v-for="c in report.locations.byCity" :key="'gci' + c.key" class="hbar-row">
+              <span class="hbar-label" :title="c.key + (c.country ? ', ' + c.country : '')">{{ c.key }}</span>
+              <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.byCity) }"></div></div>
+              <span class="hbar-val">{{ c.users }}</span>
+            </div>
+          </div>
+          <div class="mr-compare-col mr-compare-col--right">
+            <h3 class="mr-compare-head">🧭 Destination mode</h3>
+            <div class="mr-compare-sub">Countries</div>
+            <div v-for="c in report.locations.destinations.byCountry" :key="'dc' + c.key" class="hbar-row">
+              <span class="hbar-label" :title="c.key">{{ c.key }}</span>
+              <div class="hbar-track"><div class="hbar-fill hbar-fill--alt" :style="{ width: rowW(c, report.locations.destinations.byCountry) }"></div></div>
+              <span class="hbar-val">{{ c.users }}</span>
+            </div>
+            <div v-if="!report.locations.destinations.byCountry.length" class="mr-note-sm">No destination-mode users yet.</div>
+            <div class="mr-compare-sub" style="margin-top:14px">Top cities</div>
+            <div v-for="c in report.locations.destinations.byCity" :key="'dci' + c.key" class="hbar-row">
+              <span class="hbar-label" :title="c.key + (c.country ? ', ' + c.country : '')">{{ c.key }}</span>
+              <div class="hbar-track"><div class="hbar-fill hbar-fill--alt" :style="{ width: rowW(c, report.locations.destinations.byCity) }"></div></div>
+              <span class="hbar-val">{{ c.users }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Splits -->
       <section class="mr-split">
         <div class="mr-card">
@@ -148,6 +192,18 @@
             <span class="hbar-val">{{ q.users }}</span>
           </div>
           <div v-if="!qaRows.length" class="mr-note-sm">No searches in this window yet.</div>
+        </div>
+        <div class="mr-card">
+          <h2>Search modes ({{ report.windowDays }}d)</h2>
+          <p class="mr-desc-sm">How people search: Nearby = around their GPS position · Discovery = browsing a chosen destination.</p>
+          <div v-for="m in modeRows" :key="m.key" class="hbar-row">
+            <span class="hbar-label" :title="m.label">{{ m.label }}</span>
+            <div class="hbar-track"><div class="hbar-fill" :class="{ 'hbar-fill--alt': m.key === 'discovery' }" :style="{ width: rowW(m, modeRows) }"></div></div>
+            <span class="hbar-val">{{ m.users }}</span>
+          </div>
+          <p class="mr-note-sm" style="margin-top:12px">
+            🗺️ Map route calculations: {{ (report.surfaces && report.surfaces.map) || 0 }} requests by {{ report.mapUsers || 0 }} user{{ report.mapUsers === 1 ? '' : 's' }}
+          </p>
         </div>
         <div class="mr-card">
           <h2>Travel styles</h2>
@@ -165,41 +221,17 @@
             <span class="hbar-val">{{ s.users }}</span>
           </div>
         </div>
-        <div class="mr-card">
-          <h2>Users by country (GPS mode)</h2>
-          <p class="mr-desc-sm">Users physically there, sharing their location.</p>
-          <div v-for="c in report.locations.byCountry" :key="c.key" class="hbar-row">
-            <span class="hbar-label" :title="c.key">{{ c.key }}</span>
-            <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.byCountry) }"></div></div>
-            <span class="hbar-val">{{ c.users }}</span>
+        <div class="mr-card" v-if="report.usage">
+          <h2>Usage &amp; limits</h2>
+          <p class="mr-desc-sm">Today's metered AI usage and {{ report.windowDays }}-day card views.</p>
+          <div class="mr-usage-rows">
+            <div class="mr-usage-row"><span>Users on cooldown now</span><b>{{ report.usage.usersOnCooldown }}</b></div>
+            <div class="mr-usage-row"><span>AI tokens used today</span><b>{{ (report.usage.todayTokens || 0).toLocaleString() }}</b></div>
+            <div class="mr-usage-row"><span>Places viewed today</span><b>{{ report.usage.todayPlaces }} <small>by {{ report.usage.todayMeteredUsers }} users</small></b></div>
+            <div class="mr-usage-row"><span>Card views ({{ report.windowDays }}d)</span><b>{{ (report.usage.cardViews || 0).toLocaleString() }} <small>by {{ report.usage.cardViewers }} users</small></b></div>
+            <div class="mr-usage-row"><span>Card interactions ({{ report.windowDays }}d)</span><b>{{ (report.usage.cardEngagements || 0).toLocaleString() }}</b></div>
           </div>
-        </div>
-        <div class="mr-card">
-          <h2>Top user cities (GPS mode)</h2>
-          <div v-for="c in report.locations.byCity" :key="c.key" class="hbar-row">
-            <span class="hbar-label" :title="c.key + (c.country ? ', ' + c.country : '')">{{ c.key }}</span>
-            <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.byCity) }"></div></div>
-            <span class="hbar-val">{{ c.users }}</span>
-          </div>
-        </div>
-        <div class="mr-card">
-          <h2>Destinations by country</h2>
-          <p class="mr-desc-sm">Users in destination mode — exploring a place they chose, without GPS.</p>
-          <div v-for="c in report.locations.destinations.byCountry" :key="c.key" class="hbar-row">
-            <span class="hbar-label" :title="c.key">{{ c.key }}</span>
-            <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.destinations.byCountry) }"></div></div>
-            <span class="hbar-val">{{ c.users }}</span>
-          </div>
-          <div v-if="!report.locations.destinations.byCountry.length" class="mr-note-sm">No destinations set yet.</div>
-        </div>
-        <div class="mr-card">
-          <h2>Destination cities</h2>
-          <div v-for="c in report.locations.destinations.byCity" :key="c.key" class="hbar-row">
-            <span class="hbar-label" :title="c.key + (c.country ? ', ' + c.country : '')">{{ c.key }}</span>
-            <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.destinations.byCity) }"></div></div>
-            <span class="hbar-val">{{ c.users }}</span>
-          </div>
-          <div v-if="!report.locations.destinations.byCity.length" class="mr-note-sm">No destination cities set yet.</div>
+          <p class="mr-note-sm" style="margin-top:10px">Approximate — the per-user meter is known to undercount until the usage-meter fix ships.</p>
         </div>
         <div class="mr-card">
           <h2>Users by language</h2>
@@ -210,7 +242,8 @@
           </div>
         </div>
         <div class="mr-card">
-          <h2>App surfaces ({{ report.windowDays }}d, requests)</h2>
+          <h2>Activity by app section ({{ report.windowDays }}d)</h2>
+          <p class="mr-desc-sm">Which part of the app users spend requests in — chat, quick-action searches, Explore browsing, itineraries, saves.</p>
           <div v-for="s in surfaceRows" :key="s.key" class="hbar-row">
             <span class="hbar-label">{{ s.label }}</span>
             <div class="hbar-track"><div class="hbar-fill" :style="{ width: s.w }"></div></div>
@@ -254,6 +287,7 @@ export default {
       isDark: false,
       selCountry: '',
       selCity: '',
+      viewerName: '',
       tip: { show: false, x: 0, y: 0, day: '', new: 0, ret: 0, total: 0 }
     };
   },
@@ -284,8 +318,17 @@ export default {
     qaRows() {
       return (this.report.quickActions || []).map(q => ({ key: q.key, label: q.label, users: q.n }));
     },
+    modeRows() {
+      const m = this.report.searchModes || { nearby: 0, discovery: 0 };
+      return [
+        { key: 'nearby', label: '📍 Nearby (GPS)', users: m.nearby },
+        { key: 'discovery', label: '🧭 Discovery', users: m.discovery }
+      ];
+    },
     surfaceRows() {
-      const labels = { chat: 'Chat', quickAction: 'Quick actions', explore: 'Explore', itinerary: 'Itineraries', saves: 'Saved places', other: 'Other' };
+      /* 'other' (settings calls, session loads, tracking pings) is plumbing
+       * noise, not a product section — excluded from the card. */
+      const labels = { chat: 'Chat', quickAction: 'Quick actions', explore: 'Explore', itinerary: 'Itineraries', saves: 'Saved places', map: 'Map & directions' };
       const s = this.report.surfaces || {};
       const rows = Object.keys(labels).map(k => ({ key: k, label: labels[k], n: s[k] || 0 }));
       const max = Math.max(1, ...rows.map(r => r.n));
@@ -298,6 +341,10 @@ export default {
      * to the shared 'adminTheme' key (night is the default, like admin). */
     const saved = localStorage.getItem('adminTheme');
     this.isDark = saved ? saved === 'night-mode' : true;
+    /* Greet logged-in marketing accounts by the name the admin set. */
+    if (this.authedMode) {
+      try { this.viewerName = JSON.parse(localStorage.getItem('user') || '{}').name || ''; } catch { /* no name, no greeting */ }
+    }
     await this.load();
     /* Keep an open tab honest: silently refetch every 10 minutes (matches
      * the server-side report cache, so the cost is ~zero). */
@@ -397,10 +444,12 @@ export default {
  * (deep purple, glowing cards). Toggled by the header button, persisted
  * to the shared 'adminTheme' key. */
 .mr-page {
-  --mr-page: #f4efe4;
+  /* Day background = JinniChat day (#f9f5eb, genie-theme). Cards are
+   * borderless like the admin/validator pages — background + glow only. */
+  --mr-page: #f9f5eb;
   --mr-card: rgba(255, 255, 255, 0.9);
-  --mr-card-shadow: 0 0 8px rgba(139, 69, 19, 0.04);
-  --mr-border: rgba(139, 69, 19, 0.10);
+  --mr-card-shadow: 0 0 8px rgba(139, 69, 19, 0.05);
+  --mr-border: rgba(139, 69, 19, 0.12);
   --mr-ink: #2c1e10;
   --mr-ink2: #5c3f2e;
   --mr-muted: #8a7a66;
@@ -419,10 +468,11 @@ export default {
   transition: background 0.35s, color 0.35s;
 }
 .mr-page.mr-dark {
+  /* Night background = JinniChat night (#0a0118) */
   --mr-page: #0a0118;
   --mr-card: #1e1438;
   --mr-card-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
-  --mr-border: rgba(139, 92, 246, 0.18);
+  --mr-border: rgba(255, 255, 255, 0.10);
   --mr-ink: #e2e8f0;
   --mr-ink2: #94a3b8;
   --mr-muted: #64748b;
@@ -439,6 +489,8 @@ export default {
 .mr-brand { color: var(--mr-brand); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; font-size: 13px; }
 .mr-head h1 { margin: 4px 0 6px; font-size: 26px; font-weight: 650; }
 .mr-sub { color: var(--mr-muted); font-size: 13px; margin: 0; }
+.mr-welcome { color: var(--mr-ink2); font-size: 14px; margin: 2px 0 6px; }
+.mr-welcome b { color: var(--mr-brand); }
 .mr-head-actions { display: flex; gap: 8px; align-items: center; }
 .mr-signout {
   display: inline-flex; align-items: center; gap: 6px;
@@ -450,15 +502,47 @@ export default {
 main { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.2s; }
 
-/* Filter row — one row above the content it scopes */
+/* Filter row — one row above the content it scopes. Selects wear the app's
+ * pill style: rounded, glassy, custom inset chevron (native arrow hidden —
+ * it hugged the right border). */
 .mr-filters { max-width: 1060px; margin: 0 auto 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .mr-select {
-  background: var(--mr-card); color: var(--mr-ink); border: 1px solid var(--mr-border);
-  border-radius: 8px; padding: 8px 12px; font-size: 13.5px; font-family: inherit;
-  min-width: 160px; cursor: pointer;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  background-color: var(--mr-card); color: var(--mr-ink); border: 1px solid var(--mr-border);
+  border-radius: 20px; padding: 9px 38px 9px 16px; font-size: 13.5px; font-family: inherit;
+  min-width: 170px; cursor: pointer; box-shadow: var(--mr-card-shadow); transition: all 0.15s;
+  background-repeat: no-repeat; background-position: right 14px center; background-size: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c3f2e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
+.mr-dark .mr-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+.mr-select:hover { border-color: var(--mr-brand); }
+.mr-select:focus { outline: none; border-color: var(--mr-brand); }
 .mr-select:disabled { opacity: 0.45; cursor: default; }
 .mr-filter-note { color: var(--mr-muted); font-size: 12.5px; }
+
+/* Brand row — app icon + name, like JinniChat's sidebar header */
+.mr-brandrow { display: flex; align-items: center; gap: 8px; }
+.mr-appicon { width: 26px; height: 26px; object-fit: contain; }
+
+/* GPS vs Destination side-by-side comparison */
+.mr-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.mr-compare-col--right { border-left: 1px solid var(--mr-grid); padding-left: 28px; }
+.mr-compare-head { margin: 0 0 10px; font-size: 14.5px; font-weight: 650; }
+.mr-compare-sub { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mr-muted); margin-bottom: 6px; }
+.hbar-fill.hbar-fill--alt { background: var(--mr-new); }
+
+/* Usage & limits rows */
+.mr-usage-rows { display: flex; flex-direction: column; }
+.mr-usage-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--mr-grid); font-size: 13px; color: var(--mr-ink2); }
+.mr-usage-row:last-child { border-bottom: none; }
+.mr-usage-row b { color: var(--mr-ink); font-variant-numeric: tabular-nums; }
+.mr-usage-row small { color: var(--mr-muted); font-weight: 400; }
+@media (max-width: 700px) {
+  .mr-compare { grid-template-columns: 1fr; gap: 18px; }
+  .mr-compare-col--right { border-left: none; padding-left: 0; border-top: 1px solid var(--mr-grid); padding-top: 16px; }
+}
 
 .mr-note { max-width: 1060px; margin: 24px auto; color: var(--mr-ink2); }
 .mr-note-sm { color: var(--mr-muted); font-size: 13px; }
@@ -466,7 +550,7 @@ main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.
 
 .mr-hero-row { display: flex; gap: 16px; flex-wrap: wrap; }
 .mr-hero {
-  background: var(--mr-card); border: 1px solid var(--mr-border); border-radius: 14px;
+  background: var(--mr-card); border-radius: 14px;
   box-shadow: var(--mr-card-shadow);
   padding: 22px 26px; flex: 1 1 260px; display: flex; flex-direction: column; justify-content: center;
 }
@@ -477,7 +561,7 @@ main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.
 .mr-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex: 2 1 420px; }
 .mr-tiles-3 { grid-template-columns: repeat(3, 1fr); }
 .mr-tile {
-  background: var(--mr-card); border: 1px solid var(--mr-border); border-radius: 12px;
+  background: var(--mr-card); border-radius: 12px;
   box-shadow: var(--mr-card-shadow);
   padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;
 }
@@ -486,7 +570,7 @@ main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.
 .t-foot { color: var(--mr-muted); font-size: 12px; }
 
 .mr-card {
-  background: var(--mr-card); border: 1px solid var(--mr-border); border-radius: 14px;
+  background: var(--mr-card); border-radius: 14px;
   box-shadow: var(--mr-card-shadow);
   padding: 18px 20px;
 }
