@@ -1133,7 +1133,7 @@
           </div>
           <div v-else-if="!places.length" class="empty-state">No cached places found.</div>
           <div v-else class="places-grid">
-            <div v-for="p in places" :key="p.placeId" class="place-card">
+            <div v-for="p in places" :key="p.placeId" class="place-card place-card--clickable" @click="openPlaceInfo(p)" title="Click to read everything the cache knows about this place">
               <div class="place-img-wrap">
                 <img
                   v-if="p.imagesStored && p.photos && p.photos.length"
@@ -1146,19 +1146,24 @@
                 <div v-else class="place-img-placeholder">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
+                <!-- Labeled actions — icon-only circles were cryptic (nobody
+                     remembers what ✓/eye/✕ do); text also reflects state. -->
                 <div class="place-img-overlay">
                   <button class="place-mod-btn place-mod-verify" :class="{ 'place-mod-btn--on': p.explore?.status === 'verified' }"
-                    @click="setExploreStatus(p, 'verified')"
-                    :title="p.explore?.status === 'verified' ? 'Unverify (back to visible)' : 'Verify for Explore (always shown, skips auto-rules)'">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    @click.stop="setExploreStatus(p, 'verified')"
+                    title="Verified places are always shown on Explore, skipping the auto-rules">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {{ p.explore?.status === 'verified' ? 'Unverify' : 'Verify' }}
                   </button>
                   <button class="place-mod-btn place-mod-hide" :class="{ 'place-mod-btn--on': p.explore?.status === 'hidden' }"
-                    @click="setExploreStatus(p, 'hidden')"
-                    :title="p.explore?.status === 'hidden' ? 'Unhide (back to visible)' : 'Hide everywhere — Explore page, chat and quick-action recommendations'">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    @click.stop="setExploreStatus(p, 'hidden')"
+                    title="Hidden places disappear everywhere — Explore, chat and quick-action recommendations">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    {{ p.explore?.status === 'hidden' ? 'Unhide' : 'Hide' }}
                   </button>
-                  <button class="place-delete-btn" @click="deletePlace(p)" title="Remove from cache">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <button class="place-delete-btn" @click.stop="deletePlace(p)" title="Remove this place from the cache (re-fetched from Google if asked for again)">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Delete
                   </button>
                 </div>
                 <span class="place-img-badge" v-if="p.rating">{{ p.rating.toFixed(1) }}</span>
@@ -1708,23 +1713,26 @@
                   <span class="price-val" v-else>Hetzner Cloud VPS</span>
                 </div>
                 <template v-if="serverStats">
-                  <div class="price-row" title="Load average (1 min / 5 min / 15 min) vs CPU cores — below the core count is healthy">
-                    <span class="price-label">CPU load</span>
-                    <span class="price-val">{{ serverStats.load[0] }} / {{ serverStats.load[1] }} / {{ serverStats.load[2] }} <span class="db-meta">of {{ serverStats.cpus }} cores ({{ cpuPct }}%)</span>
-                      <span class="gm-status" :class="vitalClass(cpuPct, 50, 80)">{{ vitalWord(cpuPct, 50, 80, ['healthy', 'busy', 'overloaded']) }}</span>
-                    </span>
+                  <div class="sv-row" title="Load average (1 min / 5 min / 15 min) vs CPU cores — below the core count is healthy">
+                    <div class="sv-head">
+                      <span class="price-label">CPU load</span>
+                      <span class="sv-val">{{ serverStats.load[0] }} / {{ serverStats.load[1] }} / {{ serverStats.load[2] }} <span class="db-meta">· {{ cpuPct }}% of {{ serverStats.cpus }} cores</span></span>
+                    </div>
+                    <div class="gm-bar sv-bar"><div class="gm-fill" :class="vitalClass(cpuPct, 50, 80)" :style="{ width: Math.max(2, Math.min(100, cpuPct)) + '%' }"></div></div>
                   </div>
-                  <div class="price-row">
-                    <span class="price-label">RAM</span>
-                    <span class="price-val">{{ serverStats.memUsedGB }} / {{ serverStats.memTotalGB }} GB ({{ serverStats.memUsedPct }}%) <span class="db-meta">· backend {{ serverStats.nodeHeapMB }} MB</span>
-                      <span class="gm-status" :class="vitalClass(serverStats.memUsedPct, 60, 85)">{{ vitalWord(serverStats.memUsedPct, 60, 85, ['healthy', 'high', 'critical']) }}</span>
-                    </span>
+                  <div class="sv-row">
+                    <div class="sv-head">
+                      <span class="price-label">RAM</span>
+                      <span class="sv-val">{{ serverStats.memUsedGB }} / {{ serverStats.memTotalGB }} GB <span class="db-meta">· {{ serverStats.memUsedPct }}% · backend {{ serverStats.nodeHeapMB }} MB</span></span>
+                    </div>
+                    <div class="gm-bar sv-bar"><div class="gm-fill" :class="vitalClass(serverStats.memUsedPct, 60, 85)" :style="{ width: Math.max(2, Math.min(100, serverStats.memUsedPct)) + '%' }"></div></div>
                   </div>
-                  <div class="price-row" v-if="serverStats.disk">
-                    <span class="price-label">Disk</span>
-                    <span class="price-val">{{ serverStats.disk.totalGB - serverStats.disk.freeGB }} / {{ serverStats.disk.totalGB }} GB used ({{ diskPct }}%)
-                      <span class="gm-status" :class="vitalClass(diskPct, 70, 90)">{{ vitalWord(diskPct, 70, 90, ['plenty', 'filling up', 'almost full']) }}</span>
-                    </span>
+                  <div class="sv-row" v-if="serverStats.disk">
+                    <div class="sv-head">
+                      <span class="price-label">Disk</span>
+                      <span class="sv-val">{{ serverStats.disk.totalGB - serverStats.disk.freeGB }} / {{ serverStats.disk.totalGB }} GB <span class="db-meta">· {{ diskPct }}% used</span></span>
+                    </div>
+                    <div class="gm-bar sv-bar"><div class="gm-fill" :class="vitalClass(diskPct, 70, 90)" :style="{ width: Math.max(2, Math.min(100, diskPct)) + '%' }"></div></div>
                   </div>
                   <div class="price-row">
                     <span class="price-label">Uptime</span>
@@ -1736,6 +1744,32 @@
                 <div class="price-row" v-else><span class="price-label">Live vitals</span><span class="price-val db-loading">Loading…</span></div>
                 <div class="price-row"><span class="price-label">Scale path</span><span class="price-val">~25k users → ~$40/mo · ~50k → ~$90/mo (2-node)</span></div>
                 <div class="price-row price-row--total"><span class="price-label">Monthly cost</span><span class="price-val">$17.09 <span class="db-meta">· verify in Hetzner console — live specs suggest CPX31 (~$15)</span></span></div>
+              </div>
+            </div>
+            <div class="card price-card">
+              <div class="card-head">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                <h2>Map Routing (ORS)</h2><span class="card-sub">OpenRouteService · free · daily-capped</span>
+              </div>
+              <div class="price-card-body">
+                <div class="price-row"><span class="price-label">Plan</span><span class="price-val">Free — ~2,000 directions/day · 40/min</span></div>
+                <div class="sv-row" v-if="routingUsage">
+                  <div class="sv-head">
+                    <span class="price-label">Today's routes</span>
+                    <span class="sv-val">{{ fmt(routingUsage.today.directions) }} / {{ fmt(routingUsage.capDaily) }} <span class="db-meta">· {{ Math.round(100 * routingUsage.today.directions / routingUsage.capDaily) }}% of daily cap</span></span>
+                  </div>
+                  <div class="gm-bar sv-bar"><div class="gm-fill" :class="vitalClass(Math.round(100 * routingUsage.today.directions / routingUsage.capDaily), 60, 85)" :style="{ width: Math.max(2, Math.min(100, Math.round(100 * routingUsage.today.directions / routingUsage.capDaily))) + '%' }"></div></div>
+                </div>
+                <div class="price-row" v-if="routingUsage">
+                  <span class="price-label">This month</span>
+                  <span class="price-val">{{ fmt(routingUsage.month.directions) }} routes
+                    <span v-if="routingUsage.month.rateLimited > 0" class="gm-status gm-red">{{ routingUsage.month.rateLimited }} rate-limited</span>
+                    <span v-else class="gm-status gm-green">no cap hits</span>
+                  </span>
+                </div>
+                <div class="price-row" v-else><span class="price-label">Usage</span><span class="price-val db-loading">Loading… (counts start at this deploy)</span></div>
+                <div class="price-row"><span class="price-label">At scale</span><span class="price-val">Past the cap → paid ORS or self-hosted OSRM</span></div>
+                <div class="price-row price-row--total"><span class="price-label">Monthly cost</span><span class="price-val">$0</span></div>
               </div>
             </div>
             <div class="card price-card">
@@ -3198,6 +3232,42 @@
       </div>
     </transition>
     <!-- ── /STAFF PERMANENT DELETE MODAL ──────────────────────────────── -->
+
+    <!-- ── PLACE CACHE DETAIL MODAL — click a card, read everything ────── -->
+    <transition name="modal-fade">
+      <div v-if="placeInfoModal.open" class="edit-overlay" @click.self="placeInfoModal.open = false">
+        <div class="edit-panel" :class="theme" style="max-width: 580px">
+          <div class="edit-header">
+            <div class="edit-header-left">
+              <span class="edit-badge">Cached place</span>
+              <h2 class="edit-title">{{ placeInfoModal.row?.name }}</h2>
+            </div>
+            <button class="edit-close-btn" @click="placeInfoModal.open = false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="edit-body">
+            <div v-if="placeInfoModal.loading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+            <section v-else class="edit-section">
+              <div class="pi-row" v-for="r in placeInfoRows" :key="r.k">
+                <span class="pi-k">{{ r.k }}</span>
+                <a v-if="r.href" class="pi-v pi-link" :href="r.href" target="_blank" rel="noopener">{{ r.v }}</a>
+                <span v-else class="pi-v">{{ r.v }}</span>
+              </div>
+              <template v-if="placeInfoHours.length">
+                <div class="edit-section-title" style="margin-top:14px">Opening hours</div>
+                <div class="pi-hours"><div v-for="h in placeInfoHours" :key="h">{{ h }}</div></div>
+              </template>
+              <p style="margin:16px 0 0; font-size:11.5px; opacity:0.55; line-height:1.55">
+                This is everything the cache stores for this place (Google Place Details, paid once and reused for free).
+                Verify / Hide / Delete live on the card's image — hover it.
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <!-- ── /PLACE CACHE DETAIL MODAL ──────────────────────────────────── -->
 
     <!-- ── STAFF ASSIGNMENT EDIT MODAL ────────────────────────────────── -->
     <transition name="modal-fade">
@@ -4675,7 +4745,7 @@ export default {
     const debouncedDestFetch = debounce(() => fetchDestinations(true))
     const fetchAll = async () => {
       loading.value = true
-      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiMonthly(), fetchServerStats(), fetchDbStats()]) }
+      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiMonthly(), fetchServerStats(), fetchRoutingUsage(), fetchDbStats()]) }
       catch (e) { showToast(e.message, 'error') } finally { loading.value = false }
     }
     // Stored rec images are either absolute URLs or API-relative paths
@@ -5920,6 +5990,46 @@ export default {
       const mongo = parseFloat(projectedMongoCostStr.value) || 8
       return (17.09 + mongo).toFixed(2)
     })
+    // ── Place-cache "click to read" modal ──
+    const placeInfoModal = ref({ open: false, loading: false, row: null, data: null })
+    const openPlaceInfo = async (p) => {
+      placeInfoModal.value = { open: true, loading: true, row: p, data: null }
+      try {
+        const res = await apiFetch(`/places/${encodeURIComponent(p.placeId)}/full`)
+        if (res.success) placeInfoModal.value.data = res.data
+      } catch (e) { showToast(e.message, 'error') }
+      finally { placeInfoModal.value.loading = false }
+    }
+    const placeInfoRows = computed(() => {
+      const m = placeInfoModal.value; if (!m.row) return []
+      const d = m.data || {}, det = d.details || {}, r = m.row
+      const rows = []
+      const add = (k, v, href) => { if (v !== undefined && v !== null && v !== '') rows.push({ k, v, href }) }
+      add('Address', det.formatted_address || r.details?.formatted_address)
+      add('Category', [d.primaryType, ...(d.types || [])].filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 4).join(', '))
+      add('Rating', r.rating ? `${r.rating.toFixed(1)} ★` : null)
+      add('Price', r.priceTierLabel ? `${r.priceTierLabel}${r.priceDollars ? ' · ' + r.priceDollars : ''}` : null)
+      add('Phone', det.formatted_phone_number)
+      add('Website', det.website ? det.website.replace(/^https?:\/\//, '').slice(0, 45) : null, det.website)
+      add('Explore status', d.explore?.status || r.explore?.status || 'visible (default rules)')
+      add('Shown under', (d.actions || r.actions || []).join(', '))
+      add('Community', `${r.likes || 0} likes · ${r.dislikes || 0} dislikes`)
+      add('Event dates', eventDateLabel(r.eventSchedule))
+      add('Images stored', r.imagesStored ? `yes (${(d.photos || r.photos || []).length} photo${(d.photos || r.photos || []).length === 1 ? '' : 's'})` : 'no')
+      add('Cache economics', `used ${fmt(r.useCount)}× · fetched from Google ${fmt(r.fetchCount)}× — each use above 1 fetch was free`)
+      add('Last used', r.lastUsed ? shortDate(r.lastUsed) : null)
+      add('First cached', r.createdAt ? shortDate(r.createdAt) : null)
+      add('Place ID', r.placeId)
+      return rows
+    })
+    const placeInfoHours = computed(() => placeInfoModal.value.data?.details?.opening_hours?.weekday_text || [])
+
+    // Map routing (ORS) usage vs the free daily cap
+    const routingUsage = ref(null)
+    const fetchRoutingUsage = async () => {
+      try { const res = await apiFetch('/routing-usage'); if (res.success) routingUsage.value = res.data }
+      catch (e) { console.warn('routing usage fetch failed:', e.message) }
+    }
     // Live Hetzner vitals (backend reads its own host via os.*) + traffic-light
     // indicators: green below `warn`%, amber between, red above `bad`%.
     const serverStats = ref(null)
@@ -6108,7 +6218,8 @@ export default {
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
       aiMonthly, aiMonthlyLoading, fetchAiMonthly, aiPrevMonth, aiNextMonth,
-      vitalClass, vitalWord, cpuPct, diskPct,
+      vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
+      placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
@@ -6801,14 +6912,15 @@ export default {
 .place-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
 .place-card:hover .place-img { transform: scale(1.05); }
 .place-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 34px; }
-.place-img-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; display: flex; align-items: flex-start; justify-content: flex-end; gap: 6px; padding: 8px; }
+.place-img-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 0.2s; display: flex; align-items: flex-start; justify-content: flex-end; flex-wrap: wrap; gap: 6px; padding: 8px; }
 .place-card:hover .place-img-overlay { opacity: 1; }
 .place-img-badge { position: absolute; bottom: 8px; left: 8px; padding: 3px 7px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; backdrop-filter: blur(6px); background: rgba(0,0,0,0.5); color: #f0ca5a; }
-.place-delete-btn { width: 26px; height: 26px; border-radius: 7px; border: none; cursor: pointer; display: grid; place-items: center; background: rgba(244,63,94,0.85); color: white; transition: all 0.15s; }
-.place-delete-btn:hover { background: #f43f5e; transform: scale(1.08); }
+.place-delete-btn { height: 26px; padding: 0 9px; gap: 5px; border-radius: 7px; border: none; cursor: pointer; display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; font-family: 'DM Sans', sans-serif; background: rgba(244,63,94,0.85); color: white; transition: all 0.15s; }
+.place-delete-btn:hover { background: #f43f5e; }
 /* Explore moderation toggles (verify / hide) — dim until active. */
-.place-mod-btn { width: 26px; height: 26px; border-radius: 7px; border: none; cursor: pointer; display: grid; place-items: center; background: rgba(30,30,30,0.6); color: rgba(255,255,255,0.85); transition: all 0.15s; }
-.place-mod-btn:hover { transform: scale(1.08); }
+.place-mod-btn { height: 26px; padding: 0 9px; gap: 5px; border-radius: 7px; border: none; cursor: pointer; display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; font-family: 'DM Sans', sans-serif; background: rgba(30,30,30,0.72); color: rgba(255,255,255,0.9); transition: all 0.15s; }
+.place-mod-btn:hover { background: rgba(30,30,30,0.9); }
+.place-card--clickable { cursor: pointer; }
 .place-mod-verify:hover { background: rgba(34,197,94,0.75); }
 .place-mod-hide:hover { background: rgba(148,163,184,0.75); }
 .place-mod-verify.place-mod-btn--on { background: #22c55e; color: #fff; }
@@ -6913,6 +7025,20 @@ export default {
 .gm-warn-text { color: #f59e0b; font-weight: 600; }
 .gm-drives { font-size: 11px; opacity: 0.5; margin-top: 3px; }
 .gm-total { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.2); font-size: 13px; }
+/* Place-cache detail modal rows */
+.pi-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,0.14); font-size: 13px; }
+.pi-row:last-child { border-bottom: none; }
+.pi-k { opacity: 0.6; flex-shrink: 0; }
+.pi-v { text-align: right; word-break: break-word; }
+.pi-link { color: #8b5cf6; text-decoration: none; }
+.pi-link:hover { text-decoration: underline; }
+.pi-hours { font-size: 12.5px; line-height: 1.8; opacity: 0.85; font-variant-numeric: tabular-nums; }
+
+/* Server-vitals gauge rows (Hetzner card) */
+.sv-row { padding: 8px 0; }
+.sv-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+.sv-val { font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.sv-bar { height: 8px; margin: 0; }
 .gm-hint { font-size: 11.5px; opacity: 0.6; line-height: 1.6; margin: 10px 0 0; max-width: 90ch; }
 /* Label sits flush against the bottom of the bar's colored segment */
 .g-bar-label { font-size: 8px; font-family: 'DM Mono', monospace; color: #64748b; margin-bottom: 2px; white-space: nowrap; letter-spacing: 0.03em; }
