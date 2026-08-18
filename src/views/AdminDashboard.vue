@@ -958,7 +958,7 @@
               </button>
             </div>
             <div class="seg-group">
-              <button v-for="opt in categoryFilterOpts" :key="opt.value"
+              <button v-for="opt in bizCategoryFilterOpts" :key="opt.value"
                 class="seg-btn"
                 :class="{ 'seg-btn--active': bizTypeFilter === opt.value }"
                 @click="bizTypeFilter = opt.value; bizPage = 1; fetchBusinesses()">
@@ -1061,7 +1061,15 @@
             </div>
           </div>
 
-          <div class="toolbar">
+          <!-- View switcher: the cached-places grid vs the Jinni-found events
+               queue (AiFoundEvent — a different collection, same as the
+               validator's "jinni events" chip in Explore). -->
+          <div class="seg-group" style="margin-bottom: 12px">
+            <button class="seg-btn" :class="{ 'seg-btn--active': placesView === 'cache' }" @click="placesView = 'cache'">Cached places</button>
+            <button class="seg-btn" :class="{ 'seg-btn--active': placesView === 'jinni_events' }" @click="placesView = 'jinni_events'; fetchAiEvents()">Jinni events</button>
+          </div>
+
+          <div class="toolbar" v-if="placesView === 'cache'">
             <div class="search-wrap">
               <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input v-model="placesSearch" class="search-input" placeholder="Search places by name or address…" @input="debouncedPlacesFetch" />
@@ -1137,11 +1145,11 @@
             </div>
           </div>
 
-          <div v-if="placesLoading" class="loading-screen" style="min-height:200px">
+          <div v-if="placesView === 'cache' && placesLoading" class="loading-screen" style="min-height:200px">
             <div class="loader-ring"></div>
           </div>
-          <div v-else-if="!places.length" class="empty-state">No cached places found.</div>
-          <div v-else class="places-grid">
+          <div v-else-if="placesView === 'cache' && !places.length" class="empty-state">No cached places found.</div>
+          <div v-else-if="placesView === 'cache'" class="places-grid">
             <div v-for="p in places" :key="p.placeId" class="place-card place-card--clickable" @click="openPlaceInfo(p)" title="Click to read everything the cache knows about this place">
               <div class="place-img-wrap">
                 <img
@@ -1180,9 +1188,11 @@
               <div class="place-info">
                 <div class="place-name">{{ p.name }}</div>
                 <div class="place-addr">{{ p.details?.formatted_address || '—' }}</div>
+                <div class="place-cats" v-if="(p.actions || []).length">
+                  <span v-for="a in p.actions.slice(0, 3)" :key="a" class="place-cat" :class="'place-cat--' + a">{{ a.replace('_', ' ') }}</span>
+                  <span v-if="p.actions.length > 3" class="place-cat place-cat--more">+{{ p.actions.length - 3 }}</span>
+                </div>
                 <div class="place-meta">
-                  <span class="badge" :class="p.imagesStored ? 'badge-ok' : 'badge-muted'">{{ p.imagesStored ? 'Image' : 'No img' }}</span>
-                  <span class="badge" :class="p.hasDetailedInfo ? 'badge-ok' : 'badge-muted'">{{ p.hasDetailedInfo ? 'Detail' : 'Basic' }}</span>
                   <span v-if="p.explore?.status === 'verified'" class="badge badge-ok" title="Human-verified — always on Explore">✓ Verified</span>
                   <span v-else-if="p.explore?.status === 'hidden'" class="badge badge-hidden" title="Hidden from the Explore page">Hidden</span>
                   <span v-if="p.priceTier" class="badge pf-tier" :title="`Tier ${p.priceTier}/4 · from ${p.priceTierSource === 'price' ? 'Google price level' : 'lodging type'}`">
@@ -1196,23 +1206,32 @@
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
                     {{ fmt(p.dislikes || 0) }}
                   </span>
+                  <span v-if="!p.imagesStored" class="badge badge-muted" title="No stored photos — cards fall back to a placeholder">no img</span>
+                  <span v-if="!p.hasDetailedInfo" class="badge badge-muted" title="Basic record — hours/phone/website not fetched yet">basic</span>
                 </div>
                 <div class="place-event" v-if="eventDateLabel(p.eventSchedule)">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                   <span>{{ eventDateLabel(p.eventSchedule) }}</span>
                 </div>
-                <div class="place-stats">
-                  <span>Used {{ fmt(p.useCount) }}×</span>
-                  <span>·</span>
-                  <span>Fetched {{ fmt(p.fetchCount) }}×</span>
-                  <span>·</span>
-                  <span>{{ shortDate(p.lastUsed) }}</span>
+                <div class="place-stats place-stats--iconed">
+                  <span class="ps-item" title="Times this cached place was served — every serve after the first fetch cost $0">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    {{ fmt(p.useCount) }}× served
+                  </span>
+                  <span class="ps-item ps-item--save" v-if="(p.useCount || 0) > (p.fetchCount || 0)" title="Google calls avoided thanks to the cache">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    {{ fmt((p.useCount || 0) - (p.fetchCount || 0)) }} saved
+                  </span>
+                  <span class="ps-item" :title="'Last used ' + shortDate(p.lastUsed)">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {{ shortDate(p.lastUsed) }}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="pagination" v-if="placesTotalPages > 1">
+          <div class="pagination" v-if="placesView === 'cache' && placesTotalPages > 1">
             <button :disabled="placesPage === 1" @click="placesPage--; fetchPlaces()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
               Prev
@@ -1226,7 +1245,7 @@
 
           <!-- Jinni Events — events the AI found & stored by itself (AiFoundEvent),
                same queue the validator sees, with the same actions. -->
-          <div class="card" style="margin-top: 16px; padding: 18px 20px">
+          <div class="card" v-if="placesView === 'jinni_events'" style="padding: 18px 20px">
             <div class="card-head" style="padding: 0 0 10px">
               <h2>Jinni Events</h2>
               <span class="card-sub">events Jinni discovered and stored by itself · approve → becomes a curated Destination</span>
@@ -1611,7 +1630,8 @@
             </div>
           </div>
 
-          <div class="loc-grid" v-if="limitsData" style="margin-top: 14px">
+          <div class="loc-section-label" v-if="limitsData" style="margin-top: 14px">User limits</div>
+          <div class="loc-grid" v-if="limitsData" style="margin-top: 10px">
             <div class="card" style="padding: 18px 20px" v-for="tierKey in ['free', 'premium']" :key="tierKey">
               <div class="card-head" style="padding: 0 0 8px">
                 <h2 style="text-transform: capitalize">{{ tierKey }} tier</h2>
@@ -1619,15 +1639,32 @@
               </div>
               <div class="edit-field edit-field--full" style="margin-top: 8px">
                 <label class="edit-label">Daily AI tokens</label>
-                <input class="edit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Tokens']" />
+                <input class="limit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Tokens']" />
                 <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Used today ({{ tierKey }} total): {{ fmt(limitsData[tierKey].tokensToday) }} tokens across {{ limitsData[tierKey].activeToday }} users</small>
               </div>
               <div class="edit-field edit-field--full" style="margin-top: 12px">
                 <label class="edit-label">Daily places viewed</label>
-                <input class="edit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Places']" />
+                <input class="limit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Places']" />
                 <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Viewed today ({{ tierKey }} total): {{ fmt(limitsData[tierKey].placesToday) }} places</small>
               </div>
             </div>
+          </div>
+
+          <div class="loc-section-label" v-if="limitsData" style="margin-top: 16px">Business limits</div>
+          <div class="card" v-if="limitsData" style="margin-top: 10px; padding: 18px 20px">
+            <div class="card-head" style="padding: 0 0 8px">
+              <h2>Visibility radius per category</h2>
+              <span class="card-sub">how far a business reaches in results &amp; zone boosts (meters, 50–5000)</span>
+            </div>
+            <div class="loc-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px">
+              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems']" :key="cat">
+                <label class="edit-label" style="text-transform: capitalize">{{ cat.replace('_', ' ') }}</label>
+                <input class="limit-input" type="number" min="50" max="5000" step="50" v-model.number="limitsZoneForm[cat]" />
+              </div>
+            </div>
+            <p style="margin: 12px 0 0; font-size: 11.5px; opacity: 0.6; line-height: 1.55">
+              The auction zone grid itself stays fixed — changing it would re-shuffle existing Signature zones.
+            </p>
           </div>
 
           <div class="card" v-if="limitsData" style="margin-top: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
@@ -1873,26 +1910,6 @@
                 <div class="price-row" v-else><span class="price-label">Usage</span><span class="price-val db-loading">Loading… (counts start at this deploy)</span></div>
                 <div class="price-row"><span class="price-label">At scale</span><span class="price-val">Past the cap → paid ORS or self-hosted OSRM</span></div>
                 <div class="price-row price-row--total"><span class="price-label">Monthly cost</span><span class="price-val">$0</span></div>
-              </div>
-            </div>
-            <div class="card price-card">
-              <div class="card-head">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <h2>Other / Notes</h2><span class="card-sub">Extra costs &amp; notes</span>
-              </div>
-              <div class="price-card-body">
-                <div class="price-row"><span class="price-label">Extra monthly</span>
-                  <div class="price-stepper">
-                    <button class="price-step-btn" @click="prices.googleExtra = Math.max(0, (prices.googleExtra || 0) - 1)">−</button>
-                    <span class="price-step-symbol">$</span>
-                    <input class="price-input" type="number" v-model.number="prices.googleExtra" min="0" step="1" placeholder="0" />
-                    <button class="price-step-btn" @click="prices.googleExtra = (prices.googleExtra || 0) + 1">+</button>
-                  </div>
-                </div>
-                <div class="price-row" style="flex-direction:column;gap:6px">
-                  <span class="price-label">Notes</span>
-                  <textarea class="price-textarea" v-model="prices.notes" placeholder="e.g. hosting, domain, CDN…" rows="3"></textarea>
-                </div>
               </div>
             </div>
           </div>
@@ -3380,6 +3397,26 @@
                   <label class="edit-label">Website</label>
                   <input class="edit-input" type="text" v-model="placeEditForm.website" placeholder="https://…" />
                 </div>
+                <div class="edit-field edit-field--full" style="margin-top:12px">
+                  <label class="edit-label">Shown under <small style="opacity:0.6">(Explore / quick-action categories — empty = not on Explore)</small></label>
+                  <div class="seg-group" style="flex-wrap:wrap; margin-top:6px">
+                    <button v-for="c in placeEditCategories" :key="c" class="seg-btn"
+                      :class="{ 'seg-btn--active': placeEditForm.actions.includes(c) }"
+                      @click="togglePlaceEditTag('actions', c)">{{ c.replace('_', ' ') }}</button>
+                  </div>
+                </div>
+                <div class="edit-field edit-field--full" style="margin-top:12px">
+                  <label class="edit-label">Interest tags <small style="opacity:0.6">(personalization matching)</small></label>
+                  <div class="seg-group" style="flex-wrap:wrap; margin-top:6px">
+                    <button v-for="t in placeEditInterests" :key="t" class="seg-btn"
+                      :class="{ 'seg-btn--active': placeEditForm.interests.includes(t) }"
+                      @click="togglePlaceEditTag('interests', t)">{{ t }}</button>
+                  </div>
+                </div>
+                <label style="display:flex; align-items:center; gap:8px; margin-top:14px; cursor:pointer; font-size:13px">
+                  <input type="checkbox" v-model="placeEditForm.aiBlocked" />
+                  <span>AI-blocked — never surfaced by chat / quick-action recommendations</span>
+                </label>
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
                   <button class="action-btn btn-muted" @click="placeInfoModal.editing = false" :disabled="placeEditSaving">Cancel</button>
                   <button class="action-btn btn-accent" @click="savePlaceEdit" :disabled="placeEditSaving">{{ placeEditSaving ? 'Saving…' : 'Save changes' }}</button>
@@ -3838,7 +3875,8 @@ export default {
     const destFilter = ref('')
     const destTypeFilter = ref('')
     const bizTypeFilter = ref('')
-    // Category pills shared by Destinations + Businesses (same type enum).
+    // Category pills — same type enum, but per-menu lists: photo_spots is a
+    // curation tag for destinations, never a registered business.
     // 'Shopping' = the concrete shop sub-types (there is no 'shopping' tag).
     const categoryFilterOpts = [
       { value: '', label: 'All types' },
@@ -3850,6 +3888,7 @@ export default {
       { value: 'souvenirs,clothing,market,mall,jewelry,food', label: 'Shopping' },
       { value: 'photo_spots', label: 'Photo Spots' },
     ]
+    const bizCategoryFilterOpts = categoryFilterOpts.filter(o => o.value !== 'photo_spots')
     const destSummary = ref({})
     const expandedTypes = ref({})
     const quickActionStats = ref({ actions: [], chatStream: { count: 0 }, quickActionTotal: 0, chatStreamTotal: 0, grandTotal: 0 })
@@ -6152,6 +6191,7 @@ export default {
       if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || `HTTP ${r.status}`) }
       return r.json()
     }
+    const placesView = ref('cache')
     const aiEvents = ref([])
     const aiEvStatus = ref('new')
     const aiEvLoading = ref(false)
@@ -6176,6 +6216,7 @@ export default {
     // ── Limits tab: tier config + analytics ──
     const limitsData = ref(null)
     const limitsForm = ref({ freeTokens: 10000, freePlaces: 100, premiumTokens: 50000, premiumPlaces: 200 })
+    const limitsZoneForm = ref({ restaurants: 300, hotels: 900, events: 300, historical: 500, hidden_gems: 900 })
     const limitsSaving = ref(false)
     const fetchLimits = async () => {
       try {
@@ -6188,6 +6229,7 @@ export default {
             premiumTokens: res.data.config.limitPremiumDailyTokens,
             premiumPlaces: res.data.config.limitPremiumDailyPlaces
           }
+          limitsZoneForm.value = { ...limitsZoneForm.value, ...(res.data.config.zoneRadiusM || {}) }
         }
       } catch (e) { console.warn('limits fetch failed:', e.message) }
     }
@@ -6198,7 +6240,8 @@ export default {
           limitFreeDailyTokens: limitsForm.value.freeTokens,
           limitFreeDailyPlaces: limitsForm.value.freePlaces,
           limitPremiumDailyTokens: limitsForm.value.premiumTokens,
-          limitPremiumDailyPlaces: limitsForm.value.premiumPlaces
+          limitPremiumDailyPlaces: limitsForm.value.premiumPlaces,
+          zoneRadiusM: limitsZoneForm.value
         }) })
         showToast('Limits saved — active immediately')
         await fetchLimits()
@@ -6208,29 +6251,55 @@ export default {
 
     // ── Place-cache "click to read" modal ──
     const placeInfoModal = ref({ open: false, loading: false, editing: false, row: null, data: null })
-    const placeEditForm = ref({ name: '', address: '', phone: '', website: '' })
+    const placeEditForm = ref({ name: '', address: '', phone: '', website: '', actions: [], interests: [], aiBlocked: false })
     const placeEditSaving = ref(false)
+    // Same vocab the staff Explore drawer edits (validated server-side too)
+    const placeEditCategories = ['restaurants', 'hotels', 'historical', 'events', 'photo_spots', 'hidden_gems', 'shopping']
+    const placeEditInterests = ['nature', 'family', 'romantic', 'art', 'cultural', 'history', 'adventure', 'relaxation', 'nightlife', 'food&drink', 'luxury', 'budget']
+    const togglePlaceEditTag = (field, v) => {
+      const arr = placeEditForm.value[field]
+      const i = arr.indexOf(v)
+      if (i >= 0) arr.splice(i, 1); else arr.push(v)
+    }
     const startPlaceEdit = () => {
-      const d = placeInfoModal.value.data || {}, det = d.details || {}
+      const d = placeInfoModal.value.data || {}, det = d.details || {}, r = placeInfoModal.value.row || {}
       placeEditForm.value = {
-        name: d.name || placeInfoModal.value.row?.name || '',
+        name: d.name || r.name || '',
         address: det.formatted_address || '',
         phone: det.formatted_phone_number || '',
-        website: det.website || ''
+        website: det.website || '',
+        actions: [...(d.actions || r.actions || [])].filter(a => placeEditCategories.includes(a)),
+        interests: [...(d.interests || [])],
+        aiBlocked: !!d.aiBlocked
       }
       placeInfoModal.value.editing = true
     }
     const savePlaceEdit = async () => {
       placeEditSaving.value = true
       try {
-        const res = await apiFetch(`/places/${encodeURIComponent(placeInfoModal.value.row.placeId)}/edit`, {
-          method: 'PATCH', body: JSON.stringify(placeEditForm.value)
-        })
-        placeInfoModal.value.data = res.data
+        const placeId = placeInfoModal.value.row.placeId
+        // Two backends: contact/identity via the admin edit endpoint,
+        // curation (categories / interests / aiBlocked) via the same staff
+        // endpoint the validator drawer uses — admins pass its gate.
+        const [res] = await Promise.all([
+          apiFetch(`/places/${encodeURIComponent(placeId)}/edit`, {
+            method: 'PATCH',
+            body: JSON.stringify({ name: placeEditForm.value.name, address: placeEditForm.value.address, phone: placeEditForm.value.phone, website: placeEditForm.value.website })
+          }),
+          staffFetch(`/explore-places/${encodeURIComponent(placeId)}/actions`, {
+            method: 'PATCH',
+            body: JSON.stringify({ actions: placeEditForm.value.actions, interests: placeEditForm.value.interests, aiBlocked: placeEditForm.value.aiBlocked })
+          })
+        ])
+        placeInfoModal.value.data = { ...res.data, actions: placeEditForm.value.actions, interests: placeEditForm.value.interests, aiBlocked: placeEditForm.value.aiBlocked }
         placeInfoModal.value.editing = false
-        // Reflect the rename on the card grid without a refetch
-        const row = places.value.find(x => x.placeId === placeInfoModal.value.row.placeId)
-        if (row) { row.name = res.data.name; if (row.details) row.details.formatted_address = res.data.details?.formatted_address }
+        // Reflect the changes on the card grid without a refetch
+        const row = places.value.find(x => x.placeId === placeId)
+        if (row) {
+          row.name = res.data.name
+          row.actions = [...placeEditForm.value.actions]
+          if (row.details) row.details.formatted_address = res.data.details?.formatted_address
+        }
         placeInfoModal.value.row.name = res.data.name
         showToast('Place updated')
       } catch (e) { showToast(e.message, 'error') }
@@ -6464,10 +6533,10 @@ export default {
       aiMonthly, aiMonthlyLoading, fetchAiMonthly, aiPrevMonth, aiNextMonth,
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
-      limitsData, limitsForm, limitsSaving, fetchLimits, saveLimits,
-      destTypeFilter, bizTypeFilter, categoryFilterOpts,
-      aiEvents, aiEvStatus, aiEvLoading, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss,
-      placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit,
+      limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
+      destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
+      placesView, aiEvents, aiEvStatus, aiEvLoading, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss,
+      placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
@@ -7273,6 +7342,40 @@ export default {
 .gm-warn-text { color: #f59e0b; font-weight: 600; }
 .gm-drives { font-size: 11px; opacity: 0.5; margin-top: 3px; }
 .gm-total { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.2); font-size: 13px; }
+/* Place-cache card: colored category chips + iconed stats footer */
+.place-cats { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
+.place-cat { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 9px; text-transform: capitalize; letter-spacing: 0.02em; }
+.place-cat--restaurants { background: rgba(244, 114, 94, 0.16); color: #fb923c; }
+.place-cat--hotels      { background: rgba(96, 165, 250, 0.16); color: #60a5fa; }
+.place-cat--historical  { background: rgba(217, 175, 55, 0.16); color: #d4af37; }
+.place-cat--events      { background: rgba(232, 121, 249, 0.16); color: #e879f9; }
+.place-cat--hidden_gems { background: rgba(52, 211, 153, 0.16); color: #34d399; }
+.place-cat--shopping, .place-cat--souvenirs, .place-cat--clothing, .place-cat--market, .place-cat--mall, .place-cat--jewelry, .place-cat--food { background: rgba(251, 191, 36, 0.14); color: #fbbf24; }
+.place-cat--photo_spots { background: rgba(125, 211, 252, 0.16); color: #7dd3fc; }
+.place-cat--more { background: rgba(128, 128, 128, 0.15); color: inherit; opacity: 0.7; }
+.admin-shell.day-mode .place-cat--restaurants { color: #c2410c; }
+.admin-shell.day-mode .place-cat--hotels { color: #1d4ed8; }
+.admin-shell.day-mode .place-cat--historical { color: #92600e; }
+.admin-shell.day-mode .place-cat--events { color: #a21caf; }
+.admin-shell.day-mode .place-cat--hidden_gems { color: #047857; }
+.admin-shell.day-mode .place-cat--shopping, .admin-shell.day-mode .place-cat--souvenirs, .admin-shell.day-mode .place-cat--clothing, .admin-shell.day-mode .place-cat--market, .admin-shell.day-mode .place-cat--mall, .admin-shell.day-mode .place-cat--jewelry, .admin-shell.day-mode .place-cat--food { color: #92600e; }
+.admin-shell.day-mode .place-cat--photo_spots { color: #0369a1; }
+.place-stats--iconed { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 7px; padding-top: 7px; border-top: 1px solid rgba(128, 128, 128, 0.14); }
+.ps-item { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; opacity: 0.75; font-variant-numeric: tabular-nums; }
+.ps-item--save { color: #34d399; opacity: 1; font-weight: 600; }
+.admin-shell.day-mode .ps-item--save { color: #047857; }
+
+/* Limits-tab inputs — .edit-input's night styling is scoped to .edit-panel,
+ * so these need their own themed class. Native number spinners hidden (the
+ * value fields are typed, not stepped). */
+.limit-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 14px; font-family: 'DM Mono', monospace; outline: none; transition: all 0.15s; box-sizing: border-box; }
+.limit-input::-webkit-outer-spin-button, .limit-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.limit-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.admin-shell.night-mode .limit-input { background: rgba(255,255,255,0.06); color: #e2e8f0; box-shadow: inset 0 0 0 1px rgba(139,92,246,0.18); }
+.admin-shell.night-mode .limit-input:focus { box-shadow: inset 0 0 0 1px rgba(139,92,246,0.5), 0 0 8px rgba(139,92,246,0.2); }
+.admin-shell.day-mode .limit-input { background: rgba(255,255,255,0.95); color: #2c1e10; box-shadow: inset 0 0 0 1px rgba(139,69,19,0.15); }
+.admin-shell.day-mode .limit-input:focus { box-shadow: inset 0 0 0 1px rgba(212,175,55,0.6), 0 0 8px rgba(212,175,55,0.15); }
+
 /* Jinni Events rows */
 .aiev-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.14); flex-wrap: wrap; }
 .aiev-row:last-child { border-bottom: none; }
