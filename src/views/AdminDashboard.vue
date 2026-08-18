@@ -1406,6 +1406,7 @@
                     :key="day.date"
                     class="g-bar-col"
                     :class="{ 'g-bar-col--active': day.total > 0 }"
+                    :title="gDayTitle(day)"
                   >
                     <div class="g-bar-spacer"></div>
                     <div
@@ -2939,10 +2940,10 @@
                   </span>
                 </label>
                 <label class="staff-perm-row">
-                  <input type="checkbox" v-model="staffModal.form.permissions.viewMarketing" />
+                  <input type="checkbox" v-model="staffModal.form.permissions.viewMarketing" @change="onMarketingPermToggle(staffModal.form.permissions)" />
                   <span class="staff-perm-body">
                     <span class="staff-perm-title">Marketing report</span>
-                    <span class="staff-perm-sub">View the Growth &amp; Retention dashboard (aggregate numbers only). Check ONLY this to create a marketing-partner account locked to that page.</span>
+                    <span class="staff-perm-sub">View the Growth &amp; Retention dashboard (aggregate numbers only). Checking this makes a marketing-only account locked to that page; re-tick other permissions after for a mixed account.</span>
                   </span>
                 </label>
               </div>
@@ -3116,10 +3117,10 @@
                   </span>
                 </label>
                 <label class="staff-perm-row">
-                  <input type="checkbox" v-model="staffAssignModal.form.permissions.viewMarketing" />
+                  <input type="checkbox" v-model="staffAssignModal.form.permissions.viewMarketing" @change="onMarketingPermToggle(staffAssignModal.form.permissions)" />
                   <span class="staff-perm-body">
                     <span class="staff-perm-title">Marketing report</span>
-                    <span class="staff-perm-sub">View the Growth &amp; Retention dashboard (aggregate numbers only).</span>
+                    <span class="staff-perm-sub">View the Growth &amp; Retention dashboard (aggregate numbers only). Checking this makes the account marketing-only; re-tick other permissions after for a mixed account.</span>
                   </span>
                 </label>
               </div>
@@ -3625,6 +3626,13 @@ export default {
     const marketingOnlyPerms = (p) => !!p?.viewMarketing && !p?.validateBusinesses && !p?.manageDestinations && !p?.moderateExplore
     const staffCreateMarketingOnly = computed(() => marketingOnlyPerms(staffModal.value.form.permissions))
     const staffAssignMarketingOnly = computed(() => marketingOnlyPerms(staffAssignModal.value.form.permissions))
+    // Checking "Marketing report" is a deliberate account-type choice — it
+    // auto-unchecks the territory permissions (validate/destinations/explore)
+    // so the modal collapses to a marketing-only account in one click. The
+    // admin can re-tick any of them afterwards for a mixed account.
+    const onMarketingPermToggle = (p) => {
+      if (p.viewMarketing) { p.validateBusinesses = false; p.manageDestinations = false; p.moderateExplore = false }
+    }
 
     const openStaffCreate = () => {
       staffModal.value = {
@@ -4016,6 +4024,10 @@ export default {
       catch (e) { console.warn('retention fetch failed:', e.message) }
     }
     const googleChartMax = computed(() => Math.max(...googleDailyStats.value.map(d => d.total), 1))
+    // Hover tooltip for a Google-chart day column: full per-SKU breakdown.
+    const gDayTitle = (d) => d.total === 0
+      ? `${d.date}: no API calls`
+      : `${d.date} — ${d.total} calls · $${(d.cost || 0).toFixed(2)}\nText Search: ${d.findPlaces}\nPlace Details: ${d.getPlaceDetails}\nGeocoding: ${d.reverseGeocode}\nPhotos: ${d.imageDownload}`
     const aiChartMax = computed(() => Math.max(...aiDailyStats.value.map(d => d.tokens), 1))
     // Per-provider daily series (DeepSeek / Claude charts). Each chart scales
     // to its own max so a heavy-Claude day doesn't flatten the DeepSeek bars.
@@ -5819,11 +5831,11 @@ export default {
       providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost,
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
-      staffCreateMarketingOnly, staffAssignMarketingOnly,
+      staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
       places, placesLoading, placesPage, placesTotalPages, placesSearch, placesImageFilter, placesActionFilter, placesSort, placesSummary,
-      googleUsage, googleTopPlaces, googleLoading, googleDailyStats, googleChartDays, googleChartMax, googleTotalCost, googleMonthCost, googleTodayCost, googleSkuRows,
+      googleUsage, googleTopPlaces, googleLoading, googleDailyStats, googleChartDays, googleChartMax, googleTotalCost, googleMonthCost, googleTodayCost, googleSkuRows, gDayTitle,
       quickActionStats,
       prefStats, PREF_COLORS, PREF_DOT_COLORS, LIVE_PRICE_STYLES, travelStyleSegments, currencySegments, travelStyleTopPct, currencyTopPct, prefLocTotal, prefBudgetTotal, budgetBucketColor, budgetRangeHint,
       prices, dbStats, mongoBilling, fetchMongoBilling, prettySku, projectedMongoCostStr, monthlyAiCost, monthlyGoogleCost, monthlyMongoCost, monthlyTotal, monthlyRevenue,
