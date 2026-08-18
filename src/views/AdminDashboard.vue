@@ -150,6 +150,38 @@
             <p v-else class="empty-state">No registration data yet.</p>
           </div>
 
+          <!-- Returning users (retention) — same data as the /marketing report -->
+          <div class="card chart-card">
+            <div class="card-head">
+              <h2>Returning Users</h2>
+              <span class="card-sub" v-if="retention">Last {{ retention.windowDays }} days · {{ retPct(retention.returnRates.comeback) }} come back after their first day ({{ retention.returnRates.comeback.returned }}/{{ retention.returnRates.comeback.eligible }})</span>
+              <div class="card-head-spacer"></div>
+              <div class="chart-legend">
+                <span class="legend-dot ret-legend-returning"></span> Returning
+                <span class="legend-dot ret-legend-new" style="margin-left:10px"></span> New
+              </div>
+            </div>
+            <div class="ret-kpis" v-if="retention">
+              <div class="ret-kpi"><span>Back in 1d</span><b>{{ retPct(retention.returnRates.d1) }}</b></div>
+              <div class="ret-kpi"><span>Back in 7d</span><b>{{ retPct(retention.returnRates.d7) }}</b></div>
+              <div class="ret-kpi"><span>Back in 30d</span><b>{{ retPct(retention.returnRates.d30) }}</b></div>
+              <div class="ret-kpi"><span>Active today</span><b>{{ retention.totals.dau }}</b></div>
+              <div class="ret-kpi"><span>Active 7d</span><b>{{ retention.totals.wau }}</b></div>
+              <div class="ret-kpi"><span>Active 30d</span><b>{{ retention.totals.mau }}</b></div>
+            </div>
+            <div class="sparkbar-wrap" v-if="retention && retention.daily.some(d => d.active > 0)">
+              <div v-for="d in retention.daily" :key="d.day" class="sparkbar-col" :title="`${d.day}: ${d.active} active — ${d.returning} returning, ${d.newUsers} new`">
+                <div class="sparkbar-value">{{ d.active > 0 ? d.active : '' }}</div>
+                <div class="ret-stack">
+                  <div v-if="d.newUsers > 0" class="ret-bar ret-bar-new" :style="{ height: retBarH(d.newUsers) + 'px' }"></div>
+                  <div v-if="d.returning > 0" class="ret-bar ret-bar-returning" :style="{ height: retBarH(d.returning) + 'px' }"></div>
+                </div>
+                <div class="sparkbar-label">{{ d.day.slice(8) }}</div>
+              </div>
+            </div>
+            <p v-else class="empty-state">No activity data yet — deploy the tracking and run scripts/backfillUserActivity.js.</p>
+          </div>
+
           <!-- Feature Usage Chart: Quick Actions + Chat Stream -->
           <div class="card chart-card">
             <div class="card-head">
@@ -735,10 +767,10 @@
             </div>
           </div>
 
-          <!-- Daily AI chart -->
+          <!-- Daily AI charts — one per provider, same window toggle -->
           <div class="card chart-card">
             <div class="card-head">
-              <h2>Daily AI Usage</h2>
+              <h2>DeepSeek Daily AI Usage</h2>
               <span class="card-sub">Last {{ aiChartDays }} days · tokens per day</span>
               <div class="card-head-spacer"></div>
               <div class="seg-group">
@@ -746,8 +778,8 @@
                 <button class="seg-btn" :class="{ 'seg-btn--active': aiChartDays === 30 }" @click="aiChartDays = 30; fetchAIUsage(); fetchProviderStats()">30d</button>
               </div>
             </div>
-            <div v-if="aiLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
-            <div v-else-if="!aiDailyStats.length || aiDailyStats.every(d => d.tokens === 0)" class="empty-state">No AI usage recorded yet.</div>
+            <div v-if="providerStatsLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+            <div v-else-if="providerDaily.every(d => d.deepseek.tokens === 0)" class="empty-state">No DeepSeek usage recorded in this window.</div>
             <div v-else class="g-chart-body">
               <div class="g-chart-area">
                 <div class="g-grid-lines">
@@ -755,18 +787,19 @@
                 </div>
                 <div class="g-bars" :class="{ 'g-bars--30d': aiChartDays === 30 }">
                   <div
-                    v-for="(day, idx) in aiDailyStats"
-                    :key="day.date"
+                    v-for="(day, idx) in providerDaily"
+                    :key="'ds' + day.date"
                     class="g-bar-col"
+                    :title="`${day.date}: ${fmtK(day.deepseek.tokens)} tokens · ${day.deepseek.queries} requests`"
                   >
                     <div class="g-bar-spacer"></div>
                     <div
                       class="g-bar-stack"
-                      :style="{ height: day.tokens > 0 ? Math.max(6, Math.round((day.tokens / aiChartMax) * 110)) + 'px' : '3px', animationDelay: idx * 20 + 'ms' }"
+                      :style="{ height: day.deepseek.tokens > 0 ? Math.max(6, Math.round((day.deepseek.tokens / dsChartMax) * 110)) + 'px' : '3px', animationDelay: idx * 20 + 'ms' }"
                     >
-                      <div class="g-seg ai-seg-queries" v-if="day.queries" :style="{ flex: day.queries }"></div>
-                      <div class="g-seg ai-seg-tokens"  v-if="day.tokens"  :style="{ flex: day.tokens }"></div>
-                      <div class="g-seg g-seg-zero"     v-if="day.tokens === 0" style="flex:1"></div>
+                      <div class="g-seg ai-seg-queries" v-if="day.deepseek.queries" :style="{ flex: day.deepseek.queries }"></div>
+                      <div class="g-seg ai-seg-tokens"  v-if="day.deepseek.tokens"  :style="{ flex: day.deepseek.tokens }"></div>
+                      <div class="g-seg g-seg-zero"     v-if="day.deepseek.tokens === 0" style="flex:1"></div>
                     </div>
                     <div class="g-bar-label">{{ day.label }}</div>
                   </div>
@@ -775,6 +808,45 @@
               <div class="g-legend g-legend--footer">
                 <span class="g-legend-item"><span class="g-legend-dot ai-dot-tokens"></span>Tokens</span>
                 <span class="g-legend-item"><span class="g-legend-dot ai-dot-queries"></span>Queries</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-head">
+              <h2>Claude Haiku Daily AI Usage</h2>
+              <span class="card-sub">Last {{ aiChartDays }} days · tokens per day · web searches in hover</span>
+            </div>
+            <div v-if="providerStatsLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+            <div v-else-if="providerDaily.every(d => d.claude.tokens === 0)" class="empty-state">No Claude usage recorded in this window.</div>
+            <div v-else class="g-chart-body">
+              <div class="g-chart-area">
+                <div class="g-grid-lines">
+                  <div class="g-grid-line" v-for="i in 4" :key="i"></div>
+                </div>
+                <div class="g-bars" :class="{ 'g-bars--30d': aiChartDays === 30 }">
+                  <div
+                    v-for="(day, idx) in providerDaily"
+                    :key="'cl' + day.date"
+                    class="g-bar-col"
+                    :title="`${day.date}: ${fmtK(day.claude.tokens)} tokens · ${day.claude.queries} requests · ${day.claude.searches} web searches`"
+                  >
+                    <div class="g-bar-spacer"></div>
+                    <div
+                      class="g-bar-stack"
+                      :style="{ height: day.claude.tokens > 0 ? Math.max(6, Math.round((day.claude.tokens / clChartMax) * 110)) + 'px' : '3px', animationDelay: idx * 20 + 'ms' }"
+                    >
+                      <div class="g-seg cl-seg-searches" v-if="day.claude.searches" :style="{ flex: Math.max(day.claude.searches, Math.round(day.claude.tokens * 0.06)) }"></div>
+                      <div class="g-seg cl-seg-tokens"   v-if="day.claude.tokens"   :style="{ flex: day.claude.tokens }"></div>
+                      <div class="g-seg g-seg-zero"      v-if="day.claude.tokens === 0" style="flex:1"></div>
+                    </div>
+                    <div class="g-bar-label">{{ day.label }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="g-legend g-legend--footer">
+                <span class="g-legend-item"><span class="g-legend-dot cl-dot-tokens"></span>Tokens</span>
+                <span class="g-legend-item"><span class="g-legend-dot cl-dot-searches"></span>Web searches</span>
               </div>
             </div>
           </div>
@@ -1358,6 +1430,54 @@
               </div>
             </div>
           </div>
+
+          <!-- Free tier & billing forecast — month-by-month, caps reset on the 1st -->
+          <div class="card chart-card">
+            <div class="card-head">
+              <h2>Free Tier &amp; Billing Forecast</h2>
+              <span class="card-sub" v-if="gMonthly">{{ gMonthly.isCurrent ? `Day ${gMonthly.dayOfMonth} of ${gMonthly.daysInMonth} · free caps reset on the 1st` : 'Closed month' }}</span>
+              <div class="card-head-spacer"></div>
+              <div class="seg-group">
+                <button class="seg-btn" :disabled="!gPrevMonth" @click="fetchGoogleMonthly(gPrevMonth)">‹</button>
+                <span class="gm-month">{{ gMonthly ? gMonthly.month : '…' }}</span>
+                <button class="seg-btn" :disabled="!gNextMonth" @click="fetchGoogleMonthly(gNextMonth)">›</button>
+              </div>
+            </div>
+            <div v-if="gMonthlyLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+            <div v-else-if="gMonthly" class="gm-body">
+              <div class="gm-sku" v-for="s in gMonthly.skus" :key="s.key">
+                <div class="gm-sku-head">
+                  <b>{{ s.label }}</b>
+                  <span class="gm-rate">${{ s.rate.toFixed(3) }}/call · {{ fmt(s.free) }} free/mo</span>
+                  <span class="gm-status" :class="gmStatusClass(s)">{{ gmStatusText(s) }}</span>
+                </div>
+                <div class="gm-bar" :title="s.projected !== null ? `Projected month-end: ${fmt(s.projected)} calls (${s.projectedPct}% of cap)` : ''">
+                  <div class="gm-fill" :class="gmStatusClass(s)" :style="{ width: Math.min(100, s.usedPct) + '%' }"></div>
+                  <div v-if="s.projectedPct !== null" class="gm-proj-marker" :style="{ left: Math.min(100, s.projectedPct) + '%' }"></div>
+                </div>
+                <div class="gm-sku-meta">
+                  <span>{{ fmt(s.total) }} / {{ fmt(s.free) }} calls</span>
+                  <span v-if="s.billed > 0" class="gm-billed">billed ${{ s.billed.toFixed(2) }}</span>
+                  <span v-if="s.projected !== null">→ month-end ~{{ fmt(s.projected) }} ({{ s.projectedPct }}%)<template v-if="s.projectedBilled > 0"> · ~${{ s.projectedBilled.toFixed(2) }}</template></span>
+                  <span v-if="s.capCrossDate && s.capCrossDate !== 'crossed'" class="gm-warn-text">cap crossed ~{{ s.capCrossDate }}</span>
+                </div>
+                <div class="gm-drives">{{ s.drives }}</div>
+              </div>
+              <div class="gm-total">
+                <template v-if="gMonthly.isCurrent">
+                  Billed so far this month: <b>${{ gMonthly.totals.billed.toFixed(2) }}</b>
+                  &nbsp;·&nbsp; projected month-end: <b>${{ (gMonthly.totals.projectedBilled || 0).toFixed(2) }}</b>
+                </template>
+                <template v-else>Month total billed: <b>${{ gMonthly.totals.billed.toFixed(2) }}</b></template>
+              </div>
+              <p class="gm-hint">
+                Reading this: the bar is this month's usage of the free cap; the tick is where the month is projected to end (7-day pace × user-growth trend).
+                If <b>Text Search</b> trends over its cap, that's chat grounding + quick-action refills — in warm (well-cached) cities those can be turned down first.
+                <b>Details</b> and <b>Photos</b> are paid once per NEW place (cached forever), so they calm down as a city warms up. <b>Geocoding</b> rarely bills.
+                Turn a category or chat grounding off only when its cache-hit rate is high — then the AI serves from cached/DB data on its own.
+              </p>
+            </div>
+          </div>
         </section>
 
         <!-- ── PRICES ── -->
@@ -1406,6 +1526,24 @@
                 <div class="price-row"><span class="price-label">Today's cost</span><span class="price-val">${{ todayCost }}</span></div>
                 <div class="price-row"><span class="price-label">All-time tokens</span><span class="price-val">{{ fmtK(aiSummary.totalTokens) }}</span></div>
                 <div class="price-row price-row--total"><span class="price-label">All-time cost</span><span class="price-val">${{ aiCost }}</span></div>
+              </div>
+            </div>
+            <div class="card price-card">
+              <div class="card-head">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
+                <h2>Claude AI</h2><span class="card-sub">Haiku 4.5 · tokens + web search billing</span>
+              </div>
+              <div class="price-card-body">
+                <div class="price-row"><span class="price-label">Input rate</span><span class="price-val">$1.00 / 1M tokens (cache read $0.10)</span></div>
+                <div class="price-row"><span class="price-label">Output rate</span><span class="price-val">$5.00 / 1M tokens</span></div>
+                <div class="price-row"><span class="price-label">Web search</span><span class="price-val">$0.01 / search (+ result tokens)</span></div>
+                <div class="price-row"><span class="price-label">Blended est.</span><span class="price-val">~$2.00 / 1M tokens (incl. cache write/read)</span></div>
+                <div class="price-row"><span class="price-label">Today's tokens</span><span class="price-val">{{ fmtK(claudeToday.tokens) }}</span></div>
+                <div class="price-row"><span class="price-label">Today's searches</span><span class="price-val">{{ fmt(claudeToday.searches) }}</span></div>
+                <div class="price-row"><span class="price-label">Today's cost</span><span class="price-val">${{ claudeTodayCost }}</span></div>
+                <div class="price-row"><span class="price-label">{{ aiChartDays }}-day tokens</span><span class="price-val">{{ fmtK(providerStats.summary.claude.tokens) }}</span></div>
+                <div class="price-row"><span class="price-label">{{ aiChartDays }}-day searches</span><span class="price-val">{{ fmt(providerStats.summary.claude.searches) }} · ${{ (providerStats.summary.claude.searches * 0.01).toFixed(2) }}</span></div>
+                <div class="price-row price-row--total"><span class="price-label">{{ aiChartDays }}-day cost (tokens + search)</span><span class="price-val">${{ claudeCost }}</span></div>
               </div>
             </div>
             <div class="card price-card">
@@ -1584,6 +1722,7 @@
                       <span v-if="(s.staffAssignment?.permissions?.validateBusinesses ?? true)" class="staff-perm-badge staff-perm-badge--validate" title="Can validate business applications">validate</span>
                       <span v-if="s.staffAssignment?.permissions?.manageDestinations" class="staff-perm-badge staff-perm-badge--destinations" title="Can add and manage destinations">destinations</span>
                       <span v-if="s.staffAssignment?.permissions?.moderateExplore" class="staff-perm-badge staff-perm-badge--explore" title="Can hide / verify Explore-page places">explore</span>
+                      <span v-if="s.staffAssignment?.permissions?.viewMarketing" class="staff-perm-badge staff-perm-badge--explore" title="Can view the Growth &amp; Retention marketing report">marketing</span>
                     </div>
                     <span v-if="!(s.staffAssignment?.countries?.length || s.staffAssignment?.cities?.length)" class="assign-empty">no scope</span>
                     <span v-else class="assign-scope">
@@ -2799,8 +2938,15 @@
                     <span class="staff-perm-sub">Hide low-quality places or verify good ones on the Explore page, inside their territory.</span>
                   </span>
                 </label>
+                <label class="staff-perm-row">
+                  <input type="checkbox" v-model="staffModal.form.permissions.viewMarketing" />
+                  <span class="staff-perm-body">
+                    <span class="staff-perm-title">Marketing report</span>
+                    <span class="staff-perm-sub">View the Growth &amp; Retention dashboard (aggregate numbers only). Check ONLY this to create a marketing-partner account locked to that page.</span>
+                  </span>
+                </label>
               </div>
-              <div v-if="!staffModal.form.permissions.validateBusinesses && !staffModal.form.permissions.manageDestinations && !staffModal.form.permissions.moderateExplore"
+              <div v-if="!staffModal.form.permissions.validateBusinesses && !staffModal.form.permissions.manageDestinations && !staffModal.form.permissions.moderateExplore && !staffModal.form.permissions.viewMarketing"
                    style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.1); color:#f59e0b; border-radius:6px; font-size:12.5px">
                 Pick at least one — a staff member with no permissions can't do anything.
               </div>
@@ -2958,8 +3104,15 @@
                     <span class="staff-perm-sub">Hide low-quality places or verify good ones on the Explore page, inside their territory.</span>
                   </span>
                 </label>
+                <label class="staff-perm-row">
+                  <input type="checkbox" v-model="staffAssignModal.form.permissions.viewMarketing" />
+                  <span class="staff-perm-body">
+                    <span class="staff-perm-title">Marketing report</span>
+                    <span class="staff-perm-sub">View the Growth &amp; Retention dashboard (aggregate numbers only).</span>
+                  </span>
+                </label>
               </div>
-              <div v-if="!staffAssignModal.form.permissions.validateBusinesses && !staffAssignModal.form.permissions.manageDestinations && !staffAssignModal.form.permissions.moderateExplore"
+              <div v-if="!staffAssignModal.form.permissions.validateBusinesses && !staffAssignModal.form.permissions.manageDestinations && !staffAssignModal.form.permissions.moderateExplore && !staffAssignModal.form.permissions.viewMarketing"
                    style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.1); color:#f59e0b; border-radius:6px; font-size:12.5px">
                 At least one permission must stay enabled.
               </div>
@@ -3380,6 +3533,7 @@ export default {
           validateBusinesses: true,
           manageDestinations: false,
           moderateExplore: false,
+          viewMarketing: false,
         },
       },
     })
@@ -3402,6 +3556,7 @@ export default {
           validateBusinesses: true,
           manageDestinations: false,
           moderateExplore: false,
+          viewMarketing: false,
         },
       },
     })
@@ -3451,7 +3606,7 @@ export default {
     })
     const staffCanSubmit = computed(() => {
       const f = staffModal.value.form
-      const anyPerm = f.permissions?.validateBusinesses || f.permissions?.manageDestinations || f.permissions?.moderateExplore
+      const anyPerm = f.permissions?.validateBusinesses || f.permissions?.manageDestinations || f.permissions?.moderateExplore || f.permissions?.viewMarketing
       return f.email && f.tempPassword && !staffPwError.value && anyPerm
     })
 
@@ -3464,7 +3619,7 @@ export default {
           countriesText: '', citiesText: '',
           priorityCountriesText: '', priorityCitiesText: '',
           notes: '',
-          permissions: { validateBusinesses: true, manageDestinations: false, moderateExplore: false },
+          permissions: { validateBusinesses: true, manageDestinations: false, moderateExplore: false, viewMarketing: false },
         },
       }
     }
@@ -3503,6 +3658,7 @@ export default {
             validateBusinesses: !!f.permissions?.validateBusinesses,
             manageDestinations: !!f.permissions?.manageDestinations,
             moderateExplore:    !!f.permissions?.moderateExplore,
+            viewMarketing:      !!f.permissions?.viewMarketing,
           },
         }
         const res = await apiFetch('/staff', {
@@ -3554,6 +3710,7 @@ export default {
             validateBusinesses: p.validateBusinesses !== false,
             manageDestinations: p.manageDestinations === true,
             moderateExplore:    p.moderateExplore === true,
+            viewMarketing:      p.viewMarketing === true,
           },
         },
       }
@@ -3576,6 +3733,7 @@ export default {
             validateBusinesses: !!m.form.permissions?.validateBusinesses,
             manageDestinations: !!m.form.permissions?.manageDestinations,
             moderateExplore:    !!m.form.permissions?.moderateExplore,
+            viewMarketing:      !!m.form.permissions?.viewMarketing,
           },
         }
         await apiFetch(`/staff/${m.target._id}/assignment`, {
@@ -3832,8 +3990,56 @@ export default {
     })
     const maxReg = computed(() => Math.max(...registrations.value.map(r => r.count), 1))
     const barHeight = (count) => Math.max(4, Math.round((count / maxReg.value) * 80))
+    // ── Retention (Returning Users card) — same report as /marketing ──
+    const retention = ref(null)
+    const maxRetDaily = computed(() => Math.max(...(retention.value?.daily || []).map(d => d.active), 1))
+    const retBarH = (v) => Math.max(2, Math.round((v / maxRetDaily.value) * 80))
+    const retPct = (r) => (r?.pct === null || r?.pct === undefined) ? '—' : r.pct + '%'
+    const fetchRetention = async () => {
+      try { const res = await apiFetch('/retention?days=30'); retention.value = res.data }
+      catch (e) { console.warn('retention fetch failed:', e.message) }
+    }
     const googleChartMax = computed(() => Math.max(...googleDailyStats.value.map(d => d.total), 1))
     const aiChartMax = computed(() => Math.max(...aiDailyStats.value.map(d => d.tokens), 1))
+    // Per-provider daily series (DeepSeek / Claude charts). Each chart scales
+    // to its own max so a heavy-Claude day doesn't flatten the DeepSeek bars.
+    const providerDaily = computed(() => (providerStats.value.daily || []).map(d => ({ ...d, label: d.date.slice(5) })))
+    const dsChartMax = computed(() => Math.max(...providerDaily.value.map(d => d.deepseek.tokens), 1))
+    const clChartMax = computed(() => Math.max(...providerDaily.value.map(d => d.claude.tokens), 1))
+
+    // ── Google monthly free-tier & billing forecast ──
+    const gMonthly = ref(null)
+    const gMonthlyLoading = ref(false)
+    const fetchGoogleMonthly = async (month) => {
+      gMonthlyLoading.value = true
+      try {
+        const res = await apiFetch('/google-usage/monthly' + (month ? `?month=${month}` : ''))
+        if (res.success) gMonthly.value = res.data
+      } catch (e) { console.warn('google monthly fetch failed:', e.message) }
+      finally { gMonthlyLoading.value = false }
+    }
+    const gPrevMonth = computed(() => {
+      if (!gMonthly.value) return null
+      const i = gMonthly.value.months.indexOf(gMonthly.value.month)
+      return i > 0 ? gMonthly.value.months[i - 1] : null
+    })
+    const gNextMonth = computed(() => {
+      if (!gMonthly.value) return null
+      const i = gMonthly.value.months.indexOf(gMonthly.value.month)
+      return i >= 0 && i < gMonthly.value.months.length - 1 ? gMonthly.value.months[i + 1] : null
+    })
+    const gmStatusClass = (s) => {
+      if (s.total >= s.free) return 'gm-red'
+      if (s.projectedPct !== null && s.projectedPct > 100) return 'gm-amber'
+      if (s.usedPct > 70) return 'gm-amber'
+      return 'gm-green'
+    }
+    const gmStatusText = (s) => {
+      if (s.total >= s.free) return 'over cap — billing'
+      if (s.projectedPct !== null && s.projectedPct > 100) return 'on track to exceed'
+      if (s.usedPct > 70) return 'watch'
+      return 'safe'
+    }
     const isToday = (dateStr) => {
       if (!dateStr) return false
       const d = new Date(dateStr), now = new Date()
@@ -4195,7 +4401,7 @@ export default {
     const debouncedDestFetch = debounce(() => fetchDestinations(true))
     const fetchAll = async () => {
       loading.value = true
-      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchDbStats()]) }
+      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchDbStats()]) }
       catch (e) { showToast(e.message, 'error') } finally { loading.value = false }
     }
     // Stored rec images are either absolute URLs or API-relative paths
@@ -5416,6 +5622,14 @@ export default {
       const s = providerStats.value.summary.claude
       return fmtCost((s.tokens || 0) * CLAUDE_RATE_BLENDED + (s.searches || 0) * CLAUDE_SEARCH_RATE)
     })
+    // Today's Claude usage = the last entry of the per-provider daily series
+    // (series is gap-filled by the backend, so the last row is always today).
+    const claudeToday = computed(() => {
+      const daily = providerStats.value.daily || []
+      return (daily.length ? daily[daily.length - 1].claude : null) || { tokens: 0, queries: 0, searches: 0 }
+    })
+    const claudeTodayCost = computed(() =>
+      fmtCost((claudeToday.value.tokens || 0) * CLAUDE_RATE_BLENDED + (claudeToday.value.searches || 0) * CLAUDE_SEARCH_RATE))
     const aiCost = computed(() => {
       const tokens = aiSummary.value.totalTokens || 0
       return fmtCost(tokens * DEEPSEEK_RATE_BLENDED)
@@ -5579,13 +5793,16 @@ export default {
       theme, toggleTheme, handleLogout, loading, activeTab, tabs, currentTabLabel, formattedDate,
       mobileNavItems, mobileNavItemsTripled, loopStrip, onMobileNavClick, onLoopStripScroll,
       overviewData, overview, registrations, premiumPct, barHeight, maxReg,
+      retention, retBarH, retPct,
       users, usersLoading, usersPage, usersTotalPages, userSearch, userFilter, userLocations,
       aiUsers, aiLoading, aiPage, aiTotalPages, aiSummary, aiDailyStats, aiChartDays, aiChartMax, dailyTokenPct, dailyPlacesPct, aiCost, todayCost,
       aiProvider, aiProviderLoading, aiProviderSaving, aiProviderSavedAt, fetchAiProvider, saveAiProvider, setProvider,
       webSearchActionOptions, isSearchActionOn, searchActionCount, toggleSearchAction,
       prefetchLayerOptions, isPrefetchLayerOn, prefetchLayerCount, togglePrefetchLayer,
       isPrefetchActionOn, prefetchActionCount, togglePrefetchAction,
-      providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost,
+      providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost,
+      providerDaily, dsChartMax, clChartMax,
+      gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
       places, placesLoading, placesPage, placesTotalPages, placesSearch, placesImageFilter, placesActionFilter, placesSort, placesSummary,
@@ -6336,6 +6553,38 @@ export default {
 .g-seg-zero    { background: rgba(139,92,246,0.12); border-radius: 4px 4px 0 0; }
 .ai-seg-tokens  { background: linear-gradient(180deg, #a5b4fc, #4f46e5); }
 .ai-seg-queries { background: linear-gradient(180deg, #6ee7b7, #059669); }
+/* Claude daily chart — tokens in the provider's sky→indigo, web searches in
+ * amber so the paid-search share is visible at a glance. The searches segment
+ * has a visibility floor (~6% of the bar) because raw counts (0–10) would be
+ * invisible next to token thousands. Exact numbers live in the hover title. */
+.cl-seg-tokens   { background: linear-gradient(180deg, #7dd3fc, #38bdf8); }
+.cl-seg-searches { background: linear-gradient(180deg, #fcd34d, #f59e0b); }
+.cl-dot-tokens   { background: #38bdf8; }
+.cl-dot-searches { background: #f59e0b; }
+
+/* Google Free Tier & Billing Forecast card */
+.gm-month { font-size: 12px; font-family: 'DM Mono', monospace; padding: 0 8px; opacity: 0.85; align-self: center; }
+.gm-body { padding: 6px 20px 16px; }
+.gm-sku { margin: 14px 0; }
+.gm-sku-head { display: flex; align-items: baseline; gap: 10px; font-size: 13px; flex-wrap: wrap; }
+.gm-rate { font-size: 11.5px; opacity: 0.55; }
+.gm-status { margin-left: auto; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.gm-status.gm-green { background: rgba(16,185,129,0.14); color: #10b981; }
+.gm-status.gm-amber { background: rgba(245,158,11,0.14); color: #f59e0b; }
+.gm-status.gm-red   { background: rgba(239,68,68,0.14);  color: #ef4444; }
+.gm-bar { position: relative; height: 10px; border-radius: 5px; background: rgba(128,128,128,0.16); margin: 7px 0 5px; overflow: visible; }
+.gm-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; }
+.gm-fill.gm-green { background: linear-gradient(90deg, #34d399, #10b981); }
+.gm-fill.gm-amber { background: linear-gradient(90deg, #fcd34d, #f59e0b); }
+.gm-fill.gm-red   { background: linear-gradient(90deg, #f87171, #ef4444); }
+/* Projected month-end tick */
+.gm-proj-marker { position: absolute; top: -3px; bottom: -3px; width: 2px; background: currentColor; opacity: 0.75; border-radius: 1px; }
+.gm-sku-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; opacity: 0.8; font-variant-numeric: tabular-nums; }
+.gm-billed { color: #ef4444; font-weight: 600; }
+.gm-warn-text { color: #f59e0b; font-weight: 600; }
+.gm-drives { font-size: 11px; opacity: 0.5; margin-top: 3px; }
+.gm-total { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.2); font-size: 13px; }
+.gm-hint { font-size: 11.5px; opacity: 0.6; line-height: 1.6; margin: 10px 0 0; max-width: 90ch; }
 /* Label sits flush against the bottom of the bar's colored segment */
 .g-bar-label { font-size: 8px; font-family: 'DM Mono', monospace; color: #64748b; margin-bottom: 2px; white-space: nowrap; letter-spacing: 0.03em; }
 /* Footer legend — sits below the chart, centered */
@@ -6662,6 +6911,21 @@ export default {
 .qa-row--chat .qa-label { opacity: 0.85; }
 .qa-legend-quick { background: linear-gradient(90deg, #D4AF37, #a78bfa); }
 .qa-legend-chat { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+
+/* Returning Users card — stacked day columns, admin two-series palette
+ * (returning = gold→violet like the primary series, new = sky→indigo). */
+.ret-legend-returning { background: linear-gradient(90deg, #D4AF37, #a78bfa); }
+.ret-legend-new { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+.ret-kpis { display: flex; gap: 22px; flex-wrap: wrap; padding: 6px 20px 2px; }
+.ret-kpi { display: flex; flex-direction: column; gap: 2px; font-size: 11px; }
+.ret-kpi span { opacity: 0.6; }
+.ret-kpi b { font-size: 15px; font-family: 'DM Mono', monospace; }
+.ret-stack { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; }
+.ret-bar { width: 100%; min-height: 2px; transition: height 0.4s ease; }
+.ret-stack .ret-bar:first-child { border-radius: 3px 3px 0 0; }
+.ret-bar-returning { background: linear-gradient(180deg, #a78bfa, #8b5cf6); }
+.ret-bar-new { background: linear-gradient(180deg, #38bdf8, #818cf8); }
+.admin-shell.day-mode .ret-bar-returning { background: linear-gradient(180deg, #e0c050, #D4AF37); }
 .admin-shell.day-mode .qa-bar { background: rgba(0,0,0,0.07); }
 .admin-shell.day-mode .qa-divider { background: rgba(0,0,0,0.07); }
 .admin-shell.day-mode .qa-label { color: #2c1e10; }

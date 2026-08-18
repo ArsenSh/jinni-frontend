@@ -104,6 +104,22 @@ const routes = [
         name: 'JinniShare',
         component: () => import('@/views/JinniShare.vue'),
         meta: { public: true }   // skip auth guard for this route
+    },
+    {
+        // Retention report for the marketing team — token-guarded server-side
+        // (MARKETING_REPORT_TOKEN env); aggregate numbers only, safe to share.
+        path: '/marketing/:token',
+        name: 'MarketingReport',
+        component: () => import('@/views/MarketingReport.vue'),
+        meta: { public: true, title: 'Jinni — Growth & Retention' }
+    },
+    {
+        // Same report for logged-in marketing accounts (staff with the
+        // viewMarketing permission) and admins — no token in the URL.
+        path: '/marketing',
+        name: 'MarketingView',
+        component: () => import('@/views/MarketingReport.vue'),
+        meta: { requiresAuth: true, title: 'Jinni — Growth & Retention' }
     }
 ]
 
@@ -188,7 +204,12 @@ router.beforeEach(async (to, from, next) => {
         if (to.name === 'Privacy' || to.name === 'Terms' || to.name === 'BusinessPrivacy' || to.name === 'BusinessTerms') { return next() }
         if (tokenValid && publicRoutes.includes(to.name)) { 
             if (to.name === 'BusinessApply' || to.name === 'BusinessLanding') { return next() }
-            if (user?.role === 'staff') { return next({ name: 'StaffValidation' }) }
+            if (user?.role === 'staff') {
+                // Marketing-only staff live on the report page, not the queue
+                const sp = user?.staffPermissions || {}
+                const marketingOnly = sp.viewMarketing && !sp.validateBusinesses && !sp.manageDestinations && !sp.moderateExplore
+                return next({ name: marketingOnly ? 'MarketingView' : 'StaffValidation' })
+            }
             if (user?.isAdmin || user?.role === 'admin') { return next({ name: 'Admin' }) }
             if (user?.businessId) { return next({ name: 'BusinessDashboard' }) }
             return next({ name: user?.onboardingCompleted ? 'JinniChat' : 'Onboarding' });
@@ -202,10 +223,17 @@ router.beforeEach(async (to, from, next) => {
         }
         return next({ name: 'Auth', query: { redirect: to.fullPath } });
     }
-    // Staff (validation-only role) — locked to StaffValidation and a few utility routes
+    // Staff — locked to their working page(s) plus a few utility routes.
+    // Validators live on StaffValidation; marketing-only staff (viewMarketing
+    // permission, nothing else) live on the Growth & Retention report.
     if (user?.role === 'staff') {
-        const staffRoutes = ['StaffValidation', 'ContactUs', 'Terms', 'Privacy', 'BusinessPrivacy', 'BusinessTerms']
-        if (!staffRoutes.includes(to.name)) { return next({ name: 'StaffValidation' }) }
+        const sp = user?.staffPermissions || {}
+        const marketingOnly = sp.viewMarketing && !sp.validateBusinesses && !sp.manageDestinations && !sp.moderateExplore
+        const staffRoutes = ['ContactUs', 'Terms', 'Privacy', 'BusinessPrivacy', 'BusinessTerms']
+        if (sp.viewMarketing) staffRoutes.push('MarketingView')
+        if (!marketingOnly) staffRoutes.push('StaffValidation')
+        const home = marketingOnly ? 'MarketingView' : 'StaffValidation'
+        if (!staffRoutes.includes(to.name)) { return next({ name: home }) }
         return next()
     }
     // Business owners go to their dashboard, not traveler onboarding/chat
