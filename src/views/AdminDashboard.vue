@@ -23,6 +23,7 @@
           <svg v-else-if="tab.icon === 'destinations'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           <svg v-else-if="tab.icon === 'google'" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.454 0-.769-.085-1.357-.187-1.857H12.24z"/></svg>
           <svg v-else-if="tab.icon === 'prices'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <svg v-else-if="tab.icon === 'limits'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
           <svg v-else-if="tab.icon === 'staff'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
           <span class="nav-label">{{ tab.label }}</span>
         </button>
@@ -956,6 +957,14 @@
                 {{ opt.label }}
               </button>
             </div>
+            <div class="seg-group">
+              <button v-for="opt in categoryFilterOpts" :key="opt.value"
+                class="seg-btn"
+                :class="{ 'seg-btn--active': bizTypeFilter === opt.value }"
+                @click="bizTypeFilter = opt.value; bizPage = 1; fetchBusinesses()">
+                {{ opt.label }}
+              </button>
+            </div>
           </div>
           <div class="card table-card">
             <div class="card-head"><h2>Business Directory</h2><span class="card-sub">{{ businesses.length }} results</span></div>
@@ -1214,6 +1223,42 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
+
+          <!-- Jinni Events — events the AI found & stored by itself (AiFoundEvent),
+               same queue the validator sees, with the same actions. -->
+          <div class="card" style="margin-top: 16px; padding: 18px 20px">
+            <div class="card-head" style="padding: 0 0 10px">
+              <h2>Jinni Events</h2>
+              <span class="card-sub">events Jinni discovered and stored by itself · approve → becomes a curated Destination</span>
+              <div class="card-head-spacer"></div>
+              <div class="seg-group">
+                <button v-for="s in ['new', 'approved', 'hidden', 'all']" :key="s" class="seg-btn"
+                  :class="{ 'seg-btn--active': aiEvStatus === s }"
+                  @click="aiEvStatus = s; fetchAiEvents()">{{ s }}</button>
+              </div>
+            </div>
+            <div v-if="aiEvLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+            <div v-else-if="!aiEvents.length" class="empty-state">No {{ aiEvStatus === 'all' ? '' : aiEvStatus + ' ' }}Jinni-found events.</div>
+            <div v-else>
+              <div v-for="ev in aiEvents" :key="ev._id" class="aiev-row">
+                <div class="aiev-main">
+                  <b>{{ ev.name }}</b>
+                  <span class="db-meta">
+                    {{ shortDate(ev.startDate) }}<template v-if="ev.endDate"> → {{ shortDate(ev.endDate) }}</template>
+                    · {{ ev.venueName || ev.venue?.name || 'venue unresolved' }}<template v-if="ev.city"> · {{ ev.city }}</template>
+                    · shown {{ ev.timesShown || 1 }}×
+                  </span>
+                </div>
+                <span class="gm-status" :class="ev.status === 'approved' ? 'gm-green' : ev.status === 'hidden' ? 'gm-red' : 'gm-amber'">{{ ev.status }}</span>
+                <div class="action-group">
+                  <button v-if="ev.status === 'new'" class="action-btn btn-accent" @click="aiEvApprove(ev)" title="Create a curated Destination from this event">Approve</button>
+                  <button v-if="ev.status !== 'hidden'" class="action-btn btn-muted" @click="aiEvSetStatus(ev, 'hidden')" title="Permanently block — an annual re-listing stays hidden next year too">Hide</button>
+                  <button v-else class="action-btn btn-muted" @click="aiEvSetStatus(ev, 'new')">Unhide</button>
+                  <button class="action-btn btn-delete" @click="aiEvDismiss(ev)" title="Remove from the queue — may reappear if Jinni finds it again">Dismiss</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- ── DESTINATIONS ── -->
@@ -1246,6 +1291,9 @@
             </div>
             <div class="seg-group">
               <button v-for="opt in destFilterOpts" :key="opt.value" class="seg-btn" :class="{ 'seg-btn--active': destFilter === opt.value }" @click="destFilter = opt.value; fetchDestinations(true)">{{ opt.label }}</button>
+            </div>
+            <div class="seg-group">
+              <button v-for="opt in categoryFilterOpts" :key="opt.value" class="seg-btn" :class="{ 'seg-btn--active': destTypeFilter === opt.value }" @click="destTypeFilter = opt.value; fetchDestinations(true)">{{ opt.label }}</button>
             </div>
             <button class="action-btn btn-accent" @click="openCreateDestination" title="Add a new destination">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1536,6 +1584,61 @@
               </p>
             </div>
           </div>
+        </section>
+
+        <!-- ── LIMITS ── -->
+        <section v-if="activeTab === 'limits'" class="tab-section">
+          <div class="kpi-grid kpi-grid--4" v-if="limitsData">
+            <div class="kpi-card">
+              <div class="kpi-label">Free users</div>
+              <div class="kpi-value">{{ fmt(limitsData.free.users) }}</div>
+              <div class="kpi-sub">{{ limitsData.free.activeToday }} active today</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Premium users</div>
+              <div class="kpi-value">{{ fmt(limitsData.premium.users) }}</div>
+              <div class="kpi-sub">{{ limitsData.premium.activeToday }} active today</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">On cooldown now</div>
+              <div class="kpi-value">{{ limitsData.free.onCooldown + limitsData.premium.onCooldown }}</div>
+              <div class="kpi-sub">free {{ limitsData.free.onCooldown }} · premium {{ limitsData.premium.onCooldown }}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Near their limit today</div>
+              <div class="kpi-value">{{ limitsData.free.nearLimit + limitsData.premium.nearLimit }}</div>
+              <div class="kpi-sub">≥80% of daily tokens used</div>
+            </div>
+          </div>
+
+          <div class="loc-grid" v-if="limitsData" style="margin-top: 14px">
+            <div class="card" style="padding: 18px 20px" v-for="tierKey in ['free', 'premium']" :key="tierKey">
+              <div class="card-head" style="padding: 0 0 8px">
+                <h2 style="text-transform: capitalize">{{ tierKey }} tier</h2>
+                <span class="card-sub">daily allowances · resets midnight UTC</span>
+              </div>
+              <div class="edit-field edit-field--full" style="margin-top: 8px">
+                <label class="edit-label">Daily AI tokens</label>
+                <input class="edit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Tokens']" />
+                <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Used today ({{ tierKey }} total): {{ fmt(limitsData[tierKey].tokensToday) }} tokens across {{ limitsData[tierKey].activeToday }} users</small>
+              </div>
+              <div class="edit-field edit-field--full" style="margin-top: 12px">
+                <label class="edit-label">Daily places viewed</label>
+                <input class="edit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Places']" />
+                <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Viewed today ({{ tierKey }} total): {{ fmt(limitsData[tierKey].placesToday) }} places</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" v-if="limitsData" style="margin-top: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+            <button class="action-btn btn-accent" @click="saveLimits" :disabled="limitsSaving">{{ limitsSaving ? 'Saving…' : 'Save limits' }}</button>
+            <span style="font-size: 12.5px; opacity: 0.65; line-height: 1.55; max-width: 70ch">
+              Takes effect immediately for every user (no redeploy). Free values are a floor — a user with a hand-raised
+              personal limit keeps it. Hitting a limit puts free users on a 4-hour cooldown.
+              Note: the per-user meter has a known undercount bug, so "used today" figures are lower bounds until that fix ships.
+            </span>
+          </div>
+          <div v-else class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
         </section>
 
         <!-- ── PRICES ── -->
@@ -3258,6 +3361,37 @@
                 <div class="edit-section-title" style="margin-top:14px">Opening hours</div>
                 <div class="pi-hours"><div v-for="h in placeInfoHours" :key="h">{{ h }}</div></div>
               </template>
+
+              <template v-if="placeInfoModal.editing">
+                <div class="edit-section-title" style="margin-top:16px">Edit place</div>
+                <div class="edit-field edit-field--full" style="margin-top:8px">
+                  <label class="edit-label">Name</label>
+                  <input class="edit-input" type="text" v-model="placeEditForm.name" />
+                </div>
+                <div class="edit-field edit-field--full" style="margin-top:10px">
+                  <label class="edit-label">Address</label>
+                  <input class="edit-input" type="text" v-model="placeEditForm.address" />
+                </div>
+                <div class="edit-field edit-field--full" style="margin-top:10px">
+                  <label class="edit-label">Phone</label>
+                  <input class="edit-input" type="text" v-model="placeEditForm.phone" />
+                </div>
+                <div class="edit-field edit-field--full" style="margin-top:10px">
+                  <label class="edit-label">Website</label>
+                  <input class="edit-input" type="text" v-model="placeEditForm.website" placeholder="https://…" />
+                </div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
+                  <button class="action-btn btn-muted" @click="placeInfoModal.editing = false" :disabled="placeEditSaving">Cancel</button>
+                  <button class="action-btn btn-accent" @click="savePlaceEdit" :disabled="placeEditSaving">{{ placeEditSaving ? 'Saving…' : 'Save changes' }}</button>
+                </div>
+              </template>
+              <div v-else style="display:flex; justify-content:flex-end; margin-top:14px">
+                <button class="action-btn btn-muted" @click="startPlaceEdit">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  Edit place
+                </button>
+              </div>
+
               <p style="margin:16px 0 0; font-size:11.5px; opacity:0.55; line-height:1.55">
                 This is everything the cache stores for this place (Google Place Details, paid once and reused for free).
                 Verify / Hide / Delete live on the card's image — hover it.
@@ -3702,6 +3836,20 @@ export default {
     const destTotalPages = ref(1)
     const destSearch = ref('')
     const destFilter = ref('')
+    const destTypeFilter = ref('')
+    const bizTypeFilter = ref('')
+    // Category pills shared by Destinations + Businesses (same type enum).
+    // 'Shopping' = the concrete shop sub-types (there is no 'shopping' tag).
+    const categoryFilterOpts = [
+      { value: '', label: 'All types' },
+      { value: 'restaurants', label: 'Restaurants' },
+      { value: 'hotels', label: 'Hotels' },
+      { value: 'historical', label: 'Historical' },
+      { value: 'events', label: 'Events' },
+      { value: 'hidden_gems', label: 'Hidden Gems' },
+      { value: 'souvenirs,clothing,market,mall,jewelry,food', label: 'Shopping' },
+      { value: 'photo_spots', label: 'Photo Spots' },
+    ]
     const destSummary = ref({})
     const expandedTypes = ref({})
     const quickActionStats = ref({ actions: [], chatStream: { count: 0 }, quickActionTotal: 0, chatStreamTotal: 0, grandTotal: 0 })
@@ -4065,6 +4213,7 @@ export default {
       { id: 'businesses', label: 'Businesses', icon: 'businesses' },
       { id: 'destinations', label: 'Destinations', icon: 'destinations' },
       { id: 'places', label: 'Places Cache', icon: 'places', badge: placesSummary.value.totalPlaces || null },
+      { id: 'limits', label: 'Limits', icon: 'limits' },
       { id: 'prices', label: 'Prices', icon: 'prices' }
     ])
 
@@ -4597,7 +4746,8 @@ export default {
           search: bizSearch.value,
           partner: bizPartnerFilter.value,
           status: bizStatusFilter.value,
-          location: bizLocationSearch.value
+          location: bizLocationSearch.value,
+          type: bizTypeFilter.value
         })
         const res = await apiFetch(`/businesses?${params}`)
         businesses.value = res.data.businesses
@@ -4705,7 +4855,7 @@ export default {
       if (resetPage) destPage.value = 1
       destLoading.value = true
       try {
-        const params = new URLSearchParams({ page: destPage.value, limit: 20, search: destSearch.value, filter: destFilter.value })
+        const params = new URLSearchParams({ page: destPage.value, limit: 20, search: destSearch.value, filter: destFilter.value, type: destTypeFilter.value })
         const res = await apiFetch(`/destinations?${params}`)
         destinations.value = res.data.destinations
         destTotalPages.value = res.data.totalPages
@@ -5879,6 +6029,8 @@ export default {
       if (tab === 'ai') fetchProviderStats()
       if (tab === 'businesses' && !businesses.value.length) fetchBusinesses()
       if (tab === 'destinations' && !destinations.value.length) fetchDestinations()
+      if (tab === 'limits' && !limitsData.value) fetchLimits()
+      if (tab === 'places' && !aiEvents.value.length) fetchAiEvents()
       if (tab === 'places' && !places.value.length) fetchPlaces()
       if (tab === 'google' && !googleUsage.value.totalPlaces) fetchGoogleUsage()
       // The Google Prefetch control lives on this tab but writes AppConfig via
@@ -5990,10 +6142,102 @@ export default {
       const mongo = parseFloat(projectedMongoCostStr.value) || 8
       return (17.09 + mongo).toFixed(2)
     })
+    // ── Jinni Events queue (AiFoundEvent) — reuses the staff endpoints;
+    //    aiEventGate passes admins straight through. ──
+    const staffFetch = async (path, opts = {}) => {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token')
+      const headers = { Authorization: `Bearer ${token}`, ...opts.headers }
+      if (opts.body) headers['Content-Type'] = 'application/json'
+      const r = await fetch(`${API}/staff${path}`, { ...opts, headers })
+      if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || `HTTP ${r.status}`) }
+      return r.json()
+    }
+    const aiEvents = ref([])
+    const aiEvStatus = ref('new')
+    const aiEvLoading = ref(false)
+    const fetchAiEvents = async () => {
+      aiEvLoading.value = true
+      try { const res = await staffFetch(`/ai-events?status=${aiEvStatus.value}`); aiEvents.value = res.data || [] }
+      catch (e) { showToast(e.message, 'error') } finally { aiEvLoading.value = false }
+    }
+    const aiEvApprove = async (ev) => {
+      try { await staffFetch(`/ai-events/${ev._id}/approve`, { method: 'POST', body: JSON.stringify({}) }); showToast(`"${ev.name}" approved → Destination created`); fetchAiEvents() }
+      catch (e) { showToast(e.message, 'error') }
+    }
+    const aiEvSetStatus = async (ev, status) => {
+      try { await staffFetch(`/ai-events/${ev._id}`, { method: 'PATCH', body: JSON.stringify({ status }) }); showToast(`"${ev.name}" ${status === 'hidden' ? 'hidden' : 'restored'}`); fetchAiEvents() }
+      catch (e) { showToast(e.message, 'error') }
+    }
+    const aiEvDismiss = async (ev) => {
+      try { await staffFetch(`/ai-events/${ev._id}`, { method: 'DELETE' }); showToast(`"${ev.name}" dismissed`); fetchAiEvents() }
+      catch (e) { showToast(e.message, 'error') }
+    }
+
+    // ── Limits tab: tier config + analytics ──
+    const limitsData = ref(null)
+    const limitsForm = ref({ freeTokens: 10000, freePlaces: 100, premiumTokens: 50000, premiumPlaces: 200 })
+    const limitsSaving = ref(false)
+    const fetchLimits = async () => {
+      try {
+        const res = await apiFetch('/limits')
+        if (res.success) {
+          limitsData.value = res.data
+          limitsForm.value = {
+            freeTokens: res.data.config.limitFreeDailyTokens,
+            freePlaces: res.data.config.limitFreeDailyPlaces,
+            premiumTokens: res.data.config.limitPremiumDailyTokens,
+            premiumPlaces: res.data.config.limitPremiumDailyPlaces
+          }
+        }
+      } catch (e) { console.warn('limits fetch failed:', e.message) }
+    }
+    const saveLimits = async () => {
+      limitsSaving.value = true
+      try {
+        await apiFetch('/limits', { method: 'POST', body: JSON.stringify({
+          limitFreeDailyTokens: limitsForm.value.freeTokens,
+          limitFreeDailyPlaces: limitsForm.value.freePlaces,
+          limitPremiumDailyTokens: limitsForm.value.premiumTokens,
+          limitPremiumDailyPlaces: limitsForm.value.premiumPlaces
+        }) })
+        showToast('Limits saved — active immediately')
+        await fetchLimits()
+      } catch (e) { showToast(e.message, 'error') }
+      finally { limitsSaving.value = false }
+    }
+
     // ── Place-cache "click to read" modal ──
-    const placeInfoModal = ref({ open: false, loading: false, row: null, data: null })
+    const placeInfoModal = ref({ open: false, loading: false, editing: false, row: null, data: null })
+    const placeEditForm = ref({ name: '', address: '', phone: '', website: '' })
+    const placeEditSaving = ref(false)
+    const startPlaceEdit = () => {
+      const d = placeInfoModal.value.data || {}, det = d.details || {}
+      placeEditForm.value = {
+        name: d.name || placeInfoModal.value.row?.name || '',
+        address: det.formatted_address || '',
+        phone: det.formatted_phone_number || '',
+        website: det.website || ''
+      }
+      placeInfoModal.value.editing = true
+    }
+    const savePlaceEdit = async () => {
+      placeEditSaving.value = true
+      try {
+        const res = await apiFetch(`/places/${encodeURIComponent(placeInfoModal.value.row.placeId)}/edit`, {
+          method: 'PATCH', body: JSON.stringify(placeEditForm.value)
+        })
+        placeInfoModal.value.data = res.data
+        placeInfoModal.value.editing = false
+        // Reflect the rename on the card grid without a refetch
+        const row = places.value.find(x => x.placeId === placeInfoModal.value.row.placeId)
+        if (row) { row.name = res.data.name; if (row.details) row.details.formatted_address = res.data.details?.formatted_address }
+        placeInfoModal.value.row.name = res.data.name
+        showToast('Place updated')
+      } catch (e) { showToast(e.message, 'error') }
+      finally { placeEditSaving.value = false }
+    }
     const openPlaceInfo = async (p) => {
-      placeInfoModal.value = { open: true, loading: true, row: p, data: null }
+      placeInfoModal.value = { open: true, loading: true, editing: false, row: p, data: null }
       try {
         const res = await apiFetch(`/places/${encodeURIComponent(p.placeId)}/full`)
         if (res.success) placeInfoModal.value.data = res.data
@@ -6220,6 +6464,10 @@ export default {
       aiMonthly, aiMonthlyLoading, fetchAiMonthly, aiPrevMonth, aiNextMonth,
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
+      limitsData, limitsForm, limitsSaving, fetchLimits, saveLimits,
+      destTypeFilter, bizTypeFilter, categoryFilterOpts,
+      aiEvents, aiEvStatus, aiEvLoading, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss,
+      placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
@@ -7025,6 +7273,12 @@ export default {
 .gm-warn-text { color: #f59e0b; font-weight: 600; }
 .gm-drives { font-size: 11px; opacity: 0.5; margin-top: 3px; }
 .gm-total { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.2); font-size: 13px; }
+/* Jinni Events rows */
+.aiev-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.14); flex-wrap: wrap; }
+.aiev-row:last-child { border-bottom: none; }
+.aiev-main { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
+.aiev-main .db-meta { font-size: 12px; }
+
 /* Place-cache detail modal rows */
 .pi-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,0.14); font-size: 13px; }
 .pi-row:last-child { border-bottom: none; }
