@@ -2982,21 +2982,21 @@
                 What this staff member can do in the platform. At least one must be enabled. You can change these anytime.
               </p>
               <div class="staff-perms">
-                <label class="staff-perm-row">
+                <label v-if="!staffCreateMarketingOnly" class="staff-perm-row">
                   <input type="checkbox" v-model="staffModal.form.permissions.validateBusinesses" />
                   <span class="staff-perm-body">
                     <span class="staff-perm-title">Validate businesses</span>
                     <span class="staff-perm-sub">Review pending business applications in their assigned territory.</span>
                   </span>
                 </label>
-                <label class="staff-perm-row">
+                <label v-if="!staffCreateMarketingOnly" class="staff-perm-row">
                   <input type="checkbox" v-model="staffModal.form.permissions.manageDestinations" />
                   <span class="staff-perm-body">
                     <span class="staff-perm-title">Manage destinations</span>
                     <span class="staff-perm-sub">Add, edit, and remove destinations (parks, museums, landmarks) inside their territory.</span>
                   </span>
                 </label>
-                <label class="staff-perm-row">
+                <label v-if="!staffCreateMarketingOnly" class="staff-perm-row">
                   <input type="checkbox" v-model="staffModal.form.permissions.moderateExplore" />
                   <span class="staff-perm-body">
                     <span class="staff-perm-title">Moderate Explore</span>
@@ -3068,6 +3068,9 @@
                   <div style="display:flex; gap:12px; padding:4px 0"><span style="opacity:0.5; min-width:75px; font-size:11px; text-transform:uppercase; letter-spacing:0.05em">Password</span><span style="word-break:break-all">{{ staffModal.created.password }}</span></div>
                 </div>
                 <button class="action-btn btn-accent" @click="copyStaffCreds">{{ staffModal.copied ? 'Copied!' : 'Copy both' }}</button>
+                <p style="margin:12px 0 0; font-size:12px; opacity:0.65; line-height:1.55">
+                  Tell them: to change this password, use <strong>"Forgot password?"</strong> on the sign-in page (a reset code arrives by email). Their workspace page has no password settings.
+                </p>
               </div>
             </section>
           </div>
@@ -3188,21 +3191,21 @@
 
               <div class="edit-section-title" style="margin-top:18px">Permissions</div>
               <div class="staff-perms">
-                <label class="staff-perm-row">
+                <label v-if="!staffAssignMarketingOnly" class="staff-perm-row">
                   <input type="checkbox" v-model="staffAssignModal.form.permissions.validateBusinesses" />
                   <span class="staff-perm-body">
                     <span class="staff-perm-title">Validate businesses</span>
                     <span class="staff-perm-sub">Review pending business applications in their assigned territory.</span>
                   </span>
                 </label>
-                <label class="staff-perm-row">
+                <label v-if="!staffAssignMarketingOnly" class="staff-perm-row">
                   <input type="checkbox" v-model="staffAssignModal.form.permissions.manageDestinations" />
                   <span class="staff-perm-body">
                     <span class="staff-perm-title">Manage destinations</span>
                     <span class="staff-perm-sub">Add, edit, and remove destinations inside their territory.</span>
                   </span>
                 </label>
-                <label class="staff-perm-row">
+                <label v-if="!staffAssignMarketingOnly" class="staff-perm-row">
                   <input type="checkbox" v-model="staffAssignModal.form.permissions.moderateExplore" />
                   <span class="staff-perm-body">
                     <span class="staff-perm-title">Moderate Explore</span>
@@ -3724,7 +3727,14 @@ export default {
     // so the modal collapses to a marketing-only account in one click. The
     // admin can re-tick any of them afterwards for a mixed account.
     const onMarketingPermToggle = (p) => {
-      if (p.viewMarketing) { p.validateBusinesses = false; p.manageDestinations = false; p.moderateExplore = false }
+      if (p.viewMarketing) {
+        // Marketing-only account: the other permission rows hide entirely.
+        p.validateBusinesses = false; p.manageDestinations = false; p.moderateExplore = false
+      } else if (!p.validateBusinesses && !p.manageDestinations && !p.moderateExplore) {
+        // Un-ticking Marketing with nothing else set would strand the form on
+        // "no permissions" — restore the validator default.
+        p.validateBusinesses = true
+      }
     }
 
     const openStaffCreate = () => {

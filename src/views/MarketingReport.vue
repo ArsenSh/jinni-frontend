@@ -15,7 +15,7 @@
             <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             {{ isDark ? 'Day mode' : 'Night mode' }}
           </button>
-          <button v-if="authedMode && report" class="mr-signout" @click="signOut">Sign out</button>
+          <button v-if="authedMode && report" class="mr-signout mr-signout--danger" @click="signOut">Sign out</button>
         </div>
       </div>
       <p v-if="viewerName" class="mr-welcome">Welcome, <b>{{ viewerName }}</b> — here's how Jinni is growing.</p>
@@ -251,9 +251,9 @@
           <h2>Usage &amp; limits</h2>
           <p class="mr-desc-sm">Today's metered AI usage and {{ report.windowDays }}-day card views.</p>
           <div class="mr-usage-rows">
-            <div class="mr-usage-row"><span>Users on cooldown now</span><b>{{ report.usage.usersOnCooldown }}</b></div>
-            <div class="mr-usage-row"><span>AI tokens used today</span><b>{{ (report.usage.todayTokens || 0).toLocaleString() }}</b></div>
-            <div class="mr-usage-row"><span>Places viewed today</span><b>{{ report.usage.todayPlaces }} <small>by {{ report.usage.todayMeteredUsers }} users</small></b></div>
+            <div class="mr-usage-row"><span>Users on cooldown now</span><b>{{ report.usage.usersOnCooldown }} <small v-if="report.usage.free">free {{ report.usage.cooldownFree }} · premium {{ report.usage.cooldownPremium }}</small></b></div>
+            <div class="mr-usage-row"><span>AI tokens used today</span><b>{{ (report.usage.todayTokens || 0).toLocaleString() }} <small v-if="report.usage.free">free {{ (report.usage.free.tokens || 0).toLocaleString() }} · premium {{ (report.usage.premium.tokens || 0).toLocaleString() }}</small></b></div>
+            <div class="mr-usage-row"><span>Places viewed today</span><b>{{ report.usage.todayPlaces }} <small v-if="report.usage.free">free {{ report.usage.free.places }} · premium {{ report.usage.premium.places }}</small><small v-else>by {{ report.usage.todayMeteredUsers }} users</small></b></div>
             <div class="mr-usage-row"><span>Card views ({{ report.windowDays }}d)</span><b>{{ (report.usage.cardViews || 0).toLocaleString() }} <small>by {{ report.usage.cardViewers }} users</small></b></div>
             <div class="mr-usage-row"><span>Card interactions ({{ report.windowDays }}d)</span><b>{{ (report.usage.cardEngagements || 0).toLocaleString() }}</b></div>
           </div>
@@ -542,11 +542,7 @@ export default {
 
 .mr-head { max-width: 1060px; margin: 0 auto 20px; }
 .mr-head-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.mr-brand {
-  font-size: 1.6rem; font-weight: 600; color: #FFD700;
-  background: linear-gradient(45deg, #D4AF37, #FF8C00);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
+.mr-brand { font-size: 1.5rem; font-weight: 650; color: var(--mr-brand); letter-spacing: 0.01em; }
 .mr-head h1 { margin: 6px 0 6px; font-size: clamp(23px, 4vw, 30px); font-weight: 650; }
 .mr-sub { color: var(--mr-muted); font-size: 13px; margin: 0; }
 .mr-welcome { color: var(--mr-ink2); font-size: 14px; margin: 2px 0 6px; }
@@ -560,6 +556,11 @@ export default {
   font-family: inherit; cursor: pointer; transition: all 0.15s;
 }
 .mr-signout:hover { background: var(--mr-hover); color: var(--mr-ink); }
+/* Sign out wears the app's danger tone (admin logout red family) */
+.mr-signout--danger { color: #c53030; }
+.mr-signout--danger:hover { background: rgba(229, 62, 62, 0.08); color: #c53030; }
+.mr-dark .mr-signout--danger { color: #fb7185; }
+.mr-dark .mr-signout--danger:hover { background: rgba(244, 63, 94, 0.12); color: #fb7185; }
 main { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.2s; }
 
