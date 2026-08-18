@@ -25,16 +25,41 @@
       </p>
     </header>
 
-    <!-- Country / city filters — scope every number below; default = worldwide -->
+    <!-- Country / city filters — custom app-style dropdowns (native option
+         popups can't be themed); scope every number below; default = worldwide -->
     <div class="mr-filters" v-if="report">
-      <select class="mr-select" v-model="selCountry" @change="selCity = ''; load(true)">
-        <option value="">All countries</option>
-        <option v-for="c in report.filterOptions.countries" :key="c" :value="c">{{ c }}</option>
-      </select>
-      <select class="mr-select" v-model="selCity" :disabled="!selCountry" @change="load(true)">
-        <option value="">All cities</option>
-        <option v-for="c in report.filterOptions.cities" :key="c" :value="c">{{ c }}</option>
-      </select>
+      <div class="mr-dd">
+        <button class="mr-dd-btn" @click.stop="openDd = openDd === 'country' ? null : 'country'">
+          <span>{{ selCountry || 'All countries' }}</span>
+          <svg class="mr-dd-chev" :class="{ rot: openDd === 'country' }" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div v-if="openDd === 'country'" class="mr-dd-menu" @click.stop>
+          <button class="mr-dd-item" :class="{ sel: !selCountry }" @click="pickCountry('')">
+            <svg v-if="!selCountry" class="mr-dd-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span v-else class="mr-dd-spacer"></span>All countries
+          </button>
+          <button v-for="c in report.filterOptions.countries" :key="c" class="mr-dd-item" :class="{ sel: selCountry === c }" @click="pickCountry(c)">
+            <svg v-if="selCountry === c" class="mr-dd-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span v-else class="mr-dd-spacer"></span>{{ c }}
+          </button>
+        </div>
+      </div>
+      <div class="mr-dd" :class="{ 'mr-dd--disabled': !selCountry }">
+        <button class="mr-dd-btn" @click.stop="openDd = openDd === 'city' ? null : 'city'">
+          <span>{{ selCity || 'All cities' }}</span>
+          <svg class="mr-dd-chev" :class="{ rot: openDd === 'city' }" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div v-if="openDd === 'city'" class="mr-dd-menu" @click.stop>
+          <button class="mr-dd-item" :class="{ sel: !selCity }" @click="pickCity('')">
+            <svg v-if="!selCity" class="mr-dd-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span v-else class="mr-dd-spacer"></span>All cities
+          </button>
+          <button v-for="c in report.filterOptions.cities" :key="c" class="mr-dd-item" :class="{ sel: selCity === c }" @click="pickCity(c)">
+            <svg v-if="selCity === c" class="mr-dd-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span v-else class="mr-dd-spacer"></span>{{ c }}
+          </button>
+        </div>
+      </div>
       <span v-if="selCountry" class="mr-filter-note">
         Scoped to users from {{ selCity ? selCity + ', ' : '' }}{{ selCountry }}
       </span>
@@ -148,7 +173,7 @@
         <p class="mr-desc">Left: GPS mode — physically there, sharing location. Right: destination mode — browsing a place they chose, without GPS. Same rows, side by side, so the two markets compare at a glance.</p>
         <div class="mr-compare">
           <div class="mr-compare-col">
-            <h3 class="mr-compare-head">📍 GPS mode</h3>
+            <h3 class="mr-compare-head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> GPS mode</h3>
             <div class="mr-compare-sub">Countries</div>
             <div v-for="c in report.locations.byCountry" :key="'gc' + c.key" class="hbar-row">
               <span class="hbar-label" :title="c.key">{{ c.key }}</span>
@@ -164,7 +189,7 @@
             </div>
           </div>
           <div class="mr-compare-col mr-compare-col--right">
-            <h3 class="mr-compare-head">🧭 Destination mode</h3>
+            <h3 class="mr-compare-head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Destination mode</h3>
             <div class="mr-compare-sub">Countries</div>
             <div v-for="c in report.locations.destinations.byCountry" :key="'dc' + c.key" class="hbar-row">
               <span class="hbar-label" :title="c.key">{{ c.key }}</span>
@@ -201,8 +226,9 @@
             <div class="hbar-track"><div class="hbar-fill" :class="{ 'hbar-fill--alt': m.key === 'discovery' }" :style="{ width: rowW(m, modeRows) }"></div></div>
             <span class="hbar-val">{{ m.users }}</span>
           </div>
-          <p class="mr-note-sm" style="margin-top:12px">
-            🗺️ Map route calculations: {{ (report.surfaces && report.surfaces.map) || 0 }} requests by {{ report.mapUsers || 0 }} user{{ report.mapUsers === 1 ? '' : 's' }}
+          <p class="mr-note-sm mr-iconline" style="margin-top:12px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            Map route calculations: {{ (report.surfaces && report.surfaces.map) || 0 }} requests by {{ report.mapUsers || 0 }} user{{ report.mapUsers === 1 ? '' : 's' }}
           </p>
         </div>
         <div class="mr-card">
@@ -232,6 +258,23 @@
             <div class="mr-usage-row"><span>Card interactions ({{ report.windowDays }}d)</span><b>{{ (report.usage.cardEngagements || 0).toLocaleString() }}</b></div>
           </div>
           <p class="mr-note-sm" style="margin-top:10px">Approximate — the per-user meter is known to undercount until the usage-meter fix ships.</p>
+        </div>
+        <div class="mr-card" v-if="report.engagement">
+          <h2>Engagement actions ({{ report.windowDays }}d)</h2>
+          <p class="mr-desc-sm">What users do with results. "≈/user" divides by the {{ report.totals.mau || 0 }} monthly actives.</p>
+          <div class="mr-usage-rows">
+            <div class="mr-usage-row"><span>New chat sessions</span><b>{{ report.engagement.chatSessions }} <small>{{ perActive(report.engagement.chatSessions) }}</small></b></div>
+            <div class="mr-usage-row"><span>Places saved</span><b>{{ report.engagement.saved }} <small>{{ perActive(report.engagement.saved) }}</small></b></div>
+            <div class="mr-usage-row"><span>Places shared</span><b>{{ report.engagement.shares }}</b></div>
+            <div class="mr-usage-row"><span>Card likes / dislikes</span><b>{{ report.engagement.cardFeedback }}</b></div>
+            <div class="mr-usage-row"><span>Message feedback</span><b>{{ report.engagement.messageFeedback }}</b></div>
+            <div class="mr-usage-row"><span>View More taps</span><b>{{ report.engagement.viewMore }}</b></div>
+            <div class="mr-usage-row"><span>Map / directions opens *</span><b>{{ report.engagement.mapOpens }}</b></div>
+            <div class="mr-usage-row"><span>Ask AI on a card *</span><b>{{ report.engagement.askAi }}</b></div>
+            <div class="mr-usage-row"><span>More info opens *</span><b>{{ report.engagement.moreInfo }}</b></div>
+            <div class="mr-usage-row"><span>More images *</span><b>{{ report.engagement.moreImages }}</b></div>
+          </div>
+          <p class="mr-note-sm" style="margin-top:10px">* card-button counters started with the tracking deploy — they grow from there.</p>
         </div>
         <div class="mr-card">
           <h2>Users by language</h2>
@@ -287,6 +330,7 @@ export default {
       isDark: false,
       selCountry: '',
       selCity: '',
+      openDd: null,
       viewerName: '',
       tip: { show: false, x: 0, y: 0, day: '', new: 0, ret: 0, total: 0 }
     };
@@ -321,8 +365,8 @@ export default {
     modeRows() {
       const m = this.report.searchModes || { nearby: 0, discovery: 0 };
       return [
-        { key: 'nearby', label: '📍 Nearby (GPS)', users: m.nearby },
-        { key: 'discovery', label: '🧭 Discovery', users: m.discovery }
+        { key: 'nearby', label: 'Nearby (GPS)', users: m.nearby },
+        { key: 'discovery', label: 'Discovery', users: m.discovery }
       ];
     },
     surfaceRows() {
@@ -349,11 +393,21 @@ export default {
     /* Keep an open tab honest: silently refetch every 10 minutes (matches
      * the server-side report cache, so the cost is ~zero). */
     this._refreshTimer = setInterval(() => { if (this.report) this.load(true); }, 10 * 60 * 1000);
+    /* Close open dropdowns on any outside click */
+    this._ddClose = () => { this.openDd = null; };
+    document.addEventListener('click', this._ddClose);
   },
   beforeUnmount() {
     if (this._refreshTimer) clearInterval(this._refreshTimer);
+    if (this._ddClose) document.removeEventListener('click', this._ddClose);
   },
   methods: {
+    pickCountry(c) { this.selCountry = c; this.selCity = ''; this.openDd = null; this.load(true); },
+    pickCity(c) { this.selCity = c; this.openDd = null; this.load(true); },
+    perActive(v) {
+      const mau = this.report?.totals?.mau || 0;
+      return v > 0 && mau > 0 ? `≈${(v / mau).toFixed(1)}/user` : '';
+    },
     toggleTheme() {
       this.isDark = !this.isDark;
       localStorage.setItem('adminTheme', this.isDark ? 'night-mode' : 'day-mode');
@@ -457,7 +511,8 @@ export default {
   --mr-ret: #D4AF37;
   --mr-new: #38bdf8;
   --mr-tip-bg: rgba(255, 253, 246, 0.98);
-  --mr-tip-border: rgba(0, 0, 0, 0.14);
+  --mr-menu: #fffdf8;
+  --mr-hover: rgba(212, 175, 55, 0.12);
   --mr-brand: #a67c00;
 
   min-height: 100vh;
@@ -479,57 +534,74 @@ export default {
   --mr-grid: rgba(255, 255, 255, 0.08);
   --mr-ret: #8b5cf6;
   --mr-new: #38bdf8;
-  --mr-tip-bg: rgba(24, 20, 38, 0.97);
-  --mr-tip-border: rgba(255, 255, 255, 0.14);
+  --mr-tip-bg: rgba(30, 24, 52, 0.98);
+  --mr-menu: #251b46;
+  --mr-hover: rgba(139, 92, 246, 0.16);
   --mr-brand: #d4af37;
 }
 
 .mr-head { max-width: 1060px; margin: 0 auto 20px; }
 .mr-head-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.mr-brand { color: var(--mr-brand); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; font-size: 13px; }
-.mr-head h1 { margin: 4px 0 6px; font-size: 26px; font-weight: 650; }
+.mr-brand {
+  font-size: 1.6rem; font-weight: 600; color: #FFD700;
+  background: linear-gradient(45deg, #D4AF37, #FF8C00);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.mr-head h1 { margin: 6px 0 6px; font-size: clamp(23px, 4vw, 30px); font-weight: 650; }
 .mr-sub { color: var(--mr-muted); font-size: 13px; margin: 0; }
 .mr-welcome { color: var(--mr-ink2); font-size: 14px; margin: 2px 0 6px; }
 .mr-welcome b { color: var(--mr-brand); }
 .mr-head-actions { display: flex; gap: 8px; align-items: center; }
 .mr-signout {
   display: inline-flex; align-items: center; gap: 6px;
-  background: transparent; color: var(--mr-ink2); border: 1px solid var(--mr-border);
-  border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 500;
+  background: var(--mr-card); color: var(--mr-ink2); border: none;
+  box-shadow: var(--mr-card-shadow);
+  border-radius: 12px; padding: 9px 15px; font-size: 13px; font-weight: 500;
   font-family: inherit; cursor: pointer; transition: all 0.15s;
 }
-.mr-signout:hover { background: var(--mr-card); box-shadow: var(--mr-card-shadow); color: var(--mr-ink); }
+.mr-signout:hover { background: var(--mr-hover); color: var(--mr-ink); }
 main { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.2s; }
 
-/* Filter row — one row above the content it scopes. Selects wear the app's
- * pill style: rounded, glassy, custom inset chevron (native arrow hidden —
- * it hugged the right border). */
-.mr-filters { max-width: 1060px; margin: 0 auto 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.mr-select {
-  appearance: none; -webkit-appearance: none; -moz-appearance: none;
-  background-color: var(--mr-card); color: var(--mr-ink); border: 1px solid var(--mr-border);
-  border-radius: 20px; padding: 9px 38px 9px 16px; font-size: 13.5px; font-family: inherit;
-  min-width: 170px; cursor: pointer; box-shadow: var(--mr-card-shadow); transition: all 0.15s;
-  background-repeat: no-repeat; background-position: right 14px center; background-size: 12px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c3f2e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+/* Filter row — custom app-style dropdowns (borderless: tone + shadow carry
+ * the shape, like the rest of the app). */
+.mr-filters { max-width: 1060px; margin: 0 auto 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; position: relative; z-index: 20; }
+.mr-dd { position: relative; }
+.mr-dd-btn {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--mr-card); box-shadow: var(--mr-card-shadow); border: none;
+  color: var(--mr-ink); border-radius: 20px; padding: 10px 16px; font-size: 13.5px;
+  font-family: inherit; cursor: pointer; min-width: 175px; transition: all 0.15s;
 }
-.mr-dark .mr-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+.mr-dd-btn:hover { color: var(--mr-brand); }
+.mr-dd--disabled .mr-dd-btn { opacity: 0.45; pointer-events: none; }
+.mr-dd-chev { transition: transform 0.2s; opacity: 0.6; flex-shrink: 0; }
+.mr-dd-chev.rot { transform: rotate(180deg); }
+.mr-dd-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%; z-index: 30;
+  background: var(--mr-menu); border-radius: 14px; padding: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.32); max-height: 300px; overflow-y: auto;
 }
-.mr-select:hover { border-color: var(--mr-brand); }
-.mr-select:focus { outline: none; border-color: var(--mr-brand); }
-.mr-select:disabled { opacity: 0.45; cursor: default; }
+.mr-dd-item {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  background: transparent; border: none; color: var(--mr-ink2); padding: 9px 12px;
+  border-radius: 9px; font-size: 13.5px; font-family: inherit; cursor: pointer; white-space: nowrap;
+}
+.mr-dd-item:hover { background: var(--mr-hover); color: var(--mr-ink); }
+.mr-dd-item.sel { color: var(--mr-brand); font-weight: 600; }
+.mr-dd-check { flex-shrink: 0; }
+.mr-dd-spacer { width: 12px; flex-shrink: 0; display: inline-block; }
 .mr-filter-note { color: var(--mr-muted); font-size: 12.5px; }
+.mr-iconline { display: flex; align-items: center; gap: 6px; }
 
-/* Brand row — app icon + name, like JinniChat's sidebar header */
+/* Brand row — exact JinniChat sidebar spec: 60px icon, 1.6rem gradient name */
 .mr-brandrow { display: flex; align-items: center; gap: 8px; }
-.mr-appicon { width: 26px; height: 26px; object-fit: contain; }
+.mr-appicon { width: 60px; height: 60px; object-fit: contain; }
 
 /* GPS vs Destination side-by-side comparison */
-.mr-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
-.mr-compare-col--right { border-left: 1px solid var(--mr-grid); padding-left: 28px; }
-.mr-compare-head { margin: 0 0 10px; font-size: 14.5px; font-weight: 650; }
+.mr-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+.mr-compare-col--right { background: var(--mr-hover); border-radius: 12px; padding: 14px 16px; margin: -14px -16px -14px 0; }
+.mr-compare-head { margin: 0 0 10px; font-size: 14.5px; font-weight: 650; display: flex; align-items: center; gap: 7px; }
 .mr-compare-sub { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--mr-muted); margin-bottom: 6px; }
 .hbar-fill.hbar-fill--alt { background: var(--mr-new); }
 
@@ -541,7 +613,7 @@ main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.
 .mr-usage-row small { color: var(--mr-muted); font-weight: 400; }
 @media (max-width: 700px) {
   .mr-compare { grid-template-columns: 1fr; gap: 18px; }
-  .mr-compare-col--right { border-left: none; padding-left: 0; border-top: 1px solid var(--mr-grid); padding-top: 16px; }
+  .mr-compare-col--right { margin: 0; }
 }
 
 .mr-note { max-width: 1060px; margin: 24px auto; color: var(--mr-ink2); }
@@ -554,7 +626,7 @@ main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.
   box-shadow: var(--mr-card-shadow);
   padding: 22px 26px; flex: 1 1 260px; display: flex; flex-direction: column; justify-content: center;
 }
-.mr-hero-num { font-size: 52px; font-weight: 650; line-height: 1; }
+.mr-hero-num { font-size: clamp(38px, 7vw, 54px); font-weight: 650; line-height: 1; }
 .mr-hero-label { color: var(--mr-ink2); margin-top: 8px; font-size: 15px; }
 .mr-hero-foot { color: var(--mr-muted); margin-top: 6px; font-size: 12.5px; }
 
@@ -623,9 +695,9 @@ th { color: var(--mr-muted); font-weight: 600; }
 
 .mr-tip {
   position: fixed; z-index: 50; pointer-events: none;
-  background: var(--mr-tip-bg); border: 1px solid var(--mr-tip-border); border-radius: 8px;
-  padding: 8px 12px; font-size: 13px; color: var(--mr-ink2); min-width: 150px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  background: var(--mr-tip-bg); border: none; border-radius: 10px;
+  padding: 9px 13px; font-size: 13px; color: var(--mr-ink2); min-width: 150px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
 }
 .tip-day { color: var(--mr-ink); font-weight: 600; margin-bottom: 4px; }
 .tip-row { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
@@ -633,7 +705,12 @@ th { color: var(--mr-muted); font-weight: 600; }
 .tip-total { border-top: 1px solid var(--mr-grid); margin-top: 5px; padding-top: 5px; }
 
 @media (max-width: 640px) {
+  .mr-page { padding: 16px 12px 40px; }
   .mr-tiles { grid-template-columns: repeat(2, 1fr); }
-  .mr-hero-num { font-size: 42px; }
+  .mr-appicon { width: 46px; height: 46px; }
+  .mr-brand { font-size: 1.3rem; }
+  .t-value { font-size: 22px; }
+  .mr-card { padding: 15px 16px; }
+  .mr-dd-btn { min-width: 145px; padding: 9px 14px; }
 }
 </style>
