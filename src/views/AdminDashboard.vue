@@ -1656,10 +1656,26 @@
                 <h2>Hetzner Cloud</h2><span class="card-sub">CX42 · Coolify deploys · fixed monthly</span>
               </div>
               <div class="price-card-body">
-                <div class="price-row"><span class="price-label">Server</span><span class="price-val">CX42 — 8 vCPU · 16 GB RAM · 160 GB SSD</span></div>
-                <div class="price-row"><span class="price-label">Pricing model</span><span class="price-val">Flat monthly · 20 TB traffic included</span></div>
-                <div class="price-row"><span class="price-label">Runs</span><span class="price-val">Backend + frontend + Caddy, deployed via Coolify</span></div>
-                <div class="price-row"><span class="price-label">Headroom</span><span class="price-val">Over-provisioned — holds thousands of users before an upgrade</span></div>
+                <div class="price-row"><span class="price-label">Server</span><span class="price-val">CX42 — 8 vCPU · 16 GB RAM · 160 GB SSD · 20 TB traffic</span></div>
+                <template v-if="serverStats">
+                  <div class="price-row" title="Load average (1 min / 5 min / 15 min) vs CPU cores — below the core count is healthy">
+                    <span class="price-label">CPU load</span>
+                    <span class="price-val">{{ serverStats.load[0] }} / {{ serverStats.load[1] }} / {{ serverStats.load[2] }} <span class="db-meta">of {{ serverStats.cpus }} cores ({{ Math.round(serverStats.load[0] / serverStats.cpus * 100) }}%)</span></span>
+                  </div>
+                  <div class="price-row">
+                    <span class="price-label">RAM</span>
+                    <span class="price-val">{{ serverStats.memUsedGB }} / {{ serverStats.memTotalGB }} GB ({{ serverStats.memUsedPct }}%) <span class="db-meta">· backend {{ serverStats.nodeHeapMB }} MB</span></span>
+                  </div>
+                  <div class="price-row" v-if="serverStats.disk">
+                    <span class="price-label">Disk</span>
+                    <span class="price-val">{{ serverStats.disk.totalGB - serverStats.disk.freeGB }} / {{ serverStats.disk.totalGB }} GB used ({{ Math.round((serverStats.disk.totalGB - serverStats.disk.freeGB) / serverStats.disk.totalGB * 100) }}%)</span>
+                  </div>
+                  <div class="price-row">
+                    <span class="price-label">Uptime</span>
+                    <span class="price-val">{{ serverStats.uptimeDays }} days since last reboot</span>
+                  </div>
+                </template>
+                <div class="price-row" v-else><span class="price-label">Live vitals</span><span class="price-val db-loading">Loading…</span></div>
                 <div class="price-row"><span class="price-label">Scale path</span><span class="price-val">~25k users → ~$40/mo · ~50k → ~$90/mo (2-node)</span></div>
                 <div class="price-row price-row--total"><span class="price-label">Monthly cost</span><span class="price-val">$17.09</span></div>
               </div>
@@ -4566,7 +4582,7 @@ export default {
     const debouncedDestFetch = debounce(() => fetchDestinations(true))
     const fetchAll = async () => {
       loading.value = true
-      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchDbStats()]) }
+      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchServerStats(), fetchDbStats()]) }
       catch (e) { showToast(e.message, 'error') } finally { loading.value = false }
     }
     // Stored rec images are either absolute URLs or API-relative paths
@@ -5811,6 +5827,12 @@ export default {
       const mongo = parseFloat(projectedMongoCostStr.value) || 8
       return (17.09 + mongo).toFixed(2)
     })
+    // Live Hetzner vitals (backend reads its own host via os.*)
+    const serverStats = ref(null)
+    const fetchServerStats = async () => {
+      try { const res = await apiFetch('/server-stats'); if (res.success) serverStats.value = res.data }
+      catch (e) { console.warn('server stats fetch failed:', e.message) }
+    }
     const aiCost = computed(() => {
       const tokens = aiSummary.value.totalTokens || 0
       return fmtCost(tokens * DEEPSEEK_RATE_BLENDED)
@@ -5981,7 +6003,7 @@ export default {
       webSearchActionOptions, isSearchActionOn, searchActionCount, toggleSearchAction,
       prefetchLayerOptions, isPrefetchLayerOn, prefetchLayerCount, togglePrefetchLayer,
       isPrefetchActionOn, prefetchActionCount, togglePrefetchAction,
-      providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost,
+      providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,

@@ -6,7 +6,14 @@
           <div class="mr-brand">Jinni</div>
           <h1>Growth &amp; Retention</h1>
         </div>
-        <button v-if="authedMode && report" class="mr-signout" @click="signOut">Sign out</button>
+        <div class="mr-head-actions">
+          <button class="mr-signout" @click="toggleTheme">
+            <svg v-if="isDark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            {{ isDark ? 'Day mode' : 'Night mode' }}
+          </button>
+          <button v-if="authedMode && report" class="mr-signout" @click="signOut">Sign out</button>
+        </div>
       </div>
       <p v-if="report" class="mr-sub">
         Live report · updated {{ fmtTime(report.generatedAt) }} · last {{ report.windowDays }} days ·
@@ -230,11 +237,11 @@
 <script>
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
-/* Sequential blue ramp (reference palette). In light mode magnitude runs
- * light→dark (near-zero recedes toward the light surface); in dark mode it
- * runs dark→light (near-zero recedes toward the dark surface). */
-const SEQ_LIGHT = ['#cde2fb', '#b7d3f6', '#9ec5f4', '#86b6ef', '#6da7ec', '#5598e7', '#3987e5', '#2a78d6', '#256abf', '#1c5cab'];
-const SEQ_DARK = ['#0d366b', '#104281', '#184f95', '#1c5cab', '#256abf', '#2a78d6', '#3987e5', '#5598e7', '#86b6ef', '#b7d3f6'];
+/* Sequential ramps matching the admin design system: gold for day mode,
+ * violet for night. Low values recede toward the surface (light→dark in
+ * day, dark→light at night); cell text ink flips by fill luminance. */
+const SEQ_LIGHT = ['#f7ecca', '#f0e0ab', '#e8d38c', '#ddc46c', '#d4b64f', '#c9a638', '#b8922a', '#a17c1d', '#8a6712', '#6f520a'];
+const SEQ_DARK = ['#241b4d', '#2d2260', '#372a74', '#413287', '#4c3b9b', '#5a48b0', '#6d5ac4', '#8271d6', '#9b8ce6', '#b7aaf2'];
 
 export default {
   name: 'MarketingReport',
@@ -247,9 +254,7 @@ export default {
       isDark: false,
       selCountry: '',
       selCity: '',
-      tip: { show: false, x: 0, y: 0, day: '', new: 0, ret: 0, total: 0 },
-      _themeObserver: null,
-      _mq: null
+      tip: { show: false, x: 0, y: 0, day: '', new: 0, ret: 0, total: 0 }
     };
   },
   computed: {
@@ -289,22 +294,23 @@ export default {
     }
   },
   async mounted() {
-    this.syncTheme();
-    /* Follow the app's day/night toggle (html[data-theme]) and, for the
-     * external token link where no app theme exists, the OS preference. */
-    this._themeObserver = new MutationObserver(() => this.syncTheme());
-    this._themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    this._mq = window.matchMedia('(prefers-color-scheme: dark)');
-    this._mqHandler = () => this.syncTheme();
-    this._mq.addEventListener('change', this._mqHandler);
-
+    /* Same theme system as the admin / staff pages: manual toggle persisted
+     * to the shared 'adminTheme' key (night is the default, like admin). */
+    const saved = localStorage.getItem('adminTheme');
+    this.isDark = saved ? saved === 'night-mode' : true;
     await this.load();
+    /* Keep an open tab honest: silently refetch every 10 minutes (matches
+     * the server-side report cache, so the cost is ~zero). */
+    this._refreshTimer = setInterval(() => { if (this.report) this.load(true); }, 10 * 60 * 1000);
   },
   beforeUnmount() {
-    if (this._themeObserver) this._themeObserver.disconnect();
-    if (this._mq && this._mqHandler) this._mq.removeEventListener('change', this._mqHandler);
+    if (this._refreshTimer) clearInterval(this._refreshTimer);
   },
   methods: {
+    toggleTheme() {
+      this.isDark = !this.isDark;
+      localStorage.setItem('adminTheme', this.isDark ? 'night-mode' : 'day-mode');
+    },
     /* isRefetch=true = a filter change: keep the current render dimmed
      * instead of flashing back to the loading state. */
     async load(isRefetch = false) {
@@ -333,12 +339,6 @@ export default {
         this.loading = false;
         this.refreshing = false;
       }
-    },
-    syncTheme() {
-      const attr = document.documentElement.getAttribute('data-theme');
-      if (attr === 'dark') this.isDark = true;
-      else if (attr === 'light') this.isDark = false;
-      else this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     },
     signOut() {
       localStorage.removeItem('authToken');
@@ -380,8 +380,8 @@ export default {
       const idx = Math.min(stops.length - 1, Math.floor(v / 100 * stops.length));
       /* Label ink flips by fill luminance: light fills take dark ink, dark
        * fills take white — always legible regardless of theme. */
-      const lightFill = this.isDark ? idx >= 7 : idx <= 4;
-      return { background: stops[idx], color: lightFill ? '#0b0b0b' : '#ffffff' };
+      const lightFill = this.isDark ? idx >= 8 : idx <= 4;
+      return { background: stops[idx], color: lightFill ? '#1a1030' : '#ffffff' };
     },
     rowW(row, rows) {
       const max = Math.max(1, ...rows.map(r => r.users));
@@ -392,43 +392,44 @@ export default {
 </script>
 
 <style scoped>
-/* Theme tokens — DAY defaults match the app's day background (#f9f5eb,
- * genie-theme.css); the dark blocks swap to the app's night background
- * (#0a0118). Chart series use the reference palette's per-mode steps. */
+/* Theme tokens — same design system as the admin / staff pages.
+ * DAY = admin day-mode (warm cream + gold), NIGHT = admin night-mode
+ * (deep purple, glowing cards). Toggled by the header button, persisted
+ * to the shared 'adminTheme' key. */
 .mr-page {
-  --mr-page: #f9f5eb;
-  --mr-card: #fffdf6;
-  --mr-border: rgba(26, 26, 26, 0.10);
-  --mr-ink: #1a1a1a;
-  --mr-ink2: #52514e;
-  --mr-muted: #898781;
-  --mr-grid: #e5e0d0;
-  --mr-ret: #2a78d6;
-  --mr-new: #eb6834;
-  --mr-tip-bg: #ffffff;
-  --mr-tip-border: rgba(26, 26, 26, 0.14);
+  --mr-page: #f4efe4;
+  --mr-card: rgba(255, 255, 255, 0.9);
+  --mr-card-shadow: 0 0 8px rgba(139, 69, 19, 0.04);
+  --mr-border: rgba(139, 69, 19, 0.10);
+  --mr-ink: #2c1e10;
+  --mr-ink2: #5c3f2e;
+  --mr-muted: #8a7a66;
+  --mr-grid: rgba(139, 69, 19, 0.12);
+  --mr-ret: #D4AF37;
+  --mr-new: #38bdf8;
+  --mr-tip-bg: rgba(255, 253, 246, 0.98);
+  --mr-tip-border: rgba(0, 0, 0, 0.14);
   --mr-brand: #a67c00;
 
   min-height: 100vh;
   background: var(--mr-page);
   color: var(--mr-ink);
-  font-family: 'Segoe UI', system-ui, -apple-system, Tahoma, sans-serif;
+  font-family: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
   padding: 24px 16px 48px;
+  transition: background 0.35s, color 0.35s;
 }
-/* Dark tokens ride on the reactive .mr-dark class — the component watches
- * html[data-theme] (the app's day/night toggle) and, for the external token
- * link, the OS color-scheme preference, so this single class covers both. */
 .mr-page.mr-dark {
   --mr-page: #0a0118;
-  --mr-card: rgba(255, 255, 255, 0.05);
-  --mr-border: rgba(255, 255, 255, 0.10);
-  --mr-ink: #ffffff;
-  --mr-ink2: #c3c2b7;
-  --mr-muted: #898781;
-  --mr-grid: rgba(255, 255, 255, 0.09);
-  --mr-ret: #3987e5;
-  --mr-new: #d95926;
-  --mr-tip-bg: #241b38;
+  --mr-card: #1e1438;
+  --mr-card-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
+  --mr-border: rgba(139, 92, 246, 0.18);
+  --mr-ink: #e2e8f0;
+  --mr-ink2: #94a3b8;
+  --mr-muted: #64748b;
+  --mr-grid: rgba(255, 255, 255, 0.08);
+  --mr-ret: #8b5cf6;
+  --mr-new: #38bdf8;
+  --mr-tip-bg: rgba(24, 20, 38, 0.97);
   --mr-tip-border: rgba(255, 255, 255, 0.14);
   --mr-brand: #d4af37;
 }
@@ -438,11 +439,14 @@ export default {
 .mr-brand { color: var(--mr-brand); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; font-size: 13px; }
 .mr-head h1 { margin: 4px 0 6px; font-size: 26px; font-weight: 650; }
 .mr-sub { color: var(--mr-muted); font-size: 13px; margin: 0; }
+.mr-head-actions { display: flex; gap: 8px; align-items: center; }
 .mr-signout {
+  display: inline-flex; align-items: center; gap: 6px;
   background: transparent; color: var(--mr-ink2); border: 1px solid var(--mr-border);
-  border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+  border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: all 0.15s;
 }
-.mr-signout:hover { background: var(--mr-card); }
+.mr-signout:hover { background: var(--mr-card); box-shadow: var(--mr-card-shadow); color: var(--mr-ink); }
 main { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.2s; }
 
@@ -463,6 +467,7 @@ main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.
 .mr-hero-row { display: flex; gap: 16px; flex-wrap: wrap; }
 .mr-hero {
   background: var(--mr-card); border: 1px solid var(--mr-border); border-radius: 14px;
+  box-shadow: var(--mr-card-shadow);
   padding: 22px 26px; flex: 1 1 260px; display: flex; flex-direction: column; justify-content: center;
 }
 .mr-hero-num { font-size: 52px; font-weight: 650; line-height: 1; }
@@ -473,6 +478,7 @@ main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.
 .mr-tiles-3 { grid-template-columns: repeat(3, 1fr); }
 .mr-tile {
   background: var(--mr-card); border: 1px solid var(--mr-border); border-radius: 12px;
+  box-shadow: var(--mr-card-shadow);
   padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;
 }
 .t-label { color: var(--mr-muted); font-size: 12.5px; }
@@ -481,6 +487,7 @@ main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.
 
 .mr-card {
   background: var(--mr-card); border: 1px solid var(--mr-border); border-radius: 14px;
+  box-shadow: var(--mr-card-shadow);
   padding: 18px 20px;
 }
 .mr-card h2 { margin: 0 0 6px; font-size: 16px; font-weight: 650; }
