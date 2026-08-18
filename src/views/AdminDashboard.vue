@@ -2951,25 +2951,33 @@
                 Pick at least one — a staff member with no permissions can't do anything.
               </div>
 
-              <div class="edit-section-title" style="margin-top:18px">Territorial Scope</div>
-              <p style="font-size:12.5px; opacity:0.65; line-height:1.55; margin-bottom:12px">
-                Staff only sees pending businesses in these countries / cities. Priority items bubble to the top of their queue. You can change this anytime from the staff list.
-              </p>
+              <template v-if="!staffCreateMarketingOnly">
+                <div class="edit-section-title" style="margin-top:18px">Territorial Scope</div>
+                <p style="font-size:12.5px; opacity:0.65; line-height:1.55; margin-bottom:12px">
+                  Staff only sees pending businesses in these countries / cities. Priority items bubble to the top of their queue. You can change this anytime from the staff list.
+                </p>
+              </template>
+              <template v-else>
+                <div class="edit-section-title" style="margin-top:18px">Marketing account</div>
+                <p style="font-size:12.5px; opacity:0.65; line-height:1.55; margin-bottom:12px">
+                  Marketing accounts see worldwide numbers by default — no territory needed. They can filter countries and cities themselves on the report page.
+                </p>
+              </template>
               <div class="edit-grid-2">
-                <div class="edit-field edit-field--full">
+                <div v-if="!staffCreateMarketingOnly" class="edit-field edit-field--full">
                   <label class="edit-label">Countries</label>
                   <input class="edit-input" v-model="staffModal.form.countriesText" type="text" autocomplete="off" placeholder="Armenia, Georgia" />
                   <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Comma-separated. Leave blank to set up later — staff sees nothing until assigned.</small>
                 </div>
-                <div class="edit-field edit-field--full">
+                <div v-if="!staffCreateMarketingOnly" class="edit-field edit-field--full">
                   <label class="edit-label">Cities <small style="opacity:0.6">(optional, broadens scope)</small></label>
                   <input class="edit-input" v-model="staffModal.form.citiesText" type="text" autocomplete="off" placeholder="Yerevan, Tbilisi" />
                 </div>
-                <div class="edit-field edit-field--full">
+                <div v-if="!staffCreateMarketingOnly" class="edit-field edit-field--full">
                   <label class="edit-label">Priority countries <small style="opacity:0.6">(must be in countries above)</small></label>
                   <input class="edit-input" v-model="staffModal.form.priorityCountriesText" type="text" autocomplete="off" placeholder="Armenia" />
                 </div>
-                <div class="edit-field edit-field--full">
+                <div v-if="!staffCreateMarketingOnly" class="edit-field edit-field--full">
                   <label class="edit-label">Priority cities <small style="opacity:0.6">(must be in cities above)</small></label>
                   <input class="edit-input" v-model="staffModal.form.priorityCitiesText" type="text" autocomplete="off" placeholder="Yerevan" />
                 </div>
@@ -3057,21 +3065,24 @@
               <p style="font-size:13px; opacity:0.7; line-height:1.55; margin:0 0 14px">
                 Editing scope for <strong>{{ staffAssignModal.target?.email }}</strong>. Empty all fields to fully unassign — staff will see an empty queue.
               </p>
+              <p v-if="staffAssignMarketingOnly" style="font-size:12.5px; opacity:0.65; line-height:1.55; margin-bottom:12px">
+                Marketing accounts see worldwide numbers by default — no territory needed. They can filter countries and cities themselves on the report page.
+              </p>
               <div class="edit-grid-2">
-                <div class="edit-field edit-field--full">
+                <div v-if="!staffAssignMarketingOnly" class="edit-field edit-field--full">
                   <label class="edit-label">Countries</label>
                   <input class="edit-input" v-model="staffAssignModal.form.countriesText" type="text" autocomplete="off" placeholder="Armenia, Georgia" />
                   <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Comma-separated. Case-insensitive.</small>
                 </div>
-                <div class="edit-field edit-field--full">
+                <div v-if="!staffAssignMarketingOnly" class="edit-field edit-field--full">
                   <label class="edit-label">Cities</label>
                   <input class="edit-input" v-model="staffAssignModal.form.citiesText" type="text" autocomplete="off" placeholder="Yerevan, Tbilisi" />
                 </div>
-                <div class="edit-field edit-field--full">
+                <div v-if="!staffAssignMarketingOnly" class="edit-field edit-field--full">
                   <label class="edit-label">Priority countries <small style="opacity:0.6">(must be in countries above)</small></label>
                   <input class="edit-input" v-model="staffAssignModal.form.priorityCountriesText" type="text" autocomplete="off" placeholder="Armenia" />
                 </div>
-                <div class="edit-field edit-field--full">
+                <div v-if="!staffAssignMarketingOnly" class="edit-field edit-field--full">
                   <label class="edit-label">Priority cities <small style="opacity:0.6">(must be in cities above)</small></label>
                   <input class="edit-input" v-model="staffAssignModal.form.priorityCitiesText" type="text" autocomplete="off" placeholder="Yerevan" />
                 </div>
@@ -3609,6 +3620,11 @@ export default {
       const anyPerm = f.permissions?.validateBusinesses || f.permissions?.manageDestinations || f.permissions?.moderateExplore || f.permissions?.viewMarketing
       return f.email && f.tempPassword && !staffPwError.value && anyPerm
     })
+    // Marketing-only staff (only viewMarketing checked) need no territory —
+    // they see worldwide numbers and filter country/city on the report page.
+    const marketingOnlyPerms = (p) => !!p?.viewMarketing && !p?.validateBusinesses && !p?.manageDestinations && !p?.moderateExplore
+    const staffCreateMarketingOnly = computed(() => marketingOnlyPerms(staffModal.value.form.permissions))
+    const staffAssignMarketingOnly = computed(() => marketingOnlyPerms(staffAssignModal.value.form.permissions))
 
     const openStaffCreate = () => {
       staffModal.value = {
@@ -5803,6 +5819,7 @@ export default {
       providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost,
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
+      staffCreateMarketingOnly, staffAssignMarketingOnly,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
       places, placesLoading, placesPage, placesTotalPages, placesSearch, placesImageFilter, placesActionFilter, placesSort, placesSummary,

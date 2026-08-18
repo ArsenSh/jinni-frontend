@@ -14,10 +14,25 @@
       </p>
     </header>
 
+    <!-- Country / city filters — scope every number below; default = worldwide -->
+    <div class="mr-filters" v-if="report">
+      <select class="mr-select" v-model="selCountry" @change="selCity = ''; load(true)">
+        <option value="">All countries</option>
+        <option v-for="c in report.filterOptions.countries" :key="c" :value="c">{{ c }}</option>
+      </select>
+      <select class="mr-select" v-model="selCity" :disabled="!selCountry" @change="load(true)">
+        <option value="">All cities</option>
+        <option v-for="c in report.filterOptions.cities" :key="c" :value="c">{{ c }}</option>
+      </select>
+      <span v-if="selCountry" class="mr-filter-note">
+        Scoped to users from {{ selCity ? selCity + ', ' : '' }}{{ selCountry }}
+      </span>
+    </div>
+
     <div v-if="loading" class="mr-note">Loading report…</div>
     <div v-else-if="error" class="mr-note mr-error">{{ error }}</div>
 
-    <main v-else-if="report">
+    <main v-else-if="report" :class="{ 'mr-refreshing': refreshing }">
       <!-- Hero: the comeback question -->
       <section class="mr-hero-row">
         <div class="mr-hero">
@@ -225,9 +240,12 @@ export default {
   data() {
     return {
       loading: true,
+      refreshing: false,
       error: '',
       report: null,
       isDark: false,
+      selCountry: '',
+      selCity: '',
       tip: { show: false, x: 0, y: 0, day: '', new: 0, ret: 0, total: 0 },
       _themeObserver: null,
       _mq: null
@@ -279,30 +297,42 @@ export default {
     this._mqHandler = () => this.syncTheme();
     this._mq.addEventListener('change', this._mqHandler);
 
-    try {
-      let res;
-      if (this.authedMode) {
-        const jwt = localStorage.getItem('authToken') || localStorage.getItem('token');
-        res = await fetch(`${API_BASE_URL}/api/analytics/marketing-report`, { headers: { Authorization: `Bearer ${jwt}` } });
-        if (res.status === 401 || res.status === 403) { this.error = 'Your account does not have access to this report.'; return; }
-      } else {
-        res = await fetch(`${API_BASE_URL}/api/analytics/marketing-report/${encodeURIComponent(this.$route.params.token)}`);
-        if (res.status === 403 || res.status === 404) { this.error = 'This report link is not valid (it may have been rotated). Ask the Jinni team for a fresh link.'; return; }
-      }
-      if (!res.ok) { this.error = 'Could not load the report right now — please try again in a minute.'; return; }
-      const body = await res.json();
-      this.report = body.data;
-    } catch {
-      this.error = 'Could not load the report right now — please try again in a minute.';
-    } finally {
-      this.loading = false;
-    }
+    await this.load();
   },
   beforeUnmount() {
     if (this._themeObserver) this._themeObserver.disconnect();
     if (this._mq && this._mqHandler) this._mq.removeEventListener('change', this._mqHandler);
   },
   methods: {
+    /* isRefetch=true = a filter change: keep the current render dimmed
+     * instead of flashing back to the loading state. */
+    async load(isRefetch = false) {
+      if (isRefetch) this.refreshing = true; else this.loading = true;
+      try {
+        const qs = new URLSearchParams();
+        if (this.selCountry) qs.set('country', this.selCountry);
+        if (this.selCity) qs.set('city', this.selCity);
+        const suffix = qs.toString() ? `?${qs.toString()}` : '';
+        let res;
+        if (this.authedMode) {
+          const jwt = localStorage.getItem('authToken') || localStorage.getItem('token');
+          res = await fetch(`${API_BASE_URL}/api/analytics/marketing-report${suffix}`, { headers: { Authorization: `Bearer ${jwt}` } });
+          if (res.status === 401 || res.status === 403) { this.error = 'Your account does not have access to this report.'; return; }
+        } else {
+          res = await fetch(`${API_BASE_URL}/api/analytics/marketing-report/${encodeURIComponent(this.$route.params.token)}${suffix}`);
+          if (res.status === 403 || res.status === 404) { this.error = 'This report link is not valid (it may have been rotated). Ask the Jinni team for a fresh link.'; return; }
+        }
+        if (!res.ok) { this.error = 'Could not load the report right now — please try again in a minute.'; return; }
+        const body = await res.json();
+        this.report = body.data;
+        this.error = '';
+      } catch {
+        this.error = 'Could not load the report right now — please try again in a minute.';
+      } finally {
+        this.loading = false;
+        this.refreshing = false;
+      }
+    },
     syncTheme() {
       const attr = document.documentElement.getAttribute('data-theme');
       if (attr === 'dark') this.isDark = true;
@@ -413,6 +443,17 @@ export default {
 }
 .mr-signout:hover { background: var(--mr-card); }
 main { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+main.mr-refreshing { opacity: 0.55; pointer-events: none; transition: opacity 0.2s; }
+
+/* Filter row — one row above the content it scopes */
+.mr-filters { max-width: 1060px; margin: 0 auto 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.mr-select {
+  background: var(--mr-card); color: var(--mr-ink); border: 1px solid var(--mr-border);
+  border-radius: 8px; padding: 8px 12px; font-size: 13.5px; font-family: inherit;
+  min-width: 160px; cursor: pointer;
+}
+.mr-select:disabled { opacity: 0.45; cursor: default; }
+.mr-filter-note { color: var(--mr-muted); font-size: 12.5px; }
 
 .mr-note { max-width: 1060px; margin: 24px auto; color: var(--mr-ink2); }
 .mr-note-sm { color: var(--mr-muted); font-size: 13px; }
