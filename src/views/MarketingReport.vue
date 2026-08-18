@@ -159,7 +159,8 @@
           </div>
         </div>
         <div class="mr-card">
-          <h2>Users by country</h2>
+          <h2>Users by country (GPS mode)</h2>
+          <p class="mr-desc-sm">Users physically there, sharing their location.</p>
           <div v-for="c in report.locations.byCountry" :key="c.key" class="hbar-row">
             <span class="hbar-label" :title="c.key">{{ c.key }}</span>
             <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.byCountry) }"></div></div>
@@ -167,7 +168,7 @@
           </div>
         </div>
         <div class="mr-card">
-          <h2>Top user cities</h2>
+          <h2>Top user cities (GPS mode)</h2>
           <div v-for="c in report.locations.byCity" :key="c.key" class="hbar-row">
             <span class="hbar-label" :title="c.key + (c.country ? ', ' + c.country : '')">{{ c.key }}</span>
             <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.byCity) }"></div></div>
@@ -176,7 +177,7 @@
         </div>
         <div class="mr-card">
           <h2>Destinations by country</h2>
-          <p class="mr-desc-sm">Where users say they're planning to travel.</p>
+          <p class="mr-desc-sm">Users in destination mode — exploring a place they chose, without GPS.</p>
           <div v-for="c in report.locations.destinations.byCountry" :key="c.key" class="hbar-row">
             <span class="hbar-label" :title="c.key">{{ c.key }}</span>
             <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW(c, report.locations.destinations.byCountry) }"></div></div>

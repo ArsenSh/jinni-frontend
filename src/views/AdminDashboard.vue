@@ -170,7 +170,8 @@
               <div class="ret-kpi"><span>Active 30d</span><b>{{ retention.totals.mau }}</b></div>
             </div>
             <div class="sparkbar-wrap" v-if="retention && retention.daily.some(d => d.active > 0)">
-              <div v-for="d in retention.daily" :key="d.day" class="sparkbar-col" :title="`${d.day}: ${d.active} active — ${d.returning} returning, ${d.newUsers} new`">
+              <div v-for="d in retention.daily" :key="d.day" class="sparkbar-col"
+                   @pointermove="showChartTip($event, d.day, retTipRows(d))" @pointerleave="hideChartTip">
                 <div class="sparkbar-value">{{ d.active > 0 ? d.active : '' }}</div>
                 <div class="ret-stack">
                   <div v-if="d.newUsers > 0" class="ret-bar ret-bar-new" :style="{ height: retBarH(d.newUsers) + 'px' }"></div>
@@ -386,12 +387,12 @@
               <div class="pref-tile">
                 <div class="pref-tile-head">
                   <span class="pref-tile-title">Budget Range</span>
-                  <span class="pref-tile-meta">≤$300 · ≤$1k · $1k+</span>
+                  <span class="pref-tile-meta" v-if="prefStats.budgetStats">{{ prefStats.budgetStats.usersWithBudget }} of {{ prefStats.budgetStats.onboarded }} users set one · USD equivalent</span>
                 </div>
                 <div class="pref-tile-body">
                   <div class="pref-two-bars">
                     <div v-for="(item, i) in prefStats.budgetBuckets" :key="item._id" class="pref-two-bar-row">
-                      <div class="pref-bar-label" :title="budgetRangeHint(item._id)">{{ item._id }}</div>
+                      <div class="pref-bar-label" :title="'Midpoint of the user\'s min–max budget, converted to USD'">{{ item._id }}</div>
                       <div class="pref-bar-track">
                         <div class="pref-bar-fill"
                           :style="{ width: prefBudgetTotal > 0 ? Math.round((item.count / prefBudgetTotal) * 100) + '%' : '0%',
@@ -401,7 +402,10 @@
                       <div class="pref-bar-count">{{ item.count }}</div>
                       <div class="pref-bar-pct">{{ prefBudgetTotal > 0 ? Math.round((item.count / prefBudgetTotal) * 100) : 0 }}%</div>
                     </div>
-                    <p v-if="!prefStats.budgetBuckets?.length" class="empty-state" style="padding:10px 0; font-size:12px">No budget data yet</p>
+                    <p v-if="prefStats.budgetStats && prefStats.budgetStats.avgUsd" style="margin:8px 0 0; font-size:11.5px; opacity:0.6">
+                      Average ≈ ${{ prefStats.budgetStats.avgUsd.toLocaleString() }} per user (mid of their range). Only budget-style travelers enter a range, so a small sample is normal.
+                    </p>
+                    <p v-if="!prefStats.budgetBuckets?.length" class="empty-state" style="padding:10px 0; font-size:12px">No budget data yet — only budget-style travelers set a range</p>
                   </div>
                 </div>
               </div>
@@ -497,7 +501,8 @@
           <!-- Location breakdown -->
           <div class="loc-section-label" style="margin-top: 12px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Home / Current Location
+            GPS Mode — Where Users Are
+            <span class="loc-section-sub" v-if="userLocations.modeSplit">{{ userLocations.modeSplit.gps }} users with GPS on</span>
           </div>
           <div class="loc-grid">
             <div class="card loc-card">
@@ -550,9 +555,9 @@
 
           <div class="loc-section-label" style="margin-top: 12px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-            Travel Destinations
-            <span class="loc-section-sub" v-if="userLocations.destinations.total > 0">{{ userLocations.destinations.total }} users planning travel</span>
-            <span class="loc-section-sub loc-section-sub--empty" v-else>No destinations set yet</span>
+            Destination Mode — Where They Explore
+            <span class="loc-section-sub" v-if="userLocations.modeSplit">{{ userLocations.modeSplit.destination }} users browsing a chosen destination</span>
+            <span class="loc-section-sub loc-section-sub--empty" v-else-if="!userLocations.destinations.total">No destinations set yet</span>
           </div>
           <div class="loc-grid">
             <div class="card loc-card">
@@ -790,7 +795,8 @@
                     v-for="(day, idx) in providerDaily"
                     :key="'ds' + day.date"
                     class="g-bar-col"
-                    :title="`${day.date}: ${fmtK(day.deepseek.tokens)} tokens · ${day.deepseek.queries} requests`"
+                    @pointermove="showChartTip($event, day.date, dsTipRows(day))"
+                    @pointerleave="hideChartTip"
                   >
                     <div class="g-bar-spacer"></div>
                     <div
@@ -829,7 +835,8 @@
                     v-for="(day, idx) in providerDaily"
                     :key="'cl' + day.date"
                     class="g-bar-col"
-                    :title="`${day.date}: ${fmtK(day.claude.tokens)} tokens · ${day.claude.queries} requests · ${day.claude.searches} web searches`"
+                    @pointermove="showChartTip($event, day.date, clTipRows(day))"
+                    @pointerleave="hideChartTip"
                   >
                     <div class="g-bar-spacer"></div>
                     <div
@@ -1038,7 +1045,7 @@
                 {{ opt.label }}
               </button>
             </div>
-            <button class="purge-main" style="border-radius:8px; margin-right:8px" :disabled="backfillBusy"
+            <button class="purge-standalone" :disabled="backfillBusy"
               @click="backfillRegions" title="Parse country / city for cached places that don't have them yet (needed once for staff Explore moderation scoping; safe to re-run)">
               {{ backfillBusy ? 'Backfilling…' : 'Backfill regions' }}
             </button>
@@ -1406,7 +1413,8 @@
                     :key="day.date"
                     class="g-bar-col"
                     :class="{ 'g-bar-col--active': day.total > 0 }"
-                    :title="gDayTitle(day)"
+                    @pointermove="showChartTip($event, day.date, gTipRows(day))"
+                    @pointerleave="hideChartTip"
                   >
                     <div class="g-bar-spacer"></div>
                     <div
@@ -1497,22 +1505,22 @@
               <div class="kpi-sub">All services combined</div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">DeepSeek AI (est.)</div>
-              <div class="kpi-value">${{ monthlyAiCost }}</div>
-              <div class="kpi-sub">Based on today × 30 days</div>
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div>
+              <div class="kpi-label">Fixed / month</div>
+              <div class="kpi-value">${{ fixedMonthlyCost }}</div>
+              <div class="kpi-sub">Hetzner $17.09 · Mongo ${{ projectedMongoCostStr }} proj.</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><line x1="9" y1="22" x2="15" y2="22"/></svg></div>
+              <div class="kpi-label">AI ({{ aiChartDays }}d, both providers)</div>
+              <div class="kpi-value">${{ aiCombinedCost }}</div>
+              <div class="kpi-sub">DeepSeek ${{ deepseekCost }} · Claude ${{ claudeCost }}</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.454 0-.769-.085-1.357-.187-1.857H12.24z"/></svg></div>
               <div class="kpi-label">Google Places (this month)</div>
               <div class="kpi-value">${{ monthlyGoogleCost }}</div>
-              <div class="kpi-sub">{{ fmt(googleUsage.monthFetches) }} calls · per-SKU free caps</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
-              <div class="kpi-label">MongoDB Atlas (proj.)</div>
-              <div class="kpi-value">${{ projectedMongoCostStr }}</div>
-              <div class="kpi-sub">${{ monthlyMongoCost }} MTD · {{ dbStats ? dbStats.usedMB + ' MB' : 'Atlas Flex' }}</div>
+              <div class="kpi-sub">{{ fmt(googleUsage.monthFetches) }} calls · proj. month-end ${{ gMonthly && gMonthly.totals.projectedBilled !== null ? gMonthly.totals.projectedBilled.toFixed(2) : '—' }}</div>
             </div>
           </div>
           <div class="prices-grid">
@@ -1522,11 +1530,20 @@
                 <h2>DeepSeek AI</h2><span class="card-sub">Token-based billing</span>
               </div>
               <div class="price-card-body">
-                <div class="price-row"><span class="price-label">Input rate</span><span class="price-val">$0.27 / 1M (cache miss) · $0.07 cached</span></div><div class="price-row"><span class="price-label">Output rate</span><span class="price-val">$1.10 / 1M tokens</span></div><div class="price-row"><span class="price-label">Blended est.</span><span class="price-val">~$0.50 / 1M tokens</span></div>
-                <div class="price-row"><span class="price-label">Today's tokens</span><span class="price-val">{{ fmtK(aiSummary.todayTokens) }}</span></div>
-                <div class="price-row"><span class="price-label">Today's cost</span><span class="price-val">${{ todayCost }}</span></div>
-                <div class="price-row"><span class="price-label">All-time tokens</span><span class="price-val">{{ fmtK(aiSummary.totalTokens) }}</span></div>
-                <div class="price-row price-row--total"><span class="price-label">All-time cost</span><span class="price-val">${{ aiCost }}</span></div>
+                <!-- Mirrors the Claude card row-for-row (requests instead of
+                     web searches — DeepSeek has none). Numbers come from the
+                     per-provider tracker, NOT the combined counter, which
+                     mixed Claude tokens into DeepSeek pricing. -->
+                <div class="price-row"><span class="price-label">Input rate</span><span class="price-val">$0.27 / 1M (cache miss) · $0.07 cached</span></div>
+                <div class="price-row"><span class="price-label">Output rate</span><span class="price-val">$1.10 / 1M tokens</span></div>
+                <div class="price-row"><span class="price-label">Web search</span><span class="price-val">— (not available)</span></div>
+                <div class="price-row"><span class="price-label">Blended est.</span><span class="price-val">~$0.50 / 1M tokens</span></div>
+                <div class="price-row"><span class="price-label">Today's tokens</span><span class="price-val">{{ fmtK(dsToday.tokens) }}</span></div>
+                <div class="price-row"><span class="price-label">Today's requests</span><span class="price-val">{{ fmt(dsToday.queries) }}</span></div>
+                <div class="price-row"><span class="price-label">Today's cost</span><span class="price-val">${{ dsTodayCost }}</span></div>
+                <div class="price-row"><span class="price-label">{{ aiChartDays }}-day tokens</span><span class="price-val">{{ fmtK(providerStats.summary.deepseek.tokens) }}</span></div>
+                <div class="price-row"><span class="price-label">{{ aiChartDays }}-day requests</span><span class="price-val">{{ fmt(providerStats.summary.deepseek.queries) }}</span></div>
+                <div class="price-row price-row--total"><span class="price-label">{{ aiChartDays }}-day cost</span><span class="price-val">${{ deepseekCost }}</span></div>
               </div>
             </div>
             <div class="card price-card">
@@ -1631,6 +1648,20 @@
                   <span class="price-label">Projected monthly</span>
                   <span class="price-val">${{ projectedMongoCostStr }}</span>
                 </div>
+              </div>
+            </div>
+            <div class="card price-card">
+              <div class="card-head">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                <h2>Hetzner Cloud</h2><span class="card-sub">CX42 · Coolify deploys · fixed monthly</span>
+              </div>
+              <div class="price-card-body">
+                <div class="price-row"><span class="price-label">Server</span><span class="price-val">CX42 — 8 vCPU · 16 GB RAM · 160 GB SSD</span></div>
+                <div class="price-row"><span class="price-label">Pricing model</span><span class="price-val">Flat monthly · 20 TB traffic included</span></div>
+                <div class="price-row"><span class="price-label">Runs</span><span class="price-val">Backend + frontend + Caddy, deployed via Coolify</span></div>
+                <div class="price-row"><span class="price-label">Headroom</span><span class="price-val">Over-provisioned — holds thousands of users before an upgrade</span></div>
+                <div class="price-row"><span class="price-label">Scale path</span><span class="price-val">~25k users → ~$40/mo · ~50k → ~$90/mo (2-node)</span></div>
+                <div class="price-row price-row--total"><span class="price-label">Monthly cost</span><span class="price-val">$17.09</span></div>
               </div>
             </div>
             <div class="card price-card">
@@ -1750,7 +1781,14 @@
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                         Revoke
                       </button>
-                      <span v-if="!s.isActive" class="dim-cell">—</span>
+                      <button v-if="!s.isActive" class="action-btn btn-accent" @click="restoreStaff(s)" title="Reactivate this account with its permissions intact">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        Restore
+                      </button>
+                      <button v-if="!s.isActive" class="action-btn btn-delete" @click="confirmStaffDelete(s)" title="Delete forever — frees the email for reuse">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -1762,6 +1800,16 @@
 
       </div>
     </main>
+
+    <!-- Shared styled chart tooltip (replaces the tiny native title popups) -->
+    <div v-show="chartTip.show" class="chart-tip" :class="theme" :style="{ left: chartTip.x + 'px', top: chartTip.y + 'px' }">
+      <div class="chart-tip-title">{{ chartTip.title }}</div>
+      <div v-for="r in chartTip.rows" :key="r.k" class="chart-tip-row">
+        <span class="chart-tip-dot" :style="{ background: r.c || 'transparent' }"></span>
+        <span class="chart-tip-k">{{ r.k }}</span>
+        <b class="chart-tip-v">{{ r.v }}</b>
+      </div>
+    </div>
 
     <transition name="toast-fade">
       <div v-if="toast.visible" class="toast" :class="`toast--${toast.type}`">
@@ -3041,6 +3089,35 @@
     </transition>
     <!-- ── /STAFF REVOKE MODAL ────────────────────────────────────────── -->
 
+    <!-- ── STAFF PERMANENT DELETE MODAL ───────────────────────────────── -->
+    <transition name="modal-fade">
+      <div v-if="staffDeleteTarget" class="edit-overlay" @click.self="cancelStaffDelete">
+        <div class="edit-panel" :class="theme" style="max-width: 460px">
+          <div class="edit-header">
+            <div class="edit-header-left">
+              <span class="edit-badge" style="background:rgba(239,68,68,0.15); color:#ef4444">Delete forever</span>
+              <h2 class="edit-title">Permanently delete this account?</h2>
+            </div>
+            <button class="edit-close-btn" @click="cancelStaffDelete">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="edit-body">
+            <p style="margin:0 0 16px; line-height:1.6; font-size:14px">
+              <strong>{{ staffDeleteTarget.email }}</strong> will be deleted for good — the record disappears from this list and the email address becomes free to reuse for a new account. <strong>This cannot be undone.</strong> If you only want to pause them, use Restore instead.
+            </p>
+            <div style="display:flex; gap:10px; justify-content:flex-end">
+              <button class="action-btn btn-muted" @click="cancelStaffDelete" :disabled="staffDeleteBusy">Cancel</button>
+              <button class="action-btn btn-delete" @click="executeStaffDelete" :disabled="staffDeleteBusy">
+                {{ staffDeleteBusy ? 'Deleting…' : 'Delete forever' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <!-- ── /STAFF PERMANENT DELETE MODAL ──────────────────────────────── -->
+
     <!-- ── STAFF ASSIGNMENT EDIT MODAL ────────────────────────────────── -->
     <transition name="modal-fade">
       <div v-if="staffAssignModal.open" class="edit-overlay" @click.self="closeStaffAssign">
@@ -3790,6 +3867,35 @@ export default {
         staffRevokeBusy.value = false
       }
     }
+    // Restore = undo revoke, permissions/territory intact. No confirm modal —
+    // it's safe and instantly reversible (revoke again).
+    const restoreStaff = async (s) => {
+      try {
+        await apiFetch(`/staff/${s._id}/restore`, { method: 'POST' })
+        showToast(`${s.email} restored`)
+        await fetchStaff()
+      } catch (e) { showToast(e.message, 'error') }
+    }
+    // Permanent delete — destructive, confirm-gated; backend also refuses
+    // unless the account is already revoked.
+    const staffDeleteTarget = ref(null)
+    const staffDeleteBusy = ref(false)
+    const confirmStaffDelete = (s) => { staffDeleteTarget.value = s }
+    const cancelStaffDelete = () => { staffDeleteTarget.value = null }
+    const executeStaffDelete = async () => {
+      if (!staffDeleteTarget.value) return
+      staffDeleteBusy.value = true
+      try {
+        await apiFetch(`/staff/${staffDeleteTarget.value._id}/permanent`, { method: 'DELETE' })
+        showToast(`${staffDeleteTarget.value.email} deleted`)
+        staffDeleteTarget.value = null
+        await fetchStaff()
+      } catch (e) {
+        showToast(e.message, 'error')
+      } finally {
+        staffDeleteBusy.value = false
+      }
+    }
     // ── /STAFF MANAGEMENT ────────────────────────────────────────────────────
 
     const tabs = computed(() => [
@@ -4024,10 +4130,41 @@ export default {
       catch (e) { console.warn('retention fetch failed:', e.message) }
     }
     const googleChartMax = computed(() => Math.max(...googleDailyStats.value.map(d => d.total), 1))
-    // Hover tooltip for a Google-chart day column: full per-SKU breakdown.
-    const gDayTitle = (d) => d.total === 0
-      ? `${d.date}: no API calls`
-      : `${d.date} — ${d.total} calls · $${(d.cost || 0).toFixed(2)}\nText Search: ${d.findPlaces}\nPlace Details: ${d.getPlaceDetails}\nGeocoding: ${d.reverseGeocode}\nPhotos: ${d.imageDownload}`
+
+    // ── Shared styled chart tooltip (Google + AI provider + retention charts) ──
+    const chartTip = ref({ show: false, x: 0, y: 0, title: '', rows: [] })
+    const showChartTip = (e, title, rows) => {
+      chartTip.value = {
+        show: true,
+        x: Math.min(e.clientX + 14, window.innerWidth - 220),
+        y: Math.min(e.clientY + 14, window.innerHeight - 40 - rows.length * 22),
+        title, rows
+      }
+    }
+    const hideChartTip = () => { chartTip.value.show = false }
+    const gTipRows = (d) => d.total === 0
+      ? [{ k: 'No API calls', v: '' }]
+      : [
+          { k: 'Total', v: `${d.total} · $${(d.cost || 0).toFixed(2)}` },
+          { k: 'Text Search', v: d.findPlaces, c: '#c084fc' },
+          { k: 'Place Details', v: d.getPlaceDetails, c: '#67e8f9' },
+          { k: 'Geocoding', v: d.reverseGeocode, c: '#86efac' },
+          { k: 'Photos', v: d.imageDownload, c: '#fcd34d' }
+        ]
+    const dsTipRows = (d) => [
+      { k: 'Tokens', v: fmtK(d.deepseek.tokens), c: '#818cf8' },
+      { k: 'Requests', v: fmt(d.deepseek.queries), c: '#34d399' }
+    ]
+    const clTipRows = (d) => [
+      { k: 'Tokens', v: fmtK(d.claude.tokens), c: '#38bdf8' },
+      { k: 'Requests', v: fmt(d.claude.queries) },
+      { k: 'Web searches', v: fmt(d.claude.searches), c: '#f59e0b' }
+    ]
+    const retTipRows = (d) => [
+      { k: 'Active', v: d.active },
+      { k: 'Returning', v: d.returning, c: '#8b5cf6' },
+      { k: 'New', v: d.newUsers, c: '#38bdf8' }
+    ]
     const aiChartMax = computed(() => Math.max(...aiDailyStats.value.map(d => d.tokens), 1))
     // Per-provider daily series (DeepSeek / Claude charts). Each chart scales
     // to its own max so a heavy-Claude day doesn't flatten the DeepSeek bars.
@@ -4143,9 +4280,9 @@ export default {
     const budgetBucketColor = (id) => {
       const isDay = theme.value === 'day-mode'
       return ({
-        'Budget':    isDay ? 'linear-gradient(90deg, #15803d, #14532d)' : 'linear-gradient(90deg, #4ade80, #16a34a)',
-        'Mid-range': isDay ? 'linear-gradient(90deg, #0e7490, #164e63)' : 'linear-gradient(90deg, #22d3ee, #0891b2)',
-        'Luxury':    isDay ? 'linear-gradient(90deg, #b45309, #92400e)' : 'linear-gradient(90deg, #fbbf24, #d97706)'
+        '≤ $300':         isDay ? 'linear-gradient(90deg, #15803d, #14532d)' : 'linear-gradient(90deg, #4ade80, #16a34a)',
+        '$300 – $1,000':  isDay ? 'linear-gradient(90deg, #0e7490, #164e63)' : 'linear-gradient(90deg, #22d3ee, #0891b2)',
+        '$1,000+':        isDay ? 'linear-gradient(90deg, #b45309, #92400e)' : 'linear-gradient(90deg, #fbbf24, #d97706)'
       }[id] || (isDay ? 'linear-gradient(90deg, #7e22ce, #581c87)' : 'linear-gradient(90deg, #e879f9, #a855f7)'))
     }
     const budgetRangeHint = (id) => ({ 'Budget': 'Avg budget ≤ $300', 'Mid-range': 'Avg budget $301–$1,000', 'Luxury': 'Avg budget $1,000+' }[id] || id)
@@ -5658,6 +5795,22 @@ export default {
     })
     const claudeTodayCost = computed(() =>
       fmtCost((claudeToday.value.tokens || 0) * CLAUDE_RATE_BLENDED + (claudeToday.value.searches || 0) * CLAUDE_SEARCH_RATE))
+    const dsToday = computed(() => {
+      const daily = providerStats.value.daily || []
+      return (daily.length ? daily[daily.length - 1].deepseek : null) || { tokens: 0, queries: 0, searches: 0 }
+    })
+    const dsTodayCost = computed(() => fmtCost((dsToday.value.tokens || 0) * DEEPSEEK_RATE_BLENDED))
+    // Prices-tab KPI cards: fixed infra vs variable AI, numeric sums
+    const aiCombinedCost = computed(() => {
+      const ds = (providerStats.value.summary.deepseek.tokens || 0) * DEEPSEEK_RATE_BLENDED
+      const cl = (providerStats.value.summary.claude.tokens || 0) * CLAUDE_RATE_BLENDED
+        + (providerStats.value.summary.claude.searches || 0) * CLAUDE_SEARCH_RATE
+      return fmtCost(ds + cl)
+    })
+    const fixedMonthlyCost = computed(() => {
+      const mongo = parseFloat(projectedMongoCostStr.value) || 8
+      return (17.09 + mongo).toFixed(2)
+    })
     const aiCost = computed(() => {
       const tokens = aiSummary.value.totalTokens || 0
       return fmtCost(tokens * DEEPSEEK_RATE_BLENDED)
@@ -5828,14 +5981,15 @@ export default {
       webSearchActionOptions, isSearchActionOn, searchActionCount, toggleSearchAction,
       prefetchLayerOptions, isPrefetchLayerOn, prefetchLayerCount, togglePrefetchLayer,
       isPrefetchActionOn, prefetchActionCount, togglePrefetchAction,
-      providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost,
+      providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost,
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
       places, placesLoading, placesPage, placesTotalPages, placesSearch, placesImageFilter, placesActionFilter, placesSort, placesSummary,
-      googleUsage, googleTopPlaces, googleLoading, googleDailyStats, googleChartDays, googleChartMax, googleTotalCost, googleMonthCost, googleTodayCost, googleSkuRows, gDayTitle,
+      googleUsage, googleTopPlaces, googleLoading, googleDailyStats, googleChartDays, googleChartMax, googleTotalCost, googleMonthCost, googleTodayCost, googleSkuRows,
+      chartTip, showChartTip, hideChartTip, gTipRows, dsTipRows, clTipRows, retTipRows,
       quickActionStats,
       prefStats, PREF_COLORS, PREF_DOT_COLORS, LIVE_PRICE_STYLES, travelStyleSegments, currencySegments, travelStyleTopPct, currencyTopPct, prefLocTotal, prefBudgetTotal, budgetBucketColor, budgetRangeHint,
       prices, dbStats, mongoBilling, fetchMongoBilling, prettySku, projectedMongoCostStr, monthlyAiCost, monthlyGoogleCost, monthlyMongoCost, monthlyTotal, monthlyRevenue,
@@ -5862,6 +6016,7 @@ export default {
       staffModal, staffPwError, staffCanSubmit, staffRevokeTarget, staffRevokeBusy,
       fetchStaff, openStaffCreate, closeStaffCreate, generateStaffPw, submitStaffCreate, copyStaffCreds,
       confirmStaffRevoke, cancelStaffRevoke, executeStaffRevoke,
+      restoreStaff, staffDeleteTarget, staffDeleteBusy, confirmStaffDelete, cancelStaffDelete, executeStaffDelete,
       // staff assignment editor
       staffAssignModal, openStaffAssign, closeStaffAssign, submitStaffAssign,
     }
@@ -6490,9 +6645,13 @@ export default {
 
 /* ── PURGE SPLIT BUTTON ── */
 .purge-split { position: relative; display: flex; align-items: stretch; border-radius: 9px; overflow: visible; }
-.purge-main { display: flex; align-items: center; gap: 6px; padding: 8px 11px; border: 1px solid currentColor; border-right: none; border-radius: 9px 0 0 9px; background: transparent; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; white-space: nowrap; }
+.purge-main { display: flex; align-items: center; gap: 6px; padding: 8px 11px; border: 1px solid; border-color: color-mix(in srgb, currentColor 40%, transparent); border-right: none; border-radius: 9px 0 0 9px; background: transparent; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; white-space: nowrap; }
+/* Standalone sibling of the purge split — same size/shape, neutral color,
+ * full border (purge-main's missing right border is split-only). */
+.purge-standalone { display: flex; align-items: center; gap: 6px; padding: 8px 12px; margin-right: 8px; border: 1px solid; border-color: color-mix(in srgb, currentColor 40%, transparent); border-radius: 9px; background: transparent; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; white-space: nowrap; }
+.purge-standalone:disabled { opacity: 0.5; cursor: default; }
 .purge-period-label { font-weight: 700; }
-.purge-chevron { display: flex; align-items: center; justify-content: center; padding: 0 9px; border: 1px solid currentColor; border-left: none; border-radius: 0 9px 9px 0; background: transparent; cursor: pointer; transition: all 0.15s; }
+.purge-chevron { display: flex; align-items: center; justify-content: center; padding: 0 9px; border: 1px solid; border-color: color-mix(in srgb, currentColor 40%, transparent); border-left: none; border-radius: 0 9px 9px 0; background: transparent; cursor: pointer; transition: all 0.15s; }
 .purge-dropdown { position: absolute; top: calc(100% + 6px); right: 0; min-width: 180px; border-radius: 11px; padding: 6px; z-index: 100; display: flex; flex-direction: column; gap: 1px; box-shadow: 0 0 28px rgba(0,0,0,0.18); }
 .purge-dropdown-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; padding: 5px 10px 7px; opacity: 0.45; }
 .purge-dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; border: none; background: transparent; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: left; transition: background 0.12s; }
@@ -6590,6 +6749,22 @@ export default {
 .cl-seg-searches { background: linear-gradient(180deg, #fcd34d, #f59e0b); }
 .cl-dot-tokens   { background: #38bdf8; }
 .cl-dot-searches { background: #f59e0b; }
+
+/* Shared styled chart tooltip */
+.chart-tip {
+  position: fixed; z-index: 300; pointer-events: none; min-width: 170px;
+  background: rgba(24, 20, 38, 0.97); border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.chart-tip.day-mode { background: rgba(255, 253, 246, 0.98); border-color: rgba(0,0,0,0.14); color: #52514e; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+.chart-tip-title { font-weight: 650; margin-bottom: 6px; color: #fff; font-family: 'DM Mono', monospace; font-size: 12.5px; }
+.chart-tip.day-mode .chart-tip-title { color: #1a1a1a; }
+.chart-tip-row { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+.chart-tip-dot { width: 9px; height: 9px; border-radius: 2.5px; flex-shrink: 0; }
+.chart-tip-k { flex: 1; }
+.chart-tip-v { font-variant-numeric: tabular-nums; color: #fff; }
+.chart-tip.day-mode .chart-tip-v { color: #1a1a1a; }
 
 /* Google Free Tier & Billing Forecast card */
 .gm-month { font-size: 12px; font-family: 'DM Mono', monospace; padding: 0 8px; opacity: 0.85; align-self: center; }
@@ -6722,6 +6897,8 @@ export default {
 .admin-shell.night-mode .btn-danger-outline:hover { background: rgba(244,63,94,0.1); }
 .admin-shell.night-mode .purge-main { color: #fb7185; }
 .admin-shell.night-mode .purge-main:hover { background: rgba(244,63,94,0.1); }
+.admin-shell.night-mode .purge-standalone { color: #c084fc; }
+.admin-shell.night-mode .purge-standalone:hover { background: rgba(192,132,252,0.1); }
 .admin-shell.night-mode .purge-chevron { color: #fb7185; }
 .admin-shell.night-mode .purge-chevron:hover { background: rgba(244,63,94,0.1); }
 .admin-shell.night-mode .purge-dropdown { background: #1e1438 }
@@ -6840,6 +7017,8 @@ export default {
 .admin-shell.day-mode .btn-danger-outline:hover { background: rgba(229,62,62,0.07); }
 .admin-shell.day-mode .purge-main { color: #c53030; }
 .admin-shell.day-mode .purge-main:hover { background: rgba(229,62,62,0.07); }
+.admin-shell.day-mode .purge-standalone { color: #5c3f2e; }
+.admin-shell.day-mode .purge-standalone:hover { background: rgba(212,175,55,0.07); }
 .admin-shell.day-mode .purge-chevron { color: #c53030; }
 .admin-shell.day-mode .purge-chevron:hover { background: rgba(229,62,62,0.07); }
 .admin-shell.day-mode .purge-dropdown { background: #fff; box-shadow: 0 0 28px rgba(139,69,19,0.1); }
@@ -6912,8 +7091,11 @@ export default {
 .price-step-btn:active { background: rgba(255,255,255,0.18); }
 .price-step-symbol { font-family: 'DM Mono', monospace; font-size: 12px; opacity: 0.5; padding: 0 2px 0 6px; }
 .price-input { width: 60px; background: transparent; border: none; border-left: 1px solid rgba(255,255,255,0.08); border-right: 1px solid rgba(255,255,255,0.08); padding: 4px 6px; font-family: 'DM Mono', monospace; font-size: 13px; color: inherit; outline: none; text-align: center; }
-/* Hide native number spinners */
+/* Hide native number spinners — the app's own −/+ buttons are the stepper.
+ * (Was broken: the ::-webkit-inner-spin-button selector was missing, so
+ * Chrome/Safari showed their arrows INSIDE the input next to our buttons.) */
 .price-input::-webkit-outer-spin-button,
+.price-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .price-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .price-textarea { width: 100%; border:none; background: transparent; border-radius: 8px; padding: 8px 10px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: inherit; outline: none; resize: vertical; transition: border-color 0.15s; }
 .admin-shell.day-mode .price-row { border-bottom-color: rgba(212,175,55,0.08); }
