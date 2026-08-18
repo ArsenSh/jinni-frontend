@@ -857,6 +857,50 @@
               </div>
             </div>
           </div>
+
+          <!-- AI cost forecast — month-by-month, like the Google one -->
+          <div class="card chart-card">
+            <div class="card-head">
+              <h2>AI Cost Forecast</h2>
+              <span class="card-sub" v-if="aiMonthly">{{ aiMonthly.isCurrent ? `Day ${aiMonthly.dayOfMonth} of ${aiMonthly.daysInMonth} · bar vs tick: ahead of the tick = spending accelerating` : 'Closed month' }}</span>
+              <div class="card-head-spacer"></div>
+              <div class="seg-group">
+                <button class="seg-btn" :disabled="!aiPrevMonth" @click="fetchAiMonthly(aiPrevMonth)">‹</button>
+                <span class="gm-month">{{ aiMonthly ? aiMonthly.month : '…' }}</span>
+                <button class="seg-btn" :disabled="!aiNextMonth" @click="fetchAiMonthly(aiNextMonth)">›</button>
+              </div>
+            </div>
+            <div v-if="aiMonthlyLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+            <div v-else-if="aiMonthly" class="gm-body">
+              <div class="gm-sku" v-for="p in aiMonthly.providers" :key="p.key">
+                <div class="gm-sku-head">
+                  <b>{{ p.label }}</b>
+                  <span class="gm-rate">{{ fmtK(p.tokens) }} tokens · {{ fmt(p.queries) }} requests<template v-if="p.key === 'claude'"> · {{ fmt(p.searches) }} web searches</template></span>
+                  <span class="gm-status" :class="p.growth !== null && p.growth > 1.2 ? 'gm-amber' : 'gm-green'" v-if="p.growth !== null">{{ p.growth > 1.2 ? 'growing ' + p.growth + '×' : 'steady' }}</span>
+                </div>
+                <div class="gm-bar" :title="p.projCost !== null ? `Month-to-date $${p.mtdCost.toFixed(2)} of projected $${p.projCost.toFixed(2)}` : ''">
+                  <div class="gm-fill gm-green" :style="{ width: (p.projCost ? Math.min(100, Math.round(100 * p.mtdCost / p.projCost)) : 100) + '%' }"></div>
+                  <div v-if="aiMonthly.isCurrent" class="gm-proj-marker" :style="{ left: Math.round(100 * aiMonthly.dayOfMonth / aiMonthly.daysInMonth) + '%' }"></div>
+                </div>
+                <div class="gm-sku-meta">
+                  <span>MTD ${{ p.mtdCost.toFixed(2) }}</span>
+                  <span v-if="p.projCost !== null">→ month-end ~${{ p.projCost.toFixed(2) }} ({{ fmtK(p.projTokens) }} tokens<template v-if="p.key === 'claude'"> · {{ fmt(p.projSearches) }} searches</template>)</span>
+                </div>
+              </div>
+              <div class="gm-total">
+                <template v-if="aiMonthly.isCurrent">
+                  AI billed so far this month: <b>${{ aiMonthly.totals.mtdCost.toFixed(2) }}</b>
+                  &nbsp;·&nbsp; projected month-end: <b>${{ (aiMonthly.totals.projCost || 0).toFixed(2) }}</b>
+                </template>
+                <template v-else>Month total: <b>${{ aiMonthly.totals.mtdCost.toFixed(2) }}</b></template>
+              </div>
+              <p class="gm-hint">
+                Costs use the blended rates (DeepSeek ~$0.50/1M, Claude ~$2/1M + $0.01/web search). No free caps here —
+                DeepSeek draws from its prepaid balance, and Claude's real ceiling is the account's daily token tier (TPD),
+                so watch the Claude projection before heavy testing days or scaling events abroad.
+              </p>
+            </div>
+          </div>
         </section>
 
         <!-- ── BUSINESSES ── -->
@@ -1653,31 +1697,45 @@
             <div class="card price-card">
               <div class="card-head">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-                <h2>Hetzner Cloud</h2><span class="card-sub">CX42 · Coolify deploys · fixed monthly</span>
+                <h2>Hetzner Cloud</h2><span class="card-sub">Coolify deploys · fixed monthly · live vitals</span>
               </div>
               <div class="price-card-body">
-                <div class="price-row"><span class="price-label">Server</span><span class="price-val">CX42 — 8 vCPU · 16 GB RAM · 160 GB SSD · 20 TB traffic</span></div>
+                <!-- Spec from the LIVE server, not docs — the live read exposed
+                     that the box is 4 vCPU / 8 GB (CPX31-class), not the CX42
+                     the cost docs claimed. -->
+                <div class="price-row"><span class="price-label">Server</span>
+                  <span class="price-val" v-if="serverStats">{{ serverStats.cpus }} vCPU · {{ serverStats.memTotalGB }} GB RAM<template v-if="serverStats.disk"> · {{ serverStats.disk.totalGB }} GB SSD</template> · 20 TB traffic</span>
+                  <span class="price-val" v-else>Hetzner Cloud VPS</span>
+                </div>
                 <template v-if="serverStats">
                   <div class="price-row" title="Load average (1 min / 5 min / 15 min) vs CPU cores — below the core count is healthy">
                     <span class="price-label">CPU load</span>
-                    <span class="price-val">{{ serverStats.load[0] }} / {{ serverStats.load[1] }} / {{ serverStats.load[2] }} <span class="db-meta">of {{ serverStats.cpus }} cores ({{ Math.round(serverStats.load[0] / serverStats.cpus * 100) }}%)</span></span>
+                    <span class="price-val">{{ serverStats.load[0] }} / {{ serverStats.load[1] }} / {{ serverStats.load[2] }} <span class="db-meta">of {{ serverStats.cpus }} cores ({{ cpuPct }}%)</span>
+                      <span class="gm-status" :class="vitalClass(cpuPct, 50, 80)">{{ vitalWord(cpuPct, 50, 80, ['healthy', 'busy', 'overloaded']) }}</span>
+                    </span>
                   </div>
                   <div class="price-row">
                     <span class="price-label">RAM</span>
-                    <span class="price-val">{{ serverStats.memUsedGB }} / {{ serverStats.memTotalGB }} GB ({{ serverStats.memUsedPct }}%) <span class="db-meta">· backend {{ serverStats.nodeHeapMB }} MB</span></span>
+                    <span class="price-val">{{ serverStats.memUsedGB }} / {{ serverStats.memTotalGB }} GB ({{ serverStats.memUsedPct }}%) <span class="db-meta">· backend {{ serverStats.nodeHeapMB }} MB</span>
+                      <span class="gm-status" :class="vitalClass(serverStats.memUsedPct, 60, 85)">{{ vitalWord(serverStats.memUsedPct, 60, 85, ['healthy', 'high', 'critical']) }}</span>
+                    </span>
                   </div>
                   <div class="price-row" v-if="serverStats.disk">
                     <span class="price-label">Disk</span>
-                    <span class="price-val">{{ serverStats.disk.totalGB - serverStats.disk.freeGB }} / {{ serverStats.disk.totalGB }} GB used ({{ Math.round((serverStats.disk.totalGB - serverStats.disk.freeGB) / serverStats.disk.totalGB * 100) }}%)</span>
+                    <span class="price-val">{{ serverStats.disk.totalGB - serverStats.disk.freeGB }} / {{ serverStats.disk.totalGB }} GB used ({{ diskPct }}%)
+                      <span class="gm-status" :class="vitalClass(diskPct, 70, 90)">{{ vitalWord(diskPct, 70, 90, ['plenty', 'filling up', 'almost full']) }}</span>
+                    </span>
                   </div>
                   <div class="price-row">
                     <span class="price-label">Uptime</span>
-                    <span class="price-val">{{ serverStats.uptimeDays }} days since last reboot</span>
+                    <span class="price-val">{{ serverStats.uptimeDays }} days since last reboot
+                      <span class="gm-status" :class="serverStats.uptimeDays >= 2 ? 'gm-green' : 'gm-amber'">{{ serverStats.uptimeDays >= 2 ? 'stable' : 'recently rebooted' }}</span>
+                    </span>
                   </div>
                 </template>
                 <div class="price-row" v-else><span class="price-label">Live vitals</span><span class="price-val db-loading">Loading…</span></div>
                 <div class="price-row"><span class="price-label">Scale path</span><span class="price-val">~25k users → ~$40/mo · ~50k → ~$90/mo (2-node)</span></div>
-                <div class="price-row price-row--total"><span class="price-label">Monthly cost</span><span class="price-val">$17.09</span></div>
+                <div class="price-row price-row--total"><span class="price-label">Monthly cost</span><span class="price-val">$17.09 <span class="db-meta">· verify in Hetzner console — live specs suggest CPX31 (~$15)</span></span></div>
               </div>
             </div>
             <div class="card price-card">
@@ -1757,12 +1815,16 @@
                   <td class="user-name" data-label="Email">{{ s.email }}</td>
                   <td class="dim-cell" data-label="Name">{{ s.name }}</td>
                   <td data-label="Status">
+                    <!-- "Awaiting first login" keys off actual login activity
+                         (analytics.lastActive), NOT mustChangePassword — that
+                         flag is never cleared (forced change isn't enforced),
+                         so it showed "awaiting" forever for active staff. -->
                     <span class="staff-status-pill" :class="{
                       'staff-status-pill--revoked': !s.isActive,
-                      'staff-status-pill--awaiting': s.isActive && s.mustChangePassword,
-                      'staff-status-pill--active': s.isActive && !s.mustChangePassword
+                      'staff-status-pill--awaiting': s.isActive && !s.analytics?.lastActive,
+                      'staff-status-pill--active': s.isActive && !!s.analytics?.lastActive
                     }">
-                      {{ !s.isActive ? 'revoked' : (s.mustChangePassword ? 'awaiting first login' : 'active') }}
+                      {{ !s.isActive ? 'revoked' : (!s.analytics?.lastActive ? 'awaiting first login' : 'active') }}
                     </span>
                   </td>
                   <td class="staff-assign-cell" data-label="Assignment">
@@ -3686,7 +3748,7 @@ export default {
       return {
         total: all.length,
         active: all.filter(s => s.isActive && !s.mustChangePassword).length,
-        awaiting: all.filter(s => s.isActive && s.mustChangePassword).length,
+        awaiting: all.filter(s => s.isActive && !s.analytics?.lastActive).length,
         revoked: all.filter(s => !s.isActive).length,
       }
     })
@@ -4225,6 +4287,27 @@ export default {
       if (s.usedPct > 70) return 'gm-amber'
       return 'gm-green'
     }
+    // ── AI monthly cost forecast (DeepSeek + Claude) ──
+    const aiMonthly = ref(null)
+    const aiMonthlyLoading = ref(false)
+    const fetchAiMonthly = async (month) => {
+      aiMonthlyLoading.value = true
+      try {
+        const res = await apiFetch('/ai-usage/monthly' + (month ? `?month=${month}` : ''))
+        if (res.success) aiMonthly.value = res.data
+      } catch (e) { console.warn('ai monthly fetch failed:', e.message) }
+      finally { aiMonthlyLoading.value = false }
+    }
+    const aiPrevMonth = computed(() => {
+      if (!aiMonthly.value) return null
+      const i = aiMonthly.value.months.indexOf(aiMonthly.value.month)
+      return i > 0 ? aiMonthly.value.months[i - 1] : null
+    })
+    const aiNextMonth = computed(() => {
+      if (!aiMonthly.value) return null
+      const i = aiMonthly.value.months.indexOf(aiMonthly.value.month)
+      return i >= 0 && i < aiMonthly.value.months.length - 1 ? aiMonthly.value.months[i + 1] : null
+    })
     const gmStatusText = (s) => {
       if (s.total >= s.free) return 'over cap — billing'
       if (s.projectedPct !== null && s.projectedPct > 100) return 'on track to exceed'
@@ -4592,7 +4675,7 @@ export default {
     const debouncedDestFetch = debounce(() => fetchDestinations(true))
     const fetchAll = async () => {
       loading.value = true
-      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchServerStats(), fetchDbStats()]) }
+      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiMonthly(), fetchServerStats(), fetchDbStats()]) }
       catch (e) { showToast(e.message, 'error') } finally { loading.value = false }
     }
     // Stored rec images are either absolute URLs or API-relative paths
@@ -5837,8 +5920,16 @@ export default {
       const mongo = parseFloat(projectedMongoCostStr.value) || 8
       return (17.09 + mongo).toFixed(2)
     })
-    // Live Hetzner vitals (backend reads its own host via os.*)
+    // Live Hetzner vitals (backend reads its own host via os.*) + traffic-light
+    // indicators: green below `warn`%, amber between, red above `bad`%.
     const serverStats = ref(null)
+    const vitalClass = (pct, warn, bad) => pct >= bad ? 'gm-red' : pct >= warn ? 'gm-amber' : 'gm-green'
+    const vitalWord = (pct, warn, bad, words) => pct >= bad ? words[2] : pct >= warn ? words[1] : words[0]
+    const cpuPct = computed(() => serverStats.value ? Math.round(serverStats.value.load[0] / serverStats.value.cpus * 100) : 0)
+    const diskPct = computed(() => {
+      const d = serverStats.value?.disk
+      return d ? Math.round((d.totalGB - d.freeGB) / d.totalGB * 100) : 0
+    })
     const fetchServerStats = async () => {
       try { const res = await apiFetch('/server-stats'); if (res.success) serverStats.value = res.data }
       catch (e) { console.warn('server stats fetch failed:', e.message) }
@@ -6016,6 +6107,8 @@ export default {
       providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
+      aiMonthly, aiMonthlyLoading, fetchAiMonthly, aiPrevMonth, aiNextMonth,
+      vitalClass, vitalWord, cpuPct, diskPct,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
