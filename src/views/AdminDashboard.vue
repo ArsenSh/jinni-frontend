@@ -1695,7 +1695,7 @@
           <div class="card" style="padding: 18px 20px" v-if="covData">
             <div class="card-head" style="padding: 0 0 10px">
               <h2>Google Coverage Gate</h2>
-              <span class="card-sub">warm city + category &rArr; Google off, serve from cache · events exempt · applies to quick actions, chat and itinerary</span>
+              <span class="card-sub">warm city + category &rArr; Google off, serve from cache · applies to quick actions, chat and itinerary · Events = cached venues; Claude web-search listings are never gated</span>
             </div>
             <div class="provider-row">
               <label class="provider-label">Enable gate <span>master switch — while OFF, Google works everywhere exactly as before</span></label>
@@ -1728,16 +1728,32 @@
                   <tr><th>City</th><th v-for="c in covData.categories" :key="c">{{ covCatLabel(c) }}</th></tr>
                 </thead>
                 <tbody>
-                  <tr v-for="row in covData.rows" :key="row.key">
-                    <td class="cov-city"><b>{{ row.city }}</b><span>{{ row.country || '—' }} · {{ row.total }} cached</span></td>
-                    <td v-for="c in covData.categories" :key="c">
-                      <button type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
-                        <b>{{ covCellPct(row, c) }}%</b>
-                        <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
-                        <em>{{ covCellState(row, c) }}</em>
-                      </button>
-                    </td>
-                  </tr>
+                  <template v-for="g in covCountries" :key="g.name">
+                    <tr class="cov-country-row" @click="toggleCovCountry(g.name)">
+                      <td class="cov-city cov-country-cell">
+                        <div class="cov-country-name">
+                          <svg class="cov-chev" :class="{ rot: covOpen[g.name] }" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                          <b>{{ g.name }}</b>
+                        </div>
+                        <span>{{ g.rows.length }} {{ g.rows.length === 1 ? 'city' : 'cities' }} · {{ g.total }} cached</span>
+                      </td>
+                      <td v-for="c in covData.categories" :key="c" class="cov-country-agg">
+                        <b>{{ g.cats[c].pct }}%</b><span>{{ g.cats[c].count }}</span>
+                      </td>
+                    </tr>
+                    <template v-if="covOpen[g.name]">
+                      <tr v-for="row in g.rows" :key="row.key" class="cov-city-row">
+                        <td class="cov-city"><b>{{ row.city }}</b><span>{{ row.total }} cached</span></td>
+                        <td v-for="c in covData.categories" :key="c">
+                          <button type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
+                            <b>{{ covCellPct(row, c) }}%</b>
+                            <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
+                            <em>{{ covCellState(row, c) }}</em>
+                          </button>
+                        </td>
+                      </tr>
+                    </template>
+                  </template>
                 </tbody>
               </table>
             </div>
@@ -6592,7 +6608,7 @@ export default {
     const covData = ref(null)
     const covForm = ref({ gate: false, cutoff: 90, targets: {}, cityTargets: {}, overrides: {} })
     const covSaving = ref(false)
-    const COV_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical', hidden_gems: 'Hidden gems', photo_spots: 'Photo spots', shopping: 'Shopping' }
+    const COV_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical', hidden_gems: 'Hidden gems', photo_spots: 'Photo spots', shopping: 'Shopping', events: 'Event venues' }
     const covCatLabel = c => COV_LABELS[c] || c
     const fetchCoverage = async () => {
       try {
@@ -6606,6 +6622,8 @@ export default {
             cityTargets: JSON.parse(JSON.stringify(res.data.config.coverageCityTargets || {})),
             overrides: JSON.parse(JSON.stringify(res.data.config.coverageOverrides || {})),
           }
+          const top = res.data.rows[0]
+          if (top && !Object.keys(covOpen.value).length) covOpen.value = { [top.country || 'Unknown']: true }
         }
       } catch (e) { console.warn('coverage fetch failed:', e.message) }
     }
@@ -6639,6 +6657,29 @@ export default {
       if (ov === 'off') return 'cov-cell--foff'
       return covCellPct(row, c) >= covForm.value.cutoff ? 'cov-cell--warm' : 'cov-cell--cold'
     }
+    // Countries collapse: Armenia ▸ opens Yerevan, Tsaghkadzor…; header row
+    // shows the country-level aggregate (Σ counts ÷ Σ targets) — display only.
+    const covOpen = ref({})
+    const toggleCovCountry = (name) => { covOpen.value = { ...covOpen.value, [name]: !covOpen.value[name] } }
+    const covCountries = computed(() => {
+      if (!covData.value) return []
+      const groups = new Map()
+      for (const row of covData.value.rows) {
+        const name = row.country || 'Unknown'
+        if (!groups.has(name)) groups.set(name, { name, rows: [], total: 0, cats: {} })
+        const g = groups.get(name)
+        g.rows.push(row); g.total += row.total
+      }
+      for (const g of groups.values()) {
+        for (const c of covData.value.categories) {
+          let count = 0, target = 0
+          for (const row of g.rows) { count += row.categories[c].count; target += covCellTarget(row, c) }
+          g.cats[c] = { count, pct: target > 0 ? Math.min(999, Math.round((count / target) * 100)) : 0 }
+        }
+        g.rows.sort((a, b) => b.total - a.total)
+      }
+      return [...groups.values()].sort((a, b) => b.total - a.total)
+    })
     const cycleCov = (key, c) => {
       const cur = covOverrideOf(key, c)
       const next = cur === 'auto' ? 'off' : cur === 'off' ? 'on' : 'auto'
@@ -6935,7 +6976,7 @@ export default {
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
-      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov,
+      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covCountries, covOpen, toggleCovCountry,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
       placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
@@ -8990,6 +9031,19 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .cov-table { border-collapse: collapse; width: 100%; min-width: 780px; }
 .cov-table th { text-align: left; padding: 8px 8px 10px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.6; }
 .cov-table td { padding: 3px 4px; vertical-align: middle; }
+.cov-country-row { cursor: pointer; }
+.admin-shell.night-mode .cov-country-row:hover td { background: rgba(139,92,246,0.07); }
+.admin-shell.day-mode .cov-country-row:hover td { background: rgba(212,175,55,0.08); }
+.cov-country-row td { padding-top: 9px; padding-bottom: 9px; }
+.cov-country-name { display: flex; align-items: center; gap: 7px; }
+.cov-country-name b { font-size: 13.5px; font-weight: 700; }
+.cov-chev { transition: transform 0.18s; opacity: 0.55; flex-shrink: 0; }
+.cov-chev.rot { transform: rotate(90deg); }
+.cov-country-cell span { margin-left: 19px; }
+.cov-country-agg { font-size: 12px; white-space: nowrap; }
+.cov-country-agg b { font-weight: 700; margin-right: 5px; }
+.cov-country-agg span { opacity: 0.5; font-size: 10.5px; }
+.cov-city-row .cov-city { padding-left: 24px; }
 .cov-city b { display: block; font-size: 13px; font-weight: 650; }
 .cov-city span { font-size: 11px; opacity: 0.55; white-space: nowrap; }
 .cov-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; min-width: 88px; border: none; cursor: pointer; border-radius: 9px; padding: 7px 9px; font-family: inherit; text-align: left; transition: background 0.15s; }
