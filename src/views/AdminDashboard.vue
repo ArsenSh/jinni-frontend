@@ -170,7 +170,10 @@
               <div class="ret-kpi"><span>Active 7d</span><b>{{ retention.totals.wau }}</b></div>
               <div class="ret-kpi"><span>Active 30d</span><b>{{ retention.totals.mau }}</b></div>
             </div>
-            <div class="sparkbar-wrap" v-if="retention && retentionDaily.some(d => d.active > 0)">
+            <div class="sparkbar-wrap" v-if="retention && retentionDaily.some(d => d.active > 0)"
+                 @touchstart="chartScrub($event, retentionDaily, retTipRows, d => d.day)"
+                 @touchmove.prevent="chartScrub($event, retentionDaily, retTipRows, d => d.day)"
+                 @touchend="hideChartTip">
               <div v-for="d in retentionDaily" :key="d.day" class="sparkbar-col"
                    @pointermove="showChartTip($event, d.day, retTipRows(d))" @pointerleave="hideChartTip">
                 <div class="sparkbar-value">{{ d.active > 0 ? d.active : '' }}</div>
@@ -605,6 +608,60 @@
 
         <!-- ── AI USAGE ── -->
         <section v-if="activeTab === 'ai'" class="tab-section">
+          <div class="kpi-grid kpi-grid--4">
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+              <div class="kpi-label">Total Tokens Used</div>
+              <div class="kpi-value">{{ fmtK(aiSummary.totalTokens) }}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+              <div class="kpi-label">Total Queries</div>
+              <div class="kpi-value">{{ fmtK(aiSummary.totalQueries) }}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+              <div class="kpi-label">Avg Tokens / Query</div>
+              <div class="kpi-value">{{ Math.round(aiSummary.avgTokensPerQuery || 0) }}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <div class="kpi-label">Users on Cooldown</div>
+              <div class="kpi-value">{{ fmt(aiSummary.usersOnCooldown) }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                </div>
+                <div class="kpi-label">Today's Tokens</div>
+                <div class="kpi-value">{{ fmtK(aiSummary.todayTokens) }}</div>
+                <div class="kpi-sub">{{ fmt(aiSummary.todayQueries) }} queries today</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                </div>
+                <div class="kpi-label">Total API Cost</div>
+                <div class="kpi-value">${{ aiCost }}</div>
+                <div class="kpi-sub">DeepSeek V3 · ~$0.50/1M blended</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+                </div>
+                <div class="kpi-label">Place Cards Named</div>
+                <div class="kpi-value">{{ fmtK(aiSummary.totalPlaces) }}</div>
+                <div class="kpi-sub">Total AI recommendations</div>
+            </div>
+          </div>
+
+
           <!-- ── AI Provider toggle (DeepSeek ↔ Claude) ───────────────────── -->
           <!-- Daily AI charts — one per provider, same window toggle -->
           <div class="card chart-card">
@@ -624,7 +681,10 @@
                 <div class="g-grid-lines">
                   <div class="g-grid-line" v-for="i in 4" :key="i"></div>
                 </div>
-                <div class="g-bars" :class="{ 'g-bars--30d': aiChartDays === 30 }">
+                <div class="g-bars" :class="{ 'g-bars--30d': aiChartDays === 30 }"
+                     @touchstart="chartScrub($event, providerDaily, dsTipRows, d => d.date)"
+                     @touchmove.prevent="chartScrub($event, providerDaily, dsTipRows, d => d.date)"
+                     @touchend="hideChartTip">
                   <div
                     v-for="(day, idx) in providerDaily"
                     :key="'ds' + day.date"
@@ -664,7 +724,10 @@
                 <div class="g-grid-lines">
                   <div class="g-grid-line" v-for="i in 4" :key="i"></div>
                 </div>
-                <div class="g-bars" :class="{ 'g-bars--30d': aiChartDays === 30 }">
+                <div class="g-bars" :class="{ 'g-bars--30d': aiChartDays === 30 }"
+                     @touchstart="chartScrub($event, providerDaily, clTipRows, d => d.date)"
+                     @touchmove.prevent="chartScrub($event, providerDaily, clTipRows, d => d.date)"
+                     @touchend="hideChartTip">
                   <div
                     v-for="(day, idx) in providerDaily"
                     :key="'cl' + day.date"
@@ -766,60 +829,6 @@
             </div>
           </div>
 
-          <div class="kpi-grid kpi-grid--4">
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">Total Tokens Used</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.totalTokens) }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">Total Queries</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.totalQueries) }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-              <div class="kpi-label">Avg Tokens / Query</div>
-              <div class="kpi-value">{{ Math.round(aiSummary.avgTokensPerQuery || 0) }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-              <div class="kpi-label">Users on Cooldown</div>
-              <div class="kpi-value">{{ fmt(aiSummary.usersOnCooldown) }}</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>
-                </div>
-                <div class="kpi-label">Today's Tokens</div>
-                <div class="kpi-value">{{ fmtK(aiSummary.todayTokens) }}</div>
-                <div class="kpi-sub">{{ fmt(aiSummary.todayQueries) }} queries today</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-                </div>
-                <div class="kpi-label">Total API Cost</div>
-                <div class="kpi-value">${{ aiCost }}</div>
-                <div class="kpi-sub">DeepSeek V3 · ~$0.50/1M blended</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                </svg>
-                </div>
-                <div class="kpi-label">Place Cards Named</div>
-                <div class="kpi-value">{{ fmtK(aiSummary.totalPlaces) }}</div>
-                <div class="kpi-sub">Total AI recommendations</div>
-            </div>
-          </div>
-
-
           <div class="card provider-card">
             <div class="card-head">
               <h2>AI Provider</h2>
@@ -841,7 +850,18 @@
                 </div>
               </div>
 
-              <template v-if="aiProvider.aiProviderChat === 'claude' || aiProvider.aiProviderQuickAction === 'claude'">
+              <div class="provider-row" key="pr-events-claude">
+                <label class="provider-label">
+                  Events &rarr; Claude
+                  <span>event questions in chat + the Events quick action always use Claude (web search rules apply); everything else follows the switches above</span>
+                </label>
+                <label class="prov-switch">
+                  <input type="checkbox" v-model="aiProvider.aiEventsUseClaude" />
+                  <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
+                </label>
+              </div>
+
+              <template v-if="aiProvider.aiProviderChat === 'claude' || aiProvider.aiProviderQuickAction === 'claude' || aiProvider.aiEventsUseClaude">
                 <div class="provider-divider" key="pr-divider"></div>
                 <div class="provider-row" key="pr-model">
                   <label class="provider-label">Claude model</label>
@@ -1430,7 +1450,10 @@
                   <div class="g-grid-line" v-for="i in 4" :key="i"></div>
                 </div>
                 <!-- Bars -->
-                <div class="g-bars" :class="{ 'g-bars--30d': googleChartDays === 30 }">
+                <div class="g-bars" :class="{ 'g-bars--30d': googleChartDays === 30 }"
+                     @touchstart="chartScrub($event, googleDailyStats, gTipRows, d => d.date)"
+                     @touchmove.prevent="chartScrub($event, googleDailyStats, gTipRows, d => d.date)"
+                     @touchend="hideChartTip">
                   <div
                     v-for="(day, idx) in googleDailyStats"
                     :key="day.date"
@@ -1510,79 +1533,6 @@
               </p>
             </div>
           </div>
-        </section>
-
-        <!-- ── LIMITS ── -->
-        <section v-if="activeTab === 'limits'" class="tab-section">
-          <div class="kpi-grid kpi-grid--4" v-if="limitsData">
-            <div class="kpi-card">
-              <div class="kpi-label">Free users</div>
-              <div class="kpi-value">{{ fmt(limitsData.free.users) }}</div>
-              <div class="kpi-sub">{{ limitsData.free.activeToday }} active today</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Premium users</div>
-              <div class="kpi-value">{{ fmt(limitsData.premium.users) }}</div>
-              <div class="kpi-sub">{{ limitsData.premium.activeToday }} active today</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">On cooldown now</div>
-              <div class="kpi-value">{{ limitsData.free.onCooldown + limitsData.premium.onCooldown }}</div>
-              <div class="kpi-sub">free {{ limitsData.free.onCooldown }} · premium {{ limitsData.premium.onCooldown }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Near their limit today</div>
-              <div class="kpi-value">{{ limitsData.free.nearLimit + limitsData.premium.nearLimit }}</div>
-              <div class="kpi-sub">≥80% of daily tokens used</div>
-            </div>
-          </div>
-
-          <div class="loc-section-label" v-if="limitsData" style="margin-top: 14px">User limits</div>
-          <div class="loc-grid" v-if="limitsData" style="margin-top: 10px">
-            <div class="card" style="padding: 18px 20px" v-for="tierKey in ['free', 'premium']" :key="tierKey">
-              <div class="card-head" style="padding: 0 0 8px">
-                <h2 style="text-transform: capitalize">{{ tierKey }} tier</h2>
-                <span class="card-sub">daily allowances · resets midnight UTC</span>
-              </div>
-              <div class="edit-field edit-field--full" style="margin-top: 8px">
-                <label class="edit-label">Daily AI tokens</label>
-                <input class="limit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Tokens']" />
-                <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Used today ({{ tierKey }} total): {{ fmt(limitsData[tierKey].tokensToday) }} tokens across {{ limitsData[tierKey].activeToday }} users</small>
-              </div>
-              <div class="edit-field edit-field--full" style="margin-top: 12px">
-                <label class="edit-label">Daily places viewed</label>
-                <input class="limit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Places']" />
-                <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Viewed today ({{ tierKey }} total): {{ fmt(limitsData[tierKey].placesToday) }} places</small>
-              </div>
-            </div>
-          </div>
-
-          <div class="loc-section-label" v-if="limitsData" style="margin-top: 16px">Business limits</div>
-          <div class="card" v-if="limitsData" style="margin-top: 10px; padding: 18px 20px">
-            <div class="card-head" style="padding: 0 0 8px">
-              <h2>Visibility radius per category</h2>
-              <span class="card-sub">how far a business reaches in results &amp; zone boosts (meters, 50–5000)</span>
-            </div>
-            <div class="loc-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px">
-              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems']" :key="cat">
-                <label class="edit-label" style="text-transform: capitalize">{{ cat.replace('_', ' ') }}</label>
-                <input class="limit-input" type="number" min="50" max="5000" step="50" v-model.number="limitsZoneForm[cat]" />
-              </div>
-            </div>
-            <p style="margin: 12px 0 0; font-size: 11.5px; opacity: 0.6; line-height: 1.55">
-              The auction zone grid itself stays fixed — changing it would re-shuffle existing Signature zones.
-            </p>
-          </div>
-
-          <div class="card" v-if="limitsData" style="margin-top: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
-            <button class="action-btn btn-accent" @click="saveLimits" :disabled="limitsSaving">{{ limitsSaving ? 'Saving…' : 'Save limits' }}</button>
-            <span style="font-size: 12.5px; opacity: 0.65; line-height: 1.55; max-width: 70ch">
-              Takes effect immediately for every user (no redeploy). Free values are a floor — a user with a hand-raised
-              personal limit keeps it. Hitting a limit puts free users on a 4-hour cooldown.
-              Note: the per-user meter has a known undercount bug, so "used today" figures are lower bounds until that fix ships.
-            </span>
-          </div>
-          <div v-else class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
           <div class="card g-prefetch-card">
             <div class="card-head">
               <h2>Google Prefetch</h2>
@@ -1664,6 +1614,79 @@
               </div>
             </template>
           </div>
+        </section>
+
+        <!-- ── LIMITS ── -->
+        <section v-if="activeTab === 'limits'" class="tab-section">
+          <div class="kpi-grid kpi-grid--4" v-if="limitsData">
+            <div class="kpi-card">
+              <div class="kpi-label">Free users</div>
+              <div class="kpi-value">{{ fmt(limitsData.free.users) }}</div>
+              <div class="kpi-sub">{{ limitsData.free.activeToday }} active today</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Premium users</div>
+              <div class="kpi-value">{{ fmt(limitsData.premium.users) }}</div>
+              <div class="kpi-sub">{{ limitsData.premium.activeToday }} active today</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">On cooldown now</div>
+              <div class="kpi-value">{{ limitsData.free.onCooldown + limitsData.premium.onCooldown }}</div>
+              <div class="kpi-sub">free {{ limitsData.free.onCooldown }} · premium {{ limitsData.premium.onCooldown }}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Near their limit today</div>
+              <div class="kpi-value">{{ limitsData.free.nearLimit + limitsData.premium.nearLimit }}</div>
+              <div class="kpi-sub">≥80% of daily tokens used</div>
+            </div>
+          </div>
+
+          <div class="loc-section-label" v-if="limitsData" style="margin-top: 14px">User limits</div>
+          <div class="loc-grid" v-if="limitsData" style="margin-top: 10px">
+            <div class="card" style="padding: 18px 20px" v-for="tierKey in ['free', 'premium']" :key="tierKey">
+              <div class="card-head" style="padding: 0 0 8px">
+                <h2 style="text-transform: capitalize">{{ tierKey }} tier</h2>
+                <span class="card-sub">daily allowances · resets midnight UTC</span>
+              </div>
+              <div class="edit-field edit-field--full" style="margin-top: 8px">
+                <label class="edit-label">Daily AI tokens</label>
+                <input class="limit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Tokens']" />
+                <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Used today ({{ tierKey }} total): {{ fmt(limitsData[tierKey].tokensToday) }} tokens across {{ limitsData[tierKey].activeToday }} users</small>
+              </div>
+              <div class="edit-field edit-field--full" style="margin-top: 12px">
+                <label class="edit-label">Daily places viewed</label>
+                <input class="limit-input" type="number" min="1" v-model.number="limitsForm[tierKey + 'Places']" />
+                <small style="opacity:0.55; display:block; margin-top:4px; font-size:11.5px">Viewed today ({{ tierKey }} total): {{ fmt(limitsData[tierKey].placesToday) }} places</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="loc-section-label" v-if="limitsData" style="margin-top: 16px">Business limits</div>
+          <div class="card" v-if="limitsData" style="margin-top: 10px; padding: 18px 20px">
+            <div class="card-head" style="padding: 0 0 8px">
+              <h2>Visibility radius per category</h2>
+              <span class="card-sub">how far a business reaches in results &amp; zone boosts (meters, 50–5000)</span>
+            </div>
+            <div class="loc-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px">
+              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems']" :key="cat">
+                <label class="edit-label" style="text-transform: capitalize">{{ cat.replace('_', ' ') }}</label>
+                <input class="limit-input" type="number" min="50" max="5000" step="50" v-model.number="limitsZoneForm[cat]" />
+              </div>
+            </div>
+            <p style="margin: 12px 0 0; font-size: 11.5px; opacity: 0.6; line-height: 1.55">
+              The auction zone grid itself stays fixed — changing it would re-shuffle existing Signature zones.
+            </p>
+          </div>
+
+          <div class="card" v-if="limitsData" style="margin-top: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+            <button class="action-btn btn-accent" @click="saveLimits" :disabled="limitsSaving">{{ limitsSaving ? 'Saving…' : 'Save limits' }}</button>
+            <span style="font-size: 12.5px; opacity: 0.65; line-height: 1.55; max-width: 70ch">
+              Takes effect immediately for every user (no redeploy). Free values are a floor — a user with a hand-raised
+              personal limit keeps it. Hitting a limit puts free users on a 4-hour cooldown.
+              Note: the per-user meter has a known undercount bug, so "used today" figures are lower bounds until that fix ships.
+            </span>
+          </div>
+          <div v-else class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
         </section>
 
         <!-- ── PRICES ── -->
@@ -3400,15 +3423,19 @@
           <div class="edit-body">
             <div v-if="placeInfoModal.loading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
             <section v-else class="edit-section">
+              <div class="edit-section-title" v-if="placeInfoModal.row?.imagesStored && (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length">Photos</div>
               <div class="pi-gallery" v-if="placeInfoModal.row?.imagesStored && (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length">
                 <img v-for="(ph, i) in (placeInfoModal.data?.photos || placeInfoModal.row.photos)" :key="i"
                   :src="`${apiBase}/api/ai/place-image/${placeInfoModal.row.placeId}/${i}`"
                   class="pi-photo" loading="lazy" @error="hideBrokenThumb" />
               </div>
-              <div class="pi-row" v-for="r in placeInfoRows" :key="r.k">
-                <span class="pi-k">{{ r.k }}</span>
-                <a v-if="r.href" class="pi-v pi-link" :href="r.href" target="_blank" rel="noopener">{{ r.v }}</a>
-                <span v-else class="pi-v">{{ r.v }}</span>
+              <div class="edit-section-title">Details</div>
+              <div class="pi-cols">
+                <div class="pi-row" v-for="r in placeInfoRows" :key="r.k">
+                  <span class="pi-k">{{ r.k }}</span>
+                  <a v-if="r.href" class="pi-v pi-link" :href="r.href" target="_blank" rel="noopener">{{ r.v }}</a>
+                  <span v-else class="pi-v">{{ r.v }}</span>
+                </div>
               </div>
               <template v-if="placeInfoHours.length">
                 <div class="edit-section-title" style="margin-top:14px">Opening hours</div>
@@ -3915,6 +3942,7 @@ export default {
     const aiProvider = ref({
       aiProviderChat: 'deepseek',
       aiProviderQuickAction: 'deepseek',
+      aiEventsUseClaude: false,
       claudeModel: 'claude-haiku-4-5-20251001',
       claudeWebSearch: false,
       claudeWebSearchMaxUses: 3,
@@ -4608,6 +4636,26 @@ export default {
     const chartTip = ref({ show: false, x: 0, y: 0, title: '', rows: [] })
     let _tipTouchTimer = null
     const hideChartTip = () => { chartTip.value.show = false }
+    // Mobile scrubbing: keep a finger on the chart and slide horizontally —
+    // the tooltip follows the finger, showing each day as it passes. Column
+    // index comes from the finger's x inside the container (bars are evenly
+    // spread), shown above the finger so the hand doesn't cover it.
+    const chartScrub = (e, list, rowsFn, titleOf) => {
+      const t = e.touches && e.touches[0]
+      if (!t || !list || !list.length) return
+      const rect = e.currentTarget.getBoundingClientRect()
+      const idx = Math.min(list.length - 1, Math.max(0, Math.floor(((t.clientX - rect.left) / rect.width) * list.length)))
+      const d = list[idx]
+      const rows = rowsFn(d)
+      chartTip.value = {
+        show: true,
+        x: Math.max(8, Math.min(t.clientX - 85, window.innerWidth - 190)),
+        y: Math.max(8, rect.top - 30 - rows.length * 22),
+        title: titleOf(d), rows
+      }
+      clearTimeout(_tipTouchTimer)
+      _tipTouchTimer = setTimeout(hideChartTip, 2500)
+    }
     const showChartTip = (e, title, rows) => {
       chartTip.value = {
         show: true,
@@ -6774,7 +6822,7 @@ export default {
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
       places, placesLoading, placesPage, placesTotalPages, placesSearch, placesImageFilter, placesActionFilter, placesSort, placesSummary,
       googleUsage, googleTopPlaces, googleLoading, googleDailyStats, googleChartDays, googleChartMax, googleTotalCost, googleMonthCost, googleTodayCost, googleSkuRows,
-      chartTip, showChartTip, hideChartTip, gTipRows, dsTipRows, clTipRows, retTipRows,
+      chartTip, showChartTip, hideChartTip, chartScrub, gTipRows, dsTipRows, clTipRows, retTipRows,
       quickActionStats,
       prefStats, PREF_COLORS, PREF_DOT_COLORS, LIVE_PRICE_STYLES, travelStyleSegments, currencySegments, travelStyleTopPct, currencyTopPct, prefLocTotal, prefBudgetTotal, budgetBucketColor, budgetRangeHint,
       prices, dbStats, mongoBilling, fetchMongoBilling, prettySku, projectedMongoCostStr, monthlyAiCost, monthlyGoogleCost, monthlyMongoCost, monthlyTotal, monthlyRevenue,
@@ -7630,6 +7678,10 @@ export default {
 .aiev-main { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
 .aiev-main .db-meta { font-size: 12px; }
 
+/* Wide-panel detail rows: two columns like the business editor's grids */
+.pi-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+@media (max-width: 700px) { .pi-cols { grid-template-columns: 1fr; } }
+
 /* Modal photo gallery strip */
 .pi-gallery { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; padding-bottom: 4px; }
 .pi-photo { width: 86px; height: 86px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
@@ -8135,7 +8187,7 @@ export default {
 /* ─ Mobile: ≤ 768px ─ */
 @media (max-width: 768px) {
   .admin-shell { flex-direction: column; }
-  .sidebar { width: 100%; height: 54px; position: fixed; bottom: 0; left: 0; right: 0; top: auto; z-index: 100; flex-direction: row; align-items: stretch; padding: 0; border-top: 1px solid rgba(139,92,246,0.18); box-shadow: 0 -4px 24px rgba(0,0,0,0.18); overflow: hidden; }
+  .sidebar { width: 100%; height: 54px; position: fixed; bottom: 0; left: 0; right: 0; top: auto; z-index: 100; flex-direction: row; align-items: stretch; padding: 0; border-top: 1px solid rgba(139,92,246,0.18); overflow: hidden; }
   .admin-shell.night-mode .sidebar { background: #16213e }
   .sidebar-brand, .sidebar-spacer, .sidebar-section-label { display: none; }
   .sidebar-nav {
@@ -8785,22 +8837,26 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .admin-shell.day-mode .provider-num { border-color: rgba(160,82,45,0.30); }
 
 /* ── Segmented provider toggle buttons ───────────────────────────────────── */
-.prov-seg { display: inline-flex; border: 1px solid rgba(139,92,246,0.25); border-radius: 10px; padding: 3px; gap: 3px; }
+/* Segmented toggle: the TRACK is filled so unselected segments read as part
+   of the track (plain muted text), and only .active looks like a button. */
+.prov-seg { display: inline-flex; background: rgba(255,255,255,0.05); border: 1px solid rgba(139,92,246,0.22); border-radius: 10px; padding: 3px; gap: 3px; }
 .prov-seg-btn {
   font: inherit; font-size: 13px; font-weight: 600; padding: 7px 16px; border: none;
   border-radius: 7px; cursor: pointer; background: transparent; color: inherit; opacity: 0.6;
   transition: opacity 0.15s, color 0.15s; display: inline-flex; align-items: center; gap: 6px;
 }
 .prov-seg-btn em { font-style: normal; font-weight: 500; font-size: 11px; opacity: 0.7; }
-.prov-seg-btn:hover { opacity: 0.9; }
-.prov-seg-btn.active { opacity: 1; color: #fff; background: linear-gradient(90deg, #D4AF37, #a78bfa); }
-.admin-shell.day-mode .prov-seg { border-color: rgba(160,82,45,0.30); }
+.prov-seg-btn:hover { opacity: 0.85; }
+.prov-seg-btn.active { opacity: 1; color: #fff; background: linear-gradient(90deg, #D4AF37, #a78bfa); box-shadow: 0 0 10px rgba(139,92,246,0.35); }
+.admin-shell.day-mode .prov-seg { background: rgba(139,69,19,0.06); border-color: rgba(160,82,45,0.30); }
+.admin-shell.day-mode .prov-seg-btn.active { box-shadow: 0 0 10px rgba(212,175,55,0.35); }
 
 /* Hard reset: only the ACTIVE segment may be filled. Higher specificity than a
    bare .prov-seg / .prov-seg-btn rule, so a stray global gradient on the
    control can't make every button look selected. */
 .provider-body .prov-seg { background: transparent; }
-.provider-body .prov-seg .prov-seg-btn { background: transparent; color: inherit; opacity: 0.6; }
+.provider-body .prov-seg .prov-seg-btn { background: transparent; color: inherit; opacity: 0.5; font-weight: 500; }
+.provider-body .prov-seg .prov-seg-btn.active { font-weight: 700; }
 .provider-body .prov-seg .prov-seg-btn.active { background: linear-gradient(90deg, #D4AF37, #a78bfa); color: #fff; opacity: 1; }
 
 /* ── Web-search on/off switch ─────────────────────────────────────────────── */
