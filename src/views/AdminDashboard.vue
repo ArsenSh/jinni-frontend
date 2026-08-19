@@ -836,25 +836,100 @@
               <span class="card-sub">Switch per endpoint · changes apply within ~30s</span>
             </div>
             <div class="provider-body">
+              <div class="prov-sec-title" key="sec-chat">Chat <em>chat-stream</em></div>
               <div class="provider-row" key="pr-chat">
-                <label class="provider-label">Chat <span>(chat-stream)</span></label>
+                <label class="provider-label">Provider</label>
                 <div class="prov-seg">
                   <button type="button" key="seg-chat-deepseek" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderChat === 'deepseek' }" @click="setProvider('aiProviderChat', 'deepseek')">DeepSeek</button>
                   <button type="button" key="seg-chat-claude" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderChat === 'claude' }" @click="setProvider('aiProviderChat', 'claude')">Claude</button>
                 </div>
               </div>
+                <div class="provider-row provider-row--actions" key="pr-route-chat" v-if="aiProvider.aiProviderChat !== 'claude'">
+                  <label class="provider-label">
+                    Use Claude for
+                    <span class="provider-hint">{{ (aiProvider.claudeChatCategories || []).length ? 'these categories run on Claude; the rest stay on DeepSeek' : 'none — every chat turn stays on DeepSeek' }}</span>
+                  </label>
+                  <div class="ws-action-grid">
+                    <button v-for="opt in webSearchActionOptions" :key="'rc-' + opt.id" type="button" class="ws-chip"
+                            :class="{ 'ws-chip--on': isSearchActionOn(opt.id, 'claudeChatCategories') }"
+                            @click="toggleSearchAction(opt.id, 'claudeChatCategories')">
+                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id, 'claudeChatCategories') ? '✓' : '' }}</span>
+                      {{ opt.label }}
+                    </button>
+                  </div>
+                </div>
+                <div class="provider-row provider-row--actions" key="pr-searchscope-chat" v-if="aiProvider.claudeWebSearch && chatUsesClaude">
+                  <label class="provider-label">
+                    Web search — Chat
+                    <span class="provider-warn" v-if="!chatSearchActionCount">none selected — chat never searches</span>
+                    <span class="provider-hint" v-else>{{ chatSearchActionCount }} of {{ webSearchActionOptions.length }} · applies to what the chat message is about</span>
+                  </label>
+                  <div class="ws-action-grid">
+                    <button
+                      v-for="opt in webSearchActionOptions"
+                      :key="'chat-' + opt.id"
+                      type="button"
+                      class="ws-chip"
+                      :class="{ 'ws-chip--on': isSearchActionOn(opt.id, 'claudeWebSearchActionsChat') }"
+                      @click="toggleSearchAction(opt.id, 'claudeWebSearchActionsChat')"
+                    >
+                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id, 'claudeWebSearchActionsChat') ? '✓' : '' }}</span>
+                      {{ opt.label }}
+                    </button>
+                  </div>
+                </div>
+
+              <div class="provider-divider" key="div-qa"></div>
+              <div class="prov-sec-title" key="sec-qa">Quick Actions <em>quick-action-stream</em></div>
               <div class="provider-row" key="pr-quick">
-                <label class="provider-label">Quick Actions <span>(quick-action-stream)</span></label>
+                <label class="provider-label">Provider</label>
                 <div class="prov-seg">
                   <button type="button" key="seg-qa-deepseek" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderQuickAction === 'deepseek' }" @click="setProvider('aiProviderQuickAction', 'deepseek')">DeepSeek</button>
                   <button type="button" key="seg-qa-claude" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderQuickAction === 'claude' }" @click="setProvider('aiProviderQuickAction', 'claude')">Claude</button>
                 </div>
               </div>
 
+                <div class="provider-row provider-row--actions" key="pr-route-qa" v-if="aiProvider.aiProviderQuickAction !== 'claude'">
+                  <label class="provider-label">
+                    Use Claude for
+                    <span class="provider-hint">{{ (aiProvider.claudeQuickActionCategories || []).length ? 'these actions run on Claude; the rest stay on DeepSeek' : 'none — every quick action stays on DeepSeek' }}</span>
+                  </label>
+                  <div class="ws-action-grid">
+                    <button v-for="opt in webSearchActionOptions" :key="'rq-' + opt.id" type="button" class="ws-chip"
+                            :class="{ 'ws-chip--on': isSearchActionOn(opt.id, 'claudeQuickActionCategories') }"
+                            @click="toggleSearchAction(opt.id, 'claudeQuickActionCategories')">
+                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id, 'claudeQuickActionCategories') ? '✓' : '' }}</span>
+                      {{ opt.label }}
+                    </button>
+                  </div>
+                </div>
+                <div class="provider-row provider-row--actions" key="pr-searchscope" v-if="aiProvider.claudeWebSearch && qaUsesClaude">
+                  <label class="provider-label">
+                    Web search — Quick Actions
+                    <span class="provider-warn" v-if="!searchActionCount">none selected — no quick action will search</span>
+                    <span class="provider-hint" v-else>{{ searchActionCount }} of {{ webSearchActionOptions.length }} · first tap only</span>
+                  </label>
+                  <div class="ws-action-grid">
+                    <button
+                      v-for="opt in webSearchActionOptions"
+                      :key="opt.id"
+                      type="button"
+                      class="ws-chip"
+                      :class="{ 'ws-chip--on': isSearchActionOn(opt.id) }"
+                      @click="toggleSearchAction(opt.id)"
+                    >
+                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id) ? '✓' : '' }}</span>
+                      {{ opt.label }}
+                    </button>
+                  </div>
+                </div>
+
+              <div class="provider-divider" key="div-claude"></div>
+              <div class="prov-sec-title" key="sec-claude">Claude settings <em>shared by both surfaces</em></div>
               <div class="provider-row" key="pr-events-claude">
                 <label class="provider-label">
                   Events &rarr; Claude
-                  <span>event questions in chat + the Events quick action always use Claude (web search rules apply); everything else follows the switches above</span>
+                  <span>anything event-flavored always uses Claude, whatever the switches above say</span>
                 </label>
                 <label class="prov-switch">
                   <input type="checkbox" v-model="aiProvider.aiEventsUseClaude" />
@@ -862,9 +937,8 @@
                 </label>
               </div>
 
-              <template v-if="aiProvider.aiProviderChat === 'claude' || aiProvider.aiProviderQuickAction === 'claude' || aiProvider.aiEventsUseClaude">
-                <div class="provider-divider" key="pr-divider"></div>
-                <div class="provider-row" key="pr-model">
+              <template v-if="chatUsesClaude || qaUsesClaude">
+                  <div class="provider-row" key="pr-model">
                   <label class="provider-label">Claude model</label>
                   <div class="prov-seg">
                     <button type="button" key="seg-model-haiku" class="prov-seg-btn" :class="{ active: aiProvider.claudeModel === 'claude-haiku-4-5-20251001' }" @click="setProvider('claudeModel', 'claude-haiku-4-5-20251001')">Haiku 4.5 <em>cheapest</em></button>
@@ -887,46 +961,6 @@
                     <button type="button" class="prov-step-btn" @click="aiProvider.claudeWebSearchMaxUses = Math.max(1, (aiProvider.claudeWebSearchMaxUses || 1) - 1)" :disabled="aiProvider.claudeWebSearchMaxUses <= 1">−</button>
                     <input class="provider-num" type="number" min="1" max="10" v-model.number="aiProvider.claudeWebSearchMaxUses" />
                     <button type="button" class="prov-step-btn" @click="aiProvider.claudeWebSearchMaxUses = Math.min(10, (aiProvider.claudeWebSearchMaxUses || 0) + 1)" :disabled="aiProvider.claudeWebSearchMaxUses >= 10">+</button>
-                  </div>
-                </div>
-                <div class="provider-row provider-row--actions" key="pr-searchscope-chat" v-if="aiProvider.claudeWebSearch && (aiProvider.aiProviderChat === 'claude' || aiProvider.aiEventsUseClaude)">
-                  <label class="provider-label">
-                    Web search — Chat
-                    <span class="provider-warn" v-if="!chatSearchActionCount">none selected — chat never searches</span>
-                    <span class="provider-hint" v-else>{{ chatSearchActionCount }} of {{ webSearchActionOptions.length }} · applies to what the chat message is about</span>
-                  </label>
-                  <div class="ws-action-grid">
-                    <button
-                      v-for="opt in webSearchActionOptions"
-                      :key="'chat-' + opt.id"
-                      type="button"
-                      class="ws-chip"
-                      :class="{ 'ws-chip--on': isSearchActionOn(opt.id, 'claudeWebSearchActionsChat') }"
-                      @click="toggleSearchAction(opt.id, 'claudeWebSearchActionsChat')"
-                    >
-                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id, 'claudeWebSearchActionsChat') ? '✓' : '' }}</span>
-                      {{ opt.label }}
-                    </button>
-                  </div>
-                </div>
-                <div class="provider-row provider-row--actions" key="pr-searchscope" v-if="aiProvider.claudeWebSearch && (aiProvider.aiProviderQuickAction === 'claude' || aiProvider.aiEventsUseClaude)">
-                  <label class="provider-label">
-                    Web search — Quick Actions
-                    <span class="provider-warn" v-if="!searchActionCount">none selected — no quick action will search</span>
-                    <span class="provider-hint" v-else>{{ searchActionCount }} of {{ webSearchActionOptions.length }} · first tap only</span>
-                  </label>
-                  <div class="ws-action-grid">
-                    <button
-                      v-for="opt in webSearchActionOptions"
-                      :key="opt.id"
-                      type="button"
-                      class="ws-chip"
-                      :class="{ 'ws-chip--on': isSearchActionOn(opt.id) }"
-                      @click="toggleSearchAction(opt.id)"
-                    >
-                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id) ? '✓' : '' }}</span>
-                      {{ opt.label }}
-                    </button>
                   </div>
                 </div>
               </template>
@@ -4057,6 +4091,8 @@ export default {
       aiProviderChat: 'deepseek',
       aiProviderQuickAction: 'deepseek',
       aiEventsUseClaude: false,
+      claudeChatCategories: [],
+      claudeQuickActionCategories: [],
       claudeModel: 'claude-haiku-4-5-20251001',
       claudeWebSearch: false,
       claudeWebSearchMaxUses: 3,
@@ -5043,6 +5079,12 @@ export default {
       const list = aiProvider.value.claudeWebSearchActions
       return Array.isArray(list) ? list.length : 0
     })
+    // Does a surface use Claude at all (full switch, category routing, or the
+    // events override)? Drives which Claude option rows are worth showing.
+    const chatUsesClaude = computed(() => aiProvider.value.aiProviderChat === 'claude'
+      || (aiProvider.value.claudeChatCategories || []).length > 0 || aiProvider.value.aiEventsUseClaude)
+    const qaUsesClaude = computed(() => aiProvider.value.aiProviderQuickAction === 'claude'
+      || (aiProvider.value.claudeQuickActionCategories || []).length > 0 || aiProvider.value.aiEventsUseClaude)
     const chatSearchActionCount = computed(() => {
       const list = aiProvider.value.claudeWebSearchActionsChat
       return Array.isArray(list) ? list.length : 0
@@ -7048,7 +7090,7 @@ export default {
       users, usersLoading, usersPage, usersTotalPages, userSearch, userFilter, userLocations,
       aiUsers, aiLoading, aiPage, aiTotalPages, aiSummary, aiDailyStats, aiChartDays, aiChartMax, dailyTokenPct, dailyPlacesPct, aiCost, todayCost,
       aiProvider, aiProviderLoading, aiProviderSaving, aiProviderSavedAt, fetchAiProvider, saveAiProvider, setProvider,
-      webSearchActionOptions, isSearchActionOn, searchActionCount, chatSearchActionCount, toggleSearchAction,
+      webSearchActionOptions, isSearchActionOn, searchActionCount, chatSearchActionCount, toggleSearchAction, chatUsesClaude, qaUsesClaude,
       prefetchLayerOptions, isPrefetchLayerOn, prefetchLayerCount, togglePrefetchLayer,
       isPrefetchActionOn, prefetchActionCount, togglePrefetchAction,
       providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
@@ -9168,6 +9210,11 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .admin-shell.day-mode .cov-cell--foff em { color: #c0504d; }
 .admin-shell.day-mode .cov-cell--fon { background: rgba(80,160,90,0.16); }
 .admin-shell.day-mode .cov-cell--fon em { color: #3d8b4f; }
+
+.prov-sec-title { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin: 4px 0 2px; }
+.prov-sec-title em { font-style: normal; font-weight: 500; text-transform: none; letter-spacing: 0; opacity: 0.5; margin-left: 8px; }
+.admin-shell.night-mode .prov-sec-title { color: #a78bfa; }
+.admin-shell.day-mode .prov-sec-title { color: #7a4a20; }
 
 /* ── Web-search on/off switch ─────────────────────────────────────────────── */
 .prov-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
