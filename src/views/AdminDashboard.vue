@@ -1698,7 +1698,7 @@
               <span class="card-sub">warm city + category &rArr; Google off, serve from cache · applies to quick actions, chat and itinerary · Events = cached venues; Claude web-search listings are never gated</span>
             </div>
             <div class="provider-row">
-              <label class="provider-label">Enable gate <span>OFF = this page only shows numbers, Google runs as always · ON = warm cells below actually stop calling Google</span></label>
+              <label class="provider-label">Enable gate <span>controls the AUTO behavior: ON = warm cells stop calling Google by themselves · Force OFF / Force ON clicks ALWAYS apply, even while this is off</span></label>
               <label class="prov-switch">
                 <input type="checkbox" v-model="covForm.gate" />
                 <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
@@ -6681,6 +6681,7 @@ export default {
       const ov = covOverrideOf(row.key, c)
       if (ov === 'on') return 'forced ON'
       if (ov === 'off') return 'forced OFF'
+      if (!covForm.value.gate) return 'gate off'
       return covCellPct(row, c) >= covForm.value.cutoff ? 'auto: off' : 'auto: on'
     }
     const covCellClass = (row, c) => {
