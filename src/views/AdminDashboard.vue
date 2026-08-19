@@ -1715,8 +1715,13 @@
                 <input class="limit-input" type="number" min="0" v-model.number="covForm.targets[c]" />
               </div>
             </div>
+            <p class="cov-meta" v-if="covData.meta">
+              {{ fmt(covData.meta.placeCacheTotal) }} cached places · {{ fmt(covData.meta.withCity) }} with a parsed city · {{ fmt(covData.meta.tagged) }} category-tagged and counted here
+              <template v-if="covData.meta.withCity < covData.meta.placeCacheTotal"> — run “Re-parse regions” to attribute more</template>
+            </p>
             <div class="provider-actions" style="margin-top: 14px">
               <button class="action-btn btn-accent" @click="saveCoverage" :disabled="covSaving">{{ covSaving ? 'Saving…' : 'Save coverage settings' }}</button>
+              <button class="action-btn" @click="reparseRegions" :disabled="covReparsing">{{ covReparsing ? 'Re-parsing…' : 'Re-parse regions' }}</button>
             </div>
           </div>
 
@@ -6641,6 +6646,17 @@ export default {
       } catch (e) { showToast(e.message, 'error') }
       finally { covSaving.value = false }
     }
+    const covReparsing = ref(false)
+    const reparseRegions = async () => {
+      covReparsing.value = true
+      try {
+        const res = await apiFetch('/places/backfill-regions', { method: 'POST' })
+        showToast(`Re-parsed: ${res.updated} of ${res.scanned} rows updated`)
+        covData.value = null
+        await fetchCoverage()
+      } catch (e) { showToast(e.message, 'error') }
+      finally { covReparsing.value = false }
+    }
     // Cells reflect the UNSAVED form (targets/cutoff/overrides) so edits preview live.
     const covCellTarget = (row, c) => Number(covForm.value.cityTargets?.[row.key]?.[c]) || Number(covForm.value.targets[c]) || row.categories[c].target
     const covCellPct = (row, c) => Math.min(999, Math.round((row.categories[c].count / covCellTarget(row, c)) * 100))
@@ -6976,7 +6992,7 @@ export default {
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
-      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covCountries, covOpen, toggleCovCountry,
+      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
       placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
@@ -9023,6 +9039,7 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .provider-body .prov-seg .prov-seg-btn.active { background: linear-gradient(90deg, #D4AF37, #a78bfa); color: #fff; opacity: 1; }
 
 /* ── Coverage tab ─────────────────────────────────────────────────────────── */
+.cov-meta { font-size: 11.5px; opacity: 0.65; margin-top: 12px; }
 .cov-targets { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 8px; }
 .cov-target { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
 .cov-target .limit-input { max-width: 84px; }
