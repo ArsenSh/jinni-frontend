@@ -24,7 +24,7 @@
           <svg v-else-if="tab.icon === 'google'" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.454 0-.769-.085-1.357-.187-1.857H12.24z"/></svg>
           <svg v-else-if="tab.icon === 'prices'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <svg v-else-if="tab.icon === 'limits'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-          <svg v-else-if="tab.icon === 'coverage'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <svg v-else-if="tab.icon === 'coverage'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
           <svg v-else-if="tab.icon === 'staff'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
           <span class="nav-label">{{ tab.label }}</span>
         </button>
@@ -1698,7 +1698,7 @@
               <span class="card-sub">warm city + category &rArr; Google off, serve from cache · applies to quick actions, chat and itinerary · Events = cached venues; Claude web-search listings are never gated</span>
             </div>
             <div class="provider-row">
-              <label class="provider-label">Enable gate <span>master switch — while OFF, Google works everywhere exactly as before</span></label>
+              <label class="provider-label">Enable gate <span>OFF = this page only shows numbers, Google runs as always · ON = warm cells below actually stop calling Google</span></label>
               <label class="prov-switch">
                 <input type="checkbox" v-model="covForm.gate" />
                 <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
@@ -1710,9 +1710,9 @@
             </div>
             <div class="loc-section-label" style="margin-top: 12px">Default targets — cached places needed for 100% warm</div>
             <div class="cov-targets">
-              <div v-for="c in covData.categories.filter(x => x !== 'jinni_events')" :key="c" class="cov-target">
+              <div v-for="c in covData.categories" :key="c" class="cov-target">
                 <span>{{ covCatLabel(c) }}</span>
-                <input class="limit-input" type="number" min="0" v-model.number="covForm.targets[c]" />
+                <input class="limit-input" type="number" min="0" max="9999" v-model.number="covForm.targets[c]" @change="covForm.targets[c] = Math.max(0, Math.min(9999, Number(covForm.targets[c]) || 0))" />
               </div>
             </div>
             <p class="cov-meta" v-if="covData.meta">
@@ -1741,10 +1741,18 @@
                           <b>{{ g.name }}</b>
                         </div>
                         <span>{{ g.rows.length }} {{ g.rows.length === 1 ? 'city' : 'cities' }} · {{ g.total }} cached</span>
+                        <div class="cov-market" @click.stop>
+                          <button v-for="m in ['open', 'contained', 'closed']" :key="m" type="button"
+                                  class="cov-market-btn" :class="[{ on: covMarketMode(g.name) === m }, 'cov-market-btn--' + m]"
+                                  @click="setMarket(g.name, m)">
+                            {{ m === 'open' ? 'Open' : m === 'contained' ? 'Cache-only' : 'Not launched' }}
+                          </button>
+                          <input v-if="covMarketMode(g.name) === 'closed'" class="limit-input cov-eta" type="text" maxlength="24"
+                                 placeholder="arrival e.g. Q1 2027" v-model="covForm.market[g.name].eta" />
+                        </div>
                       </td>
                       <td v-for="c in covData.categories" :key="c" class="cov-country-agg">
-                        <template v-if="c === 'jinni_events'"><b>{{ g.cats[c].count }}</b></template>
-                        <template v-else><b>{{ g.cats[c].pct }}%</b><span>{{ g.cats[c].count }}</span></template>
+<b>{{ g.cats[c].pct }}%</b><span>{{ g.cats[c].count }}</span>
                       </td>
                     </tr>
                     <template v-if="covOpen[g.name]">
@@ -1752,9 +1760,9 @@
                         <td class="cov-city"><b>{{ row.city }}</b><span :title="row.aliases && row.aliases.length ? 'Also recorded as: ' + row.aliases.join(', ') : null">{{ row.total }} cached<template v-if="row.aliases && row.aliases.length"> · also “{{ row.aliases.slice(0, 2).join('”, “') }}”<template v-if="row.aliases.length > 2"> +{{ row.aliases.length - 2 }} more</template></template></span></td>
                         <td v-for="c in covData.categories" :key="c">
                           <div v-if="c === 'jinni_events'" class="cov-cell cov-cell--info">
-                            <b>{{ row.categories[c].count }}</b>
-                            <span>found here</span>
-                            <em>not gated</em>
+                            <b>{{ covCellPct(row, c) }}%</b>
+                            <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
+                            <em>via web search</em>
                           </div>
                           <button v-else type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
                             <b>{{ covCellPct(row, c) }}%</b>
@@ -4506,7 +4514,7 @@ export default {
       google:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.454 0-.769-.085-1.357-.187-1.857H12.24z"/></svg>',
       prices:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
       limits:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
-      coverage:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+      coverage:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
       staff:        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
       themeMoon:    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
       themeSun:     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
@@ -6617,7 +6625,7 @@ export default {
 
     // ── Coverage tab (cache-warmth Google gate) ──
     const covData = ref(null)
-    const covForm = ref({ gate: false, cutoff: 90, targets: {}, cityTargets: {}, overrides: {} })
+    const covForm = ref({ gate: false, cutoff: 90, targets: {}, cityTargets: {}, overrides: {}, market: {} })
     const covSaving = ref(false)
     const COV_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical', hidden_gems: 'Hidden gems', photo_spots: 'Photo spots', shopping: 'Shopping', events: 'Event venues', jinni_events: 'Jinni events' }
     const covCatLabel = c => COV_LABELS[c] || c
@@ -6632,6 +6640,7 @@ export default {
             targets: { ...res.data.defaultTargets },
             cityTargets: JSON.parse(JSON.stringify(res.data.config.coverageCityTargets || {})),
             overrides: JSON.parse(JSON.stringify(res.data.config.coverageOverrides || {})),
+            market: JSON.parse(JSON.stringify(res.data.config.marketStatus || {})),
           }
           const top = res.data.rows[0]
           if (top && !Object.keys(covOpen.value).length) covOpen.value = { [top.country || 'Unknown']: true }
@@ -6647,6 +6656,7 @@ export default {
           coverageTargets: covForm.value.targets,
           coverageCityTargets: covForm.value.cityTargets,
           coverageOverrides: covForm.value.overrides,
+          marketStatus: Object.fromEntries(Object.entries(covForm.value.market).filter(([, v]) => v && v.mode && v.mode !== 'open')),
         }) })
         if (res.success) { covData.value = res.data; showToast('Coverage saved — gate live within ~30s') }
       } catch (e) { showToast(e.message, 'error') }
@@ -6678,6 +6688,15 @@ export default {
       if (ov === 'on') return 'cov-cell--fon'
       if (ov === 'off') return 'cov-cell--foff'
       return covCellPct(row, c) >= covForm.value.cutoff ? 'cov-cell--warm' : 'cov-cell--cold'
+    }
+    // Per-country market switch: Open / Cache-only (contained) / Not launched
+    // (closed — chat answers "Jinni hasn't arrived yet", optional arrival ETA).
+    const covMarketMode = (name) => (covForm.value.market[name] && covForm.value.market[name].mode) || 'open'
+    const setMarket = (name, mode) => {
+      const m = JSON.parse(JSON.stringify(covForm.value.market))
+      if (mode === 'open') delete m[name]
+      else m[name] = { mode, eta: (m[name] && m[name].eta) || '' }
+      covForm.value.market = m
     }
     // Countries collapse: Armenia ▸ opens Yerevan, Tsaghkadzor…; header row
     // shows the country-level aggregate (Σ counts ÷ Σ targets) — display only.
@@ -6998,7 +7017,7 @@ export default {
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
-      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions,
+      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covMarketMode, setMarket,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
       placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
@@ -7987,7 +8006,7 @@ export default {
 .admin-shell.night-mode .place-event { color: #c4b5fd }
 .admin-shell.night-mode .badge-danger { background: rgba(244,63,94,0.1); color: #fb7185 }
 .admin-shell.night-mode .btn-accent { background: #6d28d9; color: white; border: none; box-shadow: 0 0 4px rgba(168,85,247,0.4); }
-.admin-shell.night-mode .btn-accent:hover { background: #7c3aed; box-shadow: 0 0 10px rgba(168,85,247,0.4); }
+.admin-shell.night-mode .btn-accent:hover { background: #7c3aed; box-shadow: 0 0 4px rgba(168,85,247,0.4); }
 .admin-shell.night-mode .btn-muted { background: rgba(192,132,252,0.1); color: #c084fc }
 .admin-shell.night-mode .btn-muted:hover { background: rgba(192,132,252,0.2); box-shadow: 0 0 4px rgba(192,132,252,0.3); }
 .admin-shell.night-mode .btn-danger-outline { color: #fb7185; }
@@ -8101,7 +8120,7 @@ export default {
 .admin-shell.day-mode .place-event { color: #A0522D }
 .admin-shell.day-mode .badge-danger { background: rgba(229,62,62,0.08); color: #c53030 }
 .admin-shell.day-mode .btn-accent { background: linear-gradient(135deg, #D4AF37, #C09040); color: white; border: none; }
-.admin-shell.day-mode .btn-accent:hover { box-shadow: 0 0 14px rgba(212,175,55,0.45); }
+.admin-shell.day-mode .btn-accent:hover { filter: brightness(1.06); }
 .admin-shell.day-mode .btn-muted { background: rgba(255,255,255,0.9); color: #5c3f2e }
 .admin-shell.day-mode .btn-muted:hover { background: rgba(212,175,55,0.07); color: #2c1e10; }
 .admin-shell.day-mode .btn-danger-outline { color: #c53030; }
@@ -9048,7 +9067,7 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .cov-meta { font-size: 11.5px; opacity: 0.65; margin-top: 12px; }
 .cov-targets { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 8px; }
 .cov-target { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
-.cov-target .limit-input { max-width: 84px; }
+.cov-target .limit-input { width: 64px; max-width: 64px; text-align: center; }
 .cov-table-card { padding: 10px 12px; }
 .cov-scroll { overflow-x: auto; }
 .cov-table { border-collapse: collapse; width: 100%; min-width: 780px; }
@@ -9063,6 +9082,17 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .cov-chev { transition: transform 0.18s; opacity: 0.55; flex-shrink: 0; }
 .cov-chev.rot { transform: rotate(90deg); }
 .cov-country-cell span { margin-left: 19px; }
+.cov-market { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 7px 0 2px 19px; }
+.cov-market-btn { border: none; cursor: pointer; border-radius: 7px; padding: 4px 9px; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; font-family: inherit; transition: background 0.15s; }
+.admin-shell.night-mode .cov-market-btn { background: rgba(255,255,255,0.05); color: #7e8aa0; }
+.admin-shell.night-mode .cov-market-btn--open.on { background: rgba(74,222,128,0.16); color: #4ade80; }
+.admin-shell.night-mode .cov-market-btn--contained.on { background: rgba(212,175,55,0.18); color: #D4AF37; }
+.admin-shell.night-mode .cov-market-btn--closed.on { background: rgba(248,113,113,0.16); color: #f87171; }
+.admin-shell.day-mode .cov-market-btn { background: rgba(139,69,19,0.06); color: #8a7261; }
+.admin-shell.day-mode .cov-market-btn--open.on { background: rgba(80,160,90,0.18); color: #3d8b4f; }
+.admin-shell.day-mode .cov-market-btn--contained.on { background: rgba(212,175,55,0.25); color: #8a6d00; }
+.admin-shell.day-mode .cov-market-btn--closed.on { background: rgba(220,80,80,0.16); color: #c0504d; }
+.cov-eta { width: 130px; max-width: 130px; font-size: 11px; }
 .cov-country-agg { font-size: 12px; white-space: nowrap; }
 .cov-country-agg b { font-weight: 700; margin-right: 5px; }
 .cov-country-agg span { opacity: 0.5; font-size: 10.5px; }
