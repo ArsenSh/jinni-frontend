@@ -954,8 +954,9 @@
               <tbody>
                 <tr v-if="bizLoading"><td colspan="5" class="loading-cell"><div class="loader-ring loader-ring--sm"></div> Loading…</td></tr>
                 <tr v-else-if="!businesses.length"><td colspan="5" class="empty-cell">No businesses found.</td></tr>
-                <tr v-for="b in businesses" :key="b._id" class="table-row">
+                <tr v-for="b in businesses" :key="b._id" class="table-row table-row--clickable" @click="openEdit('business', b)" title="Click to view / edit">
                   <td class="user-name" data-label="Name">
+                    <img v-if="b.images && b.images[0]" :src="b.images[0]" class="row-thumb" loading="lazy" @error="hideBrokenThumb" />
                     {{ b.name }}
                     <!-- Event listings carry a date/time (or weekly recurrence)
                          instead of plain opening hours — surface it here so an
@@ -980,7 +981,7 @@
                       {{ b.partnership?.tier === 'signature' ? 'Signature' : b.partnership?.tier === 'spotlight' ? 'Spotlight' : 'Verified' }}
                     </span>
                   </td>
-                  <td data-label="Actions" class="td-actions">
+                  <td data-label="Actions" class="td-actions" @click.stop>
                     <div class="action-group">
                       <button class="action-btn btn-edit" @click="openEdit('business', b)" title="View / edit business">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -1310,8 +1311,9 @@
               <tbody>
                 <tr v-if="destLoading"><td colspan="6" class="loading-cell"><div class="loader-ring loader-ring--sm"></div> Loading…</td></tr>
                 <tr v-else-if="!destinations.length"><td colspan="6" class="empty-cell">No destinations found.</td></tr>
-                <tr v-for="d in destinations" :key="d._id" class="table-row" :class="{ 'row-hidden-gem': d.isHiddenGem }">
+                <tr v-for="d in destinations" :key="d._id" class="table-row table-row--clickable" :class="{ 'row-hidden-gem': d.isHiddenGem }" @click="openEdit('destination', d)" title="Click to view / edit">
                   <td class="user-name" data-label="Name">
+                    <img v-if="d.images && d.images[0]" :src="d.images[0]" class="row-thumb" loading="lazy" @error="hideBrokenThumb" />
                     {{ d.name }}
                     <span v-if="d.isHiddenGem" class="gem-badge">✦ Hidden Gem</span>
                   </td>
@@ -1324,7 +1326,7 @@
                     </template>
                     <template v-else>—</template>
                   </td>
-                  <td data-label="Action" class="td-actions">
+                  <td data-label="Action" class="td-actions" @click.stop>
                     <div class="action-group">
                       <button class="action-btn btn-edit" @click="openEdit('destination', d)" title="Edit destination">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -1723,6 +1725,11 @@
                     <template v-else>unknown — set it in AI Usage tab</template>
                   </span>
                 </div>
+                <div class="sv-row" v-if="aiBalance && aiBalance.deepseek.balance !== null && aiBalance.deepseek.nextMonthCost > 0" style="padding: 2px 0 6px"
+                  :title="`Balance $${aiBalance.deepseek.balance.toFixed(2)} vs ~$${aiBalance.deepseek.nextMonthCost.toFixed(2)} needed for the next 30 days`">
+                  <div class="gm-bar sv-bar"><div class="gm-fill" :class="aiBalance.deepseek.topUpNeeded > 0 ? 'gm-amber' : 'gm-green'"
+                    :style="{ width: Math.max(2, Math.min(100, Math.round(100 * aiBalance.deepseek.balance / aiBalance.deepseek.nextMonthCost))) + '%' }"></div></div>
+                </div>
                 <div class="price-row" v-if="aiBalance">
                   <span class="price-label">Next 30 days</span>
                   <span class="price-val">≈ ${{ aiBalance.deepseek.nextMonthCost.toFixed(2) }}
@@ -1753,6 +1760,11 @@
                     <template v-if="aiBalance.claude.balance !== null"><b>${{ aiBalance.claude.balance.toFixed(2) }}</b> <span class="db-meta">· entered {{ shortDate(aiBalance.claude.enteredAt) }}, counted down · runway ~{{ aiBalance.claude.runwayDays ?? '—' }}d</span></template>
                     <template v-else>unknown — set it in AI Usage tab</template>
                   </span>
+                </div>
+                <div class="sv-row" v-if="aiBalance && aiBalance.claude.balance !== null && aiBalance.claude.nextMonthCost > 0" style="padding: 2px 0 6px"
+                  :title="`Balance $${aiBalance.claude.balance.toFixed(2)} vs ~$${aiBalance.claude.nextMonthCost.toFixed(2)} needed for the next 30 days`">
+                  <div class="gm-bar sv-bar"><div class="gm-fill" :class="aiBalance.claude.topUpNeeded > 0 ? 'gm-amber' : 'gm-green'"
+                    :style="{ width: Math.max(2, Math.min(100, Math.round(100 * aiBalance.claude.balance / aiBalance.claude.nextMonthCost))) + '%' }"></div></div>
                 </div>
                 <div class="price-row" v-if="aiBalance">
                   <span class="price-label">Next 30 days</span>
@@ -5439,6 +5451,8 @@ export default {
       return Math.round(n) + '%'
     }
 
+    // Broken row thumbnails just disappear (no placeholder in a table cell)
+    const hideBrokenThumb = (e) => { e.target.style.display = 'none' }
     const openEdit = (kind, item) => {
       editModal.value.kind = kind
       editModal.value.id = item._id
@@ -6715,7 +6729,7 @@ export default {
       purgeOpts, purgeDays, purgeDropdownOpen, purgeNeverUsed, selectedPurgeOpt,
       userFilterOpts, destFilterOpts, bizPartnerFilterOpts, bizStatusFilterOpts, placesImageFilterOpts, placesActionOpts, placesSortOpts,
       apiBase: API_BASE,
-      editModal, ALL_TYPES, PRICING_CURRENCIES, PARTNERSHIP_TIERS, openEdit, openCreateDestination, closeEdit, saveEdit, toggleType, onImageDrop, onImageFileSelect,
+      editModal, ALL_TYPES, PRICING_CURRENCIES, PARTNERSHIP_TIERS, openEdit, hideBrokenThumb, openCreateDestination, closeEdit, saveEdit, toggleType, onImageDrop, onImageFileSelect,
       destMap, reGeocodeDestination,
       openStatusConfirm, closeStatusConfirm, executeStatusAction,
       verifierLabel,
@@ -7500,6 +7514,10 @@ export default {
 .gm-warn-text { color: #f59e0b; font-weight: 600; }
 .gm-drives { font-size: 11px; opacity: 0.5; margin-top: 3px; }
 .gm-total { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.2); font-size: 13px; }
+/* Clickable table rows + first-image thumbnails */
+.table-row--clickable { cursor: pointer; }
+.row-thumb { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; vertical-align: middle; margin-right: 8px; flex-shrink: 0; }
+
 /* Place-cache card: colored category chips + iconed stats footer */
 .place-cats { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
 .place-cat { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 9px; text-transform: capitalize; letter-spacing: 0.02em; }
