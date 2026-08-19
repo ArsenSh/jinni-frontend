@@ -612,23 +612,27 @@
           <div class="kpi-grid kpi-grid--4">
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">Total Tokens Used</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.totalTokens) }}</div>
+              <div class="kpi-label">Tokens · 30 days</div>
+              <div class="kpi-value">{{ fmtK(aiSummary.last30?.tokens || 0) }}</div>
+              <div class="kpi-sub">both providers</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">Total Queries</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.totalQueries) }}</div>
+              <div class="kpi-label">Queries · 30 days</div>
+              <div class="kpi-value">{{ fmtK(aiSummary.last30?.queries || 0) }}</div>
+              <div class="kpi-sub">chat + quick actions</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-              <div class="kpi-label">Avg Tokens / Query</div>
-              <div class="kpi-value">{{ Math.round(aiSummary.avgTokensPerQuery || 0) }}</div>
+              <div class="kpi-label">Per Active User · 30 days</div>
+              <div class="kpi-value">{{ fmtK(aiSummary.last30?.tokensPerUser || 0) }}</div>
+              <div class="kpi-sub">{{ aiSummary.last30?.queriesPerUser || 0 }} queries / user · {{ fmt(aiSummary.last30?.activeUsers || 0) }} active users</div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-              <div class="kpi-label">Users on Cooldown</div>
-              <div class="kpi-value">{{ fmt(aiSummary.usersOnCooldown) }}</div>
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <div class="kpi-label">Web Searches</div>
+              <div class="kpi-value">{{ fmt(providerStats?.summary?.claude?.searches || 0) }}</div>
+              <div class="kpi-sub">≈ ${{ ((providerStats?.summary?.claude?.searches || 0) * 0.01).toFixed(2) }} · last {{ aiChartDays }} days</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-icon">
@@ -646,9 +650,9 @@
                     <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
                 </div>
-                <div class="kpi-label">Total API Cost</div>
-                <div class="kpi-value">${{ aiCost }}</div>
-                <div class="kpi-sub">DeepSeek V3 · ~$0.50/1M blended</div>
+                <div class="kpi-label">Claude Share</div>
+                <div class="kpi-value">{{ claudeSharePct }}%</div>
+                <div class="kpi-sub">of tokens on Claude · rest DeepSeek · last {{ aiChartDays }} days</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-icon">
@@ -862,6 +866,7 @@
                   <label class="provider-label">
                     Web search — Chat
                     <span class="provider-warn" v-if="!chatSearchActionCount">none selected — chat never searches</span>
+                    <span class="provider-warn" v-else-if="chatDeadSearch.length">{{ chatDeadSearch.join(', ') }} won't search — route {{ chatDeadSearch.length === 1 ? 'it' : 'them' }} to Claude first (search is a Claude tool)</span>
                     <span class="provider-hint" v-else>{{ chatSearchActionCount }} of {{ webSearchActionOptions.length }} · applies to what the chat message is about</span>
                   </label>
                   <div class="ws-action-grid">
@@ -907,6 +912,7 @@
                   <label class="provider-label">
                     Web search — Quick Actions
                     <span class="provider-warn" v-if="!searchActionCount">none selected — no quick action will search</span>
+                    <span class="provider-warn" v-else-if="qaDeadSearch.length">{{ qaDeadSearch.join(', ') }} won't search — route {{ qaDeadSearch.length === 1 ? 'it' : 'them' }} to Claude first (search is a Claude tool)</span>
                     <span class="provider-hint" v-else>{{ searchActionCount }} of {{ webSearchActionOptions.length }} · first tap only</span>
                   </label>
                   <div class="ws-action-grid">
@@ -926,25 +932,8 @@
 
               <div class="provider-divider" key="div-claude"></div>
               <div class="prov-sec-title" key="sec-claude">Claude settings <em>shared by both surfaces</em></div>
-              <div class="provider-row" key="pr-events-claude">
-                <label class="provider-label">
-                  Events &rarr; Claude
-                  <span>anything event-flavored always uses Claude, whatever the switches above say</span>
-                </label>
-                <label class="prov-switch">
-                  <input type="checkbox" v-model="aiProvider.aiEventsUseClaude" />
-                  <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
-                </label>
-              </div>
 
               <template v-if="chatUsesClaude || qaUsesClaude">
-                  <div class="provider-row" key="pr-model">
-                  <label class="provider-label">Claude model</label>
-                  <div class="prov-seg">
-                    <button type="button" key="seg-model-haiku" class="prov-seg-btn" :class="{ active: aiProvider.claudeModel === 'claude-haiku-4-5-20251001' }" @click="setProvider('claudeModel', 'claude-haiku-4-5-20251001')">Haiku 4.5 <em>cheapest</em></button>
-                    <button type="button" key="seg-model-sonnet" class="prov-seg-btn" :class="{ active: aiProvider.claudeModel === 'claude-sonnet-4-6' }" @click="setProvider('claudeModel', 'claude-sonnet-4-6')">Sonnet 4.6</button>
-                  </div>
-                </div>
                 <div class="provider-row" key="pr-websearch">
                   <label class="provider-label">
                     Enable web search
@@ -4121,6 +4110,17 @@ export default {
     const applyRemoteProvider = async (data) => {
       applyingRemoteProvider.value = true
       aiProvider.value = { ...aiProvider.value, ...data }
+      // Legacy Events→Claude toggle: fold it into the visible category chips
+      // (events on Claude for both surfaces) so nothing hides behind a removed
+      // control. The next Save persists the chips and clears the old flag.
+      aiProvider.value.claudeModel = 'claude-haiku-4-5-20251001'   // picker removed — Haiku only
+      if (aiProvider.value.aiEventsUseClaude) {
+        for (const f of ['claudeChatCategories', 'claudeQuickActionCategories']) {
+          const list = Array.isArray(aiProvider.value[f]) ? aiProvider.value[f] : []
+          if (!list.includes('events')) aiProvider.value[f] = [...list, 'events']
+        }
+        aiProvider.value.aiEventsUseClaude = false
+      }
       // claudeWebSearchActions is an explicit allowlist: whatever the backend
       // stores is exactly what the chips reflect (empty = none selected). The
       // master claudeWebSearch switch is the on/off control.
@@ -5085,6 +5085,17 @@ export default {
       || (aiProvider.value.claudeChatCategories || []).length > 0 || aiProvider.value.aiEventsUseClaude)
     const qaUsesClaude = computed(() => aiProvider.value.aiProviderQuickAction === 'claude'
       || (aiProvider.value.claudeQuickActionCategories || []).length > 0 || aiProvider.value.aiEventsUseClaude)
+    // Search chips checked for categories that do NOT route to Claude are dead
+    // config — search is a Claude tool, DeepSeek cannot use it. Surface those.
+    const deadSearchFor = (searchField, routeField, provider) => {
+      if (aiProvider.value[provider] === 'claude') return []
+      const routed = new Set(aiProvider.value[routeField] || [])
+      if (aiProvider.value.aiEventsUseClaude) routed.add('events')
+      return (aiProvider.value[searchField] || []).filter(id => !routed.has(id))
+        .map(id => (webSearchActionOptions.find(o => o.id === id) || { label: id }).label)
+    }
+    const chatDeadSearch = computed(() => deadSearchFor('claudeWebSearchActionsChat', 'claudeChatCategories', 'aiProviderChat'))
+    const qaDeadSearch = computed(() => deadSearchFor('claudeWebSearchActions', 'claudeQuickActionCategories', 'aiProviderQuickAction'))
     const chatSearchActionCount = computed(() => {
       const list = aiProvider.value.claudeWebSearchActionsChat
       return Array.isArray(list) ? list.length : 0
@@ -5137,6 +5148,12 @@ export default {
         webSearchActionOptions.map(o => o.id).filter(x => list.includes(x))
       aiProviderDirty.value = true
     }
+    // How much of the window's token volume ran on Claude (the expensive lane).
+    const claudeSharePct = computed(() => {
+      const c = providerStats.value?.summary?.claude?.tokens || 0
+      const d = providerStats.value?.summary?.deepseek?.tokens || 0
+      return (c + d) > 0 ? Math.round((c / (c + d)) * 100) : 0
+    })
     const fetchProviderStats = async () => {
       providerStatsLoading.value = true
       try {
@@ -7090,10 +7107,10 @@ export default {
       users, usersLoading, usersPage, usersTotalPages, userSearch, userFilter, userLocations,
       aiUsers, aiLoading, aiPage, aiTotalPages, aiSummary, aiDailyStats, aiChartDays, aiChartMax, dailyTokenPct, dailyPlacesPct, aiCost, todayCost,
       aiProvider, aiProviderLoading, aiProviderSaving, aiProviderSavedAt, fetchAiProvider, saveAiProvider, setProvider,
-      webSearchActionOptions, isSearchActionOn, searchActionCount, chatSearchActionCount, toggleSearchAction, chatUsesClaude, qaUsesClaude,
+      webSearchActionOptions, isSearchActionOn, searchActionCount, chatSearchActionCount, toggleSearchAction, chatUsesClaude, qaUsesClaude, chatDeadSearch, qaDeadSearch,
       prefetchLayerOptions, isPrefetchLayerOn, prefetchLayerCount, togglePrefetchLayer,
       isPrefetchActionOn, prefetchActionCount, togglePrefetchAction,
-      providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
+      claudeSharePct, providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
       aiMonthly, aiMonthlyLoading, fetchAiMonthly, aiPrevMonth, aiNextMonth,
@@ -9104,7 +9121,10 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
   transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 .ws-chip:hover { border-color: #a78bfa; }
-.ws-chip-check { font-size: 11px; width: 10px; text-align: center; line-height: 1; }
+/* The check placeholder only takes space on SELECTED chips — an invisible
+   10px slot on unchecked ones pushed their label off-center. */
+.ws-chip-check { display: none; }
+.ws-chip--on .ws-chip-check { display: inline-block; font-size: 11px; width: 10px; text-align: center; line-height: 1; }
 .ws-chip--on {
   border-color: transparent; color: #fff;
   background: linear-gradient(90deg, #D4AF37, #a78bfa);
