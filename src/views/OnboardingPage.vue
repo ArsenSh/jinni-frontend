@@ -147,7 +147,7 @@
                 <h3>{{ locationMode === 'destination' && preferences.destination.city ? `${preferences.destination.city}, ${preferences.destination.countryName}` : $t('onboarding.location_title') }}</h3>
                 <p class="section-description">{{ $t('onboarding.location_desc') }}</p>
               </div>
-              <div v-if="marketNotice" class="market-notice">{{ marketNotice }}</div>
+              <div v-if="marketNotice" class="market-notice" :class="{ 'market-notice--blocked': marketBlocked }">{{ marketNotice }}</div>
               <div v-if="locationDenied" class="location-permission-warning location-denied-warning">
                 <span>{{ $t(locationHelpKey) }}</span>
               </div>
@@ -419,6 +419,7 @@ export default {
   data() {
     return {
       marketNotice: null,
+      marketBlocked: false,
       isVisible: false,
       currentSection: 1,
       isEditing: false,
@@ -534,7 +535,8 @@ export default {
         const r = await fetch(`${apiUrl}/api/ai/market-status?lat=${lat}&lng=${lng}&lang=${this.$i18n?.locale || 'en'}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
         const d = await r.json();
         this.marketNotice = (d && d.mode === 'closed') ? d.message : null;
-      } catch { this.marketNotice = null }
+        if (!this.marketNotice) this.marketBlocked = false;
+      } catch { this.marketNotice = null; this.marketBlocked = false }
     },
     checkScreenSize() { this.isDesktop = window.innerWidth > 768 },
     async loadCountries() {
@@ -735,6 +737,16 @@ export default {
           alert('Please select a destination or enable GPS');
           return;
         }
+        // Closed market: re-verify at save time (the picker's check is
+        // debounced) and refuse to store an unlaunched destination.
+        if (this.locationMode === 'destination' && this.preferences.destination.coordinates.lat) {
+          await this.checkMarket(this.preferences.destination.coordinates.lat, this.preferences.destination.coordinates.lng);
+          if (this.marketNotice) {
+            this.marketBlocked = true;
+            this.$nextTick(() => document.querySelector('.market-notice')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+            return;
+          }
+        }
         const token = localStorage.getItem('authToken');
         if (!token) {
           alert('Please log in again');
@@ -897,6 +909,7 @@ export default {
 
 <style scoped>
 .market-notice { margin: 10px 0 4px; padding: 11px 14px; border-radius: 12px; background: rgba(212,175,55,0.16); font-size: 13.5px; line-height: 1.5; }
+.market-notice--blocked { background: rgba(220,80,80,0.14); color: #c0504d; }
 .onboarding-page{min-height:100vh;display:flex;justify-content:center;padding:20px;position:relative;overflow-x:hidden}
 .onboarding-wrapper{width:100%;max-width:647px;margin:auto}
 .onboarding-container{opacity:0;}

@@ -21,7 +21,7 @@
         </button>
       </div>
     </div>
-    <div v-if="marketNotice" class="market-notice">{{ marketNotice }}</div>
+    <div v-if="marketNotice" class="market-notice" :class="{ 'market-notice--blocked': marketBlocked }">{{ marketNotice }}</div>
     <div class="search-container">
       <div class="search-wrapper">
         <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" :stroke="currentTheme === 'night-mode' ? '#c084fc' : '#A0522D'" stroke-width="2">
@@ -120,6 +120,7 @@ export default {
       currentLocationMarker: null,  
       selectedCoords: { lat: 0, lng: 0 },
       marketNotice: null,
+      marketBlocked: false,
       _marketTimer: null,
       locationName: '',
       address: '',
@@ -181,7 +182,8 @@ export default {
         const r = await fetch(`${API_BASE_URL}/api/ai/market-status?lat=${lat}&lng=${lng}&lang=${this.$i18n?.locale || 'en'}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
         const d = await r.json();
         this.marketNotice = (d && d.mode === 'closed') ? d.message : null;
-      } catch { this.marketNotice = null }
+        if (!this.marketNotice) this.marketBlocked = false;
+      } catch { this.marketNotice = null; this.marketBlocked = false }
     },
     loadInitialLocation() {
       try {
@@ -338,6 +340,10 @@ export default {
     },
     async confirmSelection() {
       try {
+        // Closed market: re-verify at confirm time (the pin watcher is
+        // debounced) and refuse to save an unlaunched location.
+        await this.checkMarket();
+        if (this.marketNotice) { this.marketBlocked = true; return }
         if (!this.locationName || !this.address) { await this.reverseGeocode(this.selectedCoords.lat, this.selectedCoords.lng) }
         const savedSettings = localStorage.getItem('jinni_settings');
         const settings = savedSettings ? JSON.parse(savedSettings) : {};
@@ -432,6 +438,8 @@ export default {
 .map-selector-page .market-notice { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); z-index: 1000; max-width: min(560px, 92vw); padding: 11px 16px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); }
 .map-selector-page.night-mode .market-notice { background: rgba(26,11,46,0.88); color: #e8d9b5; box-shadow: 0 0 18px rgba(212,175,55,0.18); }
 .map-selector-page.day-mode .market-notice { background: rgba(255,253,248,0.92); color: #5c3f2e; box-shadow: 0 4px 18px rgba(139,69,19,0.14); }
+.map-selector-page.night-mode .market-notice--blocked { color: #f2a3a3; box-shadow: 0 0 18px rgba(248,113,113,0.28); }
+.map-selector-page.day-mode .market-notice--blocked { color: #c0504d; box-shadow: 0 4px 18px rgba(220,80,80,0.22); }
 .gps-denied-banner{display:flex;align-items:flex-start;gap:10px;padding:10px 20px;font-size:13px;line-height:1.5;z-index:998;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
 .day-mode.gps-denied-banner,.gps-denied-banner.day-mode{background:rgba(212,175,55,0.14);color:#7a4a10;box-shadow:inset 0 1px 0 rgba(255,255,255,0.5)}
 .night-mode.gps-denied-banner,.gps-denied-banner.night-mode{background:rgba(139,92,246,0.14);color:#c084fc;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
