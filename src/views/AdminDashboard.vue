@@ -7022,7 +7022,7 @@ export default {
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
-      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covMarketMode, setMarket,
+      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covMarketMode, setMarket,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
       placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
