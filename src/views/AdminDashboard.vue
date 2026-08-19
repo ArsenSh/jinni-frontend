@@ -3601,35 +3601,41 @@
           <div class="edit-body">
             <div v-if="placeInfoModal.loading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
             <section v-else class="edit-section">
-              <div class="edit-section-title" v-if="placeInfoModal.row?.imagesStored && (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length">Photos</div>
-              <div class="pi-gallery" v-if="placeInfoModal.row?.imagesStored && (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length">
+              <div class="pim-imgs" v-if="placeInfoModal.row?.imagesStored && (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length">
                 <img v-for="(ph, i) in (placeInfoModal.data?.photos || placeInfoModal.row.photos)" :key="i"
                   :src="`${apiBase}/api/ai/place-image/${placeInfoModal.row.placeId}/${i}`"
-                  class="pi-photo" loading="lazy" @error="hideBrokenThumb" />
+                  class="pim-img" loading="lazy" @error="hideBrokenThumb" />
               </div>
-              <div class="edit-section-title">Categories — click to toggle, saves instantly</div>
-              <div class="seg-group" style="flex-wrap:wrap; margin: 6px 0 12px">
-                <button v-for="c in placeEditCategories" :key="'ic-' + c" class="seg-btn"
-                  :class="{ 'seg-btn--active': (placeInfoModal.data?.actions || placeInfoModal.row?.actions || []).includes(c) }"
-                  @click="toggleCacheTag('actions', c)">{{ c.replace('_', ' ') }}</button>
-              </div>
-              <div class="edit-section-title">Interests — which traveler preferences this place fits</div>
-              <div class="seg-group" style="flex-wrap:wrap; margin: 6px 0 12px">
-                <button v-for="t in placeEditInterests" :key="'ii-' + t" class="seg-btn"
-                  :class="{ 'seg-btn--active': (placeInfoModal.data?.interests || placeInfoModal.row?.interests || []).includes(t) }"
-                  @click="toggleCacheTag('interests', t)">{{ t }}</button>
-              </div>
-              <div class="edit-section-title">Details</div>
-              <div class="pi-cols">
-                <div class="pi-row" v-for="r in placeInfoRows" :key="r.k">
-                  <span class="pi-k">{{ r.k }}</span>
-                  <a v-if="r.href" class="pi-v pi-link" :href="r.href" target="_blank" rel="noopener">{{ r.v }}</a>
-                  <span v-else class="pi-v">{{ r.v }}</span>
+              <template v-if="!placeInfoModal.editing">
+                <h3 class="pim-title">{{ placeInfoModal.row?.name }}
+                  <span class="pim-status" :class="'pim-status--' + (placeInfoModal.data?.explore?.status || placeInfoModal.row?.explore?.status || 'visible')">
+                    {{ (placeInfoModal.data?.explore?.status || placeInfoModal.row?.explore?.status) === 'verified' ? '✓ Verified' : (placeInfoModal.data?.explore?.status || placeInfoModal.row?.explore?.status) === 'hidden' ? 'Hidden' : 'Visible' }}
+                  </span>
+                  <span class="pim-status pim-status--hidden" v-if="placeInfoModal.data?.aiBlocked">AI blocked</span>
+                </h3>
+                <div class="pim-cats">
+                  <button v-for="c in placeEditCategories" :key="'ic-' + c" type="button" class="pim-chip"
+                    :class="{ 'pim-chip--on': (placeInfoModal.data?.actions || placeInfoModal.row?.actions || []).includes(c) }"
+                    @click="toggleCacheTag('actions', c)">{{ c.replace('_', ' ') }}</button>
+                  <span class="pim-primary">{{ placeInfoModal.data?.primaryType || placeInfoModal.row?.primaryType }}</span>
                 </div>
-              </div>
-              <template v-if="placeInfoHours.length">
-                <div class="edit-section-title" style="margin-top:14px">Opening hours</div>
-                <div class="pi-hours"><div v-for="h in placeInfoHours" :key="h">{{ h }}</div></div>
+                <div class="pim-hint">Click a category to add / remove this place from that section — saves instantly. No categories = not served.</div>
+                <div class="pim-cats">
+                  <button v-for="t in placeEditInterests" :key="'ii-' + t" type="button" class="pim-chip pim-chip--int"
+                    :class="{ 'pim-chip--on': (placeInfoModal.data?.interests || placeInfoModal.row?.interests || []).includes(t) }"
+                    @click="toggleCacheTag('interests', t)">{{ t }}</button>
+                </div>
+                <div class="pim-hint">Interest tags — which traveler preferences this place fits.</div>
+                <dl class="pim-info">
+                  <template v-for="r in placeInfoRows" :key="r.k">
+                    <dt>{{ r.k }}</dt>
+                    <dd><a v-if="r.href" :href="r.href" target="_blank" rel="noopener">{{ r.v }}</a><template v-else>{{ r.v }}</template></dd>
+                  </template>
+                </dl>
+                <div class="pim-hours" v-if="placeInfoHours.length">
+                  <div class="pim-hours-title">Opening hours</div>
+                  <div v-for="h in placeInfoHours" :key="h">{{ h }}</div>
+                </div>
               </template>
 
               <template v-if="placeInfoModal.editing">
@@ -3676,7 +3682,7 @@
                   <button class="action-btn btn-muted" @click="placeInfoModal.editing = false" :disabled="placeEditSaving">Cancel — back to details</button>
                 </div>
               </template>
-              <div v-if="!placeInfoModal.editing" style="display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap">
+              <div v-if="!placeInfoModal.editing" class="pim-actions" style="display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap">
                 <div class="action-group">
                   <a class="action-btn btn-muted" v-if="placeInfoGeo"
                      :href="'https://www.google.com/maps/search/?api=1&query=' + placeInfoGeo" target="_blank" rel="noopener noreferrer">Open in Maps</a>
@@ -7012,8 +7018,6 @@ export default {
       add('Price', r.priceTierLabel ? `${r.priceTierLabel}${r.priceDollars ? ' · ' + r.priceDollars : ''}` : null)
       add('Phone', det.formatted_phone_number)
       add('Website', det.website ? det.website.replace(/^https?:\/\//, '').slice(0, 45) : null, det.website)
-      add('Explore status', d.explore?.status || r.explore?.status || 'visible (default rules)')
-      add('Shown under', (d.actions || r.actions || []).join(', '))
       add('Community', `${r.likes || 0} likes · ${r.dislikes || 0} dislikes`)
       add('Event dates', eventDateLabel(r.eventSchedule))
       add('Images stored', r.imagesStored ? `yes (${(d.photos || r.photos || []).length} photo${(d.photos || r.photos || []).length === 1 ? '' : 's'})` : 'no')
@@ -8087,6 +8091,37 @@ export default {
 .aiev-row:last-child { border-bottom: none; }
 .aiev-main { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
 .aiev-main .db-meta { font-size: 12px; }
+
+/* ── Cache modal, staff-style read view (pim-*) ─────────────────────────── */
+.pim-imgs { display: flex; gap: 6px; overflow-x: auto; border-radius: 12px; margin-bottom: 14px; }
+.pim-img { height: 220px; min-width: 160px; flex: 1 1 auto; object-fit: cover; border-radius: 10px; }
+.pim-title { margin: 0 0 10px; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pim-status { padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.pim-status--verified { background: rgba(52,211,153,0.14); color: #34d399; }
+.pim-status--hidden { background: rgba(239,68,68,0.12); color: #f87171; }
+.admin-shell.night-mode .pim-status--visible { background: rgba(255,255,255,0.06); color: #94a3b8; }
+.admin-shell.day-mode .pim-status--visible { background: rgba(139,69,19,0.07); color: #8a7261; }
+.admin-shell.day-mode .pim-status--verified { background: rgba(56,161,105,0.14); color: #2f855a; }
+.admin-shell.day-mode .pim-status--hidden { background: rgba(229,62,62,0.10); color: #c0504d; }
+.pim-cats { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+.pim-chip { padding: 4px 12px; border-radius: 999px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; border: 1px solid transparent; transition: all 0.15s; text-transform: capitalize; }
+.admin-shell.night-mode .pim-chip { background: rgba(255,255,255,0.05); color: #94a3b8; border-color: rgba(255,255,255,0.08); }
+.admin-shell.night-mode .pim-chip:hover { color: #e2e8f0; }
+.admin-shell.night-mode .pim-chip--on { color: #34d399; background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.4); }
+.admin-shell.day-mode .pim-chip { background: rgba(139,69,19,0.05); color: #8a7261; border-color: rgba(160,82,45,0.15); }
+.admin-shell.day-mode .pim-chip:hover { color: #2c1e10; }
+.admin-shell.day-mode .pim-chip--on { color: #2f855a; background: rgba(56,161,105,0.12); border-color: rgba(56,161,105,0.4); }
+.pim-primary { font-size: 11px; opacity: 0.5; margin-left: 4px; }
+.pim-hint { font-size: 11.5px; opacity: 0.55; margin: 0 0 12px; line-height: 1.5; }
+.pim-info { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 4px 0 14px; font-size: 13px; }
+.pim-info dt { font-weight: 600; white-space: nowrap; opacity: 0.6; }
+.pim-info dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.admin-shell.night-mode .pim-info a { color: #a78bfa; }
+.admin-shell.day-mode .pim-info a { color: #A0522D; }
+.pim-hours { font-size: 12.5px; margin-bottom: 14px; opacity: 0.8; line-height: 1.55; }
+.pim-hours-title { font-weight: 700; margin-bottom: 4px; opacity: 0.85; }
+.admin-shell.night-mode .pim-actions { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; }
+.admin-shell.day-mode .pim-actions { border-top: 1px solid rgba(139,69,19,0.12); padding-top: 14px; }
 
 /* Wide-panel detail rows: two columns like the business editor's grids */
 .pi-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
