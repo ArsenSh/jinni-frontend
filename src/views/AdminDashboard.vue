@@ -859,46 +859,48 @@
             </div>
           </div>
 
-          <!-- AI cost forecast — month-by-month, like the Google one -->
+          <!-- AI Balance & Forecast — prepaid model: money left inside each
+               provider, burn rate, runway, and what to add for next month. -->
           <div class="card chart-card">
             <div class="card-head">
-              <h2>AI Cost Forecast</h2>
-              <span class="card-sub" v-if="aiMonthly">{{ aiMonthly.isCurrent ? `Day ${aiMonthly.dayOfMonth} of ${aiMonthly.daysInMonth} · bar vs tick: ahead of the tick = spending accelerating` : 'Closed month' }}</span>
-              <div class="card-head-spacer"></div>
-              <div class="seg-group">
-                <button class="seg-btn" :disabled="!aiPrevMonth" @click="fetchAiMonthly(aiPrevMonth)">‹</button>
-                <span class="gm-month">{{ aiMonthly ? aiMonthly.month : '…' }}</span>
-                <button class="seg-btn" :disabled="!aiNextMonth" @click="fetchAiMonthly(aiNextMonth)">›</button>
-              </div>
+              <h2>AI Balance &amp; Forecast</h2>
+              <span class="card-sub">prepaid balances — how much is left and what next month needs</span>
             </div>
-            <div v-if="aiMonthlyLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
-            <div v-else-if="aiMonthly" class="gm-body">
-              <div class="gm-sku" v-for="p in aiMonthly.providers" :key="p.key">
+            <div v-if="!aiBalance" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+            <div v-else class="gm-body">
+              <div class="gm-sku" v-for="pk in ['deepseek', 'claude']" :key="pk">
                 <div class="gm-sku-head">
-                  <b>{{ p.label }}</b>
-                  <span class="gm-rate">{{ fmtK(p.tokens) }} tokens · {{ fmt(p.queries) }} requests<template v-if="p.key === 'claude'"> · {{ fmt(p.searches) }} web searches</template></span>
-                  <span class="gm-status" :class="p.growth !== null && p.growth > 1.2 ? 'gm-amber' : 'gm-green'" v-if="p.growth !== null">{{ p.growth > 1.2 ? 'growing ' + p.growth + '×' : 'steady' }}</span>
+                  <b>{{ pk === 'deepseek' ? 'DeepSeek' : 'Claude (Anthropic)' }}</b>
+                  <span class="gm-rate" v-if="aiBalance[pk].balance !== null">
+                    balance <b>${{ aiBalance[pk].balance.toFixed(2) }}</b>
+                    <template v-if="aiBalance[pk].source === 'live'"> · live from API</template>
+                    <template v-else-if="aiBalance[pk].source === 'manual'"> · entered ${{ aiBalance[pk].enteredUsd }} on {{ shortDate(aiBalance[pk].enteredAt) }}, spend counted down since</template>
+                  </span>
+                  <span class="gm-rate" v-else>balance unknown — enter it below</span>
+                  <span class="gm-status" v-if="aiBalance[pk].topUpNeeded !== null" :class="aiBalance[pk].topUpNeeded > 0 ? 'gm-amber' : 'gm-green'">
+                    {{ aiBalance[pk].topUpNeeded > 0 ? 'top up ~$' + aiBalance[pk].topUpNeeded.toFixed(2) : 'next month covered' }}
+                  </span>
                 </div>
-                <div class="gm-bar" :title="p.projCost !== null ? `Month-to-date $${p.mtdCost.toFixed(2)} of projected $${p.projCost.toFixed(2)}` : ''">
-                  <div class="gm-fill gm-green" :style="{ width: (p.projCost ? Math.min(100, Math.round(100 * p.mtdCost / p.projCost)) : 100) + '%' }"></div>
-                  <div v-if="aiMonthly.isCurrent" class="gm-proj-marker" :style="{ left: Math.round(100 * aiMonthly.dayOfMonth / aiMonthly.daysInMonth) + '%' }"></div>
+                <div class="gm-bar" v-if="aiBalance[pk].balance !== null && aiBalance[pk].nextMonthCost > 0"
+                  :title="`Balance $${aiBalance[pk].balance.toFixed(2)} vs ~$${aiBalance[pk].nextMonthCost.toFixed(2)} needed for the next 30 days`">
+                  <div class="gm-fill" :class="aiBalance[pk].topUpNeeded > 0 ? 'gm-amber' : 'gm-green'"
+                    :style="{ width: Math.max(2, Math.min(100, Math.round(100 * aiBalance[pk].balance / aiBalance[pk].nextMonthCost))) + '%' }"></div>
                 </div>
                 <div class="gm-sku-meta">
-                  <span>MTD ${{ p.mtdCost.toFixed(2) }}</span>
-                  <span v-if="p.projCost !== null">→ month-end ~${{ p.projCost.toFixed(2) }} ({{ fmtK(p.projTokens) }} tokens<template v-if="p.key === 'claude'"> · {{ fmt(p.projSearches) }} searches</template>)</span>
+                  <span>burn ≈ ${{ aiBalance[pk].burnPerDay.toFixed(2) }}/day (7d avg)</span>
+                  <span v-if="aiBalance[pk].runwayDays !== null">runway ~{{ aiBalance[pk].runwayDays }} days<template v-if="aiBalance[pk].runwayDays < 3650"> (runs out ~{{ runwayDate(aiBalance[pk].runwayDays) }})</template></span>
+                  <span>next 30 days ≈ ${{ aiBalance[pk].nextMonthCost.toFixed(2) }}</span>
+                </div>
+                <div class="gm-sku-meta" style="margin-top: 6px; align-items: center" v-if="pk === 'claude' || aiBalance.deepseek.source !== 'live'">
+                  <span style="opacity: 0.6">Set balance:</span>
+                  <input class="limit-input" style="width: 110px; padding: 6px 10px" type="number" min="0" step="1" v-model.number="aiBalanceForm[pk]" placeholder="$" />
+                  <button class="action-btn btn-muted" @click="saveAiBalance(pk)" :disabled="aiBalanceSaving">Set</button>
                 </div>
               </div>
-              <div class="gm-total">
-                <template v-if="aiMonthly.isCurrent">
-                  AI billed so far this month: <b>${{ aiMonthly.totals.mtdCost.toFixed(2) }}</b>
-                  &nbsp;·&nbsp; projected month-end: <b>${{ (aiMonthly.totals.projCost || 0).toFixed(2) }}</b>
-                </template>
-                <template v-else>Month total: <b>${{ aiMonthly.totals.mtdCost.toFixed(2) }}</b></template>
-              </div>
               <p class="gm-hint">
-                Costs use the blended rates (DeepSeek ~$0.50/1M, Claude ~$2/1M + $0.01/web search). No free caps here —
-                DeepSeek draws from its prepaid balance, and Claude's real ceiling is the account's daily token tier (TPD),
-                so watch the Claude projection before heavy testing days or scaling events abroad.
+                DeepSeek reads its real balance from the DeepSeek API when reachable. Anthropic has no balance endpoint, so
+                enter your remaining Claude credit after topping up — the card counts it down using the tracked daily spend
+                (blended rates, lower bound). The bar compares balance against the next 30 days of spend at the current pace.
               </p>
             </div>
           </div>
@@ -1255,25 +1257,48 @@
                   :class="{ 'seg-btn--active': aiEvStatus === s }"
                   @click="aiEvStatus = s; fetchAiEvents()">{{ s }}</button>
               </div>
+              <select v-if="aiEvCountries.length > 1" class="limit-input" style="width: auto; padding: 7px 12px; margin-left: 8px" v-model="aiEvCountry">
+                <option value="">All countries</option>
+                <option v-for="c in aiEvCountries" :key="c" :value="c">{{ c }}</option>
+              </select>
             </div>
             <div v-if="aiEvLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
-            <div v-else-if="!aiEvents.length" class="empty-state">No {{ aiEvStatus === 'all' ? '' : aiEvStatus + ' ' }}Jinni-found events.</div>
-            <div v-else>
-              <div v-for="ev in aiEvents" :key="ev._id" class="aiev-row">
-                <div class="aiev-main">
-                  <b>{{ ev.name }}</b>
-                  <span class="db-meta">
-                    {{ shortDate(ev.startDate) }}<template v-if="ev.endDate"> → {{ shortDate(ev.endDate) }}</template>
-                    · {{ ev.venueName || ev.venue?.name || 'venue unresolved' }}<template v-if="ev.city"> · {{ ev.city }}</template>
-                    · shown {{ ev.timesShown || 1 }}×
-                  </span>
+            <div v-else-if="!aiEventsFiltered.length" class="empty-state">No {{ aiEvStatus === 'all' ? '' : aiEvStatus + ' ' }}Jinni-found events{{ aiEvCountry ? ' in ' + aiEvCountry : '' }}.</div>
+            <div v-else class="places-grid" style="margin-top: 4px">
+              <div v-for="ev in aiEventsFiltered" :key="ev._id" class="place-card">
+                <div class="place-img-wrap">
+                  <img v-if="aiEvImage(ev)" :src="aiEvImage(ev)" :alt="ev.name" class="place-img" loading="lazy" @error="onImgError" />
+                  <div v-else class="place-img-placeholder">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  </div>
+                  <div class="place-img-overlay">
+                    <button v-if="ev.status === 'new'" class="place-mod-btn place-mod-verify" @click.stop="aiEvApprove(ev)" title="Create a curated Destination from this event">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      Approve
+                    </button>
+                    <button v-if="ev.status !== 'hidden'" class="place-mod-btn place-mod-hide" @click.stop="aiEvSetStatus(ev, 'hidden')" title="Permanently block — an annual re-listing stays hidden next year too">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                      Hide
+                    </button>
+                    <button v-else class="place-mod-btn" @click.stop="aiEvSetStatus(ev, 'new')">Unhide</button>
+                    <button class="place-delete-btn" @click.stop="aiEvDismiss(ev)" title="Remove from the queue — may reappear if Jinni finds it again">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
-                <span class="gm-status" :class="ev.status === 'approved' ? 'gm-green' : ev.status === 'hidden' ? 'gm-red' : 'gm-amber'">{{ ev.status }}</span>
-                <div class="action-group">
-                  <button v-if="ev.status === 'new'" class="action-btn btn-accent" @click="aiEvApprove(ev)" title="Create a curated Destination from this event">Approve</button>
-                  <button v-if="ev.status !== 'hidden'" class="action-btn btn-muted" @click="aiEvSetStatus(ev, 'hidden')" title="Permanently block — an annual re-listing stays hidden next year too">Hide</button>
-                  <button v-else class="action-btn btn-muted" @click="aiEvSetStatus(ev, 'new')">Unhide</button>
-                  <button class="action-btn btn-delete" @click="aiEvDismiss(ev)" title="Remove from the queue — may reappear if Jinni finds it again">Dismiss</button>
+                <div class="place-info">
+                  <div class="place-name">{{ ev.name }}</div>
+                  <div class="place-event">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>{{ shortDate(ev.startDate) }}<template v-if="ev.endDate"> → {{ shortDate(ev.endDate) }}</template></span>
+                  </div>
+                  <div class="place-addr">{{ ev.venueName || ev.venue?.name || 'venue unresolved' }}<template v-if="ev.city"> · {{ ev.city }}</template></div>
+                  <div class="place-meta">
+                    <span class="gm-status" :class="ev.status === 'approved' ? 'gm-green' : ev.status === 'hidden' ? 'gm-red' : 'gm-amber'">{{ ev.status }}</span>
+                    <span class="badge badge-muted">shown {{ ev.timesShown || 1 }}×</span>
+                    <a v-if="ev.sourceUrl" :href="ev.sourceUrl" target="_blank" rel="noopener" class="badge badge-muted" @click.stop title="Open the ticketing / listing page">source ↗</a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -4545,6 +4570,31 @@ export default {
       if (s.usedPct > 70) return 'gm-amber'
       return 'gm-green'
     }
+    // ── AI balances & runway (prepaid model) ──
+    const aiBalance = ref(null)
+    const aiBalanceForm = ref({ deepseek: null, claude: null })
+    const aiBalanceSaving = ref(false)
+    const fetchAiBalance = async () => {
+      try { const res = await apiFetch('/ai-balance'); if (res.success) aiBalance.value = res.data }
+      catch (e) { console.warn('ai balance fetch failed:', e.message) }
+    }
+    const saveAiBalance = async (pk) => {
+      const v = aiBalanceForm.value[pk]
+      if (!Number.isFinite(v) || v < 0) { showToast('Enter the remaining credit in USD', 'error'); return }
+      aiBalanceSaving.value = true
+      try {
+        await apiFetch('/ai-balance', { method: 'POST', body: JSON.stringify(pk === 'claude' ? { claudeCreditUsd: v } : { deepseekCreditUsd: v }) })
+        showToast('Balance set — counting down from now')
+        aiBalanceForm.value[pk] = null
+        await fetchAiBalance()
+      } catch (e) { showToast(e.message, 'error') }
+      finally { aiBalanceSaving.value = false }
+    }
+    const runwayDate = (days) => {
+      const d = new Date(); d.setDate(d.getDate() + days)
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    }
+
     // ── AI monthly cost forecast (DeepSeek + Claude) ──
     const aiMonthly = ref(null)
     const aiMonthlyLoading = ref(false)
@@ -4934,7 +4984,7 @@ export default {
     const debouncedDestFetch = debounce(() => fetchDestinations(true))
     const fetchAll = async () => {
       loading.value = true
-      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiMonthly(), fetchServerStats(), fetchRoutingUsage(), fetchDbStats()]) }
+      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiBalance(), fetchServerStats(), fetchRoutingUsage(), fetchDbStats()]) }
       catch (e) { showToast(e.message, 'error') } finally { loading.value = false }
     }
     // Stored rec images are either absolute URLs or API-relative paths
@@ -6195,6 +6245,9 @@ export default {
     const aiEvents = ref([])
     const aiEvStatus = ref('new')
     const aiEvLoading = ref(false)
+    const aiEvCountry = ref('')
+    const aiEvCountries = computed(() => [...new Set(aiEvents.value.map(e => e.country).filter(Boolean))].sort())
+    const aiEventsFiltered = computed(() => aiEvCountry.value ? aiEvents.value.filter(e => e.country === aiEvCountry.value) : aiEvents.value)
     const fetchAiEvents = async () => {
       aiEvLoading.value = true
       try { const res = await staffFetch(`/ai-events?status=${aiEvStatus.value}`); aiEvents.value = res.data || [] }
@@ -6207,6 +6260,13 @@ export default {
     const aiEvSetStatus = async (ev, status) => {
       try { await staffFetch(`/ai-events/${ev._id}`, { method: 'PATCH', body: JSON.stringify({ status }) }); showToast(`"${ev.name}" ${status === 'hidden' ? 'hidden' : 'restored'}`); fetchAiEvents() }
       catch (e) { showToast(e.message, 'error') }
+    }
+    // Event card image: its own poster URL first, else the resolved venue's
+    // cached photo, else the calendar placeholder.
+    const aiEvImage = (ev) => {
+      if (ev.image) return ev.image
+      if (ev.placeId && ev.venue?.imagesStored) return `${API_BASE}/api/ai/place-image/${ev.placeId}/0`
+      return null
     }
     const aiEvDismiss = async (ev) => {
       try { await staffFetch(`/ai-events/${ev._id}`, { method: 'DELETE' }); showToast(`"${ev.name}" dismissed`); fetchAiEvents() }
@@ -6531,11 +6591,12 @@ export default {
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
       aiMonthly, aiMonthlyLoading, fetchAiMonthly, aiPrevMonth, aiNextMonth,
+      aiBalance, aiBalanceForm, aiBalanceSaving, fetchAiBalance, saveAiBalance, runwayDate,
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
-      placesView, aiEvents, aiEvStatus, aiEvLoading, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss,
+      placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEventsFiltered, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
