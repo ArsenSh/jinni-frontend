@@ -1759,11 +1759,12 @@
                       <tr v-for="row in g.rows" :key="row.key" class="cov-city-row">
                         <td class="cov-city"><b>{{ row.city }}</b><span :title="row.aliases && row.aliases.length ? 'Also recorded as: ' + row.aliases.join(', ') : null">{{ row.total }} cached<template v-if="row.aliases && row.aliases.length"> · also “{{ row.aliases.slice(0, 2).join('”, “') }}”<template v-if="row.aliases.length > 2"> +{{ row.aliases.length - 2 }} more</template></template></span></td>
                         <td v-for="c in covData.categories" :key="c">
-                          <div v-if="c === 'jinni_events'" class="cov-cell cov-cell--info">
+                          <button v-if="c === 'jinni_events'" type="button" class="cov-cell cov-cell--info"
+                                  :class="{ 'cov-cell--foff': covOverrideOf(row.key, c) === 'off' }" @click="cycleCov(row.key, c)">
                             <b>{{ covCellPct(row, c) }}%</b>
                             <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
-                            <em>via web search</em>
-                          </div>
+                            <em>{{ covOverrideOf(row.key, c) === 'off' ? 'search OFF' : 'via web search' }}</em>
+                          </button>
                           <button v-else type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
                             <b>{{ covCellPct(row, c) }}%</b>
                             <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
@@ -6724,7 +6725,10 @@ export default {
     })
     const cycleCov = (key, c) => {
       const cur = covOverrideOf(key, c)
-      const next = cur === 'auto' ? 'off' : cur === 'off' ? 'on' : 'auto'
+      // Jinni events is a two-state switch (search allowed / search off) —
+      // there is no "force on" for web search, global rules still apply.
+      const next = c === 'jinni_events' ? (cur === 'auto' ? 'off' : 'auto')
+        : cur === 'auto' ? 'off' : cur === 'off' ? 'on' : 'auto'
       const o = JSON.parse(JSON.stringify(covForm.value.overrides))
       o[key] = o[key] || {}
       if (next === 'auto') delete o[key][c]; else o[key][c] = next
@@ -9100,7 +9104,7 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .cov-city-row .cov-city { padding-left: 24px; }
 .cov-city { max-width: 240px; }
 .cov-city span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cov-cell--info { cursor: default; }
+.cov-cell--info { cursor: pointer; }
 .admin-shell.night-mode .cov-cell--info { background: rgba(139,92,246,0.10); }
 .admin-shell.night-mode .cov-cell--info em { color: #a78bfa; }
 .admin-shell.day-mode .cov-cell--info { background: rgba(160,82,45,0.08); }
