@@ -1743,7 +1743,7 @@
                     </tr>
                     <template v-if="covOpen[g.name]">
                       <tr v-for="row in g.rows" :key="row.key" class="cov-city-row">
-                        <td class="cov-city"><b>{{ row.city }}</b><span>{{ row.total }} cached</span></td>
+                        <td class="cov-city"><b>{{ row.city }}</b><span>{{ row.total }} cached<template v-if="row.aliases && row.aliases.length"> · also “{{ row.aliases.join('”, “') }}”</template></span></td>
                         <td v-for="c in covData.categories" :key="c">
                           <button type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
                             <b>{{ covCellPct(row, c) }}%</b>
@@ -7072,7 +7072,7 @@ export default {
   backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
   -webkit-mask-image: linear-gradient(to bottom, #000 58%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 58%, transparent 100%); }
-.topbar-breadcrumb { font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0; text-transform: none; margin-bottom: 4px; opacity: 0.45; font-weight: 400; }
+.topbar-breadcrumb { font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0; text-transform: none; margin-bottom: 4px; opacity: 0.8; font-weight: 400; }
 .topbar-breadcrumb span { opacity: 1; font-weight: 600; color: inherit; }
 .topbar-title h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.2px; line-height: 1; }
 .topbar-actions { display: flex; align-items: center; gap: 14px; }
@@ -8024,7 +8024,7 @@ export default {
 .admin-shell.day-mode .topbar { background: linear-gradient(to bottom, rgba(244,239,228,0.94) 0%, rgba(244,239,228,0.75) 58%, rgba(244,239,228,0) 100%); }
 .admin-shell.day-mode .topbar-title h1 { color: #2c1e10; }
 .admin-shell.day-mode .topbar-date { color: #A0522D; }
-.admin-shell.day-mode .topbar-breadcrumb { color: #A0522D }
+.admin-shell.day-mode .topbar-breadcrumb { color: #7a4a20 }
 .admin-shell.day-mode .refresh-btn { background: rgba(255,255,255,0.9); color: #5c3f2e; }
 .admin-shell.day-mode .refresh-btn:hover { color: #A0522D }
 .admin-shell.day-mode .loading-screen { color: #5c3f2e; }
@@ -8299,12 +8299,12 @@ export default {
 .admin-shell.day-mode   .pref-bar-count { color: #2c1e10; }
 
 /* ── LOCATION SECTION LABELS ── */
-.loc-section-label { display: flex; align-items: center; gap: 7px; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.5; padding: 0 2px; }
+.loc-section-label { display: flex; align-items: center; gap: 7px; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; padding: 0 2px; }
 .loc-section-sub { font-size: 10px; font-weight: 400; text-transform: none; letter-spacing: 0; opacity: 0.7; margin-left: 6px; }
 .loc-section-sub--empty { opacity: 0.35; }
 .loc-bar-dest { background: linear-gradient(90deg, #22d3ee, #0891b2) !important; }
 .admin-shell.day-mode .loc-bar-dest { background: linear-gradient(90deg, #0e7490, #164e63) !important; }
-.admin-shell.day-mode .loc-section-label { color: #A0522D; }
+.admin-shell.day-mode .loc-section-label { color: #7a4a20; }
 .admin-shell.night-mode .loc-section-label { color: #a78bfa; }
 
 /* ── DB STATS ── */
