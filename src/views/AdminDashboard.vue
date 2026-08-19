@@ -423,14 +423,7 @@
               <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input v-model="userSearch" class="search-input" placeholder="Search by name or email…" @input="debouncedUserFetch" />
             </div>
-            <div class="seg-group">
-              <button v-for="opt in userFilterOpts" :key="opt.value"
-                class="seg-btn"
-                :class="{ 'seg-btn--active': userFilter === opt.value }"
-                @click="userFilter = opt.value; fetchUsers()">
-                {{ opt.label }}
-              </button>
-            </div>
+            <FilterDropdown :options="userFilterOpts" v-model="userFilter" @change="usersPage = 1; fetchUsers()" />
           </div>
           <div class="card table-card">
             <div class="card-head">
@@ -943,14 +936,7 @@
               <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               <input v-model="bizLocationSearch" class="search-input" placeholder="Filter by location (city, country)…" @input="debouncedBizFetch" />
             </div>
-            <div class="seg-group">
-              <button v-for="opt in bizStatusFilterOpts" :key="opt.value"
-                class="seg-btn"
-                :class="{ 'seg-btn--active': bizStatusFilter === opt.value }"
-                @click="bizStatusFilter = opt.value; bizPage = 1; fetchBusinesses()">
-                {{ opt.label }}
-              </button>
-            </div>
+            <FilterDropdown :options="bizStatusFilterOpts" v-model="bizStatusFilter" @change="bizPage = 1; fetchBusinesses()" />
             <div class="seg-group">
               <button v-for="opt in bizPartnerFilterOpts" :key="opt.value"
                 class="seg-btn"
@@ -959,14 +945,7 @@
                 {{ opt.label }}
               </button>
             </div>
-            <div class="seg-group">
-              <button v-for="opt in bizCategoryFilterOpts" :key="opt.value"
-                class="seg-btn"
-                :class="{ 'seg-btn--active': bizTypeFilter === opt.value }"
-                @click="bizTypeFilter = opt.value; bizPage = 1; fetchBusinesses()">
-                {{ opt.label }}
-              </button>
-            </div>
+            <FilterDropdown :options="bizCategoryFilterOpts" v-model="bizTypeFilter" @change="bizPage = 1; fetchBusinesses()" />
           </div>
           <div class="card table-card">
             <div class="card-head"><h2>Business Directory</h2><span class="card-sub">{{ businesses.length }} results</span></div>
@@ -1072,15 +1051,8 @@
               <button class="seg-btn" :class="{ 'seg-btn--active': placesView === 'jinni_events' }" @click="placesView = 'jinni_events'; fetchAiEvents()">Jinni events</button>
             </div>
             <template v-if="placesView === 'jinni_events'">
-              <div class="seg-group">
-                <button v-for="st in ['new', 'approved', 'hidden', 'all']" :key="st" class="seg-btn"
-                  :class="{ 'seg-btn--active': aiEvStatus === st }"
-                  @click="aiEvStatus = st; fetchAiEvents()">{{ st }}</button>
-              </div>
-              <div class="seg-group" v-if="aiEvCountries.length > 1">
-                <button class="seg-btn" :class="{ 'seg-btn--active': !aiEvCountry }" @click="aiEvCountry = ''">All countries</button>
-                <button v-for="c in aiEvCountries" :key="c" class="seg-btn" :class="{ 'seg-btn--active': aiEvCountry === c }" @click="aiEvCountry = c">{{ c }}</button>
-              </div>
+              <FilterDropdown :options="aiEvStatusOpts" v-model="aiEvStatus" @change="fetchAiEvents()" />
+              <FilterDropdown v-if="aiEvCountries.length > 1" :options="aiEvCountryOpts" v-model="aiEvCountry" />
               <div class="seg-group">
                 <button class="seg-btn" :class="{ 'seg-btn--active': aiEvNoImage }" @click="aiEvNoImage = !aiEvNoImage" title="Show only events with no poster / venue photo">No image</button>
               </div>
@@ -1100,14 +1072,7 @@
                 {{ opt.label }}
               </button>
             </div>
-            <div class="seg-group">
-              <button v-for="opt in placesActionOpts" :key="opt.value"
-                class="seg-btn"
-                :class="{ 'seg-btn--active': placesActionFilter === opt.value }"
-                @click="placesActionFilter = opt.value; fetchPlaces(true)">
-                {{ opt.label }}
-              </button>
-            </div>
+            <FilterDropdown :options="placesActionOpts" v-model="placesActionFilter" @change="fetchPlaces(true)" />
             <div class="seg-group">
               <button v-for="opt in placesExploreOpts" :key="opt.value"
                 class="seg-btn"
@@ -1116,14 +1081,7 @@
                 {{ opt.label }}
               </button>
             </div>
-            <div class="seg-group">
-              <button v-for="opt in placesSortOpts" :key="opt.value"
-                class="seg-btn"
-                :class="{ 'seg-btn--active': placesSort === opt.value }"
-                @click="placesSort = opt.value; fetchPlaces(true)">
-                {{ opt.label }}
-              </button>
-            </div>
+            <FilterDropdown :options="placesSortOpts" v-model="placesSort" @change="fetchPlaces(true)" />
             <button class="purge-standalone" :disabled="backfillBusy"
               @click="backfillRegions" title="Parse country / city for cached places that don't have them yet (needed once for staff Explore moderation scoping; safe to re-run)">
               {{ backfillBusy ? 'Backfilling…' : 'Backfill regions' }}
@@ -1338,12 +1296,8 @@
               <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input v-model="destSearch" class="search-input" placeholder="Search destinations…" @input="debouncedDestFetch" />
             </div>
-            <div class="seg-group">
-              <button v-for="opt in destFilterOpts" :key="opt.value" class="seg-btn" :class="{ 'seg-btn--active': destFilter === opt.value }" @click="destFilter = opt.value; fetchDestinations(true)">{{ opt.label }}</button>
-            </div>
-            <div class="seg-group">
-              <button v-for="opt in categoryFilterOpts" :key="opt.value" class="seg-btn" :class="{ 'seg-btn--active': destTypeFilter === opt.value }" @click="destTypeFilter = opt.value; fetchDestinations(true)">{{ opt.label }}</button>
-            </div>
+            <FilterDropdown :options="destFilterOpts" v-model="destFilter" @change="fetchDestinations(true)" />
+            <FilterDropdown :options="categoryFilterOpts" v-model="destTypeFilter" @change="fetchDestinations(true)" />
             <button class="action-btn btn-accent" @click="openCreateDestination" title="Add a new destination">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Add destination
@@ -3753,6 +3707,7 @@ import { useStore } from 'vuex'
 // Same component the chat uses — the transcript viewer restores an itinerary
 // by id so admins see exactly what the user saw, not a summary of it.
 import ItineraryView from '@/components/ui/ItineraryView.vue'
+import FilterDropdown from '@/components/ui/FilterDropdown.vue'
 
 const API = import.meta.env.VITE_API_URL || '/api'
 const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
@@ -3776,7 +3731,7 @@ function debounce(fn, ms = 400) {
 
 export default {
   name: 'AdminDashboard',
-  components: { ItineraryView },
+  components: { ItineraryView, FilterDropdown },
   props: { currentUser: { type: Object, default: null } },
   directives: {
     clickOutside: {
@@ -4986,7 +4941,16 @@ export default {
         fetchPlaces(true)
       } catch (e) { showToast(e.message, 'error') }
     }
-    const onImgError = (e) => { e.target.closest('.place-img-wrap').innerHTML = '<div class="place-img-placeholder"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>' }
+    // Swap ONLY the broken <img> for a placeholder. Replacing the whole
+    // wrapper's innerHTML (the old version) destroyed the hover overlay —
+    // event cards with dead poster URLs lost their Approve/Hide/Delete
+    // buttons entirely.
+    const onImgError = (e) => {
+      const ph = document.createElement('div')
+      ph.className = 'place-img-placeholder'
+      ph.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'
+      e.target.replaceWith(ph)
+    }
     const fetchUserLocations = async () => {
       try {
         const res = await apiFetch('/users/locations')
@@ -6306,6 +6270,12 @@ export default {
     const placesView = ref('cache')
     const aiEvents = ref([])
     const aiEvStatus = ref('new')
+    const aiEvStatusOpts = [
+      { value: 'new', label: 'New (to review)' },
+      { value: 'approved', label: 'Approved' },
+      { value: 'hidden', label: 'Hidden' },
+      { value: 'all', label: 'All statuses' },
+    ]
     const aiEvLoading = ref(false)
     const aiEvCountry = ref('')
     // Prefer the venue cache row's parsed country; the event's own `country`
@@ -6315,6 +6285,7 @@ export default {
       return (/\d|\//.test(c) || c.length > 25) ? '' : c
     }
     const aiEvCountries = computed(() => [...new Set(aiEvents.value.map(aiEvCountryOf).filter(Boolean))].sort())
+    const aiEvCountryOpts = computed(() => [{ value: '', label: 'All countries' }, ...aiEvCountries.value.map(c => ({ value: c, label: c }))])
     const aiEvNoImage = ref(false)
     const aiEventsFiltered = computed(() => aiEvents.value
       .filter(e => !aiEvCountry.value || aiEvCountryOf(e) === aiEvCountry.value)
@@ -6696,7 +6667,7 @@ export default {
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
-      placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
+      placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
@@ -7539,7 +7510,7 @@ export default {
 
 /* Events overlay: stack the labeled pills top-right so they never wrap
  * across the poster */
-.place-img-overlay--stack { flex-direction: column; align-items: flex-end; justify-content: flex-start; }
+.place-img-overlay--stack { flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 4px; overflow-y: auto; }
 
 /* Jinni Events rows */
 .aiev-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.14); flex-wrap: wrap; }
