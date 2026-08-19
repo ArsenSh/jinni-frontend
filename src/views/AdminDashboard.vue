@@ -1066,9 +1066,25 @@
           <!-- View switcher: the cached-places grid vs the Jinni-found events
                queue (AiFoundEvent — a different collection, same as the
                validator's "jinni events" chip in Explore). -->
-          <div class="seg-group" style="margin-bottom: 12px">
-            <button class="seg-btn" :class="{ 'seg-btn--active': placesView === 'cache' }" @click="placesView = 'cache'">Cached places</button>
-            <button class="seg-btn" :class="{ 'seg-btn--active': placesView === 'jinni_events' }" @click="placesView = 'jinni_events'; fetchAiEvents()">Jinni events</button>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px">
+            <div class="seg-group">
+              <button class="seg-btn" :class="{ 'seg-btn--active': placesView === 'cache' }" @click="placesView = 'cache'">Cached places</button>
+              <button class="seg-btn" :class="{ 'seg-btn--active': placesView === 'jinni_events' }" @click="placesView = 'jinni_events'; fetchAiEvents()">Jinni events</button>
+            </div>
+            <template v-if="placesView === 'jinni_events'">
+              <div class="seg-group">
+                <button v-for="st in ['new', 'approved', 'hidden', 'all']" :key="st" class="seg-btn"
+                  :class="{ 'seg-btn--active': aiEvStatus === st }"
+                  @click="aiEvStatus = st; fetchAiEvents()">{{ st }}</button>
+              </div>
+              <div class="seg-group" v-if="aiEvCountries.length > 1">
+                <button class="seg-btn" :class="{ 'seg-btn--active': !aiEvCountry }" @click="aiEvCountry = ''">All countries</button>
+                <button v-for="c in aiEvCountries" :key="c" class="seg-btn" :class="{ 'seg-btn--active': aiEvCountry === c }" @click="aiEvCountry = c">{{ c }}</button>
+              </div>
+              <div class="seg-group">
+                <button class="seg-btn" :class="{ 'seg-btn--active': aiEvNoImage }" @click="aiEvNoImage = !aiEvNoImage" title="Show only events with no poster / venue photo">No image</button>
+              </div>
+            </template>
           </div>
 
           <div class="toolbar" v-if="placesView === 'cache'">
@@ -1185,7 +1201,6 @@
                     Delete
                   </button>
                 </div>
-                <span class="place-img-badge" v-if="p.rating">{{ p.rating.toFixed(1) }}</span>
               </div>
               <div class="place-info">
                 <div class="place-name">{{ p.name }}</div>
@@ -1250,28 +1265,18 @@
           <div class="card" v-if="placesView === 'jinni_events'" style="padding: 18px 20px">
             <div class="card-head" style="padding: 0 0 10px">
               <h2>Jinni Events</h2>
-              <span class="card-sub">events Jinni discovered and stored by itself · approve → becomes a curated Destination</span>
-              <div class="card-head-spacer"></div>
-              <div class="seg-group">
-                <button v-for="s in ['new', 'approved', 'hidden', 'all']" :key="s" class="seg-btn"
-                  :class="{ 'seg-btn--active': aiEvStatus === s }"
-                  @click="aiEvStatus = s; fetchAiEvents()">{{ s }}</button>
-              </div>
-              <select v-if="aiEvCountries.length > 1" class="limit-input" style="width: auto; padding: 7px 12px; margin-left: 8px" v-model="aiEvCountry">
-                <option value="">All countries</option>
-                <option v-for="c in aiEvCountries" :key="c" :value="c">{{ c }}</option>
-              </select>
+              <span class="card-sub">events Jinni discovered and stored by itself · approve → becomes a curated Destination · click a card for full details</span>
             </div>
             <div v-if="aiEvLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
             <div v-else-if="!aiEventsFiltered.length" class="empty-state">No {{ aiEvStatus === 'all' ? '' : aiEvStatus + ' ' }}Jinni-found events{{ aiEvCountry ? ' in ' + aiEvCountry : '' }}.</div>
             <div v-else class="places-grid" style="margin-top: 4px">
-              <div v-for="ev in aiEventsFiltered" :key="ev._id" class="place-card">
+              <div v-for="ev in aiEventsFiltered" :key="ev._id" class="place-card place-card--clickable" @click="openAiEvInfo(ev)">
                 <div class="place-img-wrap">
                   <img v-if="aiEvImage(ev)" :src="aiEvImage(ev)" :alt="ev.name" class="place-img" loading="lazy" @error="onImgError" />
                   <div v-else class="place-img-placeholder">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                   </div>
-                  <div class="place-img-overlay">
+                  <div class="place-img-overlay place-img-overlay--stack">
                     <button v-if="ev.status === 'new'" class="place-mod-btn place-mod-verify" @click.stop="aiEvApprove(ev)" title="Create a curated Destination from this event">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                       Approve
@@ -3465,6 +3470,63 @@
     </transition>
     <!-- ── /PLACE CACHE DETAIL MODAL ──────────────────────────────────── -->
 
+    <!-- ── JINNI EVENT DETAIL / EDIT MODAL ────────────────────────────── -->
+    <transition name="modal-fade">
+      <div v-if="aiEvModal.open" class="edit-overlay" @click.self="aiEvModal.open = false">
+        <div class="edit-panel" :class="theme" style="max-width: 580px">
+          <div class="edit-header">
+            <div class="edit-header-left">
+              <span class="edit-badge">Jinni event</span>
+              <h2 class="edit-title">{{ aiEvModal.ev?.name }}</h2>
+            </div>
+            <button class="edit-close-btn" @click="aiEvModal.open = false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="edit-body">
+            <section class="edit-section" v-if="aiEvModal.ev">
+              <img v-if="aiEvImage(aiEvModal.ev)" :src="aiEvImage(aiEvModal.ev)" :alt="aiEvModal.ev.name" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 12px; margin-bottom: 14px" @error="onImgError" />
+              <template v-if="!aiEvModal.editing">
+                <div class="pi-row"><span class="pi-k">Dates</span><span class="pi-v">{{ shortDate(aiEvModal.ev.startDate) }}<template v-if="aiEvModal.ev.endDate"> → {{ shortDate(aiEvModal.ev.endDate) }}</template></span></div>
+                <div class="pi-row"><span class="pi-k">Venue</span><span class="pi-v">{{ aiEvModal.ev.venueName || aiEvModal.ev.venue?.name || 'unresolved' }}</span></div>
+                <div class="pi-row" v-if="aiEvModal.ev.address"><span class="pi-k">Address</span><span class="pi-v">{{ aiEvModal.ev.address }}</span></div>
+                <div class="pi-row"><span class="pi-k">City / Country</span><span class="pi-v">{{ [aiEvModal.ev.city, aiEvModal.ev.country].filter(Boolean).join(', ') || '—' }}</span></div>
+                <div class="pi-row"><span class="pi-k">Status</span><span class="pi-v">{{ aiEvModal.ev.status }}</span></div>
+                <div class="pi-row"><span class="pi-k">Times shown</span><span class="pi-v">{{ aiEvModal.ev.timesShown || 1 }}</span></div>
+                <div class="pi-row" v-if="aiEvModal.ev.sourceUrl"><span class="pi-k">Source</span><a class="pi-v pi-link" :href="aiEvModal.ev.sourceUrl" target="_blank" rel="noopener">{{ aiEvModal.ev.sourceUrl.replace(/^https?:\/\//, '').slice(0, 45) }}</a></div>
+                <div class="pi-row" v-if="aiEvModal.ev.venue?.rating"><span class="pi-k">Venue Google rating</span><span class="pi-v">{{ aiEvModal.ev.venue.rating.toFixed(1) }} ★</span></div>
+                <div style="display:flex; justify-content:flex-end; margin-top:14px">
+                  <button class="action-btn btn-muted" @click="startAiEvEdit">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Edit event
+                  </button>
+                </div>
+              </template>
+              <template v-else>
+                <div class="edit-field edit-field--full"><label class="edit-label">Name</label><input class="limit-input" type="text" v-model="aiEvForm.name" /></div>
+                <div class="loc-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px">
+                  <div class="edit-field"><label class="edit-label">Start date</label><input class="limit-input" type="date" v-model="aiEvForm.startDate" /></div>
+                  <div class="edit-field"><label class="edit-label">End date <small style="opacity:0.6">(optional)</small></label><input class="limit-input" type="date" v-model="aiEvForm.endDate" /></div>
+                </div>
+                <div class="edit-field edit-field--full" style="margin-top: 10px"><label class="edit-label">Venue name</label><input class="limit-input" type="text" v-model="aiEvForm.venueName" /></div>
+                <div class="loc-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px">
+                  <div class="edit-field"><label class="edit-label">City</label><input class="limit-input" type="text" v-model="aiEvForm.city" /></div>
+                  <div class="edit-field"><label class="edit-label">Country</label><input class="limit-input" type="text" v-model="aiEvForm.country" /></div>
+                </div>
+                <div class="edit-field edit-field--full" style="margin-top: 10px"><label class="edit-label">Source URL</label><input class="limit-input" type="text" v-model="aiEvForm.sourceUrl" placeholder="https://…" /></div>
+                <div class="edit-field edit-field--full" style="margin-top: 10px"><label class="edit-label">Poster image URL</label><input class="limit-input" type="text" v-model="aiEvForm.image" placeholder="https://…" /></div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
+                  <button class="action-btn btn-muted" @click="aiEvModal.editing = false" :disabled="aiEvSaving">Cancel</button>
+                  <button class="action-btn btn-accent" @click="saveAiEvEdit" :disabled="aiEvSaving">{{ aiEvSaving ? 'Saving…' : 'Save changes' }}</button>
+                </div>
+              </template>
+            </section>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <!-- ── /JINNI EVENT DETAIL MODAL ──────────────────────────────────── -->
+
     <!-- ── STAFF ASSIGNMENT EDIT MODAL ────────────────────────────────── -->
     <transition name="modal-fade">
       <div v-if="staffAssignModal.open" class="edit-overlay" @click.self="closeStaffAssign">
@@ -4705,14 +4767,14 @@ export default {
     const budgetRangeHint = (id) => ({ 'Budget': 'Avg budget ≤ $300', 'Mid-range': 'Avg budget $301–$1,000', 'Luxury': 'Avg budget $1,000+' }[id] || id)
     const fetchUsers = async () => {
       usersLoading.value = true
-      try { const params = new URLSearchParams({ page: usersPage.value, limit: 20, search: userSearch.value, filter: userFilter.value }); const res = await apiFetch(`/users?${params}`); users.value = res.data.users; usersTotalPages.value = res.data.totalPages }
+      try { const params = new URLSearchParams({ page: usersPage.value, limit: 8, search: userSearch.value, filter: userFilter.value }); const res = await apiFetch(`/users?${params}`); users.value = res.data.users; usersTotalPages.value = res.data.totalPages }
       catch (e) { showToast(e.message, 'error') } finally { usersLoading.value = false }
     }
     const fetchAIUsage = async () => {
       aiLoading.value = true
       try {
         const [usageRes, dailyRes] = await Promise.all([
-          apiFetch(`/ai-usage?page=${aiPage.value}&limit=20`),
+          apiFetch(`/ai-usage?page=${aiPage.value}&limit=8`),
           apiFetch(`/ai-usage/daily?days=${aiChartDays.value}`)
         ])
         aiUsers.value = usageRes.data.users
@@ -4831,7 +4893,7 @@ export default {
       try {
         const params = new URLSearchParams({
           page: bizPage.value,
-          limit: 20,
+          limit: 8,
           search: bizSearch.value,
           partner: bizPartnerFilter.value,
           status: bizStatusFilter.value,
@@ -4944,7 +5006,7 @@ export default {
       if (resetPage) destPage.value = 1
       destLoading.value = true
       try {
-        const params = new URLSearchParams({ page: destPage.value, limit: 20, search: destSearch.value, filter: destFilter.value, type: destTypeFilter.value })
+        const params = new URLSearchParams({ page: destPage.value, limit: 8, search: destSearch.value, filter: destFilter.value, type: destTypeFilter.value })
         const res = await apiFetch(`/destinations?${params}`)
         destinations.value = res.data.destinations
         destTotalPages.value = res.data.totalPages
@@ -6246,8 +6308,17 @@ export default {
     const aiEvStatus = ref('new')
     const aiEvLoading = ref(false)
     const aiEvCountry = ref('')
-    const aiEvCountries = computed(() => [...new Set(aiEvents.value.map(e => e.country).filter(Boolean))].sort())
-    const aiEventsFiltered = computed(() => aiEvCountry.value ? aiEvents.value.filter(e => e.country === aiEvCountry.value) : aiEvents.value)
+    // Prefer the venue cache row's parsed country; the event's own `country`
+    // sometimes carries venue/address strings — drop anything address-shaped.
+    const aiEvCountryOf = (e) => {
+      const c = e.venue?.country || e.country || ''
+      return (/\d|\//.test(c) || c.length > 25) ? '' : c
+    }
+    const aiEvCountries = computed(() => [...new Set(aiEvents.value.map(aiEvCountryOf).filter(Boolean))].sort())
+    const aiEvNoImage = ref(false)
+    const aiEventsFiltered = computed(() => aiEvents.value
+      .filter(e => !aiEvCountry.value || aiEvCountryOf(e) === aiEvCountry.value)
+      .filter(e => !aiEvNoImage.value || !aiEvImage(e)))
     const fetchAiEvents = async () => {
       aiEvLoading.value = true
       try { const res = await staffFetch(`/ai-events?status=${aiEvStatus.value}`); aiEvents.value = res.data || [] }
@@ -6267,6 +6338,35 @@ export default {
       if (ev.image) return ev.image
       if (ev.placeId && ev.venue?.imagesStored) return `${API_BASE}/api/ai/place-image/${ev.placeId}/0`
       return null
+    }
+    const aiEvModal = ref({ open: false, editing: false, ev: null })
+    const aiEvForm = ref({})
+    const aiEvSaving = ref(false)
+    const openAiEvInfo = (ev) => { aiEvModal.value = { open: true, editing: false, ev } }
+    const startAiEvEdit = () => {
+      const ev = aiEvModal.value.ev
+      aiEvForm.value = {
+        name: ev.name || '',
+        startDate: ev.startDate ? String(ev.startDate).slice(0, 10) : '',
+        endDate: ev.endDate ? String(ev.endDate).slice(0, 10) : '',
+        venueName: ev.venueName || '',
+        city: ev.city || '', country: ev.country || '',
+        sourceUrl: ev.sourceUrl || '', image: ev.image || ''
+      }
+      aiEvModal.value.editing = true
+    }
+    const saveAiEvEdit = async () => {
+      aiEvSaving.value = true
+      try {
+        const res = await apiFetch(`/ai-events/${aiEvModal.value.ev._id}/edit`, { method: 'PATCH', body: JSON.stringify(aiEvForm.value) })
+        const updated = { ...aiEvModal.value.ev, ...res.data }
+        aiEvModal.value.ev = updated
+        aiEvModal.value.editing = false
+        const i = aiEvents.value.findIndex(x => x._id === updated._id)
+        if (i >= 0) aiEvents.value[i] = updated
+        showToast('Event updated')
+      } catch (e) { showToast(e.message, 'error') }
+      finally { aiEvSaving.value = false }
     }
     const aiEvDismiss = async (ev) => {
       try { await staffFetch(`/ai-events/${ev._id}`, { method: 'DELETE' }); showToast(`"${ev.name}" dismissed`); fetchAiEvents() }
@@ -6596,7 +6696,7 @@ export default {
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
-      placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEventsFiltered, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
+      placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
@@ -7436,6 +7536,10 @@ export default {
 .admin-shell.night-mode .limit-input:focus { box-shadow: inset 0 0 0 1px rgba(139,92,246,0.5), 0 0 8px rgba(139,92,246,0.2); }
 .admin-shell.day-mode .limit-input { background: rgba(255,255,255,0.95); color: #2c1e10; box-shadow: inset 0 0 0 1px rgba(139,69,19,0.15); }
 .admin-shell.day-mode .limit-input:focus { box-shadow: inset 0 0 0 1px rgba(212,175,55,0.6), 0 0 8px rgba(212,175,55,0.15); }
+
+/* Events overlay: stack the labeled pills top-right so they never wrap
+ * across the poster */
+.place-img-overlay--stack { flex-direction: column; align-items: flex-end; justify-content: flex-start; }
 
 /* Jinni Events rows */
 .aiev-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.14); flex-wrap: wrap; }
