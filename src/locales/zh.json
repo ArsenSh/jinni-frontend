@@ -1067,6 +1067,7 @@
   "explore": {
     "title": "Jinni 的探索",
     "intro": "以下是 Jinni 目前在这里发现的地点，列表仍在不断丰富。",
+    "preferences": "我的偏好",
     "back": "返回",
     "km": "公里",
     "not_explored": "Jinni 还没有探索过{place}",

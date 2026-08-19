@@ -1083,6 +1083,7 @@
   "explore": {
     "title": "Découvertes de Jinni",
     "intro": "Les lieux que Jinni a découverts ici jusqu'à présent — la liste s'enrichit en continu.",
+    "preferences": "Mes préférences",
     "back": "Retour",
     "km": "km",
     "not_explored": "Jinni n'a pas encore exploré {place}",

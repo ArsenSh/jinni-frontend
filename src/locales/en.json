@@ -1063,6 +1063,7 @@
   "explore": {
     "title": "Jinni's Discoveries",
     "intro": "Places Jinni has discovered here so far — the list keeps growing.",
+    "preferences": "My preferences",
     "back": "Back",
     "km": "km",
     "not_explored": "Jinni hasn't been to {place} yet",

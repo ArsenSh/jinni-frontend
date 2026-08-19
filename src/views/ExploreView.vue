@@ -173,41 +173,118 @@
       </div>
     </div>
 
-    <!-- ═══ Place info modal ═══ -->
-    <div v-if="info.open" class="ex-info-overlay" @click.self="closeInfo">
-      <div class="ex-info">
-        <button class="ex-info-close" @click="closeInfo">✕</button>
-        <div v-if="info.loading" class="ex-info-loading"><span class="ex-info-spinner"></span></div>
-        <template v-else>
-          <div class="ex-info-body">
-            <h3 class="ex-info-name">
-              {{ info.data?.name || info.place?.name }}
-              <span v-if="info.place?.tier" class="ex-tier ex-tier--inline" :class="'ex-tier--' + info.place.tier">✦ {{ tierLabel(info.place.tier) }}</span>
-            </h3>
-            <p v-if="info.data?.description" class="ex-info-desc">{{ info.data.description }}</p>
-            <dl class="ex-info-grid">
-              <template v-if="Number.isFinite(info.data?.rating)">
-                <dt>{{ t('place_info.rating') || 'Rating' }}</dt><dd>★ {{ info.data.rating.toFixed(1) }}</dd>
-              </template>
-              <template v-if="info.data?.address">
-                <dt>{{ t('place_info.address') || 'Address' }}</dt><dd>{{ info.data.address }}</dd>
-              </template>
-              <template v-if="info.data?.phone">
-                <dt>{{ t('place_info.phone') || 'Phone' }}</dt><dd><a :href="'tel:' + info.data.phone" @click.stop>{{ info.data.phone }}</a></dd>
-              </template>
-              <template v-if="info.data?.website">
-                <dt>{{ t('place_info.website') || 'Website' }}</dt><dd><a :href="info.data.website" target="_blank" rel="noopener noreferrer" @click.stop>{{ t('place_info.visit_website') || 'Visit Website' }}</a></dd>
-              </template>
-            </dl>
-            <div v-if="info.data?.hours?.length" class="ex-info-hours">
-              <div class="ex-info-hours-title">{{ t('place_info.hours') || 'Hours' }}</div>
-              <div v-for="line in info.data.hours" :key="line" class="ex-info-hours-line">{{ line }}</div>
+    <!-- ═══ Place info modal — the chat's info-modal, same structure & design
+         (glacier glass, gold gradient title, pd-* layout, partner-tier tints).
+         Ported verbatim from JinniChat.vue so both surfaces read identically;
+         closes like the chat's: tap outside or Escape, no ✕ button. ═══ -->
+    <div v-if="info.open" class="info-modal-overlay" @click.self="closeInfo">
+      <div class="info-modal" :class="[theme === 'night-mode' ? 'night' : 'day', infoTierClass]">
+        <div class="modal-header">
+          <h3>{{ info.data?.name || info.place?.name }}</h3>
+        </div>
+        <div class="modal-body">
+          <div v-if="info.loading" class="loading-container"><p>{{ t('place_info.loading') || 'Loading…' }}</p></div>
+          <div v-else class="place-details">
+            <!-- Category subtitle, directly under the title -->
+            <div class="pd-subtitle" v-if="info.cat">{{ catLabel(info.cat) }}</div>
+
+            <!-- Event date — surfaced first: for an event the date IS the primary fact -->
+            <div class="info-row info-row--event" v-if="info.place?.eventDates">
+              <span class="label">{{ t('chat.event.event_date') || 'Event date' }}</span>
+              <div class="value event-schedule-value">
+                <span class="event-schedule-primary">{{ evDates(info.place.eventDates) }}</span>
+              </div>
             </div>
-            <div class="ex-info-actions">
-              <button class="ex-cta ex-cta--sm" @click="openPlace(info.place)">{{ t('place_info.get_directions') || 'Get Directions' }}</button>
+
+            <!-- Inline star rating (restaurants/hotels, same rule as the chat modal) -->
+            <div class="pd-rating" v-if="Number.isFinite(info.data?.rating) && (info.cat === 'restaurants' || info.cat === 'hotels')">
+              <svg class="pd-star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26 6.85.6-5.18 4.52 1.55 6.7L12 17.27 5.88 20.58l1.55-6.7L2.25 8.86l6.85-.6z"/></svg>
+              <span class="pd-rating-num">{{ info.data.rating }}</span>
+              <span class="pd-rating-out">/5</span>
+              <span v-if="info.data.totalReviews" class="review-count">{{ t('place_info.reviews', { count: info.data.totalReviews }) || `${info.data.totalReviews} reviews` }}</span>
+            </div>
+
+            <!-- Quick actions: Directions (primary), Call, Search, Website -->
+            <div class="pd-actions">
+              <button @click="openPlace(info.place)" class="pd-action pd-action--primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                <span>{{ t('place_info.get_directions') || 'Get Directions' }}</span>
+              </button>
+              <a v-if="info.data?.phone" :href="`tel:${info.data.phone}`" class="pd-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>{{ t('place_info.phone') || 'Phone' }}</span>
+              </a>
+              <button @click="searchOnline(info.place)" class="pd-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>{{ t('place_info.search_online') || 'Search' }}</span>
+              </button>
+              <a v-if="info.data?.website" :href="info.data.website" target="_blank" rel="noopener noreferrer" class="pd-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span>{{ t('place_info.website') || 'Website' }}</span>
+              </a>
+            </div>
+
+            <div class="pd-divider"></div>
+
+            <!-- Icon-leading facts -->
+            <div class="pd-fact" v-if="info.data?.address || info.place?.region">
+              <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+              <div class="pd-fact-body">{{ info.data?.address || info.place?.region }}</div>
+            </div>
+
+            <div class="pd-fact" v-if="info.data?.hours?.length">
+              <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+              <div class="pd-fact-body pd-hours">
+                <div v-for="(h, i) in hoursParsed" :key="i" class="pd-hours-row">
+                  <span class="pd-hours-day">{{ h.day }}</span>
+                  <span v-if="h.time" class="pd-hours-time">{{ h.time }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pd-fact" v-if="info.data?.pricing">
+              <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+              <div class="pd-fact-body">{{ info.data.pricing }}</div>
+            </div>
+
+            <div class="pd-fact" v-if="info.data?.email">
+              <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></span>
+              <div class="pd-fact-body"><a :href="`mailto:${info.data.email}`">{{ info.data.email }}</a></div>
+            </div>
+
+            <div class="pd-fact pd-fact--desc" v-if="infoDescription">
+              <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+              <div class="pd-fact-body">{{ infoDescription }}</div>
+            </div>
+
+            <!-- Highlights — curated feature showcase -->
+            <div class="pd-highlights" v-if="info.data?.highlights?.length">
+              <div class="pd-highlights-head">{{ t('place_info.highlights') || 'Highlights' }}</div>
+              <div class="pd-highlights-grid">
+                <div v-for="h in info.data.highlights" :key="h" class="pd-highlight-item">
+                  <svg class="pd-highlight-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>{{ h }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Social -->
+            <div class="social-links pd-chips" v-if="info.data?.socialMedia?.instagram || info.data?.socialMedia?.facebook || info.data?.socialMedia?.tripadvisor">
+              <a v-if="info.data.socialMedia?.instagram" :href="info.data.socialMedia.instagram" target="_blank" rel="noopener noreferrer" class="social-link social-link--instagram">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                Instagram
+              </a>
+              <a v-if="info.data.socialMedia?.facebook" :href="info.data.socialMedia.facebook" target="_blank" rel="noopener noreferrer" class="social-link social-link--facebook">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Facebook
+              </a>
+              <a v-if="info.data.socialMedia?.tripadvisor" :href="info.data.socialMedia.tripadvisor" target="_blank" rel="noopener noreferrer" class="social-link social-link--tripadvisor">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 4.5c1.93 0 3.75.58 5.27 1.57l1.6-1.6 1.06 1.06-1.48 1.48A9.44 9.44 0 0 1 21.5 12c0 5.247-4.253 9.5-9.5 9.5S2.5 17.247 2.5 12 6.753 2.5 12 2.5zm0 2a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15zm-3.5 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-3.5 1.5c-.69 0-1.327.212-1.856.574l.67.67a1 1 0 0 1 0 1.414l-.67.67c.53.362 1.166.572 1.856.572s1.326-.21 1.856-.572l-.67-.67a1 1 0 0 1 0-1.414l.67-.67A3.144 3.144 0 0 0 12 12z"/></svg>
+                TripAdvisor
+              </a>
             </div>
           </div>
-        </template>
+        </div>
       </div>
     </div>
   </div>
@@ -282,7 +359,15 @@ export default {
     if (this._spy) this._spy.disconnect();
   },
   methods: {
-    t(key, params) { return this.$t ? this.$t(key, params) : null; },
+    // vue-i18n returns the KEY ITSELF for a missing message (a truthy string),
+    // which silently defeats every `t(...) || fallback` in this template — the
+    // "explore.preferences" raw-key bug. Normalize a miss to null so the
+    // inline English fallbacks genuinely take over.
+    t(key, params) {
+      if (!this.$t) return null;
+      const s = this.$t(key, params);
+      return (s && s !== key) ? s : null;
+    },
     // Same resolution as JinniChat's currentTheme: explicit setting wins,
     // 'auto' follows the time of day.
     resolveTheme() {
