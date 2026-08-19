@@ -606,166 +606,6 @@
         <!-- ── AI USAGE ── -->
         <section v-if="activeTab === 'ai'" class="tab-section">
           <!-- ── AI Provider toggle (DeepSeek ↔ Claude) ───────────────────── -->
-          <div class="card provider-card">
-            <div class="card-head">
-              <h2>AI Provider</h2>
-              <span class="card-sub">Switch per endpoint · changes apply within ~30s</span>
-            </div>
-            <div class="provider-body">
-              <div class="provider-row" key="pr-chat">
-                <label class="provider-label">Chat <span>(chat-stream)</span></label>
-                <div class="prov-seg">
-                  <button type="button" key="seg-chat-deepseek" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderChat === 'deepseek' }" @click="setProvider('aiProviderChat', 'deepseek')">DeepSeek</button>
-                  <button type="button" key="seg-chat-claude" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderChat === 'claude' }" @click="setProvider('aiProviderChat', 'claude')">Claude</button>
-                </div>
-              </div>
-              <div class="provider-row" key="pr-quick">
-                <label class="provider-label">Quick Actions <span>(quick-action-stream)</span></label>
-                <div class="prov-seg">
-                  <button type="button" key="seg-qa-deepseek" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderQuickAction === 'deepseek' }" @click="setProvider('aiProviderQuickAction', 'deepseek')">DeepSeek</button>
-                  <button type="button" key="seg-qa-claude" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderQuickAction === 'claude' }" @click="setProvider('aiProviderQuickAction', 'claude')">Claude</button>
-                </div>
-              </div>
-
-              <template v-if="aiProvider.aiProviderChat === 'claude' || aiProvider.aiProviderQuickAction === 'claude'">
-                <div class="provider-divider" key="pr-divider"></div>
-                <div class="provider-row" key="pr-model">
-                  <label class="provider-label">Claude model</label>
-                  <div class="prov-seg">
-                    <button type="button" key="seg-model-haiku" class="prov-seg-btn" :class="{ active: aiProvider.claudeModel === 'claude-haiku-4-5-20251001' }" @click="setProvider('claudeModel', 'claude-haiku-4-5-20251001')">Haiku 4.5 <em>cheapest</em></button>
-                    <button type="button" key="seg-model-sonnet" class="prov-seg-btn" :class="{ active: aiProvider.claudeModel === 'claude-sonnet-4-6' }" @click="setProvider('claudeModel', 'claude-sonnet-4-6')">Sonnet 4.6</button>
-                  </div>
-                </div>
-                <div class="provider-row" key="pr-websearch">
-                  <label class="provider-label">
-                    Enable web search
-                    <span class="provider-warn">+$0.01 / search</span>
-                  </label>
-                  <label class="prov-switch">
-                    <input type="checkbox" v-model="aiProvider.claudeWebSearch" />
-                    <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
-                  </label>
-                </div>
-                <div class="provider-row" key="pr-maxsearch" v-if="aiProvider.claudeWebSearch">
-                  <label class="provider-label">Max searches / request</label>
-                  <div class="prov-stepper">
-                    <button type="button" class="prov-step-btn" @click="aiProvider.claudeWebSearchMaxUses = Math.max(1, (aiProvider.claudeWebSearchMaxUses || 1) - 1)" :disabled="aiProvider.claudeWebSearchMaxUses <= 1">−</button>
-                    <input class="provider-num" type="number" min="1" max="10" v-model.number="aiProvider.claudeWebSearchMaxUses" />
-                    <button type="button" class="prov-step-btn" @click="aiProvider.claudeWebSearchMaxUses = Math.min(10, (aiProvider.claudeWebSearchMaxUses || 0) + 1)" :disabled="aiProvider.claudeWebSearchMaxUses >= 10">+</button>
-                  </div>
-                </div>
-                <div class="provider-row provider-row--actions" key="pr-searchscope" v-if="aiProvider.claudeWebSearch">
-                  <label class="provider-label">
-                    Web search actions
-                    <span class="provider-warn" v-if="!searchActionCount">none selected — no action will search</span>
-                    <span class="provider-hint" v-else>{{ searchActionCount }} of {{ webSearchActionOptions.length }} selected · first tap only</span>
-                  </label>
-                  <div class="ws-action-grid">
-                    <button
-                      v-for="opt in webSearchActionOptions"
-                      :key="opt.id"
-                      type="button"
-                      class="ws-chip"
-                      :class="{ 'ws-chip--on': isSearchActionOn(opt.id) }"
-                      @click="toggleSearchAction(opt.id)"
-                    >
-                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id) ? '✓' : '' }}</span>
-                      {{ opt.label }}
-                    </button>
-                  </div>
-                </div>
-              </template>
-
-              <div class="provider-actions" key="pr-actions">
-                <button class="provider-save" :disabled="aiProviderSaving" @click="saveAiProvider">
-                  {{ aiProviderSaving ? 'Saving…' : 'Save provider settings' }}
-                </button>
-                <span v-if="aiProviderSavedAt" class="provider-saved">Saved ✓</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- ── Provider breakdown (DeepSeek vs Claude, last N days) ──────── -->
-          <div class="card provider-stats-card">
-            <div class="card-head">
-              <h2>Provider Usage &amp; Cost</h2>
-              <span class="card-sub">Last {{ aiChartDays }} days · estimated</span>
-            </div>
-            <div v-if="providerStatsLoading" class="empty-state">Loading…</div>
-            <div v-else class="prov-compare">
-              <div class="prov-col prov-col--deepseek">
-                <div class="prov-name">DeepSeek</div>
-                <div class="prov-cost">${{ deepseekCost }}</div>
-                <div class="prov-metric"><span>Tokens</span><b>{{ fmtK(providerStats.summary.deepseek.tokens) }}</b></div>
-                <div class="prov-metric"><span>Requests</span><b>{{ fmt(providerStats.summary.deepseek.queries) }}</b></div>
-                <div class="prov-metric"><span>Web searches</span><b>—</b></div>
-              </div>
-              <div class="prov-col prov-col--claude">
-                <div class="prov-name">Claude</div>
-                <div class="prov-cost">${{ claudeCost }}</div>
-                <div class="prov-metric"><span>Tokens</span><b>{{ fmtK(providerStats.summary.claude.tokens) }}</b></div>
-                <div class="prov-metric"><span>Requests</span><b>{{ fmt(providerStats.summary.claude.queries) }}</b></div>
-                <div class="prov-metric"><span>Web searches</span><b>{{ fmt(providerStats.summary.claude.searches) }} <em>(${{ (providerStats.summary.claude.searches * 0.01).toFixed(2) }})</em></b></div>
-              </div>
-            </div>
-            <div class="prov-note">
-              Cost is an estimate from total tokens (DeepSeek ~$0.50/1M blended; Claude Haiku ~$2/1M blended) plus Claude web searches at $0.01 each. For exact figures, check the Anthropic Console and your DeepSeek dashboard.
-            </div>
-          </div>
-
-          <div class="kpi-grid kpi-grid--4">
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">Total Tokens Used</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.totalTokens) }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">Total Queries</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.totalQueries) }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-              <div class="kpi-label">Avg Tokens / Query</div>
-              <div class="kpi-value">{{ Math.round(aiSummary.avgTokensPerQuery || 0) }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-              <div class="kpi-label">Users on Cooldown</div>
-              <div class="kpi-value">{{ fmt(aiSummary.usersOnCooldown) }}</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>
-                </div>
-                <div class="kpi-label">Today's Tokens</div>
-                <div class="kpi-value">{{ fmtK(aiSummary.todayTokens) }}</div>
-                <div class="kpi-sub">{{ fmt(aiSummary.todayQueries) }} queries today</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-                </div>
-                <div class="kpi-label">Total API Cost</div>
-                <div class="kpi-value">${{ aiCost }}</div>
-                <div class="kpi-sub">DeepSeek V3 · ~$0.50/1M blended</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                </svg>
-                </div>
-                <div class="kpi-label">Place Cards Named</div>
-                <div class="kpi-value">{{ fmtK(aiSummary.totalPlaces) }}</div>
-                <div class="kpi-sub">Total AI recommendations</div>
-            </div>
-          </div>
-
           <!-- Daily AI charts — one per provider, same window toggle -->
           <div class="card chart-card">
             <div class="card-head">
@@ -897,6 +737,168 @@
               </p>
             </div>
           </div>
+
+          <!-- ── Provider breakdown (DeepSeek vs Claude, last N days) ──────── -->
+          <div class="card provider-stats-card">
+            <div class="card-head">
+              <h2>Provider Usage &amp; Cost</h2>
+              <span class="card-sub">Last {{ aiChartDays }} days · estimated</span>
+            </div>
+            <div v-if="providerStatsLoading" class="empty-state">Loading…</div>
+            <div v-else class="prov-compare">
+              <div class="prov-col prov-col--deepseek">
+                <div class="prov-name">DeepSeek</div>
+                <div class="prov-cost">${{ deepseekCost }}</div>
+                <div class="prov-metric"><span>Tokens</span><b>{{ fmtK(providerStats.summary.deepseek.tokens) }}</b></div>
+                <div class="prov-metric"><span>Requests</span><b>{{ fmt(providerStats.summary.deepseek.queries) }}</b></div>
+                <div class="prov-metric"><span>Web searches</span><b>—</b></div>
+              </div>
+              <div class="prov-col prov-col--claude">
+                <div class="prov-name">Claude</div>
+                <div class="prov-cost">${{ claudeCost }}</div>
+                <div class="prov-metric"><span>Tokens</span><b>{{ fmtK(providerStats.summary.claude.tokens) }}</b></div>
+                <div class="prov-metric"><span>Requests</span><b>{{ fmt(providerStats.summary.claude.queries) }}</b></div>
+                <div class="prov-metric"><span>Web searches</span><b>{{ fmt(providerStats.summary.claude.searches) }} <em>(${{ (providerStats.summary.claude.searches * 0.01).toFixed(2) }})</em></b></div>
+              </div>
+            </div>
+            <div class="prov-note">
+              Cost is an estimate from total tokens (DeepSeek ~$0.50/1M blended; Claude Haiku ~$2/1M blended) plus Claude web searches at $0.01 each. For exact figures, check the Anthropic Console and your DeepSeek dashboard.
+            </div>
+          </div>
+
+          <div class="kpi-grid kpi-grid--4">
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+              <div class="kpi-label">Total Tokens Used</div>
+              <div class="kpi-value">{{ fmtK(aiSummary.totalTokens) }}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+              <div class="kpi-label">Total Queries</div>
+              <div class="kpi-value">{{ fmtK(aiSummary.totalQueries) }}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+              <div class="kpi-label">Avg Tokens / Query</div>
+              <div class="kpi-value">{{ Math.round(aiSummary.avgTokensPerQuery || 0) }}</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <div class="kpi-label">Users on Cooldown</div>
+              <div class="kpi-value">{{ fmt(aiSummary.usersOnCooldown) }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                </div>
+                <div class="kpi-label">Today's Tokens</div>
+                <div class="kpi-value">{{ fmtK(aiSummary.todayTokens) }}</div>
+                <div class="kpi-sub">{{ fmt(aiSummary.todayQueries) }} queries today</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                </div>
+                <div class="kpi-label">Total API Cost</div>
+                <div class="kpi-value">${{ aiCost }}</div>
+                <div class="kpi-sub">DeepSeek V3 · ~$0.50/1M blended</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+                </div>
+                <div class="kpi-label">Place Cards Named</div>
+                <div class="kpi-value">{{ fmtK(aiSummary.totalPlaces) }}</div>
+                <div class="kpi-sub">Total AI recommendations</div>
+            </div>
+          </div>
+
+
+          <div class="card provider-card">
+            <div class="card-head">
+              <h2>AI Provider</h2>
+              <span class="card-sub">Switch per endpoint · changes apply within ~30s</span>
+            </div>
+            <div class="provider-body">
+              <div class="provider-row" key="pr-chat">
+                <label class="provider-label">Chat <span>(chat-stream)</span></label>
+                <div class="prov-seg">
+                  <button type="button" key="seg-chat-deepseek" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderChat === 'deepseek' }" @click="setProvider('aiProviderChat', 'deepseek')">DeepSeek</button>
+                  <button type="button" key="seg-chat-claude" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderChat === 'claude' }" @click="setProvider('aiProviderChat', 'claude')">Claude</button>
+                </div>
+              </div>
+              <div class="provider-row" key="pr-quick">
+                <label class="provider-label">Quick Actions <span>(quick-action-stream)</span></label>
+                <div class="prov-seg">
+                  <button type="button" key="seg-qa-deepseek" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderQuickAction === 'deepseek' }" @click="setProvider('aiProviderQuickAction', 'deepseek')">DeepSeek</button>
+                  <button type="button" key="seg-qa-claude" class="prov-seg-btn" :class="{ active: aiProvider.aiProviderQuickAction === 'claude' }" @click="setProvider('aiProviderQuickAction', 'claude')">Claude</button>
+                </div>
+              </div>
+
+              <template v-if="aiProvider.aiProviderChat === 'claude' || aiProvider.aiProviderQuickAction === 'claude'">
+                <div class="provider-divider" key="pr-divider"></div>
+                <div class="provider-row" key="pr-model">
+                  <label class="provider-label">Claude model</label>
+                  <div class="prov-seg">
+                    <button type="button" key="seg-model-haiku" class="prov-seg-btn" :class="{ active: aiProvider.claudeModel === 'claude-haiku-4-5-20251001' }" @click="setProvider('claudeModel', 'claude-haiku-4-5-20251001')">Haiku 4.5 <em>cheapest</em></button>
+                    <button type="button" key="seg-model-sonnet" class="prov-seg-btn" :class="{ active: aiProvider.claudeModel === 'claude-sonnet-4-6' }" @click="setProvider('claudeModel', 'claude-sonnet-4-6')">Sonnet 4.6</button>
+                  </div>
+                </div>
+                <div class="provider-row" key="pr-websearch">
+                  <label class="provider-label">
+                    Enable web search
+                    <span class="provider-warn">+$0.01 / search</span>
+                  </label>
+                  <label class="prov-switch">
+                    <input type="checkbox" v-model="aiProvider.claudeWebSearch" />
+                    <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
+                  </label>
+                </div>
+                <div class="provider-row" key="pr-maxsearch" v-if="aiProvider.claudeWebSearch">
+                  <label class="provider-label">Max searches / request</label>
+                  <div class="prov-stepper">
+                    <button type="button" class="prov-step-btn" @click="aiProvider.claudeWebSearchMaxUses = Math.max(1, (aiProvider.claudeWebSearchMaxUses || 1) - 1)" :disabled="aiProvider.claudeWebSearchMaxUses <= 1">−</button>
+                    <input class="provider-num" type="number" min="1" max="10" v-model.number="aiProvider.claudeWebSearchMaxUses" />
+                    <button type="button" class="prov-step-btn" @click="aiProvider.claudeWebSearchMaxUses = Math.min(10, (aiProvider.claudeWebSearchMaxUses || 0) + 1)" :disabled="aiProvider.claudeWebSearchMaxUses >= 10">+</button>
+                  </div>
+                </div>
+                <div class="provider-row provider-row--actions" key="pr-searchscope" v-if="aiProvider.claudeWebSearch">
+                  <label class="provider-label">
+                    Web search actions
+                    <span class="provider-warn" v-if="!searchActionCount">none selected — no action will search</span>
+                    <span class="provider-hint" v-else>{{ searchActionCount }} of {{ webSearchActionOptions.length }} selected · first tap only</span>
+                  </label>
+                  <div class="ws-action-grid">
+                    <button
+                      v-for="opt in webSearchActionOptions"
+                      :key="opt.id"
+                      type="button"
+                      class="ws-chip"
+                      :class="{ 'ws-chip--on': isSearchActionOn(opt.id) }"
+                      @click="toggleSearchAction(opt.id)"
+                    >
+                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id) ? '✓' : '' }}</span>
+                      {{ opt.label }}
+                    </button>
+                  </div>
+                </div>
+              </template>
+
+              <div class="provider-actions" key="pr-actions">
+                <button class="provider-save" :disabled="aiProviderSaving" @click="saveAiProvider">
+                  {{ aiProviderSaving ? 'Saving…' : 'Save provider settings' }}
+                </button>
+                <span v-if="aiProviderSavedAt" class="provider-saved">Saved ✓</span>
+              </div>
+            </div>
+          </div>
+
         </section>
 
         <!-- ── BUSINESSES ── -->
@@ -1409,87 +1411,6 @@
           </div>
 
           <!-- ── Google Prefetch control (writes AppConfig via /ai-provider) ───── -->
-          <div class="card g-prefetch-card">
-            <div class="card-head">
-              <h2>Google Prefetch</h2>
-              <span class="card-sub">One area-cached Text Search → up to 20 real places the model ranks. Pricier SKU — watch the calls above.</span>
-              <div class="card-head-spacer"></div>
-              <label class="prov-switch">
-                <input type="checkbox" v-model="aiProvider.googlePrefetch" />
-                <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
-              </label>
-            </div>
-            <div v-if="aiProviderLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
-            <template v-else>
-              <div v-if="aiProvider.googlePrefetch" class="g-prefetch-body">
-                <div class="provider-row">
-                  <label class="provider-label">
-                    Mode
-                    <span class="provider-hint" v-if="aiProvider.googlePrefetchMode === 'resolve'">Verify only — AI recommends, Google supplies real place IDs (skips a lookup). Best for thin / well-known markets.</span>
-                    <span class="provider-hint" v-else>Suggest — inject Google's real places as recommendations too. Best for dense / unfamiliar markets.</span>
-                  </label>
-                  <div class="seg-group">
-                    <button type="button" class="seg-btn" :class="{ 'seg-btn--active': aiProvider.googlePrefetchMode !== 'resolve' }" @click="aiProvider.googlePrefetchMode = 'suggest'">Suggest</button>
-                    <button type="button" class="seg-btn" :class="{ 'seg-btn--active': aiProvider.googlePrefetchMode === 'resolve' }" @click="aiProvider.googlePrefetchMode = 'resolve'">Resolve only</button>
-                  </div>
-                </div>
-                <div class="provider-row provider-row--actions">
-                  <label class="provider-label">
-                    Layers
-                    <span class="provider-hint" v-if="prefetchLayerCount">{{ prefetchLayerCount }} selected · one cached call feeds all chosen layers</span>
-                    <span class="provider-hint" v-else>none ticked → runs on all layers</span>
-                  </label>
-                  <div class="ws-action-grid">
-                    <button
-                      v-for="opt in prefetchLayerOptions"
-                      :key="'pl-' + opt.id"
-                      type="button"
-                      class="ws-chip"
-                      :class="{ 'ws-chip--on': isPrefetchLayerOn(opt.id) }"
-                      @click="togglePrefetchLayer(opt.id)"
-                    >
-                      <span class="ws-chip-check" aria-hidden="true">{{ isPrefetchLayerOn(opt.id) ? '✓' : '' }}</span>
-                      {{ opt.label }} <em class="ws-chip-hint">{{ opt.hint }}</em>
-                    </button>
-                  </div>
-                </div>
-                <div class="provider-row provider-row--actions">
-                  <label class="provider-label">
-                    Actions
-                    <span class="provider-hint" v-if="prefetchActionCount">{{ prefetchActionCount }} of {{ webSearchActionOptions.length }} selected</span>
-                    <span class="provider-hint" v-else>none ticked → runs on all actions</span>
-                  </label>
-                  <div class="ws-action-grid">
-                    <button
-                      v-for="opt in webSearchActionOptions"
-                      :key="'pa-' + opt.id"
-                      type="button"
-                      class="ws-chip"
-                      :class="{ 'ws-chip--on': isPrefetchActionOn(opt.id) }"
-                      @click="togglePrefetchAction(opt.id)"
-                    >
-                      <span class="ws-chip-check" aria-hidden="true">{{ isPrefetchActionOn(opt.id) ? '✓' : '' }}</span>
-                      {{ opt.label }}
-                    </button>
-                  </div>
-                </div>
-                <div class="provider-row">
-                  <label class="provider-label">Candidates / search <span class="provider-hint">max 20</span></label>
-                  <div class="prov-stepper">
-                    <button type="button" class="prov-step-btn" @click="aiProvider.googlePrefetchCount = Math.max(1, (aiProvider.googlePrefetchCount || 1) - 1)" :disabled="aiProvider.googlePrefetchCount <= 1">−</button>
-                    <input class="provider-num" type="number" min="1" max="20" v-model.number="aiProvider.googlePrefetchCount" />
-                    <button type="button" class="prov-step-btn" @click="aiProvider.googlePrefetchCount = Math.min(20, (aiProvider.googlePrefetchCount || 0) + 1)" :disabled="aiProvider.googlePrefetchCount >= 20">+</button>
-                  </div>
-                </div>
-              </div>
-              <div class="g-prefetch-foot">
-                <button class="provider-save" :disabled="aiProviderSaving" @click="saveAiProvider">
-                  {{ aiProviderSaving ? 'Saving…' : 'Save prefetch settings' }}
-                </button>
-                <span v-if="aiProviderSavedAt" class="provider-saved">Saved ✓</span>
-              </div>
-            </template>
-          </div>
           <div class="card chart-card g-chart-card">
             <div class="card-head">
               <h2>Daily API Calls</h2>
@@ -1662,6 +1583,87 @@
             </span>
           </div>
           <div v-else class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+          <div class="card g-prefetch-card">
+            <div class="card-head">
+              <h2>Google Prefetch</h2>
+              <span class="card-sub">One area-cached Text Search → up to 20 real places the model ranks. Pricier SKU — watch the calls above.</span>
+              <div class="card-head-spacer"></div>
+              <label class="prov-switch">
+                <input type="checkbox" v-model="aiProvider.googlePrefetch" />
+                <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
+              </label>
+            </div>
+            <div v-if="aiProviderLoading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+            <template v-else>
+              <div v-if="aiProvider.googlePrefetch" class="g-prefetch-body">
+                <div class="provider-row">
+                  <label class="provider-label">
+                    Mode
+                    <span class="provider-hint" v-if="aiProvider.googlePrefetchMode === 'resolve'">Verify only — AI recommends, Google supplies real place IDs (skips a lookup). Best for thin / well-known markets.</span>
+                    <span class="provider-hint" v-else>Suggest — inject Google's real places as recommendations too. Best for dense / unfamiliar markets.</span>
+                  </label>
+                  <div class="seg-group">
+                    <button type="button" class="seg-btn" :class="{ 'seg-btn--active': aiProvider.googlePrefetchMode !== 'resolve' }" @click="aiProvider.googlePrefetchMode = 'suggest'">Suggest</button>
+                    <button type="button" class="seg-btn" :class="{ 'seg-btn--active': aiProvider.googlePrefetchMode === 'resolve' }" @click="aiProvider.googlePrefetchMode = 'resolve'">Resolve only</button>
+                  </div>
+                </div>
+                <div class="provider-row provider-row--actions">
+                  <label class="provider-label">
+                    Layers
+                    <span class="provider-hint" v-if="prefetchLayerCount">{{ prefetchLayerCount }} selected · one cached call feeds all chosen layers</span>
+                    <span class="provider-hint" v-else>none ticked → runs on all layers</span>
+                  </label>
+                  <div class="ws-action-grid">
+                    <button
+                      v-for="opt in prefetchLayerOptions"
+                      :key="'pl-' + opt.id"
+                      type="button"
+                      class="ws-chip"
+                      :class="{ 'ws-chip--on': isPrefetchLayerOn(opt.id) }"
+                      @click="togglePrefetchLayer(opt.id)"
+                    >
+                      <span class="ws-chip-check" aria-hidden="true">{{ isPrefetchLayerOn(opt.id) ? '✓' : '' }}</span>
+                      {{ opt.label }} <em class="ws-chip-hint">{{ opt.hint }}</em>
+                    </button>
+                  </div>
+                </div>
+                <div class="provider-row provider-row--actions">
+                  <label class="provider-label">
+                    Actions
+                    <span class="provider-hint" v-if="prefetchActionCount">{{ prefetchActionCount }} of {{ webSearchActionOptions.length }} selected</span>
+                    <span class="provider-hint" v-else>none ticked → runs on all actions</span>
+                  </label>
+                  <div class="ws-action-grid">
+                    <button
+                      v-for="opt in webSearchActionOptions"
+                      :key="'pa-' + opt.id"
+                      type="button"
+                      class="ws-chip"
+                      :class="{ 'ws-chip--on': isPrefetchActionOn(opt.id) }"
+                      @click="togglePrefetchAction(opt.id)"
+                    >
+                      <span class="ws-chip-check" aria-hidden="true">{{ isPrefetchActionOn(opt.id) ? '✓' : '' }}</span>
+                      {{ opt.label }}
+                    </button>
+                  </div>
+                </div>
+                <div class="provider-row">
+                  <label class="provider-label">Candidates / search <span class="provider-hint">max 20</span></label>
+                  <div class="prov-stepper">
+                    <button type="button" class="prov-step-btn" @click="aiProvider.googlePrefetchCount = Math.max(1, (aiProvider.googlePrefetchCount || 1) - 1)" :disabled="aiProvider.googlePrefetchCount <= 1">−</button>
+                    <input class="provider-num" type="number" min="1" max="20" v-model.number="aiProvider.googlePrefetchCount" />
+                    <button type="button" class="prov-step-btn" @click="aiProvider.googlePrefetchCount = Math.min(20, (aiProvider.googlePrefetchCount || 0) + 1)" :disabled="aiProvider.googlePrefetchCount >= 20">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="g-prefetch-foot">
+                <button class="provider-save" :disabled="aiProviderSaving" @click="saveAiProvider">
+                  {{ aiProviderSaving ? 'Saving…' : 'Save prefetch settings' }}
+                </button>
+                <span v-if="aiProviderSavedAt" class="provider-saved">Saved ✓</span>
+              </div>
+            </template>
+          </div>
         </section>
 
         <!-- ── PRICES ── -->
@@ -3378,15 +3380,22 @@
     <!-- ── PLACE CACHE DETAIL MODAL — click a card, read everything ────── -->
     <transition name="modal-fade">
       <div v-if="placeInfoModal.open" class="edit-overlay" @click.self="placeInfoModal.open = false">
-        <div class="edit-panel" :class="theme" style="max-width: 580px">
+        <div class="edit-panel" :class="theme">
           <div class="edit-header">
             <div class="edit-header-left">
               <span class="edit-badge">Cached place</span>
               <h2 class="edit-title">{{ placeInfoModal.row?.name }}</h2>
             </div>
-            <button class="edit-close-btn" @click="placeInfoModal.open = false">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+            <div class="edit-header-actions">
+              <button v-if="placeInfoModal.editing" class="edit-save-btn" :disabled="placeEditSaving" @click="savePlaceEdit">
+                <svg v-if="!placeEditSaving" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <div v-else class="loader-ring loader-ring--sm" style="width:14px;height:14px;border-width:2px"></div>
+                {{ placeEditSaving ? 'Saving…' : 'Save' }}
+              </button>
+              <button class="edit-close-btn" @click="placeInfoModal.open = false" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
           </div>
           <div class="edit-body">
             <div v-if="placeInfoModal.loading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
@@ -3416,13 +3425,15 @@
                   <label class="edit-label">Address</label>
                   <input class="edit-input" type="text" v-model="placeEditForm.address" />
                 </div>
-                <div class="edit-field edit-field--full" style="margin-top:10px">
-                  <label class="edit-label">Phone</label>
-                  <input class="edit-input" type="text" v-model="placeEditForm.phone" />
-                </div>
-                <div class="edit-field edit-field--full" style="margin-top:10px">
-                  <label class="edit-label">Website</label>
-                  <input class="edit-input" type="text" v-model="placeEditForm.website" placeholder="https://…" />
+                <div class="edit-grid-2" style="margin-top:10px">
+                  <div class="edit-field">
+                    <label class="edit-label">Phone</label>
+                    <input class="edit-input" type="text" v-model="placeEditForm.phone" />
+                  </div>
+                  <div class="edit-field">
+                    <label class="edit-label">Website</label>
+                    <input class="edit-input" type="text" v-model="placeEditForm.website" placeholder="https://…" />
+                  </div>
                 </div>
                 <div class="edit-field edit-field--full" style="margin-top:12px">
                   <label class="edit-label">Shown under <small style="opacity:0.6">(Explore / quick-action categories — empty = not on Explore)</small></label>
@@ -3445,8 +3456,7 @@
                   <span>AI-blocked — never surfaced by chat / quick-action recommendations</span>
                 </label>
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
-                  <button class="action-btn btn-muted" @click="placeInfoModal.editing = false" :disabled="placeEditSaving">Cancel</button>
-                  <button class="action-btn btn-accent" @click="savePlaceEdit" :disabled="placeEditSaving">{{ placeEditSaving ? 'Saving…' : 'Save' }}</button>
+                  <button class="action-btn btn-muted" @click="placeInfoModal.editing = false" :disabled="placeEditSaving">Cancel — back to details</button>
                 </div>
               </template>
               <div v-else style="display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap">
@@ -3479,15 +3489,22 @@
     <!-- ── JINNI EVENT DETAIL / EDIT MODAL ────────────────────────────── -->
     <transition name="modal-fade">
       <div v-if="aiEvModal.open" class="edit-overlay" @click.self="aiEvModal.open = false">
-        <div class="edit-panel" :class="theme" style="max-width: 580px">
+        <div class="edit-panel" :class="theme">
           <div class="edit-header">
             <div class="edit-header-left">
               <span class="edit-badge">Jinni event</span>
               <h2 class="edit-title">{{ aiEvModal.ev?.name }}</h2>
             </div>
-            <button class="edit-close-btn" @click="aiEvModal.open = false">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+            <div class="edit-header-actions">
+              <button v-if="aiEvModal.editing" class="edit-save-btn" :disabled="aiEvSaving" @click="saveAiEvEdit">
+                <svg v-if="!aiEvSaving" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <div v-else class="loader-ring loader-ring--sm" style="width:14px;height:14px;border-width:2px"></div>
+                {{ aiEvSaving ? 'Saving…' : 'Save' }}
+              </button>
+              <button class="edit-close-btn" @click="aiEvModal.open = false" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
           </div>
           <div class="edit-body">
             <section class="edit-section" v-if="aiEvModal.ev">
@@ -3516,20 +3533,19 @@
               </template>
               <template v-else>
                 <div class="edit-field edit-field--full"><label class="edit-label">Name</label><input class="limit-input" type="text" v-model="aiEvForm.name" /></div>
-                <div class="loc-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px">
+                <div class="edit-grid-2" style="margin-top: 10px">
                   <div class="edit-field"><label class="edit-label">Start date</label><input class="limit-input" type="date" v-model="aiEvForm.startDate" /></div>
                   <div class="edit-field"><label class="edit-label">End date <small style="opacity:0.6">(optional)</small></label><input class="limit-input" type="date" v-model="aiEvForm.endDate" /></div>
                 </div>
                 <div class="edit-field edit-field--full" style="margin-top: 10px"><label class="edit-label">Venue name</label><input class="limit-input" type="text" v-model="aiEvForm.venueName" /></div>
-                <div class="loc-grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px">
+                <div class="edit-grid-2" style="margin-top: 10px">
                   <div class="edit-field"><label class="edit-label">City</label><input class="limit-input" type="text" v-model="aiEvForm.city" /></div>
                   <div class="edit-field"><label class="edit-label">Country</label><input class="limit-input" type="text" v-model="aiEvForm.country" /></div>
                 </div>
                 <div class="edit-field edit-field--full" style="margin-top: 10px"><label class="edit-label">Source URL</label><input class="limit-input" type="text" v-model="aiEvForm.sourceUrl" placeholder="https://…" /></div>
                 <div class="edit-field edit-field--full" style="margin-top: 10px"><label class="edit-label">Poster image URL</label><input class="limit-input" type="text" v-model="aiEvForm.image" placeholder="https://…" /></div>
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
-                  <button class="action-btn btn-muted" @click="aiEvModal.editing = false" :disabled="aiEvSaving">Cancel</button>
-                  <button class="action-btn btn-accent" @click="saveAiEvEdit" :disabled="aiEvSaving">{{ aiEvSaving ? 'Saving…' : 'Save' }}</button>
+                  <button class="action-btn btn-muted" @click="aiEvModal.editing = false" :disabled="aiEvSaving">Cancel — back to details</button>
                 </div>
               </template>
             </section>
@@ -4590,6 +4606,8 @@ export default {
 
     // ── Shared styled chart tooltip (Google + AI provider + retention charts) ──
     const chartTip = ref({ show: false, x: 0, y: 0, title: '', rows: [] })
+    let _tipTouchTimer = null
+    const hideChartTip = () => { chartTip.value.show = false }
     const showChartTip = (e, title, rows) => {
       chartTip.value = {
         show: true,
@@ -4597,8 +4615,11 @@ export default {
         y: Math.min(e.clientY + 14, window.innerHeight - 40 - rows.length * 22),
         title, rows
       }
+      // Touch has no pointerleave — without this the tooltip sticks to the
+      // screen after a tap (and even survives switching tabs).
+      clearTimeout(_tipTouchTimer)
+      if (e.pointerType === 'touch') _tipTouchTimer = setTimeout(hideChartTip, 2500)
     }
-    const hideChartTip = () => { chartTip.value.show = false }
     const gTipRows = (d) => d.total === 0
       ? [{ k: 'No API calls', v: '' }]
       : [
@@ -6215,6 +6236,7 @@ export default {
       if (tab === 'ai') fetchProviderStats()
       if (tab === 'businesses' && !businesses.value.length) fetchBusinesses()
       if (tab === 'destinations' && !destinations.value.length) fetchDestinations()
+      hideChartTip()   // a stuck tooltip must never survive a tab switch
       if (tab === 'limits' && !limitsData.value) fetchLimits()
       if (tab === 'places' && !aiEvents.value.length) fetchAiEvents()
       if (tab === 'places' && !places.value.length) fetchPlaces()
@@ -7552,9 +7574,17 @@ export default {
 .gm-warn-text { color: #f59e0b; font-weight: 600; }
 .gm-drives { font-size: 11px; opacity: 0.5; margin-top: 3px; }
 .gm-total { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(128,128,128,0.2); font-size: 13px; }
+/* Mobile: chart values are hover-revealed on desktop, but touch has no
+ * hover — show them always on small screens (Registrations + Returning
+ * Users columns alike). */
+@media (max-width: 768px) {
+  .admin-shell.night-mode .sparkbar-value { color: #c084fc; }
+  .admin-shell.day-mode .sparkbar-value { color: #A0522D; }
+}
+
 /* Clickable table rows + first-image thumbnails */
 .table-row--clickable { cursor: pointer; }
-.row-thumb { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; vertical-align: middle; margin-right: 8px; flex-shrink: 0; }
+.row-thumb { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; vertical-align: middle; margin-right: 8px; flex-shrink: 0; }
 
 /* Place-cache card: colored category chips + iconed stats footer */
 .place-cats { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
