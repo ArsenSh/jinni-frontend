@@ -170,8 +170,8 @@
               <div class="ret-kpi"><span>Active 7d</span><b>{{ retention.totals.wau }}</b></div>
               <div class="ret-kpi"><span>Active 30d</span><b>{{ retention.totals.mau }}</b></div>
             </div>
-            <div class="sparkbar-wrap" v-if="retention && retention.daily.some(d => d.active > 0)">
-              <div v-for="d in retention.daily" :key="d.day" class="sparkbar-col"
+            <div class="sparkbar-wrap" v-if="retention && retentionDaily.some(d => d.active > 0)">
+              <div v-for="d in retentionDaily" :key="d.day" class="sparkbar-col"
                    @pointermove="showChartTip($event, d.day, retTipRows(d))" @pointerleave="hideChartTip">
                 <div class="sparkbar-value">{{ d.active > 0 ? d.active : '' }}</div>
                 <div class="ret-stack">
@@ -3391,6 +3391,11 @@
           <div class="edit-body">
             <div v-if="placeInfoModal.loading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
             <section v-else class="edit-section">
+              <div class="pi-gallery" v-if="placeInfoModal.row?.imagesStored && (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length">
+                <img v-for="(ph, i) in (placeInfoModal.data?.photos || placeInfoModal.row.photos)" :key="i"
+                  :src="`${apiBase}/api/ai/place-image/${placeInfoModal.row.placeId}/${i}`"
+                  class="pi-photo" loading="lazy" @error="hideBrokenThumb" />
+              </div>
               <div class="pi-row" v-for="r in placeInfoRows" :key="r.k">
                 <span class="pi-k">{{ r.k }}</span>
                 <a v-if="r.href" class="pi-v pi-link" :href="r.href" target="_blank" rel="noopener">{{ r.v }}</a>
@@ -3441,11 +3446,20 @@
                 </label>
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
                   <button class="action-btn btn-muted" @click="placeInfoModal.editing = false" :disabled="placeEditSaving">Cancel</button>
-                  <button class="action-btn btn-accent" @click="savePlaceEdit" :disabled="placeEditSaving">{{ placeEditSaving ? 'Saving…' : 'Save changes' }}</button>
+                  <button class="action-btn btn-accent" @click="savePlaceEdit" :disabled="placeEditSaving">{{ placeEditSaving ? 'Saving…' : 'Save' }}</button>
                 </div>
               </template>
-              <div v-else style="display:flex; justify-content:flex-end; margin-top:14px">
-                <button class="action-btn btn-muted" @click="startPlaceEdit">
+              <div v-else style="display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap">
+                <div class="action-group">
+                  <button class="action-btn btn-muted" @click="setExploreStatus(placeInfoModal.row, 'verified')">
+                    {{ placeInfoModal.row?.explore?.status === 'verified' ? 'Unverify' : 'Verify' }}
+                  </button>
+                  <button class="action-btn btn-muted" @click="setExploreStatus(placeInfoModal.row, 'hidden')">
+                    {{ placeInfoModal.row?.explore?.status === 'hidden' ? 'Unhide' : 'Hide' }}
+                  </button>
+                  <button class="action-btn btn-delete" @click="deletePlace(placeInfoModal.row); placeInfoModal.open = false">Delete</button>
+                </div>
+                <button class="action-btn btn-accent" @click="startPlaceEdit">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                   Edit place
                 </button>
@@ -3453,7 +3467,7 @@
 
               <p style="margin:16px 0 0; font-size:11.5px; opacity:0.55; line-height:1.55">
                 This is everything the cache stores for this place (Google Place Details, paid once and reused for free).
-                Verify / Hide / Delete live on the card's image — hover it.
+                Verify = always on Explore · Hide = removed everywhere · Delete = dropped from cache (re-fetched if asked again).
               </p>
             </section>
           </div>
@@ -3487,7 +3501,13 @@
                 <div class="pi-row"><span class="pi-k">Times shown</span><span class="pi-v">{{ aiEvModal.ev.timesShown || 1 }}</span></div>
                 <div class="pi-row" v-if="aiEvModal.ev.sourceUrl"><span class="pi-k">Source</span><a class="pi-v pi-link" :href="aiEvModal.ev.sourceUrl" target="_blank" rel="noopener">{{ aiEvModal.ev.sourceUrl.replace(/^https?:\/\//, '').slice(0, 45) }}</a></div>
                 <div class="pi-row" v-if="aiEvModal.ev.venue?.rating"><span class="pi-k">Venue Google rating</span><span class="pi-v">{{ aiEvModal.ev.venue.rating.toFixed(1) }} ★</span></div>
-                <div style="display:flex; justify-content:flex-end; margin-top:14px">
+                <div style="display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap">
+                  <div class="action-group">
+                    <button v-if="aiEvModal.ev.status === 'new'" class="action-btn btn-accent" @click="aiEvModalAction('approve')">Approve → Destination</button>
+                    <button v-if="aiEvModal.ev.status !== 'hidden'" class="action-btn btn-muted" @click="aiEvModalAction('hide')">Hide</button>
+                    <button v-else class="action-btn btn-muted" @click="aiEvModalAction('unhide')">Unhide</button>
+                    <button class="action-btn btn-delete" @click="aiEvModalAction('dismiss')">Dismiss</button>
+                  </div>
                   <button class="action-btn btn-muted" @click="startAiEvEdit">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                     Edit event
@@ -3509,7 +3529,7 @@
                 <div class="edit-field edit-field--full" style="margin-top: 10px"><label class="edit-label">Poster image URL</label><input class="limit-input" type="text" v-model="aiEvForm.image" placeholder="https://…" /></div>
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
                   <button class="action-btn btn-muted" @click="aiEvModal.editing = false" :disabled="aiEvSaving">Cancel</button>
-                  <button class="action-btn btn-accent" @click="saveAiEvEdit" :disabled="aiEvSaving">{{ aiEvSaving ? 'Saving…' : 'Save changes' }}</button>
+                  <button class="action-btn btn-accent" @click="saveAiEvEdit" :disabled="aiEvSaving">{{ aiEvSaving ? 'Saving…' : 'Save' }}</button>
                 </div>
               </template>
             </section>
@@ -3749,6 +3769,10 @@ import FilterDropdown from '@/components/ui/FilterDropdown.vue'
 
 const API = import.meta.env.VITE_API_URL || '/api'
 const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
+
+// List page size: 8 on desktop, 4 on mobile (long pages bury the pagination
+// on small screens). Evaluated once at load — rotation edge cases are fine.
+const LIST_LIMIT = (typeof window !== 'undefined' && window.innerWidth <= 768) ? 4 : 8
 
 async function apiFetch(path, opts = {}) {
   const token = localStorage.getItem('authToken') || localStorage.getItem('token')
@@ -4352,6 +4376,7 @@ export default {
       destinations: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>',
       google:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.454 0-.769-.085-1.357-.187-1.857H12.24z"/></svg>',
       prices:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+      limits:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
       staff:        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
       themeMoon:    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
       themeSun:     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
@@ -4548,7 +4573,13 @@ export default {
     const barHeight = (count) => Math.max(4, Math.round((count / maxReg.value) * 80))
     // ── Retention (Returning Users card) — same report as /marketing ──
     const retention = ref(null)
-    const maxRetDaily = computed(() => Math.max(...(retention.value?.daily || []).map(d => d.active), 1))
+    // Mobile shows the last 14 days — 30 columns don't fit a phone; bars
+    // rescale to the visible window.
+    const retentionDaily = computed(() => {
+      const d = retention.value?.daily || []
+      return LIST_LIMIT === 4 ? d.slice(-14) : d
+    })
+    const maxRetDaily = computed(() => Math.max(...retentionDaily.value.map(d => d.active), 1))
     const retBarH = (v) => Math.max(2, Math.round((v / maxRetDaily.value) * 80))
     const retPct = (r) => (r?.pct === null || r?.pct === undefined) ? '—' : r.pct + '%'
     const fetchRetention = async () => {
@@ -4760,14 +4791,14 @@ export default {
     const budgetRangeHint = (id) => ({ 'Budget': 'Avg budget ≤ $300', 'Mid-range': 'Avg budget $301–$1,000', 'Luxury': 'Avg budget $1,000+' }[id] || id)
     const fetchUsers = async () => {
       usersLoading.value = true
-      try { const params = new URLSearchParams({ page: usersPage.value, limit: 8, search: userSearch.value, filter: userFilter.value }); const res = await apiFetch(`/users?${params}`); users.value = res.data.users; usersTotalPages.value = res.data.totalPages }
+      try { const params = new URLSearchParams({ page: usersPage.value, limit: LIST_LIMIT, search: userSearch.value, filter: userFilter.value }); const res = await apiFetch(`/users?${params}`); users.value = res.data.users; usersTotalPages.value = res.data.totalPages }
       catch (e) { showToast(e.message, 'error') } finally { usersLoading.value = false }
     }
     const fetchAIUsage = async () => {
       aiLoading.value = true
       try {
         const [usageRes, dailyRes] = await Promise.all([
-          apiFetch(`/ai-usage?page=${aiPage.value}&limit=8`),
+          apiFetch(`/ai-usage?page=${aiPage.value}&limit=${LIST_LIMIT}`),
           apiFetch(`/ai-usage/daily?days=${aiChartDays.value}`)
         ])
         aiUsers.value = usageRes.data.users
@@ -4886,7 +4917,7 @@ export default {
       try {
         const params = new URLSearchParams({
           page: bizPage.value,
-          limit: 8,
+          limit: LIST_LIMIT,
           search: bizSearch.value,
           partner: bizPartnerFilter.value,
           status: bizStatusFilter.value,
@@ -5008,7 +5039,7 @@ export default {
       if (resetPage) destPage.value = 1
       destLoading.value = true
       try {
-        const params = new URLSearchParams({ page: destPage.value, limit: 8, search: destSearch.value, filter: destFilter.value, type: destTypeFilter.value })
+        const params = new URLSearchParams({ page: destPage.value, limit: LIST_LIMIT, search: destSearch.value, filter: destFilter.value, type: destTypeFilter.value })
         const res = await apiFetch(`/destinations?${params}`)
         destinations.value = res.data.destinations
         destTotalPages.value = res.data.totalPages
@@ -6379,6 +6410,13 @@ export default {
       } catch (e) { showToast(e.message, 'error') }
       finally { aiEvSaving.value = false }
     }
+    const aiEvModalAction = async (kind) => {
+      const ev = aiEvModal.value.ev
+      if (kind === 'approve') { await aiEvApprove(ev); ev.status = 'approved' }
+      else if (kind === 'hide') { await aiEvSetStatus(ev, 'hidden'); ev.status = 'hidden' }
+      else if (kind === 'unhide') { await aiEvSetStatus(ev, 'new'); ev.status = 'new' }
+      else { await aiEvDismiss(ev); aiEvModal.value.open = false }
+    }
     const aiEvDismiss = async (ev) => {
       try { await staffFetch(`/ai-events/${ev._id}`, { method: 'DELETE' }); showToast(`"${ev.name}" dismissed`); fetchAiEvents() }
       catch (e) { showToast(e.message, 'error') }
@@ -6691,7 +6729,7 @@ export default {
       theme, toggleTheme, handleLogout, loading, activeTab, tabs, currentTabLabel, formattedDate,
       mobileNavItems, mobileNavItemsTripled, loopStrip, onMobileNavClick, onLoopStripScroll,
       overviewData, overview, registrations, premiumPct, barHeight, maxReg,
-      retention, retBarH, retPct,
+      retention, retentionDaily, retBarH, retPct,
       users, usersLoading, usersPage, usersTotalPages, userSearch, userFilter, userLocations,
       aiUsers, aiLoading, aiPage, aiTotalPages, aiSummary, aiDailyStats, aiChartDays, aiChartMax, dailyTokenPct, dailyPlacesPct, aiCost, todayCost,
       aiProvider, aiProviderLoading, aiProviderSaving, aiProviderSavedAt, fetchAiProvider, saveAiProvider, setProvider,
@@ -6707,7 +6745,7 @@ export default {
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
-      placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
+      placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
@@ -7561,6 +7599,10 @@ export default {
 .aiev-row:last-child { border-bottom: none; }
 .aiev-main { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
 .aiev-main .db-meta { font-size: 12px; }
+
+/* Modal photo gallery strip */
+.pi-gallery { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; padding-bottom: 4px; }
+.pi-photo { width: 86px; height: 86px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
 
 /* Place-cache detail modal rows */
 .pi-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid rgba(128,128,128,0.14); font-size: 13px; }

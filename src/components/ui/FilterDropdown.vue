@@ -69,13 +69,13 @@ export default {
 .fd-chev.rot { transform: rotate(180deg); }
 .fd-menu {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 60;
-  min-width: 100%; max-height: 280px; overflow-y: auto;
+  min-width: 100%; max-width: min(300px, 86vw); max-height: 280px; overflow-y: auto;
   border-radius: 12px; padding: 5px;
 }
 .fd-item {
   display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
   background: transparent; border: none; padding: 8px 12px; border-radius: 8px;
-  font-size: 12.5px; font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap;
+  font-size: 12.5px; font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .fd-check { flex-shrink: 0; }
 .fd-spacer { width: 12px; flex-shrink: 0; display: inline-block; }
