@@ -804,7 +804,9 @@ export default {
         settings.location = this.preferences.destination;
         localStorage.setItem('jinni_settings', JSON.stringify(settings));
         window.dispatchEvent(new CustomEvent('location-updated'));
-        this.$router.push('/chat');
+        // Came from Explore's preferences button → go back there; the feed
+        // refetches on mount and reorders by the fresh interests.
+        this.$router.push(this.$route.query.returnTo === '/explore' ? '/explore' : '/chat');
       } catch (error) {
         console.error('Save failed:', error);
         if (error.response?.status === 401) {

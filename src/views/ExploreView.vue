@@ -2,10 +2,6 @@
   <div class="explore" :class="theme">
     <!-- ═══ Header — centered, chat-glacier back pill ═══ -->
     <header class="ex-head">
-      <!-- No back arrow: "Meet Jinni" is an invitation, not a return trip. -->
-      <button class="ex-back" @click="goBack">
-        {{ t('explore.back_chat') || 'Meet Jinni' }}
-      </button>
       <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
       <!-- Framed as an open, growing set rather than a finished one. Saying
            Jinni "already analysed/visited" these places would read as a closed
@@ -16,6 +12,20 @@
       <p class="ex-sub" v-if="location && (location.city || location.country)">
         {{ [location.city, location.country].filter(Boolean).join(', ') }}
       </p>
+      <!-- No back arrow: "Meet Jinni" is an invitation, not a return trip.
+           Sits under the intro as the page's primary CTA, in the brand
+           gradient — same treatment as the other conversion buttons. -->
+      <div class="ex-head-cta">
+        <button class="ex-back" @click="goBack">
+          {{ t('explore.back_chat') || 'Meet Jinni' }}
+        </button>
+        <!-- Preferences round-trip: onboarding returns here (returnTo), and the
+             feed refetches on mount — section order follows the new interests. -->
+        <button class="ex-pref" @click="goPreferences">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          {{ t('explore.preferences') || 'My preferences' }}
+        </button>
+      </div>
     </header>
 
     <!-- ═══ Search — explore any city / region / country (TripAdvisor-style) ═══ -->
@@ -169,28 +179,26 @@
         <button class="ex-info-close" @click="closeInfo">✕</button>
         <div v-if="info.loading" class="ex-info-loading"><span class="ex-info-spinner"></span></div>
         <template v-else>
-          <img v-if="info.image" class="ex-info-img" :src="info.image" :alt="info.data?.name"/>
           <div class="ex-info-body">
             <h3 class="ex-info-name">
               {{ info.data?.name || info.place?.name }}
               <span v-if="info.place?.tier" class="ex-tier ex-tier--inline" :class="'ex-tier--' + info.place.tier">✦ {{ tierLabel(info.place.tier) }}</span>
             </h3>
-            <div v-if="Number.isFinite(info.data?.rating)" class="ex-info-rating">★ {{ info.data.rating.toFixed(1) }}</div>
             <p v-if="info.data?.description" class="ex-info-desc">{{ info.data.description }}</p>
-            <div class="ex-info-rows">
-              <div v-if="info.data?.address" class="ex-info-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>{{ info.data.address }}</span>
-              </div>
-              <div v-if="info.data?.phone" class="ex-info-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                <a :href="'tel:' + info.data.phone" @click.stop>{{ info.data.phone }}</a>
-              </div>
-              <div v-if="info.data?.website" class="ex-info-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                <a :href="info.data.website" target="_blank" rel="noopener noreferrer" @click.stop>{{ t('place_info.visit_website') || 'Visit Website' }}</a>
-              </div>
-            </div>
+            <dl class="ex-info-grid">
+              <template v-if="Number.isFinite(info.data?.rating)">
+                <dt>{{ t('place_info.rating') || 'Rating' }}</dt><dd>★ {{ info.data.rating.toFixed(1) }}</dd>
+              </template>
+              <template v-if="info.data?.address">
+                <dt>{{ t('place_info.address') || 'Address' }}</dt><dd>{{ info.data.address }}</dd>
+              </template>
+              <template v-if="info.data?.phone">
+                <dt>{{ t('place_info.phone') || 'Phone' }}</dt><dd><a :href="'tel:' + info.data.phone" @click.stop>{{ info.data.phone }}</a></dd>
+              </template>
+              <template v-if="info.data?.website">
+                <dt>{{ t('place_info.website') || 'Website' }}</dt><dd><a :href="info.data.website" target="_blank" rel="noopener noreferrer" @click.stop>{{ t('place_info.visit_website') || 'Visit Website' }}</a></dd>
+              </template>
+            </dl>
             <div v-if="info.data?.hours?.length" class="ex-info-hours">
               <div class="ex-info-hours-title">{{ t('place_info.hours') || 'Hours' }}</div>
               <div v-for="line in info.data.hours" :key="line" class="ex-info-hours-line">{{ line }}</div>
@@ -483,6 +491,7 @@ export default {
     },
     goChat() { this.$router.push({ name: 'JinniChat' }).catch(() => { window.location.href = '/chat'; }); },
     goBack() { if (window.history.length > 1) this.$router.back(); else this.goChat(); },
+    goPreferences() { this.$router.push({ path: '/onboarding', query: { returnTo: '/explore' } }) },
   },
 };
 </script>
@@ -555,10 +564,16 @@ export default {
 /* Header — centered column */
 .ex-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
   padding: 26px 18px 4px; max-width: 1200px; margin: 0 auto; }
-.ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 999px; border: none; cursor: pointer;
-  font-family: inherit; font-size: 0.84rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
+.ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 11px 26px; margin-top: 4px; border-radius: 999px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #fff; background: var(--ex-active-grad);
+  box-shadow: var(--ex-active-ring), 0 6px 20px rgba(0,0,0,0.18), var(--ex-active-shadow); transition: filter .18s, transform .15s; }
+.ex-back:hover { filter: brightness(1.06); }
+.ex-back:active { transform: scale(0.98); }
+.ex-head-cta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.ex-pref { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
-.ex-back:hover { background: var(--ex-glass-2); }
+.ex-pref:hover { background: var(--ex-glass-2); }
 .ex-title { margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em;
   color: #D4AF37; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .ex-sub { margin: -4px 0 0; font-size: 0.88rem; color: var(--ex-muted); }
@@ -583,13 +598,6 @@ export default {
   scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
 .ex-nav-inner { display: flex; gap: 8px; width: max-content; margin-inline: auto; padding-inline: 18px; }
 .ex-nav::-webkit-scrollbar { display: none; }
-/* Desktop: a white-glass bar instead of the page-tinted one — lighter, airier,
-   still frosted so sticky chips stay readable over scrolled content. Mobile
-   keeps the original page-toned glass. */
-@media (min-width: 769px) {
-  .night-mode .ex-nav { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
-  .day-mode .ex-nav { background: rgba(255,255,255,0.55); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
-}
 .ex-chip { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: none; cursor: pointer;
   font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--ex-chip-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s, color .18s; white-space: nowrap; }
@@ -665,10 +673,14 @@ export default {
    desktop pointer devices, sitting in the side gutters OFF the images. */
 .ex-rail-wrap { position: relative; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-wrap { padding: 0 48px; } }
+/* Same glass recipe as the chat cards' "More" button. */
 .ex-rail-btn { position: absolute; top: 118px; z-index: 5; width: 40px; height: 40px; border-radius: 999px; cursor: pointer;
-  display: none; place-items: center; color: var(--ex-arrow-fg); background: var(--ex-arrow-bg);
-  border: 1px solid var(--ex-arrow-line); box-shadow: 0 4px 14px rgba(0,0,0,0.18); transition: background .18s; }
-.ex-rail-btn:hover { background: var(--ex-act-bg-hover); }
+  display: none; place-items: center; border: none; transition: background .18s;
+  backdrop-filter: blur(4px) saturate(160%); -webkit-backdrop-filter: blur(4px) saturate(160%); }
+.night-mode .ex-rail-btn { background: rgba(255,255,255,0.3); color: #e2e8f0; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
+.night-mode .ex-rail-btn:hover { background: rgba(255,255,255,0.35); }
+.day-mode .ex-rail-btn { background: rgba(255,255,255,0.55); color: var(--ex-text); box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.9), 0 4px 14px rgba(0,0,0,0.10); }
+.day-mode .ex-rail-btn:hover { background: rgba(255,255,255,0.7); }
 .ex-rail-btn--prev { left: 0; }
 .ex-rail-btn--next { right: 0; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
@@ -751,6 +763,10 @@ export default {
 .ex-info-row { display: flex; align-items: flex-start; gap: 9px; font-size: 0.88rem; color: var(--ex-text); }
 .ex-info-row svg { flex: none; margin-top: 2px; color: var(--ex-accent); }
 .ex-info-row a { color: var(--ex-accent); text-decoration: none; font-weight: 600; overflow-wrap: anywhere; }
+.ex-info-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 10px 0 12px; font-size: 13px; }
+.ex-info-grid dt { font-weight: 600; white-space: nowrap; color: var(--ex-muted); }
+.ex-info-grid dd { margin: 0; min-width: 0; overflow-wrap: anywhere; color: var(--ex-text); }
+.ex-info-grid a { color: var(--ex-heading); }
 .ex-info-hours { margin-bottom: 14px; font-size: 0.82rem; color: var(--ex-muted); }
 .ex-info-hours-title { font-weight: 700; color: var(--ex-text); margin-bottom: 4px; font-size: 0.88rem; }
 .ex-info-hours-line { line-height: 1.55; }
