@@ -889,11 +889,31 @@
                     <button type="button" class="prov-step-btn" @click="aiProvider.claudeWebSearchMaxUses = Math.min(10, (aiProvider.claudeWebSearchMaxUses || 0) + 1)" :disabled="aiProvider.claudeWebSearchMaxUses >= 10">+</button>
                   </div>
                 </div>
-                <div class="provider-row provider-row--actions" key="pr-searchscope" v-if="aiProvider.claudeWebSearch">
+                <div class="provider-row provider-row--actions" key="pr-searchscope-chat" v-if="aiProvider.claudeWebSearch && (aiProvider.aiProviderChat === 'claude' || aiProvider.aiEventsUseClaude)">
                   <label class="provider-label">
-                    Web search actions
-                    <span class="provider-warn" v-if="!searchActionCount">none selected — no action will search</span>
-                    <span class="provider-hint" v-else>{{ searchActionCount }} of {{ webSearchActionOptions.length }} selected · first tap only</span>
+                    Web search — Chat
+                    <span class="provider-warn" v-if="!chatSearchActionCount">none selected — chat never searches</span>
+                    <span class="provider-hint" v-else>{{ chatSearchActionCount }} of {{ webSearchActionOptions.length }} · applies to what the chat message is about</span>
+                  </label>
+                  <div class="ws-action-grid">
+                    <button
+                      v-for="opt in webSearchActionOptions"
+                      :key="'chat-' + opt.id"
+                      type="button"
+                      class="ws-chip"
+                      :class="{ 'ws-chip--on': isSearchActionOn(opt.id, 'claudeWebSearchActionsChat') }"
+                      @click="toggleSearchAction(opt.id, 'claudeWebSearchActionsChat')"
+                    >
+                      <span class="ws-chip-check" aria-hidden="true">{{ isSearchActionOn(opt.id, 'claudeWebSearchActionsChat') ? '✓' : '' }}</span>
+                      {{ opt.label }}
+                    </button>
+                  </div>
+                </div>
+                <div class="provider-row provider-row--actions" key="pr-searchscope" v-if="aiProvider.claudeWebSearch && (aiProvider.aiProviderQuickAction === 'claude' || aiProvider.aiEventsUseClaude)">
+                  <label class="provider-label">
+                    Web search — Quick Actions
+                    <span class="provider-warn" v-if="!searchActionCount">none selected — no quick action will search</span>
+                    <span class="provider-hint" v-else>{{ searchActionCount }} of {{ webSearchActionOptions.length }} · first tap only</span>
                   </label>
                   <div class="ws-action-grid">
                     <button
@@ -1721,6 +1741,7 @@
             </p>
             <div class="provider-actions" style="margin-top: 14px">
               <button class="action-btn btn-accent" @click="saveCoverage" :disabled="covSaving">{{ covSaving ? 'Saving…' : 'Save coverage settings' }}</button>
+              <button class="action-btn" @click="refreshCoverage" :disabled="covRefreshing">{{ covRefreshing ? 'Refreshing…' : 'Refresh counts' }}</button>
               <button class="action-btn" @click="reparseRegions" :disabled="covReparsing">{{ covReparsing ? 'Re-parsing…' : 'Re-parse regions' }}</button>
             </div>
           </div>
@@ -4040,6 +4061,7 @@ export default {
       claudeWebSearch: false,
       claudeWebSearchMaxUses: 3,
       claudeWebSearchActions: ['events'],
+      claudeWebSearchActionsChat: ['events'],
       googlePrefetch: false,
       googlePrefetchActions: ['restaurants', 'hotels', 'shopping'],
       googlePrefetchCount: 12,
@@ -5011,22 +5033,26 @@ export default {
       { id: 'photo_spots',  label: 'Photo spots' },
       { id: 'shopping',     label: 'Shopping' },
     ]
-    const isSearchActionOn = (id) => {
-      const list = aiProvider.value.claudeWebSearchActions
+    // Chat and Quick Actions each have their own category list — `field`
+    // picks which one a chip row edits.
+    const isSearchActionOn = (id, field = 'claudeWebSearchActions') => {
+      const list = aiProvider.value[field]
       return Array.isArray(list) && list.includes(id)
     }
     const searchActionCount = computed(() => {
       const list = aiProvider.value.claudeWebSearchActions
       return Array.isArray(list) ? list.length : 0
     })
-    const toggleSearchAction = (id) => {
-      const list = Array.isArray(aiProvider.value.claudeWebSearchActions)
-        ? [...aiProvider.value.claudeWebSearchActions] : []
+    const chatSearchActionCount = computed(() => {
+      const list = aiProvider.value.claudeWebSearchActionsChat
+      return Array.isArray(list) ? list.length : 0
+    })
+    const toggleSearchAction = (id, field = 'claudeWebSearchActions') => {
+      const list = Array.isArray(aiProvider.value[field]) ? [...aiProvider.value[field]] : []
       const i = list.indexOf(id)
       if (i === -1) list.push(id); else list.splice(i, 1)
       // Keep a stable, known order so the saved value is tidy.
-      aiProvider.value.claudeWebSearchActions =
-        webSearchActionOptions.map(o => o.id).filter(x => list.includes(x))
+      aiProvider.value[field] = webSearchActionOptions.map(o => o.id).filter(x => list.includes(x))
       aiProviderDirty.value = true
     }
     // ── Google prefetch helpers (layers + actions) ───────────────────────────
@@ -6664,6 +6690,17 @@ export default {
       finally { covSaving.value = false }
     }
     const covReparsing = ref(false)
+    const covRefreshing = ref(false)
+    // Bypasses the server's 10-minute coverage-table cache — counts reflect
+    // the cache as of RIGHT NOW (post-test, post-tap, post-moderation).
+    const refreshCoverage = async () => {
+      covRefreshing.value = true
+      try {
+        const res = await apiFetch('/coverage?fresh=1')
+        if (res.success) { covData.value = res.data; showToast('Counts refreshed') }
+      } catch (e) { showToast(e.message, 'error') }
+      finally { covRefreshing.value = false }
+    }
     const reparseRegions = async () => {
       covReparsing.value = true
       try {
@@ -7011,7 +7048,7 @@ export default {
       users, usersLoading, usersPage, usersTotalPages, userSearch, userFilter, userLocations,
       aiUsers, aiLoading, aiPage, aiTotalPages, aiSummary, aiDailyStats, aiChartDays, aiChartMax, dailyTokenPct, dailyPlacesPct, aiCost, todayCost,
       aiProvider, aiProviderLoading, aiProviderSaving, aiProviderSavedAt, fetchAiProvider, saveAiProvider, setProvider,
-      webSearchActionOptions, isSearchActionOn, searchActionCount, toggleSearchAction,
+      webSearchActionOptions, isSearchActionOn, searchActionCount, chatSearchActionCount, toggleSearchAction,
       prefetchLayerOptions, isPrefetchLayerOn, prefetchLayerCount, togglePrefetchLayer,
       isPrefetchActionOn, prefetchActionCount, togglePrefetchAction,
       providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
@@ -7022,7 +7059,7 @@ export default {
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
-      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covMarketMode, setMarket,
+      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
       placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
