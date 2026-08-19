@@ -612,21 +612,21 @@
           <div class="kpi-grid kpi-grid--4">
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">Tokens · 30 days</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.last30?.tokens || 0) }}</div>
+              <div class="kpi-label">Tokens · {{ aiChartDays }} days</div>
+              <div class="kpi-value">{{ fmtK(aiWin.tokens || 0) }}</div>
               <div class="kpi-sub">both providers</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-              <div class="kpi-label">Queries · 30 days</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.last30?.queries || 0) }}</div>
+              <div class="kpi-label">Queries · {{ aiChartDays }} days</div>
+              <div class="kpi-value">{{ fmtK(aiWin.queries || 0) }}</div>
               <div class="kpi-sub">chat + quick actions</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-              <div class="kpi-label">Per Active User · 30 days</div>
-              <div class="kpi-value">{{ fmtK(aiSummary.last30?.tokensPerUser || 0) }}</div>
-              <div class="kpi-sub">{{ aiSummary.last30?.queriesPerUser || 0 }} queries / user · {{ fmt(aiSummary.last30?.activeUsers || 0) }} active users</div>
+              <div class="kpi-label">Per User · {{ aiChartDays }} days</div>
+              <div class="kpi-value">{{ fmtK(aiWin.tokensPerUser || 0) }}</div>
+              <div class="kpi-sub">per active ({{ fmt(aiWin.activeUsers || 0) }}) · ≈ {{ fmtK(aiSummary.totalTravelers ? Math.round((aiWin.tokens || 0) / aiSummary.totalTravelers) : 0) }} per registered ({{ fmt(aiSummary.totalTravelers || 0) }})</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
@@ -653,6 +653,16 @@
                 <div class="kpi-label">Claude Share</div>
                 <div class="kpi-value">{{ claudeSharePct }}%</div>
                 <div class="kpi-sub">of tokens on Claude · rest DeepSeek · last {{ aiChartDays }} days</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+                </div>
+                <div class="kpi-label">Est. AI Cost · {{ aiChartDays }} days</div>
+                <div class="kpi-value">${{ aiWinCost.toFixed(2) }}</div>
+                <div class="kpi-sub">≈ ${{ (aiWin.activeUsers ? aiWinCost / aiWin.activeUsers : 0).toFixed(3) }} / active · ${{ (aiSummary.totalTravelers ? aiWinCost / aiSummary.totalTravelers : 0).toFixed(3) }} / registered user</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-icon">
@@ -1440,7 +1450,7 @@
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
               <div class="kpi-label">This Month's Calls</div>
               <div class="kpi-value">{{ fmt(googleUsage.monthBilledCalls) }}</div>
-              <div class="kpi-sub">${{ (googleUsage.monthCost || 0).toFixed(2) }} this month</div>
+              <div class="kpi-sub">${{ (googleUsage.monthCost || 0).toFixed(2) }} this month · ≈ ${{ (aiSummary.last30?.activeUsers ? (googleUsage.monthCost || 0) / aiSummary.last30.activeUsers : 0).toFixed(3) }} / active · ${{ (aiSummary.totalTravelers ? (googleUsage.monthCost || 0) / aiSummary.totalTravelers : 0).toFixed(3) }} / registered</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
@@ -5148,6 +5158,13 @@ export default {
         webSearchActionOptions.map(o => o.id).filter(x => list.includes(x))
       aiProviderDirty.value = true
     }
+    // The KPI cards follow the same 7d/30d switcher as the charts.
+    const aiWin = computed(() => (aiChartDays.value === 7 ? aiSummary.value.last7 : aiSummary.value.last30) || {})
+    const aiWinCost = computed(() => {
+      const ds = providerStats.value?.summary?.deepseek || {}
+      const cl = providerStats.value?.summary?.claude || {}
+      return ((ds.tokens || 0) * 0.5 / 1e6) + ((cl.tokens || 0) * 2 / 1e6) + ((cl.searches || 0) * 0.01)
+    })
     // How much of the window's token volume ran on Claude (the expensive lane).
     const claudeSharePct = computed(() => {
       const c = providerStats.value?.summary?.claude?.tokens || 0
@@ -6460,6 +6477,7 @@ export default {
     watch(activeTab, (tab) => {
       if (tab === 'users') { if (!users.value.length) fetchUsers(); if (!aiUsers.value.length) fetchAIUsage(); if (!userLocations.value.byCountry.length) fetchUserLocations() }
       if (tab === 'ai' && !aiUsers.value.length) fetchAIUsage()
+      if (tab === 'google' && !aiSummary.value.last30) fetchAIUsage()   // active-user count for the per-user cost line
       if (tab === 'ai' && !aiProvider.value.updatedAt) fetchAiProvider()
       if (tab === 'ai') fetchProviderStats()
       if (tab === 'businesses' && !businesses.value.length) fetchBusinesses()
@@ -7110,7 +7128,7 @@ export default {
       webSearchActionOptions, isSearchActionOn, searchActionCount, chatSearchActionCount, toggleSearchAction, chatUsesClaude, qaUsesClaude, chatDeadSearch, qaDeadSearch,
       prefetchLayerOptions, isPrefetchLayerOn, prefetchLayerCount, togglePrefetchLayer,
       isPrefetchActionOn, prefetchActionCount, togglePrefetchAction,
-      claudeSharePct, providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
+      claudeSharePct, aiWin, aiWinCost, providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
       aiMonthly, aiMonthlyLoading, fetchAiMonthly, aiPrevMonth, aiNextMonth,
