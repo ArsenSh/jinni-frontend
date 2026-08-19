@@ -91,7 +91,7 @@ export default {
 /* A card containing an OPEN dropdown must stack above the cards that follow
    it — cards create their own stacking contexts, so later DOM order otherwise
    paints the next card over the menu (seen on the Google per-user card). */
-.card:has(.fd-menu) { position: relative; z-index: 300; }
+.card:has(.fd-menu) { position: relative; z-index: 300; overflow: visible; }
 
 /* Night theme (default admin) */
 .admin-shell.night-mode .fd-btn { background: rgba(255,255,255,0.06); color: #cbd5e1; }

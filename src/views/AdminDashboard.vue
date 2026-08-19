@@ -3607,6 +3607,18 @@
                   :src="`${apiBase}/api/ai/place-image/${placeInfoModal.row.placeId}/${i}`"
                   class="pi-photo" loading="lazy" @error="hideBrokenThumb" />
               </div>
+              <div class="edit-section-title">Categories — click to toggle, saves instantly</div>
+              <div class="seg-group" style="flex-wrap:wrap; margin: 6px 0 12px">
+                <button v-for="c in placeEditCategories" :key="'ic-' + c" class="seg-btn"
+                  :class="{ 'seg-btn--active': (placeInfoModal.data?.actions || placeInfoModal.row?.actions || []).includes(c) }"
+                  @click="toggleCacheTag('actions', c)">{{ c.replace('_', ' ') }}</button>
+              </div>
+              <div class="edit-section-title">Interests — which traveler preferences this place fits</div>
+              <div class="seg-group" style="flex-wrap:wrap; margin: 6px 0 12px">
+                <button v-for="t in placeEditInterests" :key="'ii-' + t" class="seg-btn"
+                  :class="{ 'seg-btn--active': (placeInfoModal.data?.interests || placeInfoModal.row?.interests || []).includes(t) }"
+                  @click="toggleCacheTag('interests', t)">{{ t }}</button>
+              </div>
               <div class="edit-section-title">Details</div>
               <div class="pi-cols">
                 <div class="pi-row" v-for="r in placeInfoRows" :key="r.k">
@@ -3664,8 +3676,13 @@
                   <button class="action-btn btn-muted" @click="placeInfoModal.editing = false" :disabled="placeEditSaving">Cancel — back to details</button>
                 </div>
               </template>
-              <div v-else style="display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap">
+              <div v-if="!placeInfoModal.editing" style="display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap">
                 <div class="action-group">
+                  <a class="action-btn btn-muted" v-if="placeInfoGeo"
+                     :href="'https://www.google.com/maps/search/?api=1&query=' + placeInfoGeo" target="_blank" rel="noopener noreferrer">Open in Maps</a>
+                  <button class="action-btn btn-muted"
+                          :title="(placeInfoModal.data?.aiBlocked ? 'Allow' : 'Stop') + ' the AI recommending this place (all users, all categories)'"
+                          @click="toggleCacheTag('aiBlocked')">{{ placeInfoModal.data?.aiBlocked ? 'Unblock AI' : 'Block AI' }}</button>
                   <button class="action-btn btn-muted" @click="setExploreStatus(placeInfoModal.row, 'verified')">
                     {{ placeInfoModal.row?.explore?.status === 'verified' ? 'Unverify' : 'Verify' }}
                   </button>
@@ -6957,6 +6974,33 @@ export default {
       } catch (e) { showToast(e.message, 'error') }
       finally { placeInfoModal.value.loading = false }
     }
+    // Staff-style instant curation from the READ view: click a chip, it saves.
+    // Always sends the complete curation state so nothing gets clobbered.
+    const toggleCacheTag = async (kind, val) => {
+      const m = placeInfoModal.value; if (!m.row) return
+      const cur = {
+        actions: [...(m.data?.actions ?? m.row.actions ?? [])],
+        interests: [...(m.data?.interests ?? m.row.interests ?? [])],
+        aiBlocked: !!(m.data?.aiBlocked),
+      }
+      if (kind === 'aiBlocked') cur.aiBlocked = !cur.aiBlocked
+      else {
+        const i = cur[kind].indexOf(val)
+        if (i === -1) cur[kind].push(val); else cur[kind].splice(i, 1)
+      }
+      try {
+        await staffFetch(`/explore-places/${encodeURIComponent(m.row.placeId)}/actions`, { method: 'PATCH', body: JSON.stringify(cur) })
+        if (!m.data) m.data = {}
+        m.data.actions = cur.actions; m.data.interests = cur.interests; m.data.aiBlocked = cur.aiBlocked
+        m.row.actions = cur.actions
+        const row = places.value.find(x => x.placeId === m.row.placeId)
+        if (row) row.actions = [...cur.actions]
+      } catch (e) { showToast(e.message, 'error') }
+    }
+    const placeInfoGeo = computed(() => {
+      const loc = placeInfoModal.value.data?.details?.geometry?.location || placeInfoModal.value.row?.details?.geometry?.location
+      return (loc && Number.isFinite(loc.lat)) ? `${loc.lat},${loc.lng}` : null
+    })
     const placeInfoRows = computed(() => {
       const m = placeInfoModal.value; if (!m.row) return []
       const d = m.data || {}, det = d.details || {}, r = m.row
@@ -7182,7 +7226,7 @@ export default {
       covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
       placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
-      placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
+      placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag, toggleCacheTag, placeInfoGeo,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
       destinations, destLoading, destPage, destTotalPages, destSearch, destFilter, destSummary,
