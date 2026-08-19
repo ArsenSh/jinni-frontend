@@ -1716,6 +1716,19 @@
                 <div class="price-row"><span class="price-label">Today's cost</span><span class="price-val">${{ dsTodayCost }}</span></div>
                 <div class="price-row"><span class="price-label">{{ aiChartDays }}-day tokens</span><span class="price-val">{{ fmtK(providerStats.summary.deepseek.tokens) }}</span></div>
                 <div class="price-row"><span class="price-label">{{ aiChartDays }}-day requests</span><span class="price-val">{{ fmt(providerStats.summary.deepseek.queries) }}</span></div>
+                <div class="price-row" v-if="aiBalance">
+                  <span class="price-label">Balance inside</span>
+                  <span class="price-val">
+                    <template v-if="aiBalance.deepseek.balance !== null"><b>${{ aiBalance.deepseek.balance.toFixed(2) }}</b> <span class="db-meta">· {{ aiBalance.deepseek.source === 'live' ? 'live from API' : 'manual' }} · runway ~{{ aiBalance.deepseek.runwayDays ?? '—' }}d</span></template>
+                    <template v-else>unknown — set it in AI Usage tab</template>
+                  </span>
+                </div>
+                <div class="price-row" v-if="aiBalance">
+                  <span class="price-label">Next 30 days</span>
+                  <span class="price-val">≈ ${{ aiBalance.deepseek.nextMonthCost.toFixed(2) }}
+                    <span v-if="aiBalance.deepseek.topUpNeeded !== null" class="gm-status" :class="aiBalance.deepseek.topUpNeeded > 0 ? 'gm-amber' : 'gm-green'">{{ aiBalance.deepseek.topUpNeeded > 0 ? 'top up ~$' + aiBalance.deepseek.topUpNeeded.toFixed(2) : 'covered' }}</span>
+                  </span>
+                </div>
                 <div class="price-row price-row--total"><span class="price-label">{{ aiChartDays }}-day cost</span><span class="price-val">${{ deepseekCost }}</span></div>
               </div>
             </div>
@@ -1734,6 +1747,19 @@
                 <div class="price-row"><span class="price-label">Today's cost</span><span class="price-val">${{ claudeTodayCost }}</span></div>
                 <div class="price-row"><span class="price-label">{{ aiChartDays }}-day tokens</span><span class="price-val">{{ fmtK(providerStats.summary.claude.tokens) }}</span></div>
                 <div class="price-row"><span class="price-label">{{ aiChartDays }}-day searches</span><span class="price-val">{{ fmt(providerStats.summary.claude.searches) }} · ${{ (providerStats.summary.claude.searches * 0.01).toFixed(2) }}</span></div>
+                <div class="price-row" v-if="aiBalance">
+                  <span class="price-label">Balance inside</span>
+                  <span class="price-val">
+                    <template v-if="aiBalance.claude.balance !== null"><b>${{ aiBalance.claude.balance.toFixed(2) }}</b> <span class="db-meta">· entered {{ shortDate(aiBalance.claude.enteredAt) }}, counted down · runway ~{{ aiBalance.claude.runwayDays ?? '—' }}d</span></template>
+                    <template v-else>unknown — set it in AI Usage tab</template>
+                  </span>
+                </div>
+                <div class="price-row" v-if="aiBalance">
+                  <span class="price-label">Next 30 days</span>
+                  <span class="price-val">≈ ${{ aiBalance.claude.nextMonthCost.toFixed(2) }}
+                    <span v-if="aiBalance.claude.topUpNeeded !== null" class="gm-status" :class="aiBalance.claude.topUpNeeded > 0 ? 'gm-amber' : 'gm-green'">{{ aiBalance.claude.topUpNeeded > 0 ? 'top up ~$' + aiBalance.claude.topUpNeeded.toFixed(2) : 'covered' }}</span>
+                  </span>
+                </div>
                 <div class="price-row price-row--total"><span class="price-label">{{ aiChartDays }}-day cost (tokens + search)</span><span class="price-val">${{ claudeCost }}</span></div>
               </div>
             </div>

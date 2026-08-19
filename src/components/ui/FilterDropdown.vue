@@ -82,21 +82,27 @@ export default {
 .fd-fade-enter-active, .fd-fade-leave-active { transition: opacity 0.12s, transform 0.12s; }
 .fd-fade-enter-from, .fd-fade-leave-to { opacity: 0; transform: translateY(-4px); }
 
+</style>
+
+<style>
+/* Theme rules live UNSCOPED: the scoped compiler drops :global()+descendant
+ * selectors entirely (verified in the built CSS — same failure as the
+ * marketing page). .fd-* class names are unique to this component. */
 /* Night theme (default admin) */
-:global(.admin-shell.night-mode) .fd-btn { background: rgba(255,255,255,0.06); color: #cbd5e1; }
-:global(.admin-shell.night-mode) .fd-btn:hover { background: rgba(139,92,246,0.15); color: #e2e8f0; }
-:global(.admin-shell.night-mode) .fd-btn--set { background: rgba(139,92,246,0.25); color: #e2e8f0; box-shadow: 0 0 6px rgba(139,92,246,0.25); }
-:global(.admin-shell.night-mode) .fd-menu { background: #251b46; box-shadow: 0 12px 32px rgba(0,0,0,0.45); }
-:global(.admin-shell.night-mode) .fd-item { color: #94a3b8; }
-:global(.admin-shell.night-mode) .fd-item:hover { background: rgba(139,92,246,0.16); color: #e2e8f0; }
-:global(.admin-shell.night-mode) .fd-item.sel { color: #c084fc; font-weight: 700; }
+.admin-shell.night-mode .fd-btn { background: rgba(255,255,255,0.06); color: #cbd5e1; }
+.admin-shell.night-mode .fd-btn:hover { background: rgba(139,92,246,0.15); color: #e2e8f0; }
+.admin-shell.night-mode .fd-btn--set { background: rgba(139,92,246,0.25); color: #e2e8f0; box-shadow: 0 0 6px rgba(139,92,246,0.25); }
+.admin-shell.night-mode .fd-menu { background: #251b46; box-shadow: 0 12px 32px rgba(0,0,0,0.45); }
+.admin-shell.night-mode .fd-item { color: #94a3b8; }
+.admin-shell.night-mode .fd-item:hover { background: rgba(139,92,246,0.16); color: #e2e8f0; }
+.admin-shell.night-mode .fd-item.sel { color: #c084fc; font-weight: 700; }
 
 /* Day theme */
-:global(.admin-shell.day-mode) .fd-btn { background: rgba(255,255,255,0.9); color: #5c3f2e; box-shadow: 0 0 6px rgba(139,69,19,0.06); }
-:global(.admin-shell.day-mode) .fd-btn:hover { background: rgba(212,175,55,0.12); color: #2c1e10; }
-:global(.admin-shell.day-mode) .fd-btn--set { background: rgba(212,175,55,0.25); color: #2c1e10; }
-:global(.admin-shell.day-mode) .fd-menu { background: #fffdf8; box-shadow: 0 12px 32px rgba(139,69,19,0.18); }
-:global(.admin-shell.day-mode) .fd-item { color: #5c3f2e; }
-:global(.admin-shell.day-mode) .fd-item:hover { background: rgba(212,175,55,0.12); color: #2c1e10; }
-:global(.admin-shell.day-mode) .fd-item.sel { color: #a67c00; font-weight: 700; }
+.admin-shell.day-mode .fd-btn { background: rgba(255,255,255,0.9); color: #5c3f2e; box-shadow: 0 0 6px rgba(139,69,19,0.06); }
+.admin-shell.day-mode .fd-btn:hover { background: rgba(212,175,55,0.12); color: #2c1e10; }
+.admin-shell.day-mode .fd-btn--set { background: rgba(212,175,55,0.25); color: #2c1e10; }
+.admin-shell.day-mode .fd-menu { background: #fffdf8; box-shadow: 0 12px 32px rgba(139,69,19,0.18); }
+.admin-shell.day-mode .fd-item { color: #5c3f2e; }
+.admin-shell.day-mode .fd-item:hover { background: rgba(212,175,55,0.12); color: #2c1e10; }
+.admin-shell.day-mode .fd-item.sel { color: #a67c00; font-weight: 700; }
 </style>
