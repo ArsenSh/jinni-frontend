@@ -1710,7 +1710,7 @@
             </div>
             <div class="loc-section-label" style="margin-top: 12px">Default targets — cached places needed for 100% warm</div>
             <div class="cov-targets">
-              <div v-for="c in covData.categories" :key="c" class="cov-target">
+              <div v-for="c in covData.categories.filter(x => x !== 'jinni_events')" :key="c" class="cov-target">
                 <span>{{ covCatLabel(c) }}</span>
                 <input class="limit-input" type="number" min="0" v-model.number="covForm.targets[c]" />
               </div>
@@ -1743,14 +1743,20 @@
                         <span>{{ g.rows.length }} {{ g.rows.length === 1 ? 'city' : 'cities' }} · {{ g.total }} cached</span>
                       </td>
                       <td v-for="c in covData.categories" :key="c" class="cov-country-agg">
-                        <b>{{ g.cats[c].pct }}%</b><span>{{ g.cats[c].count }}</span>
+                        <template v-if="c === 'jinni_events'"><b>{{ g.cats[c].count }}</b></template>
+                        <template v-else><b>{{ g.cats[c].pct }}%</b><span>{{ g.cats[c].count }}</span></template>
                       </td>
                     </tr>
                     <template v-if="covOpen[g.name]">
                       <tr v-for="row in g.rows" :key="row.key" class="cov-city-row">
-                        <td class="cov-city"><b>{{ row.city }}</b><span>{{ row.total }} cached<template v-if="row.aliases && row.aliases.length"> · also “{{ row.aliases.join('”, “') }}”</template></span></td>
+                        <td class="cov-city"><b>{{ row.city }}</b><span :title="row.aliases && row.aliases.length ? 'Also recorded as: ' + row.aliases.join(', ') : null">{{ row.total }} cached<template v-if="row.aliases && row.aliases.length"> · also “{{ row.aliases.slice(0, 2).join('”, “') }}”<template v-if="row.aliases.length > 2"> +{{ row.aliases.length - 2 }} more</template></template></span></td>
                         <td v-for="c in covData.categories" :key="c">
-                          <button type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
+                          <div v-if="c === 'jinni_events'" class="cov-cell cov-cell--info">
+                            <b>{{ row.categories[c].count }}</b>
+                            <span>found here</span>
+                            <em>not gated</em>
+                          </div>
+                          <button v-else type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
                             <b>{{ covCellPct(row, c) }}%</b>
                             <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
                             <em>{{ covCellState(row, c) }}</em>
@@ -6613,7 +6619,7 @@ export default {
     const covData = ref(null)
     const covForm = ref({ gate: false, cutoff: 90, targets: {}, cityTargets: {}, overrides: {} })
     const covSaving = ref(false)
-    const COV_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical', hidden_gems: 'Hidden gems', photo_spots: 'Photo spots', shopping: 'Shopping', events: 'Event venues' }
+    const COV_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical', hidden_gems: 'Hidden gems', photo_spots: 'Photo spots', shopping: 'Shopping', events: 'Event venues', jinni_events: 'Jinni events' }
     const covCatLabel = c => COV_LABELS[c] || c
     const fetchCoverage = async () => {
       try {
@@ -9061,6 +9067,13 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .cov-country-agg b { font-weight: 700; margin-right: 5px; }
 .cov-country-agg span { opacity: 0.5; font-size: 10.5px; }
 .cov-city-row .cov-city { padding-left: 24px; }
+.cov-city { max-width: 240px; }
+.cov-city span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cov-cell--info { cursor: default; }
+.admin-shell.night-mode .cov-cell--info { background: rgba(139,92,246,0.10); }
+.admin-shell.night-mode .cov-cell--info em { color: #a78bfa; }
+.admin-shell.day-mode .cov-cell--info { background: rgba(160,82,45,0.08); }
+.admin-shell.day-mode .cov-cell--info em { color: #8a5a2b; }
 .cov-city b { display: block; font-size: 13px; font-weight: 650; }
 .cov-city span { font-size: 11px; opacity: 0.55; white-space: nowrap; }
 .cov-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; min-width: 88px; border: none; cursor: pointer; border-radius: 9px; padding: 7px 9px; font-family: inherit; text-align: left; transition: background 0.15s; }
