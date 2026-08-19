@@ -21,6 +21,7 @@
         </button>
       </div>
     </div>
+    <div v-if="marketNotice" class="market-notice">{{ marketNotice }}</div>
     <div class="search-container">
       <div class="search-wrapper">
         <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" :stroke="currentTheme === 'night-mode' ? '#c084fc' : '#A0522D'" stroke-width="2">
@@ -118,6 +119,8 @@ export default {
       marker: null,
       currentLocationMarker: null,  
       selectedCoords: { lat: 0, lng: 0 },
+      marketNotice: null,
+      _marketTimer: null,
       locationName: '',
       address: '',
       countryName: '',
@@ -160,7 +163,26 @@ export default {
     this.checkGpsDenied();
   },
   beforeUnmount() {if (this.map) { this.map.remove() }},
+  watch: {
+    // A new pin (map tap, search pick, my-location) re-checks whether Jinni has
+    // launched there; the notice is informative only — confirming still works.
+    selectedCoords() {
+      clearTimeout(this._marketTimer);
+      this._marketTimer = setTimeout(() => this.checkMarket(), 600);
+    }
+  },
   methods: {
+    async checkMarket() {
+      try {
+        const { lat, lng } = this.selectedCoords || {};
+        if (!lat || !lng || (lat === 20 && lng === 0)) { this.marketNotice = null; return }
+        const token = localStorage.getItem('authToken');
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+        const r = await fetch(`${API_BASE_URL}/api/ai/market-status?lat=${lat}&lng=${lng}&lang=${this.$i18n?.locale || 'en'}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+        const d = await r.json();
+        this.marketNotice = (d && d.mode === 'closed') ? d.message : null;
+      } catch { this.marketNotice = null }
+    },
     loadInitialLocation() {
       try {
         const savedSettings = localStorage.getItem('jinni_settings');
@@ -407,6 +429,9 @@ export default {
 </script>
 
 <style>
+.map-selector-page .market-notice { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); z-index: 1000; max-width: min(560px, 92vw); padding: 11px 16px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); }
+.map-selector-page.night-mode .market-notice { background: rgba(26,11,46,0.88); color: #e8d9b5; box-shadow: 0 0 18px rgba(212,175,55,0.18); }
+.map-selector-page.day-mode .market-notice { background: rgba(255,253,248,0.92); color: #5c3f2e; box-shadow: 0 4px 18px rgba(139,69,19,0.14); }
 .gps-denied-banner{display:flex;align-items:flex-start;gap:10px;padding:10px 20px;font-size:13px;line-height:1.5;z-index:998;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
 .day-mode.gps-denied-banner,.gps-denied-banner.day-mode{background:rgba(212,175,55,0.14);color:#7a4a10;box-shadow:inset 0 1px 0 rgba(255,255,255,0.5)}
 .night-mode.gps-denied-banner,.gps-denied-banner.night-mode{background:rgba(139,92,246,0.14);color:#c084fc;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}

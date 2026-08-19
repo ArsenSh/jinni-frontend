@@ -147,6 +147,7 @@
                 <h3>{{ locationMode === 'destination' && preferences.destination.city ? `${preferences.destination.city}, ${preferences.destination.countryName}` : $t('onboarding.location_title') }}</h3>
                 <p class="section-description">{{ $t('onboarding.location_desc') }}</p>
               </div>
+              <div v-if="marketNotice" class="market-notice">{{ marketNotice }}</div>
               <div v-if="locationDenied" class="location-permission-warning location-denied-warning">
                 <span>{{ $t(locationHelpKey) }}</span>
               </div>
@@ -417,6 +418,7 @@ export default {
   },
   data() {
     return {
+      marketNotice: null,
       isVisible: false,
       currentSection: 1,
       isEditing: false,
@@ -524,6 +526,16 @@ export default {
     locationHelpKey() { return locationHelpKey(); }
   },
   methods: {
+    async checkMarket(lat, lng) {
+      try {
+        if (!lat || !lng) { this.marketNotice = null; return }
+        const token = localStorage.getItem('authToken');
+        const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+        const r = await fetch(`${apiUrl}/api/ai/market-status?lat=${lat}&lng=${lng}&lang=${this.$i18n?.locale || 'en'}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+        const d = await r.json();
+        this.marketNotice = (d && d.mode === 'closed') ? d.message : null;
+      } catch { this.marketNotice = null }
+    },
     checkScreenSize() { this.isDesktop = window.innerWidth > 768 },
     async loadCountries() {
       if (this.countryOptions.length > 0) return;
@@ -641,6 +653,7 @@ export default {
       this.preferences.destination.city = '';
       this.loadCitiesForCountry(country.code);
       this.showCountryDropdown = false;
+      this.checkMarket(country.lat, country.lng);
     },
     toggleCityDropdown() {
       if (!this.preferences.destination.country || this.loadingCities) return;
@@ -662,6 +675,7 @@ export default {
       this.preferences.destination.coordinates.lat = city.lat;
       this.preferences.destination.coordinates.lng = city.lng;
       this.showCityDropdown = false;
+      this.checkMarket(city.lat, city.lng);
     },
     toggleInterest(key) {
       const index = this.preferences.interests.indexOf(key)
@@ -882,6 +896,7 @@ export default {
 </script>
 
 <style scoped>
+.market-notice { margin: 10px 0 4px; padding: 11px 14px; border-radius: 12px; background: rgba(212,175,55,0.16); font-size: 13.5px; line-height: 1.5; }
 .onboarding-page{min-height:100vh;display:flex;justify-content:center;padding:20px;position:relative;overflow-x:hidden}
 .onboarding-wrapper{width:100%;max-width:647px;margin:auto}
 .onboarding-container{opacity:0;}
