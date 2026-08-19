@@ -3687,9 +3687,6 @@
                 <div class="action-group">
                   <a class="action-btn btn-muted" v-if="placeInfoGeo"
                      :href="'https://www.google.com/maps/search/?api=1&query=' + placeInfoGeo" target="_blank" rel="noopener noreferrer">Open in Maps</a>
-                  <button class="action-btn btn-muted"
-                          :title="(placeInfoModal.data?.aiBlocked ? 'Allow' : 'Stop') + ' the AI recommending this place (all users, all categories)'"
-                          @click="toggleCacheTag('aiBlocked')">{{ placeInfoModal.data?.aiBlocked ? 'Unblock AI' : 'Block AI' }}</button>
                   <button class="action-btn btn-muted" @click="setExploreStatus(placeInfoModal.row, 'verified')">
                     {{ placeInfoModal.row?.explore?.status === 'verified' ? 'Unverify' : 'Verify' }}
                   </button>

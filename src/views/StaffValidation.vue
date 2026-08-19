@@ -1813,11 +1813,6 @@
 
             <div class="exp-modal-actions">
               <a v-if="expMapsUrl(expSelected)" class="action-btn btn-muted" :href="expMapsUrl(expSelected)" target="_blank" rel="noopener noreferrer">Open in Maps</a>
-              <button class="action-btn" :class="expSelected.aiBlocked ? 'exp-btn-hide' : 'btn-muted'"
-                      :disabled="expBusy === expSelected.placeId" @click="toggleAiBlock(expSelected)"
-                      :title="expSelected.aiBlocked ? 'AI recommendations are blocked for this place — click to allow again' : 'Stop the AI from ever recommending this place (all users, all categories)'">
-                {{ expSelected.aiBlocked ? 'AI: Blocked' : 'Block AI' }}
-              </button>
               <span style="flex:1"></span>
               <button v-if="expSelected.explore?.status !== 'verified'" class="action-btn exp-btn-verify" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'verified')">Verify</button>
               <button v-if="expSelected.explore?.status !== 'hidden'" class="action-btn exp-btn-hide" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'hidden')">Hide</button>
