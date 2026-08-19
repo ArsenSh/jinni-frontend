@@ -3601,7 +3601,8 @@
           <div class="edit-body">
             <div v-if="placeInfoModal.loading" class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
             <section v-else class="edit-section">
-              <div class="pim-imgs" v-if="placeInfoModal.row?.imagesStored && (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length">
+              <div class="pim-imgs" :class="{ 'pim-imgs--single': (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length === 1 }"
+                   v-if="placeInfoModal.row?.imagesStored && (placeInfoModal.data?.photos || placeInfoModal.row?.photos || []).length">
                 <img v-for="(ph, i) in (placeInfoModal.data?.photos || placeInfoModal.row.photos)" :key="i"
                   :src="`${apiBase}/api/ai/place-image/${placeInfoModal.row.placeId}/${i}`"
                   class="pim-img" loading="lazy" @error="hideBrokenThumb" />
@@ -3697,10 +3698,6 @@
                   </button>
                   <button class="action-btn btn-delete" @click="deletePlace(placeInfoModal.row); placeInfoModal.open = false">Delete</button>
                 </div>
-                <button class="action-btn btn-accent" @click="startPlaceEdit">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  Edit place
-                </button>
               </div>
 
               <p style="margin:16px 0 0; font-size:11.5px; opacity:0.55; line-height:1.55">
@@ -6812,8 +6809,6 @@ export default {
             overrides: JSON.parse(JSON.stringify(res.data.config.coverageOverrides || {})),
             market: JSON.parse(JSON.stringify(res.data.config.marketStatus || {})),
           }
-          const top = res.data.rows[0]
-          if (top && !Object.keys(covOpen.value).length) covOpen.value = { [top.country || 'Unknown']: true }
         }
       } catch (e) { console.warn('coverage fetch failed:', e.message) }
     }
@@ -7013,6 +7008,7 @@ export default {
       const rows = []
       const add = (k, v, href) => { if (v !== undefined && v !== null && v !== '') rows.push({ k, v, href }) }
       add('Address', det.formatted_address || r.details?.formatted_address)
+      add('Location', [d.city || r.city, d.country || r.country].filter(Boolean).join(', '))
       add('Category', [d.primaryType, ...(d.types || [])].filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 4).join(', '))
       add('Rating', r.rating ? `${r.rating.toFixed(1)} ★` : null)
       add('Price', r.priceTierLabel ? `${r.priceTierLabel}${r.priceDollars ? ' · ' + r.priceDollars : ''}` : null)
@@ -7024,6 +7020,11 @@ export default {
       add('Cache economics', `used ${fmt(r.useCount)}× · fetched from Google ${fmt(r.fetchCount)}× — each use above 1 fetch was free`)
       add('Last used', r.lastUsed ? shortDate(r.lastUsed) : null)
       add('First cached', r.createdAt ? shortDate(r.createdAt) : null)
+      add('Reviewed', (d.explore?.reviewedAt || r.explore?.reviewedAt) ? shortDate(d.explore?.reviewedAt || r.explore?.reviewedAt) : null)
+      add('Curation', [
+        (d.actionsCurated || r.actionsCurated) ? 'categories hand-curated (AI can\'t retag)' : null,
+        (d.manuallyEdited || r.manuallyEdited) ? 'details manually edited' : null,
+      ].filter(Boolean).join(' · ') || null)
       add('Place ID', r.placeId)
       return rows
     })
@@ -8093,8 +8094,14 @@ export default {
 .aiev-main .db-meta { font-size: 12px; }
 
 /* ── Cache modal, staff-style read view (pim-*) ─────────────────────────── */
-.pim-imgs { display: flex; gap: 6px; overflow-x: auto; border-radius: 12px; margin-bottom: 14px; }
-.pim-img { height: 220px; min-width: 160px; flex: 1 1 auto; object-fit: cover; border-radius: 10px; }
+/* Several photos: a grid mosaic, everything visible, nothing to scroll.
+   One photo: shown WHOLE (contain, no crop-zoom), centered on a soft ground. */
+.pim-imgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.pim-img { width: 100%; height: 190px; object-fit: cover; border-radius: 10px; }
+.pim-imgs--single { display: flex; justify-content: center; border-radius: 12px; }
+.admin-shell.night-mode .pim-imgs--single { background: rgba(255,255,255,0.04); }
+.admin-shell.day-mode .pim-imgs--single { background: rgba(139,69,19,0.05); }
+.pim-imgs--single .pim-img { width: auto; max-width: 100%; height: auto; max-height: 340px; object-fit: contain; }
 .pim-title { margin: 0 0 10px; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .pim-status { padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
 .pim-status--verified { background: rgba(52,211,153,0.14); color: #34d399; }
