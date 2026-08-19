@@ -583,6 +583,13 @@ export default {
   scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
 .ex-nav-inner { display: flex; gap: 8px; width: max-content; margin-inline: auto; padding-inline: 18px; }
 .ex-nav::-webkit-scrollbar { display: none; }
+/* Desktop: a white-glass bar instead of the page-tinted one — lighter, airier,
+   still frosted so sticky chips stay readable over scrolled content. Mobile
+   keeps the original page-toned glass. */
+@media (min-width: 769px) {
+  .night-mode .ex-nav { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
+  .day-mode .ex-nav { background: rgba(255,255,255,0.55); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
+}
 .ex-chip { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: none; cursor: pointer;
   font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--ex-chip-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s, color .18s; white-space: nowrap; }
