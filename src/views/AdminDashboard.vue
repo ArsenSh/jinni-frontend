@@ -24,6 +24,7 @@
           <svg v-else-if="tab.icon === 'google'" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.454 0-.769-.085-1.357-.187-1.857H12.24z"/></svg>
           <svg v-else-if="tab.icon === 'prices'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <svg v-else-if="tab.icon === 'limits'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          <svg v-else-if="tab.icon === 'coverage'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <svg v-else-if="tab.icon === 'staff'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
           <span class="nav-label">{{ tab.label }}</span>
         </button>
@@ -1687,6 +1688,62 @@
             </span>
           </div>
           <div v-else class="empty-state"><div class="loader-ring loader-ring--sm"></div> Loading…</div>
+        </section>
+
+        <!-- ── COVERAGE (cache-warmth Google gate) ── -->
+        <section v-if="activeTab === 'coverage'" class="tab-section">
+          <div class="card" style="padding: 18px 20px" v-if="covData">
+            <div class="card-head" style="padding: 0 0 10px">
+              <h2>Google Coverage Gate</h2>
+              <span class="card-sub">warm city + category &rArr; Google off, serve from cache · events exempt · applies to quick actions, chat and itinerary</span>
+            </div>
+            <div class="provider-row">
+              <label class="provider-label">Enable gate <span>master switch — while OFF, Google works everywhere exactly as before</span></label>
+              <label class="prov-switch">
+                <input type="checkbox" v-model="covForm.gate" />
+                <span class="prov-switch-track"><span class="prov-switch-thumb"></span></span>
+              </label>
+            </div>
+            <div class="provider-row">
+              <label class="provider-label">Warm cutoff % <span>auto turns Google off when warmth reaches this</span></label>
+              <input class="limit-input" style="max-width: 90px" type="number" min="10" max="200" v-model.number="covForm.cutoff" />
+            </div>
+            <div class="loc-section-label" style="margin-top: 12px">Default targets — cached places needed for 100% warm</div>
+            <div class="cov-targets">
+              <div v-for="c in covData.categories" :key="c" class="cov-target">
+                <span>{{ covCatLabel(c) }}</span>
+                <input class="limit-input" type="number" min="0" v-model.number="covForm.targets[c]" />
+              </div>
+            </div>
+            <div class="provider-actions" style="margin-top: 14px">
+              <button class="action-btn btn-accent" @click="saveCoverage" :disabled="covSaving">{{ covSaving ? 'Saving…' : 'Save coverage settings' }}</button>
+            </div>
+          </div>
+
+          <div class="loc-section-label" v-if="covData && covData.rows.length" style="margin-top: 14px">City warming — click a cell to cycle Auto &rarr; Force OFF &rarr; Force ON (then Save)</div>
+          <div class="card cov-table-card" v-if="covData && covData.rows.length">
+            <div class="cov-scroll">
+              <table class="cov-table">
+                <thead>
+                  <tr><th>City</th><th v-for="c in covData.categories" :key="c">{{ covCatLabel(c) }}</th></tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in covData.rows" :key="row.key">
+                    <td class="cov-city"><b>{{ row.city }}</b><span>{{ row.country || '—' }} · {{ row.total }} cached</span></td>
+                    <td v-for="c in covData.categories" :key="c">
+                      <button type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
+                        <b>{{ covCellPct(row, c) }}%</b>
+                        <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
+                        <em>{{ covCellState(row, c) }}</em>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p v-if="covData && !covData.rows.length" class="empty-state">No cached places carry a city yet — coverage appears as the cache warms.</p>
+          <p v-if="!covData" class="empty-state">Loading coverage…</p>
         </section>
 
         <!-- ── PRICES ── -->
@@ -4401,6 +4458,7 @@ export default {
       { id: 'destinations', label: 'Destinations', icon: 'destinations' },
       { id: 'places', label: 'Places Cache', icon: 'places', badge: placesSummary.value.totalPlaces || null },
       { id: 'limits', label: 'Limits', icon: 'limits' },
+      { id: 'coverage', label: 'Coverage', icon: 'coverage' },
       { id: 'prices', label: 'Prices', icon: 'prices' }
     ])
 
@@ -4421,6 +4479,7 @@ export default {
       google:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.454 0-.769-.085-1.357-.187-1.857H12.24z"/></svg>',
       prices:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
       limits:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+      coverage:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
       staff:        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
       themeMoon:    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
       themeSun:     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
@@ -6286,6 +6345,7 @@ export default {
       if (tab === 'destinations' && !destinations.value.length) fetchDestinations()
       hideChartTip()   // a stuck tooltip must never survive a tab switch
       if (tab === 'limits' && !limitsData.value) fetchLimits()
+      if (tab === 'coverage' && !covData.value) fetchCoverage()
       if (tab === 'places' && !aiEvents.value.length) fetchAiEvents()
       if (tab === 'places' && !places.value.length) fetchPlaces()
       if (tab === 'google' && !googleUsage.value.totalPlaces) fetchGoogleUsage()
@@ -6526,6 +6586,67 @@ export default {
         await fetchLimits()
       } catch (e) { showToast(e.message, 'error') }
       finally { limitsSaving.value = false }
+    }
+
+    // ── Coverage tab (cache-warmth Google gate) ──
+    const covData = ref(null)
+    const covForm = ref({ gate: false, cutoff: 90, targets: {}, cityTargets: {}, overrides: {} })
+    const covSaving = ref(false)
+    const COV_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical', hidden_gems: 'Hidden gems', photo_spots: 'Photo spots', shopping: 'Shopping' }
+    const covCatLabel = c => COV_LABELS[c] || c
+    const fetchCoverage = async () => {
+      try {
+        const res = await apiFetch('/coverage')
+        if (res.success) {
+          covData.value = res.data
+          covForm.value = {
+            gate: res.data.config.coverageGate,
+            cutoff: res.data.config.coverageCutoffPct,
+            targets: { ...res.data.defaultTargets },
+            cityTargets: JSON.parse(JSON.stringify(res.data.config.coverageCityTargets || {})),
+            overrides: JSON.parse(JSON.stringify(res.data.config.coverageOverrides || {})),
+          }
+        }
+      } catch (e) { console.warn('coverage fetch failed:', e.message) }
+    }
+    const saveCoverage = async () => {
+      covSaving.value = true
+      try {
+        const res = await apiFetch('/coverage', { method: 'POST', body: JSON.stringify({
+          coverageGate: covForm.value.gate,
+          coverageCutoffPct: covForm.value.cutoff,
+          coverageTargets: covForm.value.targets,
+          coverageCityTargets: covForm.value.cityTargets,
+          coverageOverrides: covForm.value.overrides,
+        }) })
+        if (res.success) { covData.value = res.data; showToast('Coverage saved — gate live within ~30s') }
+      } catch (e) { showToast(e.message, 'error') }
+      finally { covSaving.value = false }
+    }
+    // Cells reflect the UNSAVED form (targets/cutoff/overrides) so edits preview live.
+    const covCellTarget = (row, c) => Number(covForm.value.cityTargets?.[row.key]?.[c]) || Number(covForm.value.targets[c]) || row.categories[c].target
+    const covCellPct = (row, c) => Math.min(999, Math.round((row.categories[c].count / covCellTarget(row, c)) * 100))
+    const covOverrideOf = (key, c) => (covForm.value.overrides[key] && covForm.value.overrides[key][c]) || 'auto'
+    const covCellState = (row, c) => {
+      const ov = covOverrideOf(row.key, c)
+      if (ov === 'on') return 'forced ON'
+      if (ov === 'off') return 'forced OFF'
+      return covCellPct(row, c) >= covForm.value.cutoff ? 'auto: off' : 'auto: on'
+    }
+    const covCellClass = (row, c) => {
+      const ov = covOverrideOf(row.key, c)
+      if (ov === 'on') return 'cov-cell--fon'
+      if (ov === 'off') return 'cov-cell--foff'
+      return covCellPct(row, c) >= covForm.value.cutoff ? 'cov-cell--warm' : 'cov-cell--cold'
+    }
+    const cycleCov = (key, c) => {
+      const cur = covOverrideOf(key, c)
+      const next = cur === 'auto' ? 'off' : cur === 'off' ? 'on' : 'auto'
+      const o = JSON.parse(JSON.stringify(covForm.value.overrides))
+      o[key] = o[key] || {}
+      if (next === 'auto') delete o[key][c]; else o[key][c] = next
+      if (!Object.keys(o[key]).length) delete o[key]
+      covForm.value.overrides = o
     }
 
     // ── Place-cache "click to read" modal ──
@@ -6814,6 +6935,7 @@ export default {
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
+      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
       placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag,
@@ -8858,6 +8980,38 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .provider-body .prov-seg .prov-seg-btn { background: transparent; color: inherit; opacity: 0.5; font-weight: 500; }
 .provider-body .prov-seg .prov-seg-btn.active { font-weight: 700; }
 .provider-body .prov-seg .prov-seg-btn.active { background: linear-gradient(90deg, #D4AF37, #a78bfa); color: #fff; opacity: 1; }
+
+/* ── Coverage tab ─────────────────────────────────────────────────────────── */
+.cov-targets { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 8px; }
+.cov-target { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.cov-target .limit-input { max-width: 84px; }
+.cov-table-card { padding: 10px 12px; }
+.cov-scroll { overflow-x: auto; }
+.cov-table { border-collapse: collapse; width: 100%; min-width: 780px; }
+.cov-table th { text-align: left; padding: 8px 8px 10px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.6; }
+.cov-table td { padding: 3px 4px; vertical-align: middle; }
+.cov-city b { display: block; font-size: 13px; font-weight: 650; }
+.cov-city span { font-size: 11px; opacity: 0.55; white-space: nowrap; }
+.cov-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; min-width: 88px; border: none; cursor: pointer; border-radius: 9px; padding: 7px 9px; font-family: inherit; text-align: left; transition: background 0.15s; }
+.cov-cell b { font-size: 13px; font-weight: 700; }
+.cov-cell span { font-size: 10.5px; opacity: 0.6; }
+.cov-cell em { font-style: normal; font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
+.admin-shell.night-mode .cov-cell { background: rgba(255,255,255,0.045); color: #cbd5e1; }
+.admin-shell.night-mode .cov-cell--warm { background: rgba(212,175,55,0.16); }
+.admin-shell.night-mode .cov-cell--warm em { color: #D4AF37; }
+.admin-shell.night-mode .cov-cell--cold em { color: #94a3b8; }
+.admin-shell.night-mode .cov-cell--foff { background: rgba(248,113,113,0.14); }
+.admin-shell.night-mode .cov-cell--foff em { color: #f87171; }
+.admin-shell.night-mode .cov-cell--fon { background: rgba(74,222,128,0.13); }
+.admin-shell.night-mode .cov-cell--fon em { color: #4ade80; }
+.admin-shell.day-mode .cov-cell { background: rgba(139,69,19,0.05); color: #5c3f2e; }
+.admin-shell.day-mode .cov-cell--warm { background: rgba(212,175,55,0.22); }
+.admin-shell.day-mode .cov-cell--warm em { color: #a67c00; }
+.admin-shell.day-mode .cov-cell--cold em { color: #8a7261; }
+.admin-shell.day-mode .cov-cell--foff { background: rgba(220,80,80,0.14); }
+.admin-shell.day-mode .cov-cell--foff em { color: #c0504d; }
+.admin-shell.day-mode .cov-cell--fon { background: rgba(80,160,90,0.16); }
+.admin-shell.day-mode .cov-cell--fon em { color: #3d8b4f; }
 
 /* ── Web-search on/off switch ─────────────────────────────────────────────── */
 .prov-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
