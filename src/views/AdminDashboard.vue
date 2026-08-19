@@ -1540,6 +1540,37 @@
             </div>
           </div>
 
+          <!-- Per-user Google trigger cost, filterable by country -->
+          <div class="card" style="padding: 16px 20px">
+            <div class="card-head" style="padding: 0 0 10px">
+              <h2>Google Cost per User</h2>
+              <FilterDropdown v-model="gpuCountry" :options="gpuCountryOptions" label="All countries" @change="fetchGpu" />
+            </div>
+            <div class="kpi-grid kpi-grid--4" v-if="gpu">
+              <div class="kpi-card">
+                <div class="kpi-label">Avg Cost / User</div>
+                <div class="kpi-value">${{ (gpu.perUser?.cost || 0).toFixed(3) }}</div>
+                <div class="kpi-sub">this month · {{ gpu.country || 'all countries' }}</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Avg Triggers / User</div>
+                <div class="kpi-value">{{ gpu.perUser?.calls || 0 }}</div>
+                <div class="kpi-sub">billed Google calls each user caused</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Users Who Triggered</div>
+                <div class="kpi-value">{{ fmt(gpu.attributedUsers || 0) }}</div>
+                <div class="kpi-sub">of {{ fmt(gpu.totalUsersInScope || 0) }} users in scope</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Scope Total</div>
+                <div class="kpi-value">${{ (gpu.cost || 0).toFixed(2) }}</div>
+                <div class="kpi-sub">{{ fmt(gpu.calls || 0) }} calls · counting since deploy</div>
+              </div>
+            </div>
+            <p v-else class="empty-state">Loading…</p>
+          </div>
+
           <!-- Free tier & billing forecast — month-by-month, caps reset on the 1st -->
           <div class="card chart-card">
             <div class="card-head">
@@ -1602,13 +1633,13 @@
               <div v-if="aiProvider.googlePrefetch" class="g-prefetch-body">
                 <div class="provider-row">
                   <label class="provider-label">
-                    Mode
-                    <span class="provider-hint" v-if="aiProvider.googlePrefetchMode === 'resolve'">Verify only — AI recommends, Google supplies real place IDs (skips a lookup). Best for thin / well-known markets.</span>
-                    <span class="provider-hint" v-else>Suggest — inject Google's real places as recommendations too. Best for dense / unfamiliar markets.</span>
+                    Who picks the places
+                    <span class="provider-hint" v-if="aiProvider.googlePrefetchMode === 'resolve'">Jinni picks ALL the places itself — Google only confirms they exist and gives their IDs. Choose this where you trust Jinni's taste (luxury, curated categories) and don't want Google's ranking mixed in.</span>
+                    <span class="provider-hint" v-else>Google's places can appear as cards NEXT TO Jinni's own picks. Choose this for NEW cities you're warming up — Google knows the area better than Jinni does, and the cache fills faster. Safe default.</span>
                   </label>
                   <div class="seg-group">
-                    <button type="button" class="seg-btn" :class="{ 'seg-btn--active': aiProvider.googlePrefetchMode !== 'resolve' }" @click="aiProvider.googlePrefetchMode = 'suggest'">Suggest</button>
-                    <button type="button" class="seg-btn" :class="{ 'seg-btn--active': aiProvider.googlePrefetchMode === 'resolve' }" @click="aiProvider.googlePrefetchMode = 'resolve'">Resolve only</button>
+                    <button type="button" class="seg-btn" :class="{ 'seg-btn--active': aiProvider.googlePrefetchMode !== 'resolve' }" @click="aiProvider.googlePrefetchMode = 'suggest'">Google helps pick</button>
+                    <button type="button" class="seg-btn" :class="{ 'seg-btn--active': aiProvider.googlePrefetchMode === 'resolve' }" @click="aiProvider.googlePrefetchMode = 'resolve'">Jinni picks alone</button>
                   </div>
                 </div>
                 <div class="provider-row provider-row--actions">
@@ -5171,6 +5202,17 @@ export default {
       const d = providerStats.value?.summary?.deepseek?.tokens || 0
       return (c + d) > 0 ? Math.round((c / (c + d)) * 100) : 0
     })
+    // Per-user Google trigger cost (Google tab card)
+    const gpu = ref(null)
+    const gpuCountry = ref('')
+    const gpuCountryOptions = computed(() => [{ value: '', label: 'All countries' },
+      ...((gpu.value?.countries || []).map(c => ({ value: c, label: c })))])
+    const fetchGpu = async () => {
+      try {
+        const res = await apiFetch(`/google-usage/per-user?country=${encodeURIComponent(gpuCountry.value)}`)
+        if (res.success) gpu.value = res.data
+      } catch (e) { console.warn('per-user google fetch failed:', e.message) }
+    }
     const fetchProviderStats = async () => {
       providerStatsLoading.value = true
       try {
@@ -6478,6 +6520,7 @@ export default {
       if (tab === 'users') { if (!users.value.length) fetchUsers(); if (!aiUsers.value.length) fetchAIUsage(); if (!userLocations.value.byCountry.length) fetchUserLocations() }
       if (tab === 'ai' && !aiUsers.value.length) fetchAIUsage()
       if (tab === 'google' && !aiSummary.value.last30) fetchAIUsage()   // active-user count for the per-user cost line
+      if (tab === 'google' && !gpu.value) fetchGpu()
       if (tab === 'ai' && !aiProvider.value.updatedAt) fetchAiProvider()
       if (tab === 'ai') fetchProviderStats()
       if (tab === 'businesses' && !businesses.value.length) fetchBusinesses()
@@ -7128,7 +7171,7 @@ export default {
       webSearchActionOptions, isSearchActionOn, searchActionCount, chatSearchActionCount, toggleSearchAction, chatUsesClaude, qaUsesClaude, chatDeadSearch, qaDeadSearch,
       prefetchLayerOptions, isPrefetchLayerOn, prefetchLayerCount, togglePrefetchLayer,
       isPrefetchActionOn, prefetchActionCount, togglePrefetchAction,
-      claudeSharePct, aiWin, aiWinCost, providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
+      claudeSharePct, aiWin, aiWinCost, gpu, gpuCountry, gpuCountryOptions, fetchGpu, providerStats, providerStatsLoading, fetchProviderStats, deepseekCost, claudeCost, claudeToday, claudeTodayCost, dsToday, dsTodayCost, aiCombinedCost, fixedMonthlyCost, serverStats,
       providerDaily, dsChartMax, clChartMax,
       gMonthly, gMonthlyLoading, fetchGoogleMonthly, gPrevMonth, gNextMonth, gmStatusClass, gmStatusText,
       aiMonthly, aiMonthlyLoading, fetchAiMonthly, aiPrevMonth, aiNextMonth,
