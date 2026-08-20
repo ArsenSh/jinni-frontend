@@ -1739,6 +1739,12 @@
               </td>
               <td class="col-actions" data-label="Action" @click.stop>
                 <div class="action-group">
+                  <!-- Mobile-only: the name tap toggles the accordion there, so
+                       the moderation modal needs its own explicit opener. -->
+                  <button class="action-btn btn-edit sv-mobile-only" @click="openExpPlace(p)">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Edit
+                  </button>
                   <button v-if="p.explore?.status !== 'verified'" class="action-btn exp-btn-verify" :disabled="expBusy === p.placeId" @click="setExpStatus(p, 'verified')">Verify</button>
                   <button v-if="p.explore?.status !== 'hidden'" class="action-btn exp-btn-hide" :disabled="expBusy === p.placeId" @click="setExpStatus(p, 'hidden')">Hide</button>
                   <button v-if="p.explore?.status === 'hidden' || p.explore?.status === 'verified'" class="action-btn btn-muted" :disabled="expBusy === p.placeId" @click="setExpStatus(p, 'visible')">Reset</button>
@@ -5278,7 +5284,10 @@ select.edit-input { cursor: pointer; }
 .sv-appicon { width: 60px; height: 60px; object-fit: contain; }
 .sv-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .edit-hours-day-short { display: none; }
-.dest-row-hero { display: none; }
+/* Destination list image: small inline thumb on desktop (Arsen 2026-08-20),
+   promoted to the full-width hero inside the mobile cards. */
+.dest-row-hero { display: inline-block; width: 46px; height: 46px; border-radius: 10px; object-fit: cover; vertical-align: middle; margin-right: 8px; }
+.biz-table--dest td.col-name .row-name { display: inline-flex; vertical-align: middle; }
 
 /* ── Mobile refinements (2026-08-20 full audit) — ≤768px only. MUST live in
    THIS scoped block: scoped rules carry the data-v attribute selector, so an
@@ -5287,6 +5296,8 @@ select.edit-input { cursor: pointer; }
 @media (max-width: 768px) {
   .logout-btn span, .sv-btn-text { display: none; }
   .logout-btn, .theme-toggle-btn { padding: 9px; }
+  .sv-mobile-only { display: flex; }
+  .biz-table--dest td.col-name .row-name { display: flex; }
   /* Pagination: ONE horizontal row — ‹ Prev · Page X of Y · Next › */
   /* Side padding so Prev/Next don't touch the edges of the bar's background */
   .pagination { flex-direction: row; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; }

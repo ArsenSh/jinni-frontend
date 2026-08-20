@@ -92,9 +92,13 @@ export default {
       //    stays painted with the TOP color — iOS 26+ Safari ignores the meta
       //    and derives the toolbar tint from the body paint.
       const [edgeTop, edgeBottom] = pageEdges(theme, this.$route?.path || '/');
+      // The canvas TILES this background beyond the page: the area revealed by
+      // TOP overscroll is the previous tile's BOTTOM half, and vice versa — so
+      // the halves must be swapped (bottom color first). In-page the gradient
+      // is hidden behind the painted <body>, only the tiled edges ever show.
       document.documentElement.style.background = edgeTop === edgeBottom
         ? edgeTop
-        : `linear-gradient(${edgeTop} 50%, ${edgeBottom} 50%)`;
+        : `linear-gradient(${edgeBottom} 50%, ${edgeTop} 50%)`;
       document.body.style.backgroundColor = edgeTop;
       void color;
       // 4. <meta name="theme-color"> — Safari/Chrome browser chrome (top edge)
