@@ -1032,7 +1032,7 @@
                 <tr v-else-if="!businesses.length"><td colspan="5" class="empty-cell">No businesses found.</td></tr>
                 <tr v-for="b in businesses" :key="b._id" class="table-row table-row--clickable" @click="openEdit('business', b)" title="Click to view / edit">
                   <td class="user-name" data-label="Name">
-                    <img v-if="b.images && b.images[0]" :src="b.images[0]" class="row-thumb" loading="lazy" @error="hideBrokenThumb" />
+                    <img v-if="b.images && b.images[0]" :src="resolveImage(b.images[0])" class="row-thumb" loading="lazy" @error="hideBrokenThumb" />
                     {{ b.name }}
                     <!-- Event listings carry a date/time (or weekly recurrence)
                          instead of plain opening hours — surface it here so an
@@ -1389,7 +1389,7 @@
                 <tr v-else-if="!destinations.length"><td colspan="6" class="empty-cell">No destinations found.</td></tr>
                 <tr v-for="d in destinations" :key="d._id" class="table-row table-row--clickable" :class="{ 'row-hidden-gem': d.isHiddenGem }" @click="openEdit('destination', d)" title="Click to view / edit">
                   <td class="user-name" data-label="Name">
-                    <img v-if="d.images && d.images[0]" :src="d.images[0]" class="row-thumb" loading="lazy" @error="hideBrokenThumb" />
+                    <img v-if="d.images && d.images[0]" :src="resolveImage(d.images[0])" class="row-thumb" loading="lazy" @error="hideBrokenThumb" />
                     {{ d.name }}
                     <span v-if="d.isHiddenGem" class="gem-badge">✦ Hidden Gem</span>
                   </td>
@@ -2318,7 +2318,7 @@
                 <!-- Hero (large) -->
                 <div class="edit-gallery-hero" @click="editModal.lightboxOpen = true">
                   <img
-                    :src="(editModal.form.images || []).filter(u => u && u.trim())[Math.min(editModal.galleryIndex, (editModal.form.images || []).filter(u => u && u.trim()).length - 1)]"
+                    :src="resolveImage((editModal.form.images || []).filter(u => u && u.trim())[Math.min(editModal.galleryIndex, (editModal.form.images || []).filter(u => u && u.trim()).length - 1)])"
                     class="edit-gallery-hero-img"
                     alt="Business image"
                     @error="e => e.target.classList.add('edit-gallery-hero-img--error')"
@@ -2359,7 +2359,7 @@
                     @click="editModal.galleryIndex = idx"
                     :title="'Image ' + (idx + 1)"
                   >
-                    <img :src="url" :alt="'Image ' + (idx + 1)" @error="e => e.target.style.display='none'" />
+                    <img :src="resolveImage(url)" :alt="'Image ' + (idx + 1)" @error="e => e.target.style.display='none'" />
                   </button>
                 </div>
               </div>
@@ -3263,7 +3263,7 @@
                 <!-- Existing image rows -->
                 <div v-for="(url, idx) in editModal.form.images" :key="idx" class="edit-img-row">
                   <div class="edit-img-thumb-wrap">
-                    <img v-if="url" :src="url" class="edit-img-thumb" @error="e=>e.target.style.display='none'" />
+                    <img v-if="url" :src="resolveImage(url)" class="edit-img-thumb" @error="e=>e.target.style.display='none'" />
                     <div v-else class="edit-img-thumb-empty">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     </div>
@@ -3343,7 +3343,7 @@
             </button>
 
             <img
-              :src="(editModal.form.images || []).filter(u => u && u.trim())[Math.min(editModal.galleryIndex, (editModal.form.images || []).filter(u => u && u.trim()).length - 1)]"
+              :src="resolveImage((editModal.form.images || []).filter(u => u && u.trim())[Math.min(editModal.galleryIndex, (editModal.form.images || []).filter(u => u && u.trim()).length - 1)])"
               class="edit-lightbox-img"
               alt="Business image"
             />
