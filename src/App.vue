@@ -6,6 +6,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { syncPageChrome } from './utils/pageChrome';
 
 const THEME_COLORS = {
   dark:  '#0a0118',
@@ -45,37 +46,12 @@ export default {
       // 2. body.theme-* — legacy class hooks used across pages
       document.body.classList.remove('theme-light', 'theme-dark');
       document.body.classList.add(`theme-${theme}`);
-      // 3. <html> AND <body> background — app-wide page background.
-      //    iOS 26+ Safari ignores <meta theme-color> and derives the toolbar
-      //    tint from the <body> background (or a fixed/sticky edge element),
-      //    so <body> MUST be painted for the mobile chrome to follow the theme.
-      document.documentElement.style.backgroundColor = color;
-      document.body.style.backgroundColor = color;
-      // 4. <meta name="theme-color"> — Safari/Chrome browser chrome
-      let meta = document.querySelector('meta[name="theme-color"]:not([media])');
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'theme-color');
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute('content', color);
-
-      // 5. Best-effort: iOS Safari computes the toolbar tint at render time and
-      //    ignores post-paint JS changes, so the bar can lag until a reload.
-      //    A 1px scroll provokes a re-derivation on versions that re-evaluate
-      //    on scroll. Harmless elsewhere. NOTE: only works if the *document*
-      //    itself scrolls — pages that scroll inside an inner container won't
-      //    trigger it, and on some iOS versions nothing will short of reload.
-      this.nudgeSafariToolbar();
-    },
-    nudgeSafariToolbar() {
-      const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (!isIOS) return;
-      requestAnimationFrame(() => {
-        window.scrollBy(0, 1);
-        requestAnimationFrame(() => window.scrollBy(0, -1));
-      });
+      // 3. Browser chrome (meta theme-color + overscroll canvas) is handled by
+      //    utils/pageChrome.js, which SAMPLES the page's real edge colors —
+      //    no hardcoded tones, and it owns the <html>/<body> inline paints.
+      //    (`color` stays as the CSS pre-paint fallback; see THEME_COLORS.)
+      void color;
+      syncPageChrome();
     },
   },
 };
