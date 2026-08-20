@@ -757,7 +757,8 @@
       "mode_nearby": "À proximité",
       "mode_discovery": "Découverte",
       "send": "Envoyer le message",
-      "switched_mode": "Passé en mode {mode}"
+      "switched_mode": "Passé en mode {mode}",
+      "switched_mode_short": "Mode {mode}"
     },
     "context_menu": {
       "rename": "Renommer",

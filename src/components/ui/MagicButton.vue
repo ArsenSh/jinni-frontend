@@ -1,8 +1,22 @@
 <template>
-  <button class="magic-button" @click="$emit('click')">
+  <!-- The native event MUST be forwarded: listeners like
+       @click.prevent="savePreferences" (OnboardingPage) are wrapped by Vue in
+       withModifiers, which calls e.preventDefault() — an emit without $event
+       made that throw "undefined is not an object (evaluating 'e.preventDefault')". -->
+  <button class="magic-button" @click="$emit('click', $event)">
     <slot></slot>
   </button>
 </template>
+
+<script>
+export default {
+  name: 'MagicButton',
+  // Declaring the emit stops Vue's fallthrough from ALSO binding the parent's
+  // @click natively to this button — undeclared, every click fired twice
+  // (once native, once via $emit).
+  emits: ['click'],
+};
+</script>
 
 <style scoped>
 .magic-button {

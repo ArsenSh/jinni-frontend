@@ -402,7 +402,9 @@
       "placeholder_cooldown": "Դուք հասել եք ձեր սահմանին: Փորձեք նորից ժամը {time}",
       "placeholder_mobile_cooldown": "Սահման է հասել: Փորձեք ժամը {time}",
       "mode_nearby": "Մոտակա",
-      "mode_discovery": "Հայտնաբերում"
+      "mode_discovery": "Հայտնաբերում",
+      "switched_mode": "Անցում {mode} ռեժիմին",
+      "switched_mode_short": "{mode} ռեժիմ"
     },
     "context_menu": {
       "rename": "Վերանվանել",

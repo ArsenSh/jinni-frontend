@@ -5609,7 +5609,11 @@ export default {
       // Briefly show "Switched to <mode> mode" in the input placeholder, then
       // revert. Re-toggling restarts the timer rather than stacking.
       const modeName = this.t(this.nearbyMode ? 'chat.input.mode_nearby' : 'chat.input.mode_discovery');
-      this.modeSwitchNotice = this.t('chat.input.switched_mode', { mode: modeName });
+      // Mobile input-wrapper is short — the full "Switched to X mode" overflows,
+      // so phones get the compact "X mode" variant. Live width check (not
+      // this.isMobile, which is never set on this component).
+      const shortNotice = window.innerWidth <= 768;
+      this.modeSwitchNotice = this.t(shortNotice ? 'chat.input.switched_mode_short' : 'chat.input.switched_mode', { mode: modeName });
       clearTimeout(this.modeSwitchTimer);
       this.modeSwitchTimer = setTimeout(() => { this.modeSwitchNotice = '' }, 2500);
       const button = event.target.closest('.mode-toggle, .mobile-mode-toggle');

@@ -757,7 +757,8 @@
       "mode_nearby": "Рядом",
       "mode_discovery": "Поиск",
       "send": "Отправить сообщение",
-      "switched_mode": "Переключено на режим «{mode}»"
+      "switched_mode": "Переключено на режим «{mode}»",
+      "switched_mode_short": "Режим «{mode}»"
     },
     "context_menu": {
       "rename": "Переименовать",

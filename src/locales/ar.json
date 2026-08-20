@@ -754,7 +754,8 @@
       "mode_nearby": "قريب",
       "mode_discovery": "استكشاف",
       "send": "إرسال الرسالة",
-      "switched_mode": "تم التبديل إلى وضع {mode}"
+      "switched_mode": "تم التبديل إلى وضع {mode}",
+      "switched_mode_short": "وضع {mode}"
     },
     "context_menu": {
       "rename": "إعادة التسمية",

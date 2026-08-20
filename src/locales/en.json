@@ -744,7 +744,8 @@
       "mode_nearby": "Nearby",
       "mode_discovery": "Discovery",
       "send": "Send message",
-      "switched_mode": "Switched to {mode} mode"
+      "switched_mode": "Switched to {mode} mode",
+      "switched_mode_short": "{mode} mode"
     },
     "context_menu": {
       "rename": "Rename",

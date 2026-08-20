@@ -763,7 +763,8 @@
       "mode_nearby": "附近",
       "mode_discovery": "探索",
       "send": "发送消息",
-      "switched_mode": "已切换到{mode}模式"
+      "switched_mode": "已切换到{mode}模式",
+      "switched_mode_short": "{mode}模式"
     },
     "context_menu": {
       "rename": "重命名",

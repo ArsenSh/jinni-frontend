@@ -2,6 +2,7 @@
   <div class="explore" :class="theme">
     <!-- ═══ Header — centered, chat-glacier back pill ═══ -->
     <header class="ex-head">
+      <img src="/images/bottle.png" class="ex-app-icon" alt="Jinni"/>
       <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
       <!-- Framed as an open, growing set rather than a finished one. Saying
            Jinni "already analysed/visited" these places would read as a closed
@@ -136,7 +137,7 @@
                 <button class="ex-act" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
                 </button>
-                <button class="ex-act" :title="t('place_info.more_info') || 'More info'" @click="openInfo(p)">
+                <button class="ex-act" :title="t('place_info.more_info') || 'More info'" @click="openInfo(p, c)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                 </button>
               </div>
@@ -323,7 +324,9 @@ export default {
       searchMiss: false,
       override: null,   // { lat, lng, label } — explore a searched place instead of the user's area
       gallery: { open: false, images: [], idx: 0, name: '' },
-      info: { open: false, loading: false, data: null, image: null, place: null },
+      // cat = the rail the card was opened from; drives the modal's subtitle
+      // and the restaurants/hotels-only rating rule (same as the chat modal).
+      info: { open: false, loading: false, data: null, place: null, cat: null },
     };
   },
   computed: {
@@ -341,6 +344,36 @@ export default {
         ? [this.location.city, this.location.country].filter(Boolean).join(', ')
         : (this.t('explore.this_area') || 'this area');
       return this.t('explore.not_explored', { place: where }) || `Jinni hasn’t been to ${where} yet`;
+    },
+    // ── Info modal (ported from JinniChat) ──
+    // Parse each backend hours string ("Mon: 09:00–22:00") into a day/time
+    // pair for the two-column schedule; a line with no "day: time" separator
+    // shows whole in the day column. Same shape as the chat's hoursParsed.
+    hoursParsed() {
+      const hrs = this.info.data?.hours;
+      if (!Array.isArray(hrs)) return [];
+      return hrs.map(line => {
+        const s = String(line);
+        const idx = s.indexOf(': ');
+        if (idx > 0) return { day: s.slice(0, idx).trim(), time: s.slice(idx + 2).trim() };
+        return { day: s.trim(), time: '' };
+      });
+    },
+    // Tier tint for the modal — only partners get one (mirrors the chat's
+    // infoModalTierClass; Explore's p.tier IS the partner tier, so no
+    // verifiedId gymnastics needed here).
+    infoTierClass() {
+      const tier = this.info.place?.tier;
+      if (tier === 'signature' || tier === 'featured') return 'info-modal--signature';
+      if (tier === 'spotlight') return 'info-modal--spotlight';
+      if (tier === 'verified') return 'info-modal--verified';
+      return '';
+    },
+    // Description arrives either as a plain string or {short, detailed}.
+    infoDescription() {
+      const d = this.info.data?.description;
+      if (!d) return '';
+      return typeof d === 'string' ? d.trim() : (d.short || d.detailed || '');
     },
   },
   mounted() {
@@ -555,8 +588,8 @@ export default {
     },
     closeGallery() { this.gallery = { open: false, images: [], idx: 0, name: '' }; },
     // ── Info ──
-    async openInfo(p) {
-      this.info = { open: true, loading: true, data: null, image: p.image ? this.imgUrl(p.image) : null, place: p };
+    async openInfo(p, cat) {
+      this.info = { open: true, loading: true, data: null, place: p, cat: cat || null };
       try {
         const res = await fetch(`${API_BASE}/api/ai/place-details/${encodeURIComponent(p.placeId)}?name=${encodeURIComponent(p.name)}`, { headers: this.authHeaders() });
         const data = await res.json().catch(() => ({}));
@@ -565,7 +598,12 @@ export default {
         this.info = { ...this.info, loading: false, data: null };
       }
     },
-    closeInfo() { this.info = { open: false, loading: false, data: null, image: null, place: null }; },
+    closeInfo() { this.info = { open: false, loading: false, data: null, place: null, cat: null }; },
+    // Same as the chat modal's Search action — a plain web search on the name.
+    searchOnline(p) {
+      if (!p?.name) return;
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(p.name)}`, '_blank');
+    },
     openPlace(p) {
       // Open on Google Maps (a public maps search URL — no API key exposed).
       const q = encodeURIComponent(`${p.name} ${[this.location?.city, this.location?.country].filter(Boolean).join(' ')}`);
@@ -659,6 +697,9 @@ export default {
   font-family: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
 .ex-pref:hover { background: var(--ex-glass-2); }
+/* App icon above the title — same asset the chat header uses. */
+.ex-app-icon { width: 52px; height: 52px; object-fit: contain; margin-bottom: -4px;
+  filter: drop-shadow(0 4px 14px rgba(212,175,55,0.28)); }
 .ex-title { margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em;
   color: #D4AF37; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .ex-sub { margin: -4px 0 0; font-size: 0.88rem; color: var(--ex-muted); }
@@ -681,6 +722,8 @@ export default {
    "different background" strip), and a hairline grounds it while stuck. */
 .ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 12px 0 0;
   scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
+/* Night: lighter tint so the frosted bar doesn't read as a solid band. */
+.explore.night-mode .ex-nav { background: color-mix(in srgb, var(--ex-bg) 60%, transparent); }
 .ex-nav-inner { display: flex; gap: 8px; width: max-content; margin-inline: auto; padding-inline: 18px; }
 .ex-nav::-webkit-scrollbar { display: none; }
 .ex-chip { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: none; cursor: pointer;
@@ -749,7 +792,6 @@ export default {
 .ex-tier--verified  { background: rgba(34,197,94,0.72); }
 .ex-tier--spotlight { background: rgba(59,159,221,0.75); }
 .ex-tier--signature { background: linear-gradient(135deg, rgba(212,175,55,0.88), rgba(255,140,0,0.88)); }
-.ex-tier--inline { position: static; margin-left: 8px; font-size: 0.68rem; vertical-align: middle; }
 .ex-card--verified  .ex-card-imgwrap { box-shadow: inset 0 0 0 1.5px rgba(34,197,94,0.55), 0 0 16px rgba(34,197,94,0.16); }
 .ex-card--spotlight .ex-card-imgwrap { box-shadow: inset 0 0 0 1.5px rgba(59,159,221,0.6), 0 0 16px rgba(59,159,221,0.18); }
 .ex-card--signature .ex-card-imgwrap { box-shadow: inset 0 0 0 1.5px rgba(212,175,55,0.65), 0 0 18px rgba(212,175,55,0.22); }
@@ -824,39 +866,125 @@ export default {
 .ex-gallery-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ex-gallery-count { flex: none; font-variant-numeric: tabular-nums; opacity: 0.8; }
 
-/* Info modal — chat modal chrome: violet glass at night, warm cream by day */
-.ex-info-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
-  background: rgba(0,0,0,0.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-.ex-info { position: relative; width: min(520px, 94vw); max-height: 86vh; overflow-y: auto; border-radius: 18px; color: var(--ex-text); }
-.night-mode .ex-info { background: rgba(40,30,62,0.72); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.16), 0 0 40px rgba(0,0,0,0.5);
-  backdrop-filter: blur(30px) saturate(190%); -webkit-backdrop-filter: blur(30px) saturate(190%); }
-.day-mode .ex-info { background: rgba(255,251,245,0.85); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), 0 0 30px rgba(0,0,0,0.2);
-  backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%); }
-.ex-info-close { position: absolute; top: 12px; right: 12px; z-index: 2; width: 32px; height: 32px; border-radius: 999px; border: none; cursor: pointer;
-  color: #fff; background: rgba(0,0,0,0.4); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: background .18s; }
-.ex-info-close:hover { background: rgba(0,0,0,0.6); }
-.ex-info-loading { display: grid; place-items: center; min-height: 220px; }
-.ex-info-spinner { width: 34px; height: 34px; border-radius: 999px; border: 3px solid var(--ex-line); border-top-color: var(--ex-accent); animation: exSpin 0.8s linear infinite; }
-@keyframes exSpin { to { transform: rotate(360deg); } }
-.ex-info-img { width: 100%; height: 210px; object-fit: cover; display: block; }
-.ex-info-body { padding: 16px 20px 20px; }
-.ex-info-name { margin: 0 0 4px; font-size: 1.25rem; font-weight: 800; color: var(--ex-heading); }
-.ex-info-rating { font-size: 0.92rem; font-weight: 700; color: var(--ex-accent); margin-bottom: 8px; }
-.ex-info-desc { margin: 0 0 12px; font-size: 0.92rem; line-height: 1.55; color: var(--ex-text); }
-.ex-info-rows { display: flex; flex-direction: column; gap: 9px; margin-bottom: 12px; }
-.ex-info-row { display: flex; align-items: flex-start; gap: 9px; font-size: 0.88rem; color: var(--ex-text); }
-.ex-info-row svg { flex: none; margin-top: 2px; color: var(--ex-accent); }
-.ex-info-row a { color: var(--ex-accent); text-decoration: none; font-weight: 600; overflow-wrap: anywhere; }
-.ex-info-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 10px 0 12px; font-size: 13px; }
-.ex-info-grid dt { font-weight: 600; white-space: nowrap; color: var(--ex-muted); }
-.ex-info-grid dd { margin: 0; min-width: 0; overflow-wrap: anywhere; color: var(--ex-text); }
-.ex-info-grid a { color: var(--ex-heading); }
-.ex-info-hours { margin-bottom: 14px; font-size: 0.82rem; color: var(--ex-muted); }
-.ex-info-hours-title { font-weight: 700; color: var(--ex-text); margin-bottom: 4px; font-size: 0.88rem; }
-.ex-info-hours-line { line-height: 1.55; }
-.ex-info-actions { display: flex; justify-content: flex-end; }
-.ex-cta--sm { padding: 9px 18px; font-size: 0.88rem; }
+/* ── Info modal — ported VERBATIM from JinniChat's info-modal (glacier glass,
+   gold gradient title, pd-* fact layout, partner-tier tints) so the two
+   surfaces read identically. Explore adds nothing of its own here; if the
+   chat modal design changes, re-port rather than diverge. ── */
+.info-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000}
+.info-modal{border-radius:12px;max-width:500px;width:90%;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.info-modal.night{background:rgba(30,20,56,0.85);color:#e2e8f0;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:0 0 5px rgba(0,0,0,0.5),inset 0 0 0 0.5px rgba(255,255,255,0.08)}
+.info-modal.day{background:rgba(255,255,255,0.85);color:#2d3748;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:none;box-shadow:0 0 30px rgba(0,0,0,0.18),inset 0 0 0 1px rgba(255,255,255,0.6)}
+.info-modal .modal-header{position:relative;z-index:4;background:transparent;border:none;padding:14px 20px 8px 20px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
+.info-modal .modal-header h3{margin:0;font-size:1.25rem;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25;background:linear-gradient(45deg,#D4AF37,#FF8C00);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.info-modal .modal-body{flex:1 1 auto;min-height:0;padding:2px 20px 20px 20px;max-height:60vh;overflow-y:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 14px),transparent 100%);mask-image:linear-gradient(to bottom,#000 calc(100% - 14px),transparent 100%)}
+.info-modal.night .modal-body::-webkit-scrollbar{width:4px}
+.info-modal.night .modal-body::-webkit-scrollbar-track{background:transparent}
+.info-modal.night .modal-body::-webkit-scrollbar-thumb{border-radius:4px;background:rgba(192,132,252,0.1)}
+.info-modal.night .modal-body::-webkit-scrollbar-thumb:hover{background:rgba(192,132,252,0.3)}
+.info-modal.day .modal-body::-webkit-scrollbar{width:8px}
+.info-modal.day .modal-body::-webkit-scrollbar-track{background:transparent}
+.info-modal.day .modal-body::-webkit-scrollbar-thumb{border-radius:4px;background:rgba(160,82,45,0.3)}
+.info-modal.day .modal-body::-webkit-scrollbar-thumb:hover{background:rgba(160,82,45,0.5)}
+.loading-container{text-align:center;padding:20px}
+.info-modal.night .loading-container p{color:#aaa}
+.info-modal.day .loading-container p{color:#2d3748}
+.place-details{display:flex;flex-direction:column;gap:12px}
+.info-row{display:flex;flex-direction:column}
+.label{font-weight:600;color:#4a5568;font-size:0.875rem}
+.value{color:#2d3748;line-height:1.5}
+.info-modal.night .label,.info-modal.night .value{color:#e2e8f0}
+.info-modal.day .label{background:linear-gradient(0deg,#D4AF37,#FF8C00);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.info-modal.day .value{color:#3c2a1e}
+.info-modal .info-row--event .value.event-schedule-value{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.event-schedule-primary{font-weight:600;font-size:0.95rem}
+.review-count{color:#718096;font-size:0.875rem}
+.pd-subtitle{font-size:0.82rem;opacity:0.6;margin-top:-2px;text-transform:capitalize}
+.pd-rating{display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:600}
+.pd-star{width:16px;height:16px;flex-shrink:0;color:#f5b301}
+.pd-rating-out{opacity:0.5;font-weight:400;margin-left:-3px}
+.pd-rating .review-count{font-weight:400;opacity:0.6;margin-left:2px}
+.pd-actions{display:flex;flex-wrap:wrap;gap:8px}
+.pd-action{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:22px;font-size:0.85rem;font-weight:600;line-height:1;cursor:pointer;border:none;text-decoration:none;white-space:nowrap;font-family:inherit;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);transition:all 0.2s ease}
+.pd-action svg{width:16px;height:16px;flex-shrink:0}
+.pd-action:active{transform:scale(0.96)}
+.info-modal.night .pd-action{background:rgba(255,255,255,0.06);color:#d5dce4;box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.1)}
+.info-modal.night .pd-action:hover{background:rgba(255,255,255,0.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
+.info-modal.night .pd-action--primary{background:linear-gradient(45deg,rgba(212,175,55,0.7),rgba(255,140,0,0.7));color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)}
+.info-modal.night .pd-action--primary:hover{background:linear-gradient(45deg,rgba(212,175,55,0.8),rgba(255,140,0,0.8));box-shadow:inset 0 0 0 1.5px rgba(255,255,255,0.2)}
+.info-modal.day .pd-action{background:rgba(255,255,255,0.55);color:#8b6b3d;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7)}
+.info-modal.day .pd-action:hover{background:rgba(255,255,255,0.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.95)}
+.info-modal.day .pd-action--primary{background:linear-gradient(45deg,rgba(212,175,55,0.8),rgba(255,140,0,0.8));color:#fff;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.4)}
+.info-modal.day .pd-action--primary:hover{background:linear-gradient(45deg,rgba(212,175,55,0.9),rgba(255,140,0,0.9));box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.45)}
+.pd-divider{height:1px;width:100%;margin:2px 0}
+.info-modal.night .pd-divider{background:rgba(255,255,255,0.08)}
+.info-modal.day .pd-divider{background:rgba(150,100,40,0.14)}
+.pd-fact{display:flex;gap:12px;align-items:flex-start}
+.pd-fact-ic{flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
+.pd-fact-ic svg{width:17px;height:17px}
+.pd-fact-body{flex:1;min-width:0;font-size:0.92rem;line-height:1.45}
+.pd-fact-body a{text-decoration:none}
+.pd-fact--desc .pd-fact-body{opacity:0.82;font-size:0.88rem}
+.info-modal.night .pd-fact-ic{color:#c9b8ff}
+.info-modal.night .pd-fact-body a{background:linear-gradient(45deg,#D4AF37,#FF8C00);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.info-modal.day .pd-fact-ic{color:#b87a2a}
+.info-modal.day .pd-fact-body a{color:#b8860b}
+.pd-hours{display:flex;flex-direction:column;width:100%}
+.pd-hours-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:6px 0}
+.pd-hours-row:first-child{padding-top:0}
+.pd-hours-row + .pd-hours-row{border-top:1px solid transparent}
+.pd-hours-day{font-weight:600;white-space:nowrap}
+.pd-hours-time{opacity:0.72;text-align:right;font-variant-numeric:tabular-nums}
+.info-modal.night .pd-hours-row + .pd-hours-row{border-top-color:rgba(255,255,255,0.08)}
+.info-modal.day .pd-hours-row + .pd-hours-row{border-top-color:rgba(150,100,40,0.13)}
+.pd-highlights{border-radius:16px;padding:12px 14px 13px;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+.pd-highlights-head{display:flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;opacity:0.7;margin-bottom:10px}
+.info-modal.night .pd-highlights{background:rgba(255,255,255,0.04);box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.08)}
+.info-modal.day .pd-highlights{background:rgba(255,255,255,0.4);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6)}
+.pd-highlights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 16px}
+.pd-highlight-item{display:flex;align-items:flex-start;gap:9px;font-size:0.9rem;line-height:1.35;font-weight:500}
+.info-modal .pd-highlight-check{width:15px;height:15px;margin-top:1px}
+.pd-chips{display:flex;flex-wrap:wrap;gap:6px}
+.social-links{display:flex;flex-wrap:wrap;gap:8px;padding-top:2px}
+.social-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;text-decoration:none;transition:opacity 0.15s}
+.social-link:hover{opacity:0.8}
+.social-link--instagram{background:rgba(225,48,108,0.12);color:#e1306c}
+.social-link--facebook{background:rgba(24,119,242,0.12);color:#1877f2}
+.social-link--tripadvisor{background:rgba(52,168,83,0.12);color:#34a853}
+.info-modal.day .social-link{background:rgba(255,255,255,0.55);color:#6b5840;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7)}
+.info-modal.day .social-link:hover{background:rgba(255,255,255,0.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.95);opacity:1}
+
+/* Tier tints — verified / spotlight / signature (same recipes as chat) */
+.info-modal.night.info-modal--verified{background:linear-gradient(rgba(34,197,94,0.13),rgba(34,197,94,0.13)),rgba(30,20,56,0.84)}
+.info-modal.day.info-modal--verified{background:linear-gradient(rgba(34,197,94,0.10),rgba(34,197,94,0.10)),rgba(255,255,255,0.85)}
+.info-modal--verified.night .modal-header h3,.info-modal--verified.night .label{background:linear-gradient(45deg,#34d399,#22c55e);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.info-modal--verified.day .modal-header h3,.info-modal--verified.day .label{background:linear-gradient(45deg,#16a34a,#15803d);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.info-modal--verified.night .pd-fact-ic{color:#4ade80}
+.info-modal--verified.day .pd-fact-ic{color:#16a34a}
+.info-modal--verified.night .pd-action--primary{background:linear-gradient(45deg,rgba(34,197,94,0.7),rgba(16,185,129,0.7))}
+.info-modal--verified.night .pd-action--primary:hover{background:linear-gradient(45deg,rgba(34,197,94,0.8),rgba(16,185,129,0.8))}
+.info-modal--verified.day .pd-action--primary{background:linear-gradient(45deg,rgba(34,197,94,0.8),rgba(16,185,129,0.8))}
+.info-modal--verified.day .pd-action--primary:hover{background:linear-gradient(45deg,rgba(34,197,94,0.9),rgba(16,185,129,0.9))}
+.info-modal--verified .info-row--event{background:linear-gradient(135deg,rgba(34,197,94,0.16),rgba(16,185,129,0.07))}
+.info-modal.night.info-modal--spotlight{background:linear-gradient(rgba(59,158,221,0.15),rgba(59,158,221,0.15)),rgba(30,20,56,0.84)}
+.info-modal.day.info-modal--spotlight{background:linear-gradient(rgba(59,158,221,0.11),rgba(59,158,221,0.11)),rgba(255,255,255,0.85)}
+.info-modal--spotlight.night .modal-header h3,.info-modal--spotlight.night .label{background:linear-gradient(45deg,#5cb3e8,#3b9fdd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.info-modal--spotlight.day .modal-header h3,.info-modal--spotlight.day .label{background:linear-gradient(45deg,#2b85c0,#1f6ea8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.info-modal--spotlight.night .pd-fact-ic{color:#5cb3e8}
+.info-modal--spotlight.day .pd-fact-ic{color:#2b85c0}
+.info-modal--spotlight.night .pd-action--primary{background:linear-gradient(45deg,rgba(59,158,221,0.7),rgba(37,128,190,0.7))}
+.info-modal--spotlight.night .pd-action--primary:hover{background:linear-gradient(45deg,rgba(59,158,221,0.8),rgba(37,128,190,0.8))}
+.info-modal--spotlight.day .pd-action--primary{background:linear-gradient(45deg,rgba(59,158,221,0.8),rgba(37,128,190,0.8))}
+.info-modal--spotlight.day .pd-action--primary:hover{background:linear-gradient(45deg,rgba(59,158,221,0.9),rgba(37,128,190,0.9))}
+.info-modal--spotlight .info-row--event{background:linear-gradient(135deg,rgba(59,158,221,0.16),rgba(37,128,190,0.07))}
+.info-modal.night.info-modal--signature{background:linear-gradient(rgba(212,175,55,0.15),rgba(212,175,55,0.15)),rgba(30,20,56,0.84)}
+.info-modal.day.info-modal--signature{background:linear-gradient(rgba(212,175,55,0.13),rgba(212,175,55,0.13)),rgba(255,255,255,0.86)}
+.info-modal--signature.night .pd-fact-ic{color:#e8c45f}
+.info-modal--signature.day .pd-fact-ic{color:#c79a2e}
+.info-modal--signature.night .pd-action--primary{background:linear-gradient(45deg,rgba(212,175,55,0.7),rgba(255,140,0,0.7))}
+.info-modal--signature.night .pd-action--primary:hover{background:linear-gradient(45deg,rgba(212,175,55,0.82),rgba(255,140,0,0.82))}
+.info-modal--signature.day .pd-action--primary{background:linear-gradient(45deg,rgba(212,175,55,0.8),rgba(255,140,0,0.8))}
+.info-modal--signature.day .pd-action--primary:hover{background:linear-gradient(45deg,rgba(212,175,55,0.9),rgba(255,140,0,0.9))}
+.info-modal--signature .info-row--event{background:linear-gradient(135deg,rgba(212,175,55,0.18),rgba(255,140,0,0.08))}
 
 @media (max-width: 520px) {
   .ex-title { font-size: 1.35rem; }
