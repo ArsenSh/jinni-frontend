@@ -2295,8 +2295,37 @@ export default {
       if (!e.target.closest('.message-bubble.user')) this.touchedMessageId = null;
     };
     document.addEventListener('touchstart', this._clearTouchedMessage, { passive: true });
+    // iOS keyboard handling: when the keyboard opens, Safari shrinks only the
+    // VISUAL viewport — the fixed 100vh chat shell keeps its layout height, so
+    // the input bar could hide behind the keyboard, and Safari's "scroll the
+    // focused field into view" push exposed the backdrop below the page.
+    // Pinning the shell's height to visualViewport.height keeps the input bar
+    // sitting right on top of the keyboard; scrollTo(0,0) cancels the push.
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS && window.visualViewport) {
+      this._vvHandler = () => {
+        const vv = window.visualViewport;
+        const el = document.querySelector('.genie-chat-container');
+        if (!vv || !el) return;
+        const keyboard = window.innerHeight - vv.height;
+        if (keyboard > 60) {
+          el.style.height = vv.height + 'px';
+          window.scrollTo(0, 0);
+          this.scrollToBottom();
+        } else {
+          el.style.height = '';
+        }
+      };
+      window.visualViewport.addEventListener('resize', this._vvHandler);
+      window.visualViewport.addEventListener('scroll', this._vvHandler);
+    }
   },
   beforeUnmount() {
+    if (this._vvHandler && window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', this._vvHandler);
+      window.visualViewport.removeEventListener('scroll', this._vvHandler);
+    }
     this.closeContextMenu();   // clears the 5s timer + document click listener
     document.removeEventListener('click', this.handlePlaceSearchClick);
     clearTimeout(this._usageNoticeTimer);

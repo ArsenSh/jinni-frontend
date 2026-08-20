@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- maximum-scale=1 blocks iOS Safari's automatic zoom-in when focusing
+         inputs (the chat box "sometimes zooms" bug). iOS still allows manual
+         pinch-zoom regardless of this value, so accessibility is preserved. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
     <title>Jinni - Your AI Guide</title>
     <!-- Tight-cropped lamp icons — the raw logo PNG has big transparent
          margins that made the favicon look tiny in browser tabs. -->

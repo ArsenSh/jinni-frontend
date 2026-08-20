@@ -25,7 +25,7 @@ const PAGE_EDGES = {
     '/':                   ['#0a0118', '#080313'],   // starry sky
     '/business':           ['#0a0118', '#080313'],
     '/marketing':          ['#0a0118', '#0a0118'],   // flat pages
-    '/admin':              ['#0a0118', '#16213e'],   // flat page, #16213e bottom nav on mobile
+    '/admin':              ['#0a0118', '#0a0118'],   // flat in BOTH themes (Arsen)
   },
   light: {
     default:               ['#f9f5eb', '#f9f5eb'],
@@ -136,8 +136,20 @@ export default {
         || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       if (!isIOS) return;
       requestAnimationFrame(() => {
+        // Safari only re-derives the canvas/toolbar tint on a DOCUMENT scroll.
+        // Fixed-height shells (chat, business dashboard) have nothing to
+        // scroll, so the old 1px nudge was a no-op there and Safari kept the
+        // PREVIOUS page's colors until a full reload (auth → dashboard bug).
+        // Temporarily grant 2px of scroll slack — invisible on fixed shells —
+        // so the nudge always actually scrolls.
+        const de = document.documentElement;
+        const needsSlack = de.scrollHeight <= window.innerHeight;
+        if (needsSlack) document.body.style.minHeight = 'calc(100vh + 2px)';
         window.scrollBy(0, 1);
-        requestAnimationFrame(() => window.scrollBy(0, -1));
+        requestAnimationFrame(() => {
+          window.scrollBy(0, -1);
+          if (needsSlack) document.body.style.minHeight = '';
+        });
       });
     },
   },

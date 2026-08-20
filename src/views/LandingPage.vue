@@ -133,6 +133,21 @@ export default {
         document.head.appendChild(meta)
       }
       meta.setAttribute('content', p.top)
+      // Safari re-derives canvas/toolbar tint only on a document scroll; give
+      // 2px slack when the page has nothing to scroll (same as App.vue).
+      const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+      if (isIOS) {
+        requestAnimationFrame(() => {
+          const needsSlack = document.documentElement.scrollHeight <= window.innerHeight
+          if (needsSlack) document.body.style.minHeight = 'calc(100vh + 2px)'
+          window.scrollBy(0, 1)
+          requestAnimationFrame(() => {
+            window.scrollBy(0, -1)
+            if (needsSlack) document.body.style.minHeight = ''
+          })
+        })
+      }
     }
     const features = [
       {
