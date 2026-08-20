@@ -200,13 +200,15 @@ export default {
       de.style.backgroundImage = top === bottom
         ? 'none'
         : `linear-gradient(${top} 50%, ${bottom} 50%)`;
-      // The solid background-color is what iOS Safari uses to tint its BOTTOM
-      // bar and the keyboard band — both sit against the page's BOTTOM edge,
-      // so they must carry the bottom color (device-verified 2026-08-20: with
-      // `top` here the chat keyboard band showed #0a0118 against the page's
-      // #16213e bottom). The TOP chrome is covered by the theme-color meta and
-      // the canvas gradient's top half; it never reads this color.
-      de.style.backgroundColor = bottom;
+      // SPLIT tint sources (device-verified 2026-08-21): Safari tints the TOP
+      // region from <html>'s background-color and the BOTTOM bar / keyboard
+      // band from <body>'s. With both set to `bottom`, night looked fine (its
+      // two darks are near-identical) but day-mode desert pages showed the
+      // sandy BOTTOM color at the top of the phone. html carries the page's
+      // top edge; body carries the bottom edge. Both are ALWAYS solid
+      // longhands — the old `background` shorthand blanked background-color
+      // to transparent and Safari's tint fell back to WHITE.
+      de.style.backgroundColor = top;
       // <body> backdrop: exposed when the iOS keyboard shifts the visual
       // viewport behind fixed-100vh shells. Carries the page's OWN computed
       // background image verbatim (or none for flat pages) over a solid color.
