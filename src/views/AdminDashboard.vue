@@ -6913,7 +6913,11 @@ export default {
     const placeEditForm = ref({ name: '', address: '', phone: '', website: '', actions: [], interests: [], aiBlocked: false })
     const placeEditSaving = ref(false)
     // Same vocab the staff Explore drawer edits (validated server-side too)
-    const placeEditCategories = ['restaurants', 'hotels', 'historical', 'events', 'photo_spots', 'hidden_gems', 'shopping']
+    // Includes the six shopping sub-types (souvenirs…food): the cache tagger
+    // and validators record WHICH kind of shop a place is — keep the umbrella
+    // 'shopping' tag on sub-typed places too (Explore groups by it).
+    const placeEditCategories = ['restaurants', 'hotels', 'historical', 'events', 'photo_spots', 'hidden_gems', 'shopping',
+      'souvenirs', 'clothing', 'market', 'mall', 'jewelry', 'food']
     const placeEditInterests = ['nature', 'family', 'romantic', 'art', 'cultural', 'history', 'adventure', 'relaxation', 'nightlife', 'food&drink', 'luxury', 'budget']
     const togglePlaceEditTag = (field, v) => {
       const arr = placeEditForm.value[field]

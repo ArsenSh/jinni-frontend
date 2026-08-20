@@ -1772,7 +1772,7 @@
             <!-- Category membership — click to add/remove this place from an
                  Explore rail (fixes wrong AI tagging like historical+events). -->
             <div class="exp-modal-cats">
-              <button v-for="c in expCategories" :key="c.value" type="button"
+              <button v-for="c in expEditCategories" :key="c.value" type="button"
                       class="exp-cat-chip" :class="{ 'exp-cat-chip--on': (expSelected.actions || []).includes(c.value) }"
                       :disabled="expBusy === expSelected.placeId"
                       @click="toggleExpAction(expSelected, c.value)">
@@ -2339,6 +2339,21 @@ export default {
       // Not a PlaceCache category: switches the table to the AiFoundEvent
       // review queue (dated events the AI actually served to users).
       { value: 'jinni_events', label: 'Jinni events' },
+    ]
+    // Editor chips (place modal) — the real curatable categories PLUS the six
+    // shopping sub-types, so a validator can mark WHICH kind of shop a place
+    // is (a sub-typed place should keep the umbrella 'shopping' tag too; the
+    // sub-type is what the Jewelry/Malls/… refills match on). 'jinni_events'
+    // is excluded: it's a table view, not a PlaceCache tag — the server would
+    // silently strip it.
+    const expEditCategories = [
+      ...expCategories.filter(c => c.value !== 'jinni_events'),
+      { value: 'souvenirs', label: 'Souvenirs & gifts' },
+      { value: 'clothing',  label: 'Clothing & boutiques' },
+      { value: 'market',    label: 'Markets & bazaars' },
+      { value: 'mall',      label: 'Malls' },
+      { value: 'jewelry',   label: 'Jewelry' },
+      { value: 'food',      label: 'Food & gourmet' },
     ]
     // ── Place detail modal ──
     const expSelected = ref(null)
@@ -3913,7 +3928,7 @@ export default {
       filteredAiEvents, openAiEventRow,
       // Explore moderation tab
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
-      expStatus, expStatusOpts, expCategory, expCategories, expCounts,
+      expStatus, expStatusOpts, expCategory, expCategories, expEditCategories, expCounts,
       expSearchInput, onExpSearchInput, loadExplorePlaces, changeExpPage, setExpStatus, toggleExpAction,
       EXPLORE_INTERESTS, toggleExpInterest, toggleAiBlock,
       expSelected, expImages, expImagesLoading, openExpPlace, apiOrigin, expPrice, fmtD, expMapsUrl,
