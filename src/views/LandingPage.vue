@@ -107,48 +107,11 @@ export default {
       }
     }
     const isNightMode = computed(() => isNightTime())
-    // Keep the browser chrome (mobile address-bar) in sync with the landing
-    // page's actual day/night look — same colors App.vue uses for the app.
-    // Landing's theme is CLOCK-based (not the store), so it must paint its own
-    // edge pair — and it must write the `background` SHORTHAND: App.vue paints
-    // a store-theme gradient IMAGE on <html>, and writing only backgroundColor
-    // left that image visible (night landing showed the day-cream overscroll).
-    // Halves are swapped on purpose: the canvas tiles this beyond the page, so
-    // top overscroll reveals the previous tile's BOTTOM half.
-    const EDGE_PAIRS = {
-      dark:  { top: '#0a0118', bottom: '#080313' },   // starry sky ends
-      light: { top: '#f9f5eb', bottom: '#e0a082' },   // desert sky ends
-    }
-    const applyBrowserTheme = () => {
-      const theme = isNightMode.value ? 'dark' : 'light'
-      const p = EDGE_PAIRS[theme]
-      document.documentElement.setAttribute('data-theme', theme)
-      document.documentElement.style.background =
-        p.top === p.bottom ? p.top : `linear-gradient(${p.bottom} 50%, ${p.top} 50%)`
-      document.body.style.backgroundColor = p.top
-      let meta = document.querySelector('meta[name="theme-color"]:not([media])')
-      if (!meta) {
-        meta = document.createElement('meta')
-        meta.setAttribute('name', 'theme-color')
-        document.head.appendChild(meta)
-      }
-      meta.setAttribute('content', p.top)
-      // Safari re-derives canvas/toolbar tint only on a document scroll; give
-      // 2px slack when the page has nothing to scroll (same as App.vue).
-      const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-      if (isIOS) {
-        requestAnimationFrame(() => {
-          const needsSlack = document.documentElement.scrollHeight <= window.innerHeight
-          if (needsSlack) document.body.style.minHeight = 'calc(100vh + 2px)'
-          window.scrollBy(0, 1)
-          requestAnimationFrame(() => {
-            window.scrollBy(0, -1)
-            if (needsSlack) document.body.style.minHeight = ''
-          })
-        })
-      }
-    }
+    // Browser-chrome painting was removed here: App.vue now DERIVES the
+    // chrome/canvas/backdrop colors from whatever the page actually renders
+    // (getComputedStyle on the rendered sky), so the landing's clock-based
+    // theme is picked up automatically — no separate edge pair to maintain,
+    // and no second writer fighting App.vue over <html>/<body>/meta.
     const features = [
       {
         title: 'landing.features.ai.title',
@@ -186,7 +149,6 @@ export default {
       } else {clearAutoCloseTimer()}
     })
     onMounted(() => {
-      applyBrowserTheme()
       if (store.state.i18n?.locale) {selectedLanguage.value = store.state.i18n.locale}
       showAllLanguages.value = false
     })

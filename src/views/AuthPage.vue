@@ -36,7 +36,8 @@ export default {
    * the browser chrome/overscroll/keyboard band (painted from the body color
    * by App.vue) showed CREAM around a dark page in day theme. These are the
    * exact composed colors the overlay used to produce: 70% black over cream
-   * (#f9f5eb) and over night (#0a0118). App.vue PAGE_EDGES['/auth'] matches. */
+   * (#f9f5eb) and over night (#0a0118). App.vue derives the chrome from
+   * these rendered colors automatically. */
   background: #4b4a47;
   overflow-y: auto;
   width: 100%;

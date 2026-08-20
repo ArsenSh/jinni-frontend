@@ -12,48 +12,107 @@ const THEME_COLORS = {
   light: '#f9f5eb',
 };
 
-/* Per-page edge colors [top, bottom] — from the 2026-08-20 audit of every
- * routed view's real background. The browser chrome (meta theme-color = top)
- * and the overscroll canvas (html two-tone gradient) follow the page the user
- * is actually on, so the rubber-band matches each page's own gradient ends.
- * Pages absent here use the theme default. Known limitation: pages with their
- * own LOCAL theme toggle (admin, validator, marketing) are painted for the
- * store theme — their local toggle doesn't reach this map. */
-const PAGE_EDGES = {
-  dark: {
-    default:               ['#0a0118', '#16213e'],   // the app-wide night gradient ends
-    '/':                   ['#0a0118', '#080313'],   // starry sky
-    '/business':           ['#0a0118', '#080313'],
-    '/auth':               ['#0a0118', '#0a0118'],   // flat dark page (opaque .auth-page)
-    '/marketing':          ['#0a0118', '#0a0118'],   // flat pages
-    '/admin':              ['#0a0118', '#0a0118'],   // flat in BOTH themes (Arsen)
-  },
-  light: {
-    default:               ['#f9f5eb', '#f9f5eb'],
-    '/':                   ['#f9f5eb', '#e0a082'],   // desert sky pages
-    '/business':           ['#f9f5eb', '#e0a082'],
-    '/auth':               ['#4b4a47', '#4b4a47'],   // auth looks DARK even in day theme
-                                                     // (the old 70% black over cream)
-    '/contact':            ['#f9f5eb', '#e0a082'],
-    '/terms':              ['#f9f5eb', '#e0a082'],
-    '/privacy':            ['#f9f5eb', '#e0a082'],
-    '/business/terms':     ['#f9f5eb', '#e0a082'],
-    '/business/privacy':   ['#f9f5eb', '#e0a082'],
-    '/chat':               ['#f9f5eb', '#efe4cf'],   // cream gradient pages
-    '/explore':            ['#f9f5eb', '#efe4cf'],
-    '/business/dashboard': ['#f9f5eb', '#efe4cf'],
-    '/share':              ['#f9f5eb', '#efe4cf'],
-    '/admin':              ['#f4efe4', '#f4efe4'],   // admin's own cream tone
-  },
+/* ── Chrome follows the PAGE, not a map ─────────────────────────────────────
+ * The browser chrome (meta theme-color), the overscroll canvas (<html>) and
+ * the keyboard-exposed backdrop (<body>) are DERIVED from the background the
+ * routed page actually renders, via getComputedStyle. There is no per-page
+ * color table to keep in sync: restyle a page, add a route, or flip a page's
+ * LOCAL theme toggle (admin / validator / marketing) and the chrome follows
+ * by construction. Used only as a last resort when nothing parseable paints. */
+const FALLBACK_EDGES = {
+  dark:  ['#0a0118', '#16213e'],
+  light: ['#f9f5eb', '#f9f5eb'],
 };
 
-function pageEdges(theme, path) {
-  const map = PAGE_EDGES[theme] || PAGE_EDGES.light;
-  if (map[path]) return map[path];
-  // Prefix routes (/share/:token, /marketing/:token)
-  if (path.startsWith('/share')) return map['/share'] || map.default;
-  if (path.startsWith('/marketing')) return map['/marketing'] || map.default;
-  return map.default;
+/* Alpha of a computed CSS color ('rgb(…)', 'rgba(…)', '#hex', keyword). */
+function colorAlpha(str) {
+  if (!str) return 0;
+  const s = String(str).trim().toLowerCase();
+  if (s === 'transparent' || s === 'none') return 0;
+  const m = s.match(/^rgba?\(([^)]+)\)$/);
+  if (m) {
+    const parts = m[1].split(/[,/]+/).map(x => x.trim()).filter(Boolean);
+    return parts.length >= 4 ? parseFloat(parts[3]) : 1;
+  }
+  if (s[0] === '#') {
+    if (s.length === 9) return parseInt(s.slice(7, 9), 16) / 255;
+    if (s.length === 5) return parseInt(s[4] + s[4], 16) / 255;
+  }
+  return 1;
+}
+
+/* Split a computed background-image list on top-level commas (colors inside
+ * rgb()/gradient() contain commas of their own). */
+function splitLayers(img) {
+  const layers = [];
+  let depth = 0, start = 0;
+  for (let i = 0; i < img.length; i++) {
+    const ch = img[i];
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    else if (ch === ',' && depth === 0) { layers.push(img.slice(start, i).trim()); start = i + 1; }
+  }
+  layers.push(img.slice(start).trim());
+  return layers;
+}
+
+/* Opaque end colors of one gradient layer, as {top, bottom}. Computed styles
+ * normalize stops to rgb()/rgba(); transparent stops (fade-outs) are skipped.
+ * Only vertical flips need direction handling — the app's gradients are
+ * default/180deg except explicit '0deg'/'to top'. */
+function layerEnds(layer) {
+  const stops = (layer.match(/rgba?\([^)]*\)|#[0-9a-f]{3,8}/gi) || [])
+    .filter(c => colorAlpha(c) >= 0.99);
+  if (!stops.length) return null;
+  const reversed = /gradient\(\s*(0deg|to top)\b/.test(layer);
+  return reversed
+    ? { top: stops[stops.length - 1], bottom: stops[0] }
+    : { top: stops[0], bottom: stops[stops.length - 1] };
+}
+
+/* What does this element visibly paint? {top, bottom, image} or null.
+ * Top edge comes from the first (frontmost) gradient layer, bottom from the
+ * last (backmost) — matches how layered skies compose (StarrySky's top fade
+ * over its radial base). A translucent background-color (old auth overlay
+ * style) is NOT accepted: chrome must never trust a color that composites. */
+function parsePaint(cs) {
+  const img = cs.backgroundImage;
+  if (img && img !== 'none') {
+    const layers = splitLayers(img).filter(l => l.includes('gradient('));
+    if (layers.length) {
+      const top = layerEnds(layers[0]);
+      const bottom = layerEnds(layers[layers.length - 1]);
+      if (top && bottom) return { top: top.top, bottom: bottom.bottom, image: img };
+    }
+    return null;
+  }
+  const bc = cs.backgroundColor;
+  if (colorAlpha(bc) >= 0.99) return { top: bc, bottom: bc, image: null };
+  return null;
+}
+
+/* Find the element that paints the page: the routed view's root, or — for
+ * transparent roots (landing, contact, legal) — its backdrop child (the sky
+ * components deliberately sit first in the DOM, so document-order BFS finds
+ * them before any content). Bounded: depth ≤ 4, ≤ 40 elements scanned. */
+function findPagePaint(rootEl) {
+  const queue = [[rootEl, 0]];
+  let scanned = 0;
+  while (queue.length && scanned < 40) {
+    const [el, depth] = queue.shift();
+    scanned++;
+    let paint = null;
+    try { paint = parsePaint(getComputedStyle(el)); } catch (e) { /* detached node */ }
+    if (paint) return paint;
+    if (depth < 4) {
+      for (const child of el.children) {
+        const tag = child.tagName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEMPLATE') continue;
+        queue.push([child, depth + 1]);
+      }
+    }
+  }
+  return null;
 }
 
 export default {
@@ -64,9 +123,10 @@ export default {
       immediate: true,
       handler() { this.applyGlobalTheme(); },
     },
-    // Re-assert on every navigation, so a page that touched these globals
-    // (or a stale value) can't leave the browser chrome out of sync.
-    $route() { this.applyGlobalTheme(); },
+    // Re-derive after every navigation — nextTick so the NEW view is in the
+    // DOM before its background is read (the watcher fires before router-view
+    // swaps). The #app observer below catches the swap too; both are cheap.
+    $route() { this.$nextTick(() => this.applyGlobalTheme()); },
   },
   created() {
     this.$store.dispatch('settings/startAutoThemeCheck');
@@ -78,67 +138,98 @@ export default {
       if (mutation.type.startsWith('settings/')) this.applyGlobalTheme();
     });
   },
-  beforeUnmount() { this._unsub && this._unsub(); },     // beforeDestroy() in Vue 2
+  mounted() {
+    // Route swaps replace #app's child — re-derive when that happens, so the
+    // chrome reads the page that is actually on screen.
+    this._appMo = new MutationObserver(() => this.queueSync());
+    const app = document.getElementById('app');
+    if (app) this._appMo.observe(app, { childList: true });
+    this.applyGlobalTheme();
+  },
+  beforeUnmount() {
+    this._unsub && this._unsub();
+    this._appMo && this._appMo.disconnect();
+    this._rootMo && this._rootMo.disconnect();
+    clearTimeout(this._resyncT);
+  },
   methods: {
     applyGlobalTheme() {
       const theme = THEME_COLORS[this.effectiveTheme] ? this.effectiveTheme : 'light';
-      const color = THEME_COLORS[theme];
-
       // 1. <html data-theme> — drives global CSS (modals, maps, scrollbars…)
       document.documentElement.setAttribute('data-theme', theme);
       // 2. body.theme-* — legacy class hooks used across pages
       document.body.classList.remove('theme-light', 'theme-dark');
       document.body.classList.add(`theme-${theme}`);
-      // 3. <html> AND <body> background — per-page edge colors (see PAGE_EDGES).
-      //    The <html> canvas gets a two-tone 50/50 gradient: top overscroll
-      //    reveals its top half, bottom overscroll its bottom half. <body>
-      //    stays painted with the TOP color — iOS 26+ Safari ignores the meta
-      //    and derives the toolbar tint from the body paint.
-      const [edgeTop, edgeBottom] = pageEdges(theme, this.$route?.path || '/');
-      // The canvas TILES this background beyond the page: the area revealed by
-      // TOP overscroll is the previous tile's BOTTOM half, and vice versa — so
-      // the halves must be swapped (bottom color first). In-page the gradient
-      // is hidden behind the painted <body>, only the tiled edges ever show.
-      document.documentElement.style.background = edgeTop === edgeBottom
-        ? edgeTop
-        : `linear-gradient(${edgeBottom} 50%, ${edgeTop} 50%)`;
-      // Body backdrop: iOS keyboard open/close shifts the visual viewport and
-      // exposes the area BEHIND the page (fixed-100vh shells like chat show it
-      // the most). A flat backdrop against a gradient page reads as broken
-      // black bands — so gradient pages get a matching gradient backdrop.
-      const NIGHT_GRAD = 'linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%)';
-      const DAY_GRAD   = 'linear-gradient(180deg,#f9f5eb 0%,#f5edda 55%,#efe4cf 100%)';
-      const GRADIENT_ROUTES = ['/chat', '/explore', '/business/dashboard', '/share',
-        '/onboarding', '/business/apply', '/admin/businesses', '/contact',
-        '/terms', '/privacy', '/business/terms', '/business/privacy', '/map-selector'];
-      // Pages whose DAY theme is the cream gradient too (the rest are flat
-      // cream in day mode). Prefix-matched — an exact `p === '/share'` here
-      // missed every real /share/<token> URL and left a flat backdrop behind
-      // the gradient share page.
-      const DAY_GRAD_ROUTES = ['/chat', '/explore', '/share', '/business/dashboard'];
-      const p = this.$route?.path || '/';
-      const isGrad = GRADIENT_ROUTES.some(r => p === r || p.startsWith(r + '/'));
-      const isDayGrad = DAY_GRAD_ROUTES.some(r => p === r || p.startsWith(r + '/'));
-      document.body.style.background = isGrad
-        ? (theme === 'dark' ? NIGHT_GRAD : (isDayGrad ? DAY_GRAD : edgeTop))
-        : edgeTop;
-      void color;
-      // 4. <meta name="theme-color"> — Safari/Chrome browser chrome (top edge)
+      // 3. Chrome/canvas/backdrop — derived from the rendered page.
+      this.syncChromeToPage();
+      // Pages transition their backgrounds (0.5s) — read the settled value
+      // once more after the transition so the chrome lands on the final color.
+      clearTimeout(this._resyncT);
+      this._resyncT = setTimeout(() => this.syncChromeToPage(), 650);
+    },
+    // Coalesce observer bursts into one read per frame.
+    queueSync() {
+      if (this._syncQueued) return;
+      this._syncQueued = true;
+      requestAnimationFrame(() => {
+        this._syncQueued = false;
+        this.syncChromeToPage();
+      });
+    },
+    syncChromeToPage() {
+      const theme = THEME_COLORS[this.effectiveTheme] ? this.effectiveTheme : 'light';
+      const app = document.getElementById('app');
+      const paint = app ? findPagePaint(app) : null;
+      const [fbTop, fbBottom] = FALLBACK_EDGES[theme];
+      const top = paint ? paint.top : fbTop;
+      const bottom = paint ? paint.bottom : fbBottom;
+
+      // <html> canvas: the area revealed by rubber-band overscroll. It TILES
+      // beyond the page — top overscroll shows the previous tile's BOTTOM
+      // half — so the two-tone halves are swapped (bottom color first).
+      // CRITICAL: background-color is set as a LONGHAND, always solid. The
+      // old code wrote the `background` shorthand with a gradient, which
+      // resets background-color to TRANSPARENT — and iOS Safari tints the
+      // keyboard band / collapsed URL-pill area from background-color alone,
+      // so it fell back to WHITE (the white-band screenshots).
+      const de = document.documentElement;
+      de.style.backgroundImage = top === bottom
+        ? 'none'
+        : `linear-gradient(${bottom} 50%, ${top} 50%)`;
+      de.style.backgroundColor = top;
+      // <body> backdrop: exposed when the iOS keyboard shifts the visual
+      // viewport behind fixed-100vh shells. Carries the page's OWN computed
+      // background image verbatim (or none for flat pages) over a solid color.
+      document.body.style.backgroundImage = (paint && paint.image) ? paint.image : 'none';
+      document.body.style.backgroundColor = top;
+      // <meta theme-color> — Safari/Chrome top chrome.
       let meta = document.querySelector('meta[name="theme-color"]:not([media])');
       if (!meta) {
         meta = document.createElement('meta');
         meta.setAttribute('name', 'theme-color');
         document.head.appendChild(meta);
       }
-      meta.setAttribute('content', edgeTop);
+      meta.setAttribute('content', top);
 
-      // 5. Best-effort: iOS Safari computes the toolbar tint at render time and
-      //    ignores post-paint JS changes, so the bar can lag until a reload.
-      //    A 1px scroll provokes a re-derivation on versions that re-evaluate
-      //    on scroll. Harmless elsewhere. NOTE: only works if the *document*
-      //    itself scrolls — pages that scroll inside an inner container won't
-      //    trigger it, and on some iOS versions nothing will short of reload.
+      // Watch the CURRENT page root: local theme toggles (admin / validator /
+      // marketing), the landing's clock-based sky swap, and v-if backdrop
+      // changes all mutate class/children here — the chrome follows live.
+      this.observePageRoot();
+      // Best-effort: iOS Safari computes the toolbar tint at render time and
+      // ignores post-paint JS changes, so the bar can lag until a reload.
+      // A 1px scroll provokes a re-derivation on versions that re-evaluate
+      // on scroll. Harmless elsewhere.
       this.nudgeSafariToolbar();
+    },
+    observePageRoot() {
+      const app = document.getElementById('app');
+      const root = (app && app.firstElementChild) || null;
+      if (root === this._observedRoot) return;
+      this._rootMo && this._rootMo.disconnect();
+      this._observedRoot = root;
+      if (!root) return;
+      this._rootMo = new MutationObserver(() => this.queueSync());
+      this._rootMo.observe(root, { attributes: true, attributeFilter: ['class'], childList: true });
     },
     nudgeSafariToolbar() {
       const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
