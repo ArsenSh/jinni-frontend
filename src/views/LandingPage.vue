@@ -65,7 +65,6 @@ import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue'
 import { useStore } from 'vuex'
 import MagicButton from '@/components/ui/MagicButton.vue'
 import { useRouter } from 'vue-router'
-import { isNightTime } from '@/utils/timeUtils'
 import GoldCard from '@/components/ui/GoldCard.vue'
 import AuthModal from '@/components/AuthModal.vue'
 import StarrySky from '@/components/ui/StarrySky.vue'
@@ -106,7 +105,12 @@ export default {
         autoCloseTimer.value = null
       }
     }
-    const isNightMode = computed(() => isNightTime())
+    // STORE theme, not the raw clock — same source as BusinessLanding and the
+    // rest of the app ('auto' still resolves by clock inside the getter).
+    // Keying this on the clock while /business keyed on the store made the
+    // sky flip day/night when navigating between the two landings whenever a
+    // manually chosen theme disagreed with the hour.
+    const isNightMode = computed(() => store.getters['settings/effectiveTheme'] === 'dark')
     // Browser-chrome painting was removed here: App.vue now DERIVES the
     // chrome/canvas/backdrop colors from whatever the page actually renders
     // (getComputedStyle on the rendered sky), so the landing's clock-based

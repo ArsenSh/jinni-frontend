@@ -32,17 +32,12 @@ export default {
   justify-content: center;
   min-height: 100vh;
   padding: 20px;
-  /* Was rgba(0,0,0,0.7) OVER the body — same dark look, but translucent, so
-   * the browser chrome/overscroll/keyboard band (painted from the body color
-   * by App.vue) showed CREAM around a dark page in day theme. These are the
-   * exact composed colors the overlay used to produce: 70% black over cream
-   * (#f9f5eb) and over night (#0a0118). App.vue derives the chrome from
-   * these rendered colors automatically. */
-  background: #4b4a47;
+  /* Deliberately TRANSPARENT: AuthModal's fixed full-screen overlay (night
+   * radial / day desert gradient) is the page's visible background, and
+   * App.vue derives the browser-chrome colors from the rendered DOM — an
+   * opaque color here would shadow the overlay and mislead that derivation. */
+  background: transparent;
   overflow-y: auto;
   width: 100%;
-}
-body.theme-dark .auth-page {
-  background: #0a0118;
 }
 </style>

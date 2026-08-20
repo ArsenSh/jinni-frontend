@@ -209,7 +209,6 @@
 
 <script>
 import axios from 'axios'
-import { isNightTime } from '@/utils/timeUtils';
 
 export default {
   props: { show: {type: Boolean, default: false} },
@@ -249,7 +248,6 @@ export default {
   mounted() {
     this.handleOAuthCallback()
     this.handleSetupCallback()
-    this.syncThemeColor()
   },
   computed: {
     strength() {
@@ -266,7 +264,12 @@ export default {
       if (this.strength < 75) return 'medium'
       return 'strong'
     },
-    currentTheme() { return isNightTime() ? 'night-mode' : 'day-mode' },
+    // Follows the user's THEME SETTING (store), not the clock — a manually
+    // chosen light/dark must survive logout onto the auth screen. 'auto' still
+    // resolves by clock inside the store getter.
+    currentTheme() {
+      return this.$store.getters['settings/effectiveTheme'] === 'dark' ? 'night-mode' : 'day-mode'
+    },
     setupStrength() {
       if (!this.setupPassword) return 0
       let s = 0
@@ -301,47 +304,10 @@ export default {
         return 'en'
       }
     },
-    // Keep the browser chrome (mobile address-bar) + page background in sync with
-    // the day/night look — same colors/approach App.vue + LandingPage use. Harmless
-    // no-op when this modal is overlaid on an already-themed page; matters if /auth
-    // is shown standalone (direct link, refresh, or OAuth redirect).
-    syncThemeColor() {
-      // Clock-based like the landing page. Must write the `background`
-      // SHORTHAND (not backgroundColor): App.vue paints a store-theme gradient
-      // IMAGE on <html>, and color-only writes left it showing (night auth
-      // page showed the day-cream overscroll). Halves swapped: the canvas
-      // tiles beyond the page, so top overscroll shows a tile's BOTTOM half.
-      const theme = this.currentTheme === 'night-mode' ? 'dark' : 'light'
-      const p = theme === 'dark'
-        ? { top: '#0a0118', bottom: '#080313' }   // starry overlay ends
-        : { top: '#f9f5eb', bottom: '#e0a082' }   // day overlay gradient ends
-      document.documentElement.setAttribute('data-theme', theme)
-      document.documentElement.style.background =
-        `linear-gradient(${p.bottom} 50%, ${p.top} 50%)`
-      document.body.style.backgroundColor = p.top
-      let meta = document.querySelector('meta[name="theme-color"]:not([media])')
-      if (!meta) {
-        meta = document.createElement('meta')
-        meta.setAttribute('name', 'theme-color')
-        document.head.appendChild(meta)
-      }
-      meta.setAttribute('content', p.top)
-      // Safari re-derives canvas/toolbar tint only on a document scroll; give
-      // 2px slack when the page has nothing to scroll (same as App.vue).
-      const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-      if (isIOS) {
-        requestAnimationFrame(() => {
-          const needsSlack = document.documentElement.scrollHeight <= window.innerHeight
-          if (needsSlack) document.body.style.minHeight = 'calc(100vh + 2px)'
-          window.scrollBy(0, 1)
-          requestAnimationFrame(() => {
-            window.scrollBy(0, -1)
-            if (needsSlack) document.body.style.minHeight = ''
-          })
-        })
-      }
-    },
+    // Browser-chrome painting was removed here: App.vue derives chrome colors
+    // from the rendered page (this modal's fixed overlay IS the visible
+    // background of /auth), so a second writer only fought it — and its
+    // clock-based colors disagreed with a manually chosen theme.
     getSubtitle() {
       if (this.showVerification) { return this.$t('auth.verification_sent') }
       if (this.showForgotPassword) { return this.$t('auth.forgot_subtitle') }
