@@ -8861,26 +8861,27 @@ export default {
   .cov-table, .cov-table tbody { display: block; width: 100%; }
   /* Country card: header full-width, then its 8 aggregate numbers as a 4×2
      grid of labeled tiles (they were hidden before — now visible). */
-  .cov-table tr.cov-country-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; border-radius: 12px; padding: 10px; margin-top: 10px; }
+  .cov-table tr.cov-country-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; border-radius: 12px; padding: 10px; margin-top: 10px; }
   .admin-shell.night-mode .cov-table tr.cov-country-row { background: rgba(139,92,246,0.07); }
   .admin-shell.day-mode  .cov-table tr.cov-country-row { background: rgba(212,175,55,0.09); }
   .cov-country-cell { grid-column: 1 / -1; display: block; width: 100%; }
   .cov-country-row .cov-country-agg { display: block; border-radius: 8px; padding: 5px 6px; text-align: left; }
   .admin-shell.night-mode .cov-country-row .cov-country-agg { background: rgba(255,255,255,0.05); }
   .admin-shell.day-mode  .cov-country-row .cov-country-agg { background: rgba(0,0,0,0.05); }
-  .cov-country-agg::before { content: attr(data-label); display: block; font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; opacity: 0.6; }
-  .cov-country-agg b { font-size: 11px; }
+  .cov-country-agg::before { content: attr(data-label); display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; opacity: 0.6; }
+  .cov-country-agg b { font-size: 12px; }
   .cov-country-agg span { display: block; font-size: 9px; opacity: 0.55; }
-  /* City card: 8 category cells as a 4×2 grid (Arsen: 4 + 4 below). */
-  .cov-table tr.cov-city-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px; margin: 6px 0; border-radius: 12px; }
+  /* City card: 8 category cells, 2 per line (Arsen 2026-08-20 — 4-across was
+     too tight on phones). */
+  .cov-table tr.cov-city-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; padding: 10px; margin: 6px 0; border-radius: 12px; }
   .admin-shell.night-mode .cov-table tr.cov-city-row { background: rgba(255,255,255,0.03); }
   .admin-shell.day-mode  .cov-table tr.cov-city-row { background: rgba(139,69,19,0.04); }
   .cov-city-row .cov-city { grid-column: 1 / -1; padding-left: 0; max-width: none; display: block; }
   .cov-table td { padding: 0; background: transparent !important; }
-  .cov-cell { min-width: 0; width: 100%; padding: 5px 6px; }
-  .cov-cell b { font-size: 11px; }
-  .cov-cell span { font-size: 9px; }
-  .cov-cell::before { content: attr(data-label); display: block; font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; opacity: 0.65; margin-bottom: 1px; }
+  .cov-cell { min-width: 0; width: 100%; padding: 6px 8px; }
+  .cov-cell b { font-size: 12px; }
+  .cov-cell span { font-size: 10px; }
+  .cov-cell::before { content: attr(data-label); display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; opacity: 0.65; margin-bottom: 1px; }
   .cov-cell em { display: none; }
   /* Coverage gate card: stack the action buttons — three long labels in one
      flex row overflowed the block. */

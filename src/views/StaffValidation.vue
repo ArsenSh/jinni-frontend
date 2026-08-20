@@ -1813,7 +1813,7 @@
 
             <div class="exp-modal-actions">
               <a v-if="expMapsUrl(expSelected)" class="action-btn btn-muted" :href="expMapsUrl(expSelected)" target="_blank" rel="noopener noreferrer">Open in Maps</a>
-              <span style="flex:1"></span>
+              <span class="exp-actions-spacer" style="flex:1"></span>
               <button v-if="expSelected.explore?.status !== 'verified'" class="action-btn exp-btn-verify" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'verified')">Verify</button>
               <button v-if="expSelected.explore?.status !== 'hidden'" class="action-btn exp-btn-hide" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'hidden')">Hide</button>
               <button v-if="expSelected.explore?.status === 'hidden' || expSelected.explore?.status === 'verified'" class="action-btn btn-muted" :disabled="expBusy === expSelected.placeId" @click="setExpStatus(expSelected, 'visible')">Reset</button>
@@ -3613,6 +3613,15 @@ export default {
     }
     // ── Approve / reject ────────────────────────────────────────────
     const confirmingAction = ref(null)
+    // Mobile: lock the page scroll while any full-screen overlay is open
+    // (drawer, destination modal, explore modal, confirm dialogs, lightbox) —
+    // without this iOS scroll-chains the page behind the overlay and restores
+    // a random scroll position on close.
+    watch(
+      () => !!(selected.value || expSelected.value || destModal.value.open || destModal.value.lightboxOpen || confirmingAction.value || confirmLogout.value),
+      (open) => { document.body.style.overflow = open ? 'hidden' : '' }
+    )
+    onBeforeUnmount(() => { document.body.style.overflow = '' })
     // True for either rejection flow (soft 'reject' or hard 'reject_permanent').
     // Both require a reason in the textarea before the action can fire.
     const isRejectFlow = computed(() =>
@@ -5243,4 +5252,66 @@ html[data-theme="light"]::-webkit-scrollbar-thumb:hover,body.theme-light::-webki
 /* ── Firefox: themed scrollbar-color ────────────────────────────────── */
 html[data-theme="dark"],body.theme-dark,html:has(#app.night-mode),body:has(#app.night-mode){scrollbar-width:thin !important;scrollbar-color:rgba(192,132,252,0.3) transparent !important}
 html[data-theme="light"],body.theme-light,html:has(#app.day-mode),body:has(#app.day-mode){scrollbar-width:thin !important;scrollbar-color:rgba(160,82,45,0.4) transparent !important}
+
+/* ── Mobile refinements (2026-08-20 full audit) — ≤768px only; desktop
+   untouched. Appended LAST on purpose: several desktop rules declared after
+   the original 768px block (.dest-toolbar, .pagination, .toast) silently
+   overrode its mobile styles — source order here wins them back. ── */
+@media (max-width: 768px) {
+  /* Page header: title wraps; count pills wrap left-aligned instead of a
+     ragged right-anchored stack */
+  .page-title { flex-wrap: wrap; }
+  .page-title-user { overflow-wrap: anywhere; }
+  .page-header-right { align-items: stretch; }
+  .counts-strip { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-start; }
+  /* Tab strip: equal thirds, no hidden horizontally-scrolled tab */
+  .tab-strip { width: 100%; display: flex; }
+  .tab-btn { flex: 1; min-width: 0; padding: 9px 6px; font-size: 12px; }
+  .tab-mark { display: none; }
+  /* Filter chips (Tier/Show/Owner/Category/Preference/Status): wrap as pill
+     rows — they neither squashed nor scrolled before */
+  .filter-chips { flex-wrap: wrap; }
+  .filter-chips > * { white-space: nowrap; }
+  /* Destinations toolbar: restore stretch stacking */
+  .dest-toolbar { align-items: stretch; }
+  /* Drawer: approve/reject bar stacks full-width; safe area under buttons */
+  .action-buttons { flex-wrap: wrap; }
+  .action-buttons .action-btn { flex: 1 1 100%; justify-content: center; min-width: 0; }
+  .drawer-actions { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .drawer-head-top { flex-wrap: wrap; }
+  .drawer-head-top button { flex-shrink: 0; }
+  .drawer-title { overflow-wrap: anywhere; }
+  /* Drawer content: 2-col stats + gallery, narrower key column */
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kv-grid { grid-template-columns: 76px 1fr; }
+  /* Card-row action groups (Edit/Deactivate/Delete…): wrap on 360px phones */
+  .action-group { flex-wrap: wrap; justify-content: flex-end; }
+  .biz-table--dest td.col-actions { white-space: normal; }
+  /* Explore rows: categories may wrap; long place names break cleanly */
+  .exp-cats { max-width: none; white-space: normal; }
+  .row-name { min-width: 0; }
+  .row-name-text { overflow-wrap: anywhere; }
+  /* Explore modal: fit the viewport; actions wrap in halves */
+  .exp-modal { width: 100%; }
+  .exp-modal-actions { flex-wrap: wrap; }
+  .exp-modal-actions .action-btn { flex: 1 1 45%; justify-content: center; text-align: center; }
+  .exp-actions-spacer { display: none; }
+  /* Destination edit modal: single-column form, tighter chrome, and native
+     date/time inputs that actually shrink */
+  .edit-grid-2 { grid-template-columns: 1fr; }
+  .edit-header { padding: 14px 14px 12px; flex-wrap: wrap; gap: 8px; }
+  .edit-body { padding: 14px 14px 44px; }
+  .edit-panel .edit-input { min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .edit-panel input[type="date"], .edit-panel input[type="time"] { width: 100%; -webkit-appearance: none; appearance: none; }
+  /* Hours editor: day name on its own line — two tidy lines per day */
+  .edit-hours-day { width: 100%; }
+  .edit-hours-row { row-gap: 4px; }
+  /* Toast: was right-anchored AND translated -50% (two conflicting desktop
+     declarations) → landed half off-screen. Pin edge-to-edge above safe area. */
+  .toast { left: 12px; right: 12px; transform: none; max-width: none; bottom: calc(16px + env(safe-area-inset-bottom)); }
+  /* Lightbox controls: smaller arrows, close button clear of the notch */
+  .dest-lightbox-nav { width: 38px; height: 38px; }
+  .dest-lightbox-close { top: calc(10px + env(safe-area-inset-top)); }
+}
 </style>
