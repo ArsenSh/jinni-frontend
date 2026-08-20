@@ -3,6 +3,11 @@
     <!-- ── Header ────────────────────────────────────────────────────── -->
     <header class="page-header">
       <div class="page-header-left">
+        <!-- Brand row — same identity as JinniChat/marketing: bottle + gradient name -->
+        <div class="sv-brandrow">
+          <img src="/images/bottle.png" class="sv-appicon" alt="Jinni" />
+          <span class="sv-brand">Jinni</span>
+        </div>
         <h1 class="page-title">
           <span class="page-title-mark">//</span>
           {{ activeTab === 'destinations' ? 'Destinations' : activeTab === 'explore' ? 'Explore' : 'Validation' }}<span v-if="userName" class="page-title-user"> — {{ userName }}</span>
@@ -81,7 +86,7 @@
               @click="activeTab = t.key">
         <span class="tab-mark">//</span>
         <span class="tab-label">{{ t.label }}</span>
-        <span v-if="t.count != null" class="tab-count">{{ t.count }}</span>
+        <span v-if="t.count != null" class="tab-count">{{ tabCount(t.count) }}</span>
       </button>
     </nav>
 
@@ -1374,7 +1379,8 @@
               </div>
               <div v-if="!destModal.form.openingHours.is24Hours" class="edit-hours-list">
                 <div v-for="(d, di) in destModal.form.openingHours.days" :key="d.day" class="edit-hours-row">
-                  <span class="edit-hours-day">{{ d.day }}</span>
+                  <!-- Full day name on desktop, 3-letter on mobile (CSS toggles) -->
+                  <span class="edit-hours-day"><span class="edit-hours-day-full">{{ d.day }}</span><span class="edit-hours-day-short">{{ d.day.slice(0, 3) }}</span></span>
                   <div class="edit-hours-pills">
                     <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': !d.closed && !isDay24h(d) }" @click="d.closed = false; if (isDay24h(d)) { d.open = '09:00'; d.close = '18:00' }">Open</button>
                     <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': isDay24h(d) }" @click="setDay24h(d)" title="Open around the clock on this day">24h</button>
@@ -2024,7 +2030,12 @@ export default {
     const cityInput = ref('')
     const cityFilter = ref('')
     const page = ref(1)
-    const limit = ref(20)
+    // Phones get 8 rows per page (Arsen 2026-08-20) — less scrolling between
+    // the pager taps; desktop keeps the larger pages.
+    const MOBILE_PAGE = window.innerWidth <= 768
+    const limit = ref(MOBILE_PAGE ? 8 : 20)
+    // Tab badge: compact thousands ("1.2k") so long counts fit the pill.
+    const tabCount = (n) => n > 999 ? ((n / 1000).toFixed(n > 9950 ? 0 : 1).replace(/\.0$/, '') + 'k') : n
     const total = ref(0)
     const businesses = ref([])
     const counts = ref({})
@@ -2247,7 +2258,7 @@ export default {
     const destSummary  = ref({ total: 0, active: 0, hiddenGems: 0, totalViews: 0 })
     const destTotal    = ref(0)
     const destPage     = ref(1)
-    const destLimit    = ref(20)
+    const destLimit    = ref(MOBILE_PAGE ? 8 : 20)
     const destLoading  = ref(false)
     const destFilter   = ref('')
     const destMineOnly = ref(false)
@@ -2315,7 +2326,7 @@ export default {
     const expPlaces = ref([])
     const expTotal = ref(0)
     const expPage = ref(1)
-    const expLimit = ref(24)
+    const expLimit = ref(MOBILE_PAGE ? 8 : 24)
     const expLoading = ref(false)
     const expBusy = ref(null)          // placeId currently being updated
     const expStatus = ref('')          // '', 'visible', 'hidden', 'verified'
@@ -3943,7 +3954,7 @@ export default {
       EXPLORE_INTERESTS, toggleExpInterest, toggleAiBlock,
       expSelected, expImages, expImagesLoading, openExpPlace, apiOrigin, expPrice, fmtD, expMapsUrl,
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES, DEST_PREFS, destTypeFilter, destPrefFilter, destTagLabel,
-      ALL_DEST_TYPES, PRICING_CURRENCIES, fmt,
+      ALL_DEST_TYPES, PRICING_CURRENCIES, fmt, tabCount,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
       toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords, isDay24h, setDay24h,
       destIsEvent, destIsOneTimeEvent, destEventEndsInPast, destTimezoneOptions, tzShortLabel, eventScheduleSummary,
@@ -5253,11 +5264,28 @@ html[data-theme="light"]::-webkit-scrollbar-thumb:hover,body.theme-light::-webki
 html[data-theme="dark"],body.theme-dark,html:has(#app.night-mode),body:has(#app.night-mode){scrollbar-width:thin !important;scrollbar-color:rgba(192,132,252,0.3) transparent !important}
 html[data-theme="light"],body.theme-light,html:has(#app.day-mode),body:has(#app.day-mode){scrollbar-width:thin !important;scrollbar-color:rgba(160,82,45,0.4) transparent !important}
 
+/* ── Brand row — same identity as JinniChat sidebar / marketing page:
+   60px bottle + gradient "Jinni" (both themes). ── */
+.sv-brandrow { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.sv-appicon { width: 60px; height: 60px; object-fit: contain; }
+.sv-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.edit-hours-day-short { display: none; }
+
 /* ── Mobile refinements (2026-08-20 full audit) — ≤768px only; desktop
    untouched. Appended LAST on purpose: several desktop rules declared after
    the original 768px block (.dest-toolbar, .pagination, .toast) silently
    overrode its mobile styles — source order here wins them back. ── */
 @media (max-width: 768px) {
+  /* Sign out: icon-only square (like the marketing page); theme toggle is
+     already icon-only. */
+  .logout-btn span { display: none; }
+  .logout-btn { padding: 8px 9px; }
+  /* Pagination: one horizontal row — ‹ Prev · Page X of Y · Next › */
+  .pagination { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 12px; }
+  /* Add destination + validation Refresh: full-width actions in their bars */
+  .dest-toolbar .ghost-btn,
+  .filter-group--right .ghost-btn { width: 100%; justify-content: center; display: flex; align-items: center; gap: 6px; padding: 10px; }
+  .filter-group--right { width: 100%; }
   /* Page header: title wraps; count pills wrap left-aligned instead of a
      ragged right-anchored stack */
   .page-title { flex-wrap: wrap; }
@@ -5266,8 +5294,10 @@ html[data-theme="light"],body.theme-light,html:has(#app.day-mode),body:has(#app.
   .counts-strip { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-start; }
   /* Tab strip: equal thirds, no hidden horizontally-scrolled tab */
   .tab-strip { width: 100%; display: flex; }
-  .tab-btn { flex: 1; min-width: 0; padding: 9px 6px; font-size: 12px; }
+  .tab-btn { flex: 1; min-width: 0; padding: 9px 6px; font-size: 12px; gap: 5px; justify-content: center; }
   .tab-mark { display: none; }
+  .tab-label { overflow: hidden; text-overflow: ellipsis; }
+  .tab-count { flex-shrink: 0; font-size: 9.5px; padding: 1px 5px; min-width: 0; }
   /* Filter chips (Tier/Show/Owner/Category/Preference/Status): wrap as pill
      rows — they neither squashed nor scrolled before */
   .filter-chips { flex-wrap: wrap; }
@@ -5300,13 +5330,24 @@ html[data-theme="light"],body.theme-light,html:has(#app.day-mode),body:has(#app.
   /* Destination edit modal: single-column form, tighter chrome, and native
      date/time inputs that actually shrink */
   .edit-grid-2 { grid-template-columns: 1fr; }
-  .edit-header { padding: 14px 14px 12px; flex-wrap: wrap; gap: 8px; }
+  /* Header stays ONE row: title truncates, Save + Close pinned right. */
+  .edit-header { padding: 12px 14px; flex-wrap: nowrap; gap: 8px; }
+  .edit-header-left { min-width: 0; flex: 1; display: flex; align-items: center; gap: 8px; }
+  .edit-title { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .edit-header-actions { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
   .edit-body { padding: 14px 14px 44px; }
   .edit-panel .edit-input { min-width: 0; max-width: 100%; box-sizing: border-box; }
   .edit-panel input[type="date"], .edit-panel input[type="time"] { width: 100%; -webkit-appearance: none; appearance: none; }
-  /* Hours editor: day name on its own line — two tidy lines per day */
-  .edit-hours-day { width: 100%; }
-  .edit-hours-row { row-gap: 4px; }
+  /* Hours editor: one compact line per day — 3-letter day, tight pills,
+     separator dropped (same pattern as the admin edit panel). */
+  .edit-hours-row { gap: 6px; row-gap: 4px; }
+  .edit-hours-day { width: 34px; flex-shrink: 0; }
+  .edit-hours-day-full { display: none; }
+  .edit-hours-day-short { display: inline; }
+  .edit-hours-pill { padding: 4px 7px; font-size: 10.5px; }
+  .edit-hours-time { padding: 4px 4px; font-size: 11px; min-width: 0; }
+  .edit-hours-sep { display: none; }
+  .edit-hours-all-btn { flex-basis: 100%; margin-left: 0; }
   /* Toast: was right-anchored AND translated -50% (two conflicting desktop
      declarations) → landed half off-screen. Pin edge-to-edge above safe area. */
   .toast { left: 12px; right: 12px; transform: none; max-width: none; bottom: calc(16px + env(safe-area-inset-bottom)); }

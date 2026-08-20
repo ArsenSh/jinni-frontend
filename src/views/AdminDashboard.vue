@@ -9529,4 +9529,15 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .prov-metric em { font-style: normal; opacity: 0.6; font-size: 12px; }
 .prov-note { font-size: 12px; opacity: 0.6; padding: 8px 20px 18px; line-height: 1.5; }
 @media (max-width: 640px) { .prov-compare { grid-template-columns: 1fr; } }
+
+/* Coverage mobile width fix — MUST be the last rules in this file: the base
+   .cov-table (min-width:780px) and .cov-cell (min-width:88px) are declared
+   AFTER the main mobile block, so at equal specificity they won and forced a
+   horizontal scroll. Source order here takes it back. */
+@media (max-width: 768px) {
+  .cov-scroll { overflow-x: hidden; }
+  .cov-table { min-width: 0; width: 100%; }
+  .cov-cell { min-width: 0; width: 100%; padding: 6px 8px; box-sizing: border-box; }
+  .cov-city { max-width: none; }
+}
 </style>
