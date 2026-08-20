@@ -99,7 +99,20 @@ export default {
       document.documentElement.style.background = edgeTop === edgeBottom
         ? edgeTop
         : `linear-gradient(${edgeBottom} 50%, ${edgeTop} 50%)`;
-      document.body.style.backgroundColor = edgeTop;
+      // Body backdrop: iOS keyboard open/close shifts the visual viewport and
+      // exposes the area BEHIND the page (fixed-100vh shells like chat show it
+      // the most). A flat backdrop against a gradient page reads as broken
+      // black bands — so gradient pages get a matching gradient backdrop.
+      const NIGHT_GRAD = 'linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%)';
+      const DAY_GRAD   = 'linear-gradient(180deg,#f9f5eb 0%,#f5edda 55%,#efe4cf 100%)';
+      const GRADIENT_ROUTES = ['/chat', '/explore', '/business/dashboard', '/share',
+        '/onboarding', '/business/apply', '/admin/businesses', '/contact',
+        '/terms', '/privacy', '/business/terms', '/business/privacy'];
+      const p = this.$route?.path || '/';
+      const isGrad = GRADIENT_ROUTES.some(r => p === r || p.startsWith(r + '/'));
+      document.body.style.background = isGrad
+        ? (theme === 'dark' ? NIGHT_GRAD : (p === '/chat' || p === '/explore' || p === '/share' || p === '/business/dashboard' ? DAY_GRAD : edgeTop))
+        : edgeTop;
       void color;
       // 4. <meta name="theme-color"> — Safari/Chrome browser chrome (top edge)
       let meta = document.querySelector('meta[name="theme-color"]:not([media])');
