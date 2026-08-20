@@ -132,11 +132,42 @@ const isValidToken = (token) => {
     } catch { return false }
 };
 
+/* ── iOS Safari bottom-bar tint workaround ──────────────────────────────────
+ * Recent iOS Safari computes its bottom-bar/URL-pill tint ONLY at a real page
+ * load — verified on device 2026-08-20: theme-color meta changes, html/body
+ * repaints and even user scrolls do NOT re-tint it; only reload does. App.vue
+ * therefore cannot fix it from inside the page. The app's one color crossing
+ * is the Auth page (dark in BOTH themes) vs everything else (cream in day
+ * theme), so: on iOS, in day theme only, entering or leaving Auth becomes a
+ * REAL navigation. It happens once per login; assets are cached, so the
+ * reload is barely visible. Night theme needs nothing — every page shares the
+ * same dark top color. */
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function lightThemeNow() {
+    try {
+        const t = JSON.parse(localStorage.getItem('jinni_settings') || '{}').theme;
+        if (t === 'dark') return false;
+        if (t === 'light') return true;
+    } catch (e) { /* corrupt settings — fall through to the clock */ }
+    const h = new Date().getHours();          // 'auto' = night 21:00–06:00 (timeUtils)
+    return !(h >= 21 || h < 6);
+}
+
 router.beforeEach(async (to, from, next) => {
     document.title = to.meta.title || 'Jinni';
     if (to.meta.public) return next();
     if (to.name && from.name && to.name === from.name) {
         console.warn('⚠️ Preventing redirect loop:', to.name);
+        return next(false);
+    }
+    // Crossing the Auth color boundary on iOS in day theme → real page load,
+    // so Safari recomputes its bottom-bar tint. from.name is required: a fresh
+    // load (OAuth returns, deep links) already tinted correctly.
+    if (IS_IOS && from.name
+        && (to.name === 'Auth') !== (from.name === 'Auth')
+        && lightThemeNow()) {
+        window.location.href = to.fullPath;
         return next(false);
     }
     // NEW OAuth flow: the backend hands out a single-use ?code= instead of the
