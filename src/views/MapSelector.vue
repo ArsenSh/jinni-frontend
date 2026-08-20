@@ -363,7 +363,7 @@ export default {
         console.log('💾 Saved to localStorage:', settings);            
         await this.saveToBackend(settings);            
         window.dispatchEvent(new CustomEvent('location-updated', { detail: settings }));            
-        if (this.returnTo === 'onboarding') { this.$router.push('/onboarding') } 
+        if (this.returnTo === 'onboarding') { this.$router.push({ path: '/onboarding', query: this._onboardingReturnQuery() }) }
         else { this.$router.push(this.returnTo) }
       } catch (error) {
         console.error('Failed to save location:', error);
@@ -427,8 +427,17 @@ export default {
         const confirmLeave = confirm(this.$t('map_selector.unsaved_changes'));
         if (!confirmLeave) return;
       }
-      if (this.returnTo === 'onboarding') { this.$router.push('/onboarding') } 
+      if (this.returnTo === 'onboarding') { this.$router.push({ path: '/onboarding', query: this._onboardingReturnQuery() }) }
       else { this.$router.push(this.returnTo) }
+    },
+    // Restore the flags onboarding forwarded here (obEditing/obReturnTo) so
+    // the round-trip doesn't strip edit mode or the Explore return path.
+    // Empty for new users — a bare /onboarding, exactly as before.
+    _onboardingReturnQuery() {
+      const q = {};
+      if (this.$route.query.obEditing)  q.editing  = this.$route.query.obEditing;
+      if (this.$route.query.obReturnTo) q.returnTo = this.$route.query.obReturnTo;
+      return q;
     }
   }
 };

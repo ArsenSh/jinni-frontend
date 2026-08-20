@@ -24,7 +24,7 @@
              feed refetches on mount — section order follows the new interests. -->
         <button class="ex-pref" @click="goPreferences">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-          {{ t('explore.preferences') || 'My preferences' }}
+          {{ t('explore.preferences') || 'Preferences' }}
         </button>
       </div>
     </header>
@@ -614,7 +614,11 @@ export default {
     },
     goChat() { this.$router.push({ name: 'JinniChat' }).catch(() => { window.location.href = '/chat'; }); },
     goBack() { if (window.history.length > 1) this.$router.back(); else this.goChat(); },
-    goPreferences() { this.$router.push({ path: '/onboarding', query: { returnTo: '/explore' } }) },
+    // `editing: 'true'` is REQUIRED: the router guard bounces onboarding-
+    // completed users from /onboarding back to JinniChat unless the editing
+    // flag is set (router/index.js `completedOnboarding` check) — without it
+    // this button silently landed on the chat page.
+    goPreferences() { this.$router.push({ path: '/onboarding', query: { editing: 'true', returnTo: '/explore' } }) },
   },
 };
 </script>
@@ -665,7 +669,7 @@ export default {
 /* Search — TripAdvisor-style pill */
 .ex-search { display: flex; align-items: center; gap: 10px; width: min(640px, calc(100% - 36px)); margin: 16px auto 0;
   padding: 6px 6px 6px 18px; border-radius: 999px; background: var(--ex-search-bg);
-  box-shadow: var(--ex-ring), 0 8px 26px rgba(0,0,0,0.10); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); }
+  box-shadow: var(--ex-ring), 0 0 5px #0000001a; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); }
 .ex-search-icon { flex: none; color: var(--ex-muted); }
 .ex-search-input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-family: inherit;
   font-size: 0.95rem; color: var(--ex-text); padding: 9px 0; }
@@ -687,18 +691,18 @@ export default {
 /* Header — centered column */
 .ex-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
   padding: 26px 18px 4px; max-width: 1200px; margin: 0 auto; }
-.ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 11px 26px; margin-top: 4px; border-radius: 999px; border: none; cursor: pointer;
+.ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 11px 26px; border-radius: 999px; border: none; cursor: pointer;
   font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #fff; background: var(--ex-active-grad);
-  box-shadow: var(--ex-active-ring), 0 6px 20px rgba(0,0,0,0.18), var(--ex-active-shadow); transition: filter .18s, transform .15s; }
+  box-shadow: var(--ex-active-ring), 0 0 5px #0000002e, var(--ex-active-shadow); transition: filter .18s, transform .15s; }
 .ex-back:hover { filter: brightness(1.06); }
 .ex-back:active { transform: scale(0.98); }
 .ex-head-cta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .ex-pref { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
-  font-family: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring);
+  font-family: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring), 0 0 5px #0000001a;
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
 .ex-pref:hover { background: var(--ex-glass-2); }
 /* App icon above the title — same asset the chat header uses. */
-.ex-app-icon { width: 52px; height: 52px; object-fit: contain; margin-bottom: -4px;
+.ex-app-icon { width: 76px; height: 76px; object-fit: contain; margin-bottom: -6px;
   filter: drop-shadow(0 4px 14px rgba(212,175,55,0.28)); }
 .ex-title { margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em;
   color: #D4AF37; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -806,7 +810,7 @@ export default {
   backdrop-filter: blur(4px) saturate(160%); -webkit-backdrop-filter: blur(4px) saturate(160%); }
 .night-mode .ex-rail-btn { background: rgba(255,255,255,0.3); color: #e2e8f0; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
 .night-mode .ex-rail-btn:hover { background: rgba(255,255,255,0.35); }
-.day-mode .ex-rail-btn { background: rgba(255,255,255,0.55); color: var(--ex-text); box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.9), 0 4px 14px rgba(0,0,0,0.10); }
+.day-mode .ex-rail-btn { background: rgba(255,255,255,0.55); color: var(--ex-text); box-shadow: inset 0 0 0 0.7px #ffffffe6, 0 0 4px #0000001a; }
 .day-mode .ex-rail-btn:hover { background: rgba(255,255,255,0.7); }
 .ex-rail-btn--prev { left: 0; }
 .ex-rail-btn--next { right: 0; }

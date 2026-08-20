@@ -720,7 +720,17 @@ export default {
         if (this.isDesktop) { this.loadCountries() }
       }
     },
-    openMapSelector() { this.$router.push({ path: '/map-selector', query: { returnTo: 'onboarding' } }) },
+    // Forward the editing/returnTo flags through the map round-trip: the map
+    // returns to a BARE /onboarding, which used to drop them — an Explore user
+    // editing preferences lost edit mode and their way back to Explore after
+    // visiting the map. New users carry neither flag, so nothing changes for
+    // the auth → onboarding → chat flow.
+    openMapSelector() {
+      const q = { returnTo: 'onboarding' };
+      if (this.$route.query.editing)  q.obEditing  = this.$route.query.editing;
+      if (this.$route.query.returnTo) q.obReturnTo = this.$route.query.returnTo;
+      this.$router.push({ path: '/map-selector', query: q });
+    },
     chooseDestinationOnMap() {
       this.activateLocationMode('destination');
       this.openMapSelector();
