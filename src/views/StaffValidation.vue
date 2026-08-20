@@ -25,6 +25,7 @@
             <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
+            <span class="sv-btn-text">{{ theme === 'night-mode' ? 'Day mode' : 'Night mode' }}</span>
           </button>
           <button class="logout-btn" @click="confirmLogout = true" title="Sign out">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -5268,7 +5269,10 @@ select.edit-input { cursor: pointer; }
 
 /* ── Brand row — same identity as JinniChat sidebar / marketing page ── */
 .page-header { flex-wrap: wrap; }
-.sv-brandbar { flex-basis: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+/* width:100% matters: the mobile .page-header is a column with
+   align-items:flex-start, which otherwise shrinks this bar to content width
+   and glues the buttons to the Jinni name. */
+.sv-brandbar { flex-basis: 100%; width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .sv-brand-actions { display: flex; align-items: center; gap: 8px; height: 60px; }
 .sv-brandrow { display: flex; align-items: center; gap: 8px; }
 .sv-appicon { width: 60px; height: 60px; object-fit: contain; }
@@ -5281,15 +5285,21 @@ select.edit-input { cursor: pointer; }
    unscoped copy of these rules loses every specificity tie (that is exactly
    what broke the first attempt — pagination, toast, modal grid…). ── */
 @media (max-width: 768px) {
-  .logout-btn span { display: none; }
-  .logout-btn { padding: 8px 9px; }
+  .logout-btn span, .sv-btn-text { display: none; }
+  .logout-btn, .theme-toggle-btn { padding: 9px; }
   /* Pagination: ONE horizontal row — ‹ Prev · Page X of Y · Next › */
-  .pagination { flex-direction: row; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 8px; }
+  /* Side padding so Prev/Next don't touch the edges of the bar's background */
+  .pagination { flex-direction: row; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; }
   .pagination span, .pagination .page-indicator { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
   .pagination button, .pagination .ghost-btn { flex-shrink: 0; padding: 7px 10px; font-size: 12px; }
   /* Destinations + Explore accordion */
   .biz-table--dest tbody tr.biz-row:not(.row-open) td:not(.acc-visible),
   .biz-table--explore tbody tr.biz-row:not(.row-open) td:not(.acc-visible) { display: none; }
+  /* Collapsed cards: the (now-last-visible) location cell keeps its own
+     border-bottom, which stacked with the row border into a thin empty band
+     below Location — drop it while collapsed. */
+  .biz-table--dest tbody tr.biz-row:not(.row-open) td.acc-visible,
+  .biz-table--explore tbody tr.biz-row:not(.row-open) td.acc-visible { border-bottom: none; }
   .biz-table td.acc-toggle { cursor: pointer; position: relative; }
   /* Chevron sits on the NAME line (bottom of the cell), not up by the image */
   .biz-table td.acc-toggle::after { content: '▾'; position: absolute; right: 12px; bottom: 10px; font-size: 13px; opacity: 0.5; transition: transform 0.18s; }
@@ -5301,9 +5311,9 @@ select.edit-input { cursor: pointer; }
   .biz-table--dest tbody tr.biz-row td.col-name,
   .biz-table--explore tbody tr.biz-row td.col-name { padding: 0 0 8px; }
   .biz-table td.col-name .row-name { padding: 0 34px 0 12px; }
-  .dest-row-hero { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0; margin: 0 0 8px; }
+  .dest-row-hero { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px 12px 0 0; margin: 0 0 8px; }
   .exp-place-cell { flex-direction: column; align-items: stretch; }
-  .exp-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 0; margin: 0 0 6px; }
+  .exp-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px 12px 0 0; margin: 0 0 6px; }
   .exp-thumb--empty { display: none; }
   /* Full-width bar actions */
   .dest-toolbar .ghost-btn,
