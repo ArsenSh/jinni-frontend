@@ -185,9 +185,12 @@ export default {
       const top = paint ? paint.top : fbTop;
       const bottom = paint ? paint.bottom : fbBottom;
 
-      // <html> canvas: the area revealed by rubber-band overscroll. It TILES
-      // beyond the page — top overscroll shows the previous tile's BOTTOM
-      // half — so the two-tone halves are swapped (bottom color first).
+      // <html> canvas: the area revealed beyond the page at top and bottom.
+      // Painted in NATURAL orientation — top color in the top half, bottom
+      // color in the bottom half. (An earlier version swapped the halves on a
+      // "Safari tiles the canvas" theory; device testing 2026-08-21 showed it
+      // does NOT tile — the swap put the desert BOTTOM color above the page
+      // and cream below it on day-mode landing/business/contact/auth.)
       // CRITICAL: background-color is set as a LONGHAND, always solid. The
       // old code wrote the `background` shorthand with a gradient, which
       // resets background-color to TRANSPARENT — and iOS Safari tints the
@@ -196,7 +199,7 @@ export default {
       const de = document.documentElement;
       de.style.backgroundImage = top === bottom
         ? 'none'
-        : `linear-gradient(${bottom} 50%, ${top} 50%)`;
+        : `linear-gradient(${top} 50%, ${bottom} 50%)`;
       // The solid background-color is what iOS Safari uses to tint its BOTTOM
       // bar and the keyboard band — both sit against the page's BOTTOM edge,
       // so they must carry the bottom color (device-verified 2026-08-20: with
