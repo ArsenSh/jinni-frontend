@@ -2292,7 +2292,7 @@
               <button class="edit-save-btn" :disabled="editModal.saving" @click="saveEdit">
                 <svg v-if="!editModal.saving" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 <div v-else class="loader-ring loader-ring--sm" style="width:14px;height:14px;border-width:2px"></div>
-                {{ editModal.saving ? 'Saving…' : 'Save Changes' }}
+                {{ editModal.saving ? 'Saving…' : 'Save' }}
               </button>
               <button class="edit-close-btn" @click="closeEdit" title="Close">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2755,7 +2755,8 @@
               </div>
               <div v-if="!editModal.form.openingHours.is24Hours" class="edit-hours-list">
                 <div v-for="(d, idx) in editModal.form.openingHours.days" :key="d.day" class="edit-hours-row">
-                  <span class="edit-hours-day">{{ d.day }}</span>
+                  <!-- Full day name on desktop, 3-letter on mobile (CSS toggles) -->
+                  <span class="edit-hours-day"><span class="edit-hours-day-full">{{ d.day }}</span><span class="edit-hours-day-short">{{ d.day.slice(0, 3) }}</span></span>
                   <div class="edit-hours-pills">
                     <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': !d.closed }" @click="d.closed = false">Open</button>
                     <button type="button" class="edit-hours-pill edit-hours-pill--close" :class="{ 'edit-hours-pill--active': d.closed }" @click="d.closed = true">Closed</button>
@@ -7482,6 +7483,7 @@ export default {
 .edit-hours-list { display: flex; flex-direction: column; gap: 8px; }
 .edit-hours-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 0; }
 .edit-hours-day { width: 90px; font-size: 12px; font-weight: 600; }
+.edit-hours-day-short { display: none; }
 .edit-hours-pills { display: inline-flex; gap: 0; border-radius: 6px; overflow: hidden; }
 .edit-hours-pill { padding: 4px 10px; font-size: 11px; font-weight: 600; border: none; cursor: pointer; background: transparent; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
 .admin-shell.night-mode .edit-hours-pill { border-color: rgba(255,255,255,0.12); color: #94a3b8; }
@@ -8688,9 +8690,19 @@ export default {
   .card-head h2 { font-size: 13px; }
   .card-head-spacer { display: none; }
   .chart-legend { width: 100%; margin-top: 2px; }
-  /* Height must stay ≥120px: bars scale to 80px + always-visible value row
-     (10px) + date label + padding. 100px clipped the tallest bar's number. */
-  .sparkbar-wrap { padding: 6px 14px 10px; height: 120px; }
+  /* No fixed height on mobile (Arsen 2026-08-20): auto lets the wrap size to
+     its content (80px max bar + value row + date label) — a fixed 100px
+     clipped the tallest bar's number, and any fixed value wastes space. */
+  .sparkbar-wrap { padding: 6px 14px 10px; height: auto; }
+  /* Opening-hours rows: one line per day on mobile — 3-letter day, tighter
+     pills/inputs, separator dropped (full names wrapped to 2 lines). */
+  .edit-hours-row { gap: 6px; flex-wrap: nowrap; }
+  .edit-hours-day { width: 34px; flex-shrink: 0; }
+  .edit-hours-day-full { display: none; }
+  .edit-hours-day-short { display: inline; }
+  .edit-hours-pill { padding: 4px 7px; font-size: 10.5px; }
+  .edit-hours-time { padding: 4px 4px; font-size: 11px; min-width: 0; }
+  .edit-hours-sep { display: none; }
   .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
   .toolbar > .action-btn { align-self: flex-start; }
   .search-wrap { max-width: 100%; }
@@ -8804,6 +8816,24 @@ export default {
   .admin-shell.night-mode .data-table tbody tr.table-row td:first-child { border-bottom-color: rgba(139,92,246,0.12); }
   .admin-shell.day-mode  .data-table tbody tr.table-row td:first-child { border-bottom-color: rgba(212,175,55,0.15); }
   .data-table tbody tr.table-row td:first-child::before { display: block; }
+  /* Mobile rows are cards already — promote the 46px thumb to a rec-card-style
+     hero image (16:9 like chat cards, Arsen 2026-08-20). Desktop keeps the
+     small inline thumb. */
+  .data-table tbody tr.table-row td:first-child .row-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; margin: 4px 0 8px; }
+  /* Coverage matrix on mobile: keep the 2D table (column scanning is the whole
+     point) but pin the city column while categories scroll sideways, and
+     compact the cells. State color survives; the uppercase state word is
+     dropped — color + tap-cycle already carry it. */
+  .cov-table th:first-child,
+  .cov-table td:first-child { position: sticky; left: 0; z-index: 2; }
+  .admin-shell.night-mode .cov-table th:first-child,
+  .admin-shell.night-mode .cov-table td:first-child { background: #1e1438; }
+  .admin-shell.day-mode .cov-table th:first-child,
+  .admin-shell.day-mode .cov-table td:first-child { background: #fffdf6; }
+  .cov-city { max-width: 150px; }
+  .cov-cell { min-width: 72px; padding: 6px 7px; }
+  .cov-cell b { font-size: 12px; }
+  .cov-cell em { display: none; }
   /* The action cell goes full-width with a top divider, buttons centered */
   .data-table tbody tr.table-row td.td-actions { padding-top: 10px; margin-top: 6px; border-top: 1px dashed; flex-direction: column; align-items: stretch; gap: 6px; }
   .admin-shell.night-mode .data-table tbody tr.table-row td.td-actions { border-top-color: rgba(139,92,246,0.12); }
