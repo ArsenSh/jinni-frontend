@@ -1845,12 +1845,13 @@
                         <td class="cov-city"><b>{{ row.city }}</b><span :title="row.aliases && row.aliases.length ? 'Also recorded as: ' + row.aliases.join(', ') : null">{{ row.total }} cached<template v-if="row.aliases && row.aliases.length"> · also “{{ row.aliases.slice(0, 2).join('”, “') }}”<template v-if="row.aliases.length > 2"> +{{ row.aliases.length - 2 }} more</template></template></span></td>
                         <td v-for="c in covData.categories" :key="c">
                           <button v-if="c === 'jinni_events'" type="button" class="cov-cell cov-cell--info"
+                                  :data-label="covCatLabel(c)"
                                   :class="{ 'cov-cell--foff': covOverrideOf(row.key, c) === 'off' }" @click="cycleCov(row.key, c)">
                             <b>{{ covCellPct(row, c) }}%</b>
                             <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
                             <em>{{ covOverrideOf(row.key, c) === 'off' ? 'search OFF' : 'via web search' }}</em>
                           </button>
-                          <button v-else type="button" class="cov-cell" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
+                          <button v-else type="button" class="cov-cell" :data-label="covCatLabel(c)" :class="covCellClass(row, c)" @click="cycleCov(row.key, c)">
                             <b>{{ covCellPct(row, c) }}%</b>
                             <span>{{ row.categories[c].count }} / {{ covCellTarget(row, c) }}</span>
                             <em>{{ covCellState(row, c) }}</em>
@@ -8645,7 +8646,7 @@ export default {
 /* ─ Mobile: ≤ 768px ─ */
 @media (max-width: 768px) {
   .admin-shell { flex-direction: column; }
-  .sidebar { width: 100%; height: 54px; position: fixed; bottom: 0; left: 0; right: 0; top: auto; z-index: 100; flex-direction: row; align-items: stretch; padding: 0; border-top: 1px solid rgba(139,92,246,0.18); overflow: hidden; }
+  .sidebar { width: 100%; height: 54px; position: fixed; bottom: 0; left: 0; right: 0; top: auto; z-index: 100; flex-direction: row; align-items: stretch; padding: 0; border-top: none; overflow: hidden; }
   .admin-shell.night-mode .sidebar { background: #16213e }
   .sidebar-brand, .sidebar-spacer, .sidebar-section-label { display: none; }
   .sidebar-nav {
@@ -8820,20 +8821,29 @@ export default {
      hero image (16:9 like chat cards, Arsen 2026-08-20). Desktop keeps the
      small inline thumb. */
   .data-table tbody tr.table-row td:first-child .row-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; margin: 4px 0 8px; }
-  /* Coverage matrix on mobile: keep the 2D table (column scanning is the whole
-     point) but pin the city column while categories scroll sideways, and
-     compact the cells. State color survives; the uppercase state word is
-     dropped — color + tap-cycle already carry it. */
-  .cov-table th:first-child,
-  .cov-table td:first-child { position: sticky; left: 0; z-index: 2; }
-  .admin-shell.night-mode .cov-table th:first-child,
-  .admin-shell.night-mode .cov-table td:first-child { background: #1e1438; }
-  .admin-shell.day-mode .cov-table th:first-child,
-  .admin-shell.day-mode .cov-table td:first-child { background: #fffdf6; }
-  .cov-city { max-width: 150px; }
-  .cov-cell { min-width: 72px; padding: 6px 7px; }
-  .cov-cell b { font-size: 12px; }
+  /* City warming on mobile (Arsen 2026-08-20): the wide matrix becomes stacked
+     cards — country header (name + market buttons), then per city a 2-column
+     grid of category cells, each labeled via data-label. No sideways scroll.
+     Desktop keeps the full 2D table. */
+  .cov-table { min-width: 0; }
+  .cov-table thead { display: none; }
+  .cov-table, .cov-table tbody { display: block; width: 100%; }
+  .cov-table tr.cov-country-row { display: block; padding: 8px 0 2px; }
+  .cov-country-row .cov-country-agg { display: none; }
+  .cov-country-cell { display: block; width: 100%; }
+  .cov-table tr.cov-city-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px 0 10px; }
+  .cov-city-row .cov-city { grid-column: 1 / -1; padding-left: 0; max-width: none; display: block; }
+  .cov-table td { padding: 0; }
+  .cov-cell { min-width: 0; width: 100%; padding: 7px 9px; }
+  .cov-cell::before { content: attr(data-label); display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.65; margin-bottom: 1px; }
   .cov-cell em { display: none; }
+  /* Coverage gate card: stack the action buttons — three long labels in one
+     flex row overflowed the block. */
+  .provider-actions { flex-direction: column; align-items: stretch; gap: 8px; }
+  .provider-actions .action-btn { width: 100%; text-align: center; justify-content: center; }
+  /* Business edit: native date inputs refuse to shrink and forced the panel
+     to scroll sideways (Subscription Start/End). */
+  .edit-input[type="date"] { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none; }
   /* The action cell goes full-width with a top divider, buttons centered */
   .data-table tbody tr.table-row td.td-actions { padding-top: 10px; margin-top: 6px; border-top: 1px dashed; flex-direction: column; align-items: stretch; gap: 6px; }
   .admin-shell.night-mode .data-table tbody tr.table-row td.td-actions { border-top-color: rgba(139,92,246,0.12); }

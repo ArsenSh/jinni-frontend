@@ -13,9 +13,12 @@
           <button class="mr-signout" @click="toggleTheme">
             <svg v-if="isDark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            {{ isDark ? 'Day mode' : 'Night mode' }}
+            <span class="mr-btn-text">{{ isDark ? 'Day mode' : 'Night mode' }}</span>
           </button>
-          <button v-if="authedMode && report" class="mr-signout mr-signout--danger" @click="signOut">Sign out</button>
+          <button v-if="authedMode && report" class="mr-signout mr-signout--danger" @click="signOut">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span class="mr-btn-text">Sign out</span>
+          </button>
         </div>
       </div>
       <p v-if="viewerName" class="mr-welcome">Welcome, <b>{{ viewerName }}</b> — here's how Jinni is growing.</p>
@@ -571,7 +574,9 @@ export default {
 
 .mr-head { max-width: 1060px; margin: 0 auto 20px; }
 .mr-head-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.mr-brand { font-size: 1.5rem; font-weight: 650; color: var(--mr-brand); letter-spacing: 0.01em; }
+/* Brand name mirrors JinniChat's sidebar .app-name exactly: same font stack,
+   size, weight, and the gold→orange gradient text (identical in both themes). */
+.mr-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .mr-head h1 { margin: 6px 0 6px; font-size: clamp(23px, 4vw, 30px); font-weight: 650; }
 .mr-sub { color: var(--mr-muted); font-size: 13px; margin: 0; }
 .mr-welcome { color: var(--mr-ink2); font-size: 14px; margin: 2px 0 6px; }
@@ -737,8 +742,11 @@ th { color: var(--mr-muted); font-weight: 600; }
 @media (max-width: 640px) {
   .mr-page { padding: 16px 12px 40px; }
   .mr-tiles { grid-template-columns: repeat(2, 1fr); }
-  .mr-appicon { width: 46px; height: 46px; }
-  .mr-brand { font-size: 1.3rem; }
+  /* Brand stays chat-sidebar sized on mobile too (60px icon, 1.6rem name). */
+  /* Theme + sign-out become icon-only squares — labels hidden. */
+  .mr-btn-text { display: none; }
+  .mr-signout { padding: 9px; }
+  .mr-signout svg { width: 16px; height: 16px; }
   .t-value { font-size: 22px; }
   .mr-card { padding: 15px 16px; }
   .mr-dd-btn { min-width: 145px; padding: 9px 14px; }
