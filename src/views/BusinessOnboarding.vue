@@ -296,10 +296,10 @@
                   </div>
                   <div id="zone-map" class="zone-map"></div>
                   <!-- Dual zone legend — shown only when primary + hidden_gems selected -->
-                  <div class="zone-dual-legend" v-if="form.tier === 'signature' && form.businessType.includes('hidden_gems') && form.businessType.some(t => ['restaurants','hotels','historical','events'].includes(t))">
+                  <div class="zone-dual-legend" v-if="form.tier === 'signature' && form.businessType.includes('hidden_gems') && form.businessType.some(t => ['restaurants','hotels','historical','events','souvenirs','clothing','jewelry','food'].includes(t))">
                     <span class="zone-dual-item zone-dual-item--primary">
                       <span class="zone-dual-dot zone-dual-dot--primary"></span>
-                      {{ form.businessType.find(t => ['restaurants','hotels','historical','events'].includes(t)) }} zone
+                      {{ form.businessType.find(t => ['restaurants','hotels','historical','events','souvenirs','clothing','jewelry','food'].includes(t)) }} zone
                     </span>
                     <span class="zone-dual-item zone-dual-item--hg">
                       <span class="zone-dual-dot zone-dual-dot--hg"></span>
@@ -1031,7 +1031,6 @@ export default {
       // 2026-08-20): businesses aren't historical sites; existing rows keep it.
       { key: 'souvenirs', label: 'Souvenirs & Gifts' },
       { key: 'clothing', label: 'Clothing & Boutique' },
-      { key: 'market', label: 'Market & Bazaar' },
       { key: 'jewelry', label: 'Jewelry' },
       { key: 'food', label: 'Food & Gourmet' },
       { key: 'hidden_gems', label: 'Hidden Gem' }
@@ -1707,7 +1706,9 @@ export default {
       mustUpgradeTo: null      // 'spotlight' | 'signature' — suggested tier when blocked
     })
     const isEvent = computed(() => form.businessType.includes('events'))
-    const hasPrimaryType = computed(() => form.businessType.some(t => ['restaurants','hotels','events','historical'].includes(t)))
+    // Any selected type except the hidden_gems attach counts as the primary —
+    // derived, so newly added categories dim the others automatically.
+    const hasPrimaryType = computed(() => form.businessType.some(t => t !== 'hidden_gems'))
     let leafletMap = null
     let zoneDebounce = null
     let lastGeocoderCenter = null  // cache so re-renders don't re-geocode
@@ -1725,7 +1726,7 @@ export default {
       return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
     }
     async function checkZone() {
-      const mainTypes = ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems']
+      const mainTypes = ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems', 'souvenirs', 'clothing', 'jewelry', 'food']
       const hasMainType = form.businessType.some(t => mainTypes.includes(t))
       const hasAddress = form.address.trim().length >= 5 && form.city.trim().length >= 1
       if (!hasMainType || !hasAddress) {
@@ -1764,7 +1765,7 @@ export default {
       // If user selected both a primary category AND hidden_gems, check both zones
       // and merge the competitor lists so the map shows all relevant businesses.
       let apiData = null
-      const primaryCategories = ['restaurants', 'hotels', 'events', 'historical']
+      const primaryCategories = ['restaurants', 'hotels', 'events', 'historical', 'souvenirs', 'clothing', 'jewelry', 'food']
       const primaryCategory = form.businessType.find(t => primaryCategories.includes(t))
       const hasHiddenGem = form.businessType.includes('hidden_gems')
       // Use primary category for the main zone check; fall back to hidden_gems if that's the only one
@@ -1819,7 +1820,7 @@ export default {
         zoneStatus.earliestExpiry = null
         zoneStatus.eventMode = false
         zoneStatus.overlappingEvents = []
-        const fallbackRadius = { restaurants: 300, hotels: 900, events: 300, historical: 500, hidden_gems: 900, souvenirs: 300, clothing: 300, market: 300, jewelry: 300, food: 300 }[category] ?? 300  // category already resolved above
+        const fallbackRadius = { restaurants: 300, hotels: 900, events: 300, historical: 500, hidden_gems: 900, souvenirs: 300, clothing: 300, jewelry: 300, food: 300 }[category] ?? 300  // category already resolved above
         await nextTick()
         initZoneMap([], [], coords, currentTheme.value, fallbackRadius)
         return

@@ -1967,7 +1967,7 @@ const TIERS = [
   { key: 'spotlight', label: 'Spotlight' },
   { key: 'signature', label: 'Signature' },
 ]
-const PRIMARY_CATS = ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems']
+const PRIMARY_CATS = ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems', 'souvenirs', 'clothing', 'market', 'jewelry', 'food']
 const INTEREST_TAGS = ['cultural','history','adventure','relaxation','nature','art','nightlife','food&drink']
 const STYLE_TAGS    = ['family','romantic','luxury','budget']
 
