@@ -581,7 +581,9 @@ export default {
 .mr-sub { color: var(--mr-muted); font-size: 13px; margin: 0; }
 .mr-welcome { color: var(--mr-ink2); font-size: 14px; margin: 2px 0 6px; }
 .mr-welcome b { color: var(--mr-brand); }
-.mr-head-actions { display: flex; gap: 8px; align-items: center; }
+/* Same height as the 60px brand icon row, buttons centered inside it — so the
+   theme/sign-out buttons sit on the same horizontal line as the Jinni brand. */
+.mr-head-actions { display: flex; gap: 8px; align-items: center; height: 60px; }
 .mr-signout {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--mr-card); color: var(--mr-ink2); border: none;

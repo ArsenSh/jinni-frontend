@@ -434,19 +434,22 @@
               <h2>User Management</h2>
               <span class="card-sub">{{ users.length }} results</span>
             </div>
-            <table class="data-table">
+            <table class="data-table data-table--acc">
               <thead><tr><th>User</th><th>Joined</th><th>Last Active</th><th>Today Tokens</th><th>Today Places</th><th>Total Tokens</th><th>Total Places</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr v-if="usersLoading"><td colspan="9" class="loading-cell"><div class="loader-ring loader-ring--sm"></div> Loading…</td></tr>
                 <tr v-else-if="!users.length"><td colspan="9" class="empty-cell">No users found.</td></tr>
-                <tr v-for="u in users" :key="u._id" class="table-row">
-                  <td data-label="User">
+                <!-- Mobile: rows collapse to name/email/last-active; tapping the
+                     name cell toggles the rest (acc-visible marks always-shown
+                     cells). Desktop table unchanged. -->
+                <tr v-for="u in users" :key="u._id" class="table-row" :class="{ 'row-open': accOpen['u' + u._id] }">
+                  <td data-label="User" class="acc-visible acc-toggle" @click="toggleAccRow('u' + u._id)">
                     <div class="user-cell">
                       <div><div class="user-name">{{ u.name }}</div><div class="user-email">{{ u.email }}</div></div>
                     </div>
                   </td>
                   <td class="dim-cell" data-label="Joined">{{ shortDate(u.createdAt) }}</td>
-                  <td class="dim-cell" data-label="Last Active">{{ relativeTime(u.analytics?.lastActive) }}</td>
+                  <td class="dim-cell acc-visible" data-label="Last Active">{{ relativeTime(u.analytics?.lastActive) }}</td>
                   <td data-label="Today Tokens">
                     <div class="usage-bar-wrap">
                       <div class="usage-bar"><div class="usage-fill" :class="dailyTokenPct(u.aiLimits) > 80 ? 'fill-danger' : 'fill-accent'" :style="{ width: dailyTokenPct(u.aiLimits) + '%' }"></div></div>
@@ -1753,7 +1756,7 @@
               <span class="card-sub">how far a business reaches in results &amp; zone boosts (meters, 50–5000)</span>
             </div>
             <div class="loc-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px">
-              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems', 'souvenirs', 'clothing', 'jewelry', 'food']" :key="cat">
+              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'hidden_gems', 'souvenirs', 'clothing', 'jewelry', 'food']" :key="cat">
                 <label class="edit-label" style="text-transform: capitalize">{{ cat.replace('_', ' ') }}</label>
                 <input class="limit-input" type="number" min="50" max="5000" step="50" v-model.number="limitsZoneForm[cat]" />
               </div>
@@ -2186,14 +2189,14 @@
               <h2>Staff Members</h2>
               <span class="card-sub">{{ staffFiltered.length }} {{ staffSearch ? 'matching' : 'total' }}</span>
             </div>
-            <table class="data-table">
+            <table class="data-table data-table--acc">
               <thead><tr><th>Email</th><th>Name</th><th>Status</th><th>Assignment</th><th>Last active</th><th>Created</th><th>Action</th></tr></thead>
               <tbody>
                 <tr v-if="staffLoading"><td colspan="7" class="loading-cell"><div class="loader-ring loader-ring--sm"></div> Loading…</td></tr>
                 <tr v-else-if="!staffFiltered.length"><td colspan="7" class="empty-cell">{{ staffSearch ? 'No staff match this search.' : 'No staff accounts yet.' }}</td></tr>
-                <tr v-for="s in staffFiltered" :key="s._id" class="table-row" :style="!s.isActive ? 'opacity:0.55' : ''">
-                  <td class="user-name" data-label="Email">{{ s.email }}</td>
-                  <td class="dim-cell" data-label="Name">{{ s.name }}</td>
+                <tr v-for="s in staffFiltered" :key="s._id" class="table-row" :class="{ 'row-open': accOpen['s' + s._id] }" :style="!s.isActive ? 'opacity:0.55' : ''">
+                  <td class="user-name acc-visible acc-toggle" data-label="Email" @click="toggleAccRow('s' + s._id)">{{ s.email }}</td>
+                  <td class="dim-cell acc-visible" data-label="Name">{{ s.name }}</td>
                   <td data-label="Status">
                     <!-- "Awaiting first login" keys off actual login activity
                          (analytics.lastActive), NOT mustChangePassword — that
@@ -2227,7 +2230,7 @@
                       </span>
                     </span>
                   </td>
-                  <td class="dim-cell" data-label="Last active">{{ s.analytics?.lastActive ? relativeTime(s.analytics.lastActive) : '—' }}</td>
+                  <td class="dim-cell acc-visible" data-label="Last active">{{ s.analytics?.lastActive ? relativeTime(s.analytics.lastActive) : '—' }}</td>
                   <td class="dim-cell" data-label="Created">{{ shortDate(s.createdAt) }}</td>
                   <td class="staff-actions-cell td-actions" data-label="Action">
                     <div class="action-group">
@@ -4248,6 +4251,10 @@ export default {
       { value: 'photo_spots', label: 'Photo Spots' },
     ]
     const bizCategoryFilterOpts = categoryFilterOpts.filter(o => o.value !== 'photo_spots')
+    // Mobile accordion state for the Users/Staff tables — keys are 'u<id>' /
+    // 's<id>'. Toggling on desktop is harmless (the hiding CSS is mobile-only).
+    const accOpen = ref({})
+    const toggleAccRow = (id) => { accOpen.value[id] = !accOpen.value[id] }
     const destSummary = ref({})
     const expandedTypes = ref({})
     const quickActionStats = ref({ actions: [], chatStream: { count: 0 }, quickActionTotal: 0, chatStreamTotal: 0, grandTotal: 0 })
@@ -6758,7 +6765,7 @@ export default {
     // ── Limits tab: tier config + analytics ──
     const limitsData = ref(null)
     const limitsForm = ref({ freeTokens: 10000, freePlaces: 100, premiumTokens: 50000, premiumPlaces: 200 })
-    const limitsZoneForm = ref({ restaurants: 300, hotels: 900, events: 300, historical: 500, hidden_gems: 900, souvenirs: 300, clothing: 300, jewelry: 300, food: 300 })
+    const limitsZoneForm = ref({ restaurants: 300, hotels: 900, events: 300, hidden_gems: 900, souvenirs: 300, clothing: 300, jewelry: 300, food: 300 })
     const limitsSaving = ref(false)
     const fetchLimits = async () => {
       try {
@@ -7251,7 +7258,7 @@ export default {
       eventTimezoneOptions, tzShortLabel,
       togglePremium, toggleCooldown, deleteUser, clearCooldown,
       fetchUsers, fetchUserLocations, fetchAIUsage, fetchBusinesses, fetchDestinations, fetchPlaces, fetchGoogleUsage,
-      toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
+      toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, accOpen, toggleAccRow, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
       deletePlace, setExploreStatus, placesExploreFilter, placesExploreOpts, backfillRegions, backfillBusy, purgeStale, onImgError,
       chatLog, openChatLog, openChatSession, closeChatLog, resolveImage, fmtMsg,
       purgeOpts, purgeDays, purgeDropdownOpen, purgeNeverUsed, selectedPurgeOpt,
@@ -8707,7 +8714,16 @@ export default {
   .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
   .toolbar > .action-btn { align-self: flex-start; }
   .search-wrap { max-width: 100%; }
-  .seg-group { align-self: stretch; display: flex; flex-wrap: wrap; max-width: 100%; box-sizing: border-box; }
+  /* Filter controls stack full-width on mobile (Arsen 2026-08-20): segmented
+     buttons share each row evenly (no ragged empty space), dropdowns and the
+     toolbar action buttons stretch — search on top, filters, actions last. */
+  .seg-group { align-self: stretch; display: flex; flex-wrap: wrap; max-width: 100%; box-sizing: border-box; width: 100%; }
+  .seg-group .seg-btn { flex: 1 1 auto; text-align: center; }
+  .fd { width: 100%; }
+  .fd .fd-btn { width: 100%; justify-content: space-between; box-sizing: border-box; }
+  .toolbar .purge-standalone { width: 100%; justify-content: center; margin-right: 0; box-sizing: border-box; }
+  .toolbar .purge-split { width: 100%; display: flex; }
+  .toolbar .purge-split .purge-main { flex: 1; justify-content: center; }
   .seg-btn { flex: 0 1 auto; }
   .table-card { border-radius: 12px; }
   .user-name { font-size: 12px; }
@@ -8817,6 +8833,13 @@ export default {
   .admin-shell.night-mode .data-table tbody tr.table-row td:first-child { border-bottom-color: rgba(139,92,246,0.12); }
   .admin-shell.day-mode  .data-table tbody tr.table-row td:first-child { border-bottom-color: rgba(212,175,55,0.15); }
   .data-table tbody tr.table-row td:first-child::before { display: block; }
+  /* Users/Staff accordion (Arsen 2026-08-20): collapsed rows show only the
+     .acc-visible cells (name/email/last-active); tapping the first cell
+     toggles the rest. Chevron on the toggle cell flips when open. */
+  .data-table--acc tbody tr.table-row:not(.row-open) td:not(.acc-visible) { display: none; }
+  .data-table--acc td.acc-toggle { cursor: pointer; position: relative; padding-right: 26px; }
+  .data-table--acc td.acc-toggle::after { content: '▾'; position: absolute; right: 6px; top: 10px; font-size: 13px; opacity: 0.5; transition: transform 0.18s; }
+  .data-table--acc tr.row-open td.acc-toggle::after { transform: rotate(180deg); }
   /* Mobile rows are cards already — promote the 46px thumb to a rec-card-style
      hero image (16:9 like chat cards, Arsen 2026-08-20). Desktop keeps the
      small inline thumb. */
@@ -8831,8 +8854,18 @@ export default {
   .cov-table tr.cov-country-row { display: block; padding: 8px 0 2px; }
   .cov-country-row .cov-country-agg { display: none; }
   .cov-country-cell { display: block; width: 100%; }
-  .cov-table tr.cov-city-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px 0 10px; }
+  /* Each city reads as its own card: soft panel behind its category grid. */
+  .cov-table tr.cov-city-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; margin: 6px 0; border-radius: 12px; }
+  .admin-shell.night-mode .cov-table tr.cov-city-row { background: rgba(255,255,255,0.03); }
+  .admin-shell.day-mode  .cov-table tr.cov-city-row { background: rgba(139,69,19,0.04); }
   .cov-city-row .cov-city { grid-column: 1 / -1; padding-left: 0; max-width: none; display: block; }
+  /* Country header keeps its accent tone from the desktop rule but drops the
+     per-td striping (tds are stacked blocks here). */
+  .admin-shell.night-mode .cov-country-row td { background: transparent; }
+  .admin-shell.day-mode  .cov-country-row td { background: transparent; }
+  .cov-table tr.cov-country-row { border-radius: 12px; padding: 10px; margin-top: 10px; }
+  .admin-shell.night-mode .cov-table tr.cov-country-row { background: rgba(139,92,246,0.07); }
+  .admin-shell.day-mode  .cov-table tr.cov-country-row { background: rgba(212,175,55,0.09); }
   .cov-table td { padding: 0; }
   .cov-cell { min-width: 0; width: 100%; padding: 7px 9px; }
   .cov-cell::before { content: attr(data-label); display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.65; margin-bottom: 1px; }
@@ -9374,6 +9407,9 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .admin-shell.night-mode .cov-country-row:hover td { background: rgba(139,92,246,0.07); }
 .admin-shell.day-mode .cov-country-row:hover td { background: rgba(212,175,55,0.08); }
 .cov-country-row td { padding-top: 9px; padding-bottom: 9px; }
+/* Country rows sit a tone apart from the city rows they expand (Arsen). */
+.admin-shell.night-mode .cov-country-row td { background: rgba(139,92,246,0.05); }
+.admin-shell.day-mode  .cov-country-row td { background: rgba(212,175,55,0.07); }
 .cov-country-name { display: flex; align-items: center; gap: 7px; }
 .cov-country-name b { font-size: 13.5px; font-weight: 700; }
 .cov-chev { transition: transform 0.18s; opacity: 0.55; flex-shrink: 0; }
