@@ -1753,7 +1753,7 @@
               <span class="card-sub">how far a business reaches in results &amp; zone boosts (meters, 50–5000)</span>
             </div>
             <div class="loc-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px">
-              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems']" :key="cat">
+              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems', 'souvenirs', 'clothing', 'market', 'jewelry', 'food']" :key="cat">
                 <label class="edit-label" style="text-transform: capitalize">{{ cat.replace('_', ' ') }}</label>
                 <input class="limit-input" type="number" min="50" max="5000" step="50" v-model.number="limitsZoneForm[cat]" />
               </div>
@@ -6754,7 +6754,7 @@ export default {
     // ── Limits tab: tier config + analytics ──
     const limitsData = ref(null)
     const limitsForm = ref({ freeTokens: 10000, freePlaces: 100, premiumTokens: 50000, premiumPlaces: 200 })
-    const limitsZoneForm = ref({ restaurants: 300, hotels: 900, events: 300, historical: 500, hidden_gems: 900 })
+    const limitsZoneForm = ref({ restaurants: 300, hotels: 900, events: 300, historical: 500, hidden_gems: 900, souvenirs: 300, clothing: 300, market: 300, jewelry: 300, food: 300 })
     const limitsSaving = ref(false)
     const fetchLimits = async () => {
       try {

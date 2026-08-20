@@ -2180,7 +2180,7 @@ export default {
       }
     }
 
-    const PRIMARY_CATS = ['restaurants','hotels','events','historical','hidden_gems']
+    const PRIMARY_CATS = ['restaurants','hotels','events','historical','hidden_gems','souvenirs','clothing','market','jewelry','food']
     // Singular human labels for the primary category enum. Source enum is
     // plural ("restaurants", "hotels", …) because it describes the category
     // bucket, but a single listing card reads better in the singular ("Your
@@ -2191,7 +2191,12 @@ export default {
       hotels:      'Hotel',
       events:      'Event',
       historical:  'Historical site',
-      hidden_gems: 'Hidden gem'
+      hidden_gems: 'Hidden gem',
+      souvenirs:   'Souvenirs & gifts',
+      clothing:    'Clothing & boutique',
+      market:      'Market & bazaar',
+      jewelry:     'Jewelry',
+      food:        'Food & gourmet'
     }
     const mainCategory = computed(() => {
       const cat = business.value?.type?.find(t => PRIMARY_CATS.includes(t))
@@ -2478,7 +2483,7 @@ export default {
     const zoneSlots = computed(() => business.value?.zoneInfo?.slotsUsed ?? '—')
     const zoneRadiusLabel = computed(() => {
       const cat = business.value?.type?.find(t => PRIMARY_CATS.includes(t))
-      const map = { restaurants: '300m', hotels: '900m', events: '300m', historical: '500m', hidden_gems: '900m' }
+      const map = { restaurants: '300m', hotels: '900m', events: '300m', historical: '500m', hidden_gems: '900m', souvenirs: '300m', clothing: '300m', market: '300m', jewelry: '300m', food: '300m' }
       return cat ? (map[cat] || '—') : '—'
     })
 

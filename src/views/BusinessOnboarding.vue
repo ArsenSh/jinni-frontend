@@ -1025,7 +1025,15 @@ export default {
       { key: 'restaurants', label: 'Restaurant' },
       { key: 'hotels', label: 'Hotel' },
       { key: 'events', label: 'Event' },
-      { key: 'historical', label: 'Historical' },
+      // Shopping sub-categories — a shop picks the concrete kind it is; there is
+      // no generic "Shopping" (and no mall — malls don't self-onboard).
+      // 'historical' removed from self-serve onboarding (founder decision
+      // 2026-08-20): businesses aren't historical sites; existing rows keep it.
+      { key: 'souvenirs', label: 'Souvenirs & Gifts' },
+      { key: 'clothing', label: 'Clothing & Boutique' },
+      { key: 'market', label: 'Market & Bazaar' },
+      { key: 'jewelry', label: 'Jewelry' },
+      { key: 'food', label: 'Food & Gourmet' },
       { key: 'hidden_gems', label: 'Hidden Gem' }
     ]
     const travelerInterests = [
@@ -1811,7 +1819,7 @@ export default {
         zoneStatus.earliestExpiry = null
         zoneStatus.eventMode = false
         zoneStatus.overlappingEvents = []
-        const fallbackRadius = { restaurants: 300, hotels: 900, events: 300, historical: 500, hidden_gems: 900 }[category] ?? 300  // category already resolved above
+        const fallbackRadius = { restaurants: 300, hotels: 900, events: 300, historical: 500, hidden_gems: 900, souvenirs: 300, clothing: 300, market: 300, jewelry: 300, food: 300 }[category] ?? 300  // category already resolved above
         await nextTick()
         initZoneMap([], [], coords, currentTheme.value, fallbackRadius)
         return
