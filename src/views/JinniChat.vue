@@ -5549,9 +5549,14 @@ export default {
             excludeNames: [...new Set(excludeNames)],
             nearbyMode: this.nearbyMode,
             // Keep the same shopping sub-type when loading more, otherwise the
-            // next batch would revert to generic shops.
-            ...(message.subType && { subType: message.subType })
+            // next batch would revert to generic shops. Fallback to the last
+            // chip the user picked — prod 2026-08-20: a third tap arrived
+            // sub-typeless and served generic shops under a Malls grid.
+            ...((message.subType || (message.actionType === 'shopping' && this._lastShoppingSubType))
+              && { subType: message.subType || this._lastShoppingSubType })
           };
+          // Re-stamp the message so every FOLLOWING tap carries it again.
+          if (!message.subType && requestBody.subType) { message.subType = requestBody.subType; }
           if (location) { requestBody.location = { lat: location.lat, lng: location.lng, radius: location.source === 'ip' ? 50000 : 20000, source: location.source } }
           const token = localStorage.getItem('authToken');
           const response = await fetch(`${API_BASE_URL}/api/ai/quick-action-stream`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(requestBody), signal: reqController.signal });
@@ -5624,6 +5629,11 @@ export default {
     },
     async triggerQuickAction(actionId, opts = {}) {
       const subType = opts.subType || null;
+      // Remembered as a View-More fallback: prod 2026-08-20 showed a third
+      // refill tap arriving WITHOUT subType (grid reverted to generic shops,
+      // even a university card) — if message.subType is ever lost, the last
+      // chip the user picked is still the right answer.
+      if (subType) this._lastShoppingSubType = subType;
       // Itinerary opens its own step-by-step setup (days -> hotel) and does
       // NOT search until Build. Intercept before any usage check, like shopping.
       if (actionId === 'itinerary') {
