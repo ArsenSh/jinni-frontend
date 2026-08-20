@@ -197,12 +197,18 @@ export default {
       de.style.backgroundImage = top === bottom
         ? 'none'
         : `linear-gradient(${bottom} 50%, ${top} 50%)`;
-      de.style.backgroundColor = top;
+      // The solid background-color is what iOS Safari uses to tint its BOTTOM
+      // bar and the keyboard band — both sit against the page's BOTTOM edge,
+      // so they must carry the bottom color (device-verified 2026-08-20: with
+      // `top` here the chat keyboard band showed #0a0118 against the page's
+      // #16213e bottom). The TOP chrome is covered by the theme-color meta and
+      // the canvas gradient's top half; it never reads this color.
+      de.style.backgroundColor = bottom;
       // <body> backdrop: exposed when the iOS keyboard shifts the visual
       // viewport behind fixed-100vh shells. Carries the page's OWN computed
       // background image verbatim (or none for flat pages) over a solid color.
       document.body.style.backgroundImage = (paint && paint.image) ? paint.image : 'none';
-      document.body.style.backgroundColor = top;
+      document.body.style.backgroundColor = bottom;
       // <meta theme-color> — Safari/Chrome top chrome. When the color CHANGES,
       // the node is REPLACED rather than mutated: several iOS versions ignore
       // content edits on an existing meta during SPA navigation but re-read a
