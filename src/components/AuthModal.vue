@@ -306,17 +306,26 @@ export default {
     // no-op when this modal is overlaid on an already-themed page; matters if /auth
     // is shown standalone (direct link, refresh, or OAuth redirect).
     syncThemeColor() {
+      // Clock-based like the landing page. Must write the `background`
+      // SHORTHAND (not backgroundColor): App.vue paints a store-theme gradient
+      // IMAGE on <html>, and color-only writes left it showing (night auth
+      // page showed the day-cream overscroll). Halves swapped: the canvas
+      // tiles beyond the page, so top overscroll shows a tile's BOTTOM half.
       const theme = this.currentTheme === 'night-mode' ? 'dark' : 'light'
-      const color = theme === 'dark' ? '#0a0118' : '#f9f5eb'
+      const p = theme === 'dark'
+        ? { top: '#0a0118', bottom: '#080313' }   // starry overlay ends
+        : { top: '#f9f5eb', bottom: '#e0a082' }   // day overlay gradient ends
       document.documentElement.setAttribute('data-theme', theme)
-      document.documentElement.style.backgroundColor = color
+      document.documentElement.style.background =
+        `linear-gradient(${p.bottom} 50%, ${p.top} 50%)`
+      document.body.style.backgroundColor = p.top
       let meta = document.querySelector('meta[name="theme-color"]:not([media])')
       if (!meta) {
         meta = document.createElement('meta')
         meta.setAttribute('name', 'theme-color')
         document.head.appendChild(meta)
       }
-      meta.setAttribute('content', color)
+      meta.setAttribute('content', p.top)
     },
     getSubtitle() {
       if (this.showVerification) { return this.$t('auth.verification_sent') }

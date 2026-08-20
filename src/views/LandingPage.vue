@@ -109,19 +109,30 @@ export default {
     const isNightMode = computed(() => isNightTime())
     // Keep the browser chrome (mobile address-bar) in sync with the landing
     // page's actual day/night look — same colors App.vue uses for the app.
-    const THEME_COLORS = { dark: '#0a0118', light: '#f9f5eb' }
+    // Landing's theme is CLOCK-based (not the store), so it must paint its own
+    // edge pair — and it must write the `background` SHORTHAND: App.vue paints
+    // a store-theme gradient IMAGE on <html>, and writing only backgroundColor
+    // left that image visible (night landing showed the day-cream overscroll).
+    // Halves are swapped on purpose: the canvas tiles this beyond the page, so
+    // top overscroll reveals the previous tile's BOTTOM half.
+    const EDGE_PAIRS = {
+      dark:  { top: '#0a0118', bottom: '#080313' },   // starry sky ends
+      light: { top: '#f9f5eb', bottom: '#e0a082' },   // desert sky ends
+    }
     const applyBrowserTheme = () => {
       const theme = isNightMode.value ? 'dark' : 'light'
-      const color = THEME_COLORS[theme]
+      const p = EDGE_PAIRS[theme]
       document.documentElement.setAttribute('data-theme', theme)
-      document.documentElement.style.backgroundColor = color
+      document.documentElement.style.background =
+        p.top === p.bottom ? p.top : `linear-gradient(${p.bottom} 50%, ${p.top} 50%)`
+      document.body.style.backgroundColor = p.top
       let meta = document.querySelector('meta[name="theme-color"]:not([media])')
       if (!meta) {
         meta = document.createElement('meta')
         meta.setAttribute('name', 'theme-color')
         document.head.appendChild(meta)
       }
-      meta.setAttribute('content', color)
+      meta.setAttribute('content', p.top)
     }
     const features = [
       {
