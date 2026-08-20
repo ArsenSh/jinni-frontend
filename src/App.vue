@@ -24,6 +24,7 @@ const PAGE_EDGES = {
     default:               ['#0a0118', '#16213e'],   // the app-wide night gradient ends
     '/':                   ['#0a0118', '#080313'],   // starry sky
     '/business':           ['#0a0118', '#080313'],
+    '/auth':               ['#0a0118', '#0a0118'],   // flat dark page (opaque .auth-page)
     '/marketing':          ['#0a0118', '#0a0118'],   // flat pages
     '/admin':              ['#0a0118', '#0a0118'],   // flat in BOTH themes (Arsen)
   },
@@ -31,6 +32,8 @@ const PAGE_EDGES = {
     default:               ['#f9f5eb', '#f9f5eb'],
     '/':                   ['#f9f5eb', '#e0a082'],   // desert sky pages
     '/business':           ['#f9f5eb', '#e0a082'],
+    '/auth':               ['#4b4a47', '#4b4a47'],   // auth looks DARK even in day theme
+                                                     // (the old 70% black over cream)
     '/contact':            ['#f9f5eb', '#e0a082'],
     '/terms':              ['#f9f5eb', '#e0a082'],
     '/privacy':            ['#f9f5eb', '#e0a082'],
@@ -107,11 +110,17 @@ export default {
       const DAY_GRAD   = 'linear-gradient(180deg,#f9f5eb 0%,#f5edda 55%,#efe4cf 100%)';
       const GRADIENT_ROUTES = ['/chat', '/explore', '/business/dashboard', '/share',
         '/onboarding', '/business/apply', '/admin/businesses', '/contact',
-        '/terms', '/privacy', '/business/terms', '/business/privacy'];
+        '/terms', '/privacy', '/business/terms', '/business/privacy', '/map-selector'];
+      // Pages whose DAY theme is the cream gradient too (the rest are flat
+      // cream in day mode). Prefix-matched — an exact `p === '/share'` here
+      // missed every real /share/<token> URL and left a flat backdrop behind
+      // the gradient share page.
+      const DAY_GRAD_ROUTES = ['/chat', '/explore', '/share', '/business/dashboard'];
       const p = this.$route?.path || '/';
       const isGrad = GRADIENT_ROUTES.some(r => p === r || p.startsWith(r + '/'));
+      const isDayGrad = DAY_GRAD_ROUTES.some(r => p === r || p.startsWith(r + '/'));
       document.body.style.background = isGrad
-        ? (theme === 'dark' ? NIGHT_GRAD : (p === '/chat' || p === '/explore' || p === '/share' || p === '/business/dashboard' ? DAY_GRAD : edgeTop))
+        ? (theme === 'dark' ? NIGHT_GRAD : (isDayGrad ? DAY_GRAD : edgeTop))
         : edgeTop;
       void color;
       // 4. <meta name="theme-color"> — Safari/Chrome browser chrome (top edge)
@@ -163,6 +172,12 @@ html, body {
   min-height: 100%;
   background-color: #f9f5eb;
   transition: background-color 0.5s ease;
+}
+/* index.html's inline pre-paint script sets data-theme BEFORE this stylesheet
+ * loads, so a night user never sees the cream base between CSS apply and Vue
+ * mount (the JS bundle is big — first paint happens well before mount). */
+html[data-theme="dark"], html[data-theme="dark"] body {
+  background-color: #0a0118;
 }
 #app {
   display: flex;

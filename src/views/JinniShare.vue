@@ -945,7 +945,7 @@ export default {
    THEME VARIABLES
 ═══════════════════════════════════════════════════════════════════ */
 .share-page.night-mode {
-  --bg:           linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%);;
+  --bg:           linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%);
   --surface:      #1e1438;
   --surface2:     #241845;
   --border:       rgba(139,92,246,0.2);

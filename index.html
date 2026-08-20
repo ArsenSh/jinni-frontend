@@ -7,6 +7,33 @@
          pinch-zoom regardless of this value, so accessibility is preserved. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
     <title>Jinni - Your AI Guide</title>
+    <!-- Pre-paint theme. The JS bundle is large, so the first paint happens
+         long before Vue mounts — with no background here the page (and the
+         iOS Safari chrome/canvas, which derives its tint from that FIRST
+         paint and may keep it until a document scroll or reload) flashed
+         WHITE, then cream, then the real theme. This mirrors the settings
+         store: jinni_settings.theme, 'auto' = night 21:00–06:00 (timeUtils).
+         App.vue takes over with per-page edge colors right after mount. -->
+    <meta name="theme-color" content="#f9f5eb">
+    <script>
+      (function () {
+        var theme = 'auto';
+        try { theme = JSON.parse(localStorage.getItem('jinni_settings') || '{}').theme || 'auto'; } catch (e) {}
+        if (theme !== 'dark' && theme !== 'light') {
+          var h = new Date().getHours();
+          theme = (h >= 21 || h < 6) ? 'dark' : 'light';
+        }
+        var c = theme === 'dark' ? '#0a0118' : '#f9f5eb';
+        var d = document.documentElement;
+        // data-theme before any CSS applies — App.vue's base CSS keys its
+        // html/body background-color on it, so the stylesheet lands already
+        // in the right theme (no cream flash for night users).
+        d.setAttribute('data-theme', theme);
+        d.style.background = c;
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', c);
+      })();
+    </script>
     <!-- Tight-cropped lamp icons — the raw logo PNG has big transparent
          margins that made the favicon look tiny in browser tabs. -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
