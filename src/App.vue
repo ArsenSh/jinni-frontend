@@ -151,6 +151,7 @@ export default {
     this._appMo && this._appMo.disconnect();
     this._rootMo && this._rootMo.disconnect();
     clearTimeout(this._resyncT);
+    (this._nudgeTimers || []).forEach(clearTimeout);
   },
   methods: {
     applyGlobalTheme() {
@@ -202,14 +203,21 @@ export default {
       // background image verbatim (or none for flat pages) over a solid color.
       document.body.style.backgroundImage = (paint && paint.image) ? paint.image : 'none';
       document.body.style.backgroundColor = top;
-      // <meta theme-color> — Safari/Chrome top chrome.
+      // <meta theme-color> — Safari/Chrome top chrome. When the color CHANGES,
+      // the node is REPLACED rather than mutated: several iOS versions ignore
+      // content edits on an existing meta during SPA navigation but re-read a
+      // freshly inserted one (the auth → business-onboarding stale-bar case).
       let meta = document.querySelector('meta[name="theme-color"]:not([media])');
+      if (meta && meta.getAttribute('content') !== top) {
+        meta.remove();
+        meta = null;
+      }
       if (!meta) {
         meta = document.createElement('meta');
         meta.setAttribute('name', 'theme-color');
+        meta.setAttribute('content', top);
         document.head.appendChild(meta);
       }
-      meta.setAttribute('content', top);
 
       // Watch the CURRENT page root: local theme toggles (admin / validator /
       // marketing), the landing's clock-based sky swap, and v-if backdrop
@@ -235,22 +243,29 @@ export default {
       const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
         || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       if (!isIOS) return;
-      requestAnimationFrame(() => {
-        // Safari only re-derives the canvas/toolbar tint on a DOCUMENT scroll.
-        // Fixed-height shells (chat, business dashboard) have nothing to
-        // scroll, so the old 1px nudge was a no-op there and Safari kept the
-        // PREVIOUS page's colors until a full reload (auth → dashboard bug).
-        // Temporarily grant 2px of scroll slack — invisible on fixed shells —
-        // so the nudge always actually scrolls.
-        const de = document.documentElement;
-        const needsSlack = de.scrollHeight <= window.innerHeight;
-        if (needsSlack) document.body.style.minHeight = 'calc(100vh + 2px)';
-        window.scrollBy(0, 1);
+      // Safari only re-derives the canvas/toolbar tint on a DOCUMENT scroll —
+      // and a single early nudge can fire BEFORE the new route has painted,
+      // making Safari re-sample the OLD page and then go quiet (the stale bar
+      // on auth → business-onboarding). So nudge in a staggered series after
+      // each sync; later nudges hit the settled paint. Timers are reset on
+      // every call so bursts don't stack.
+      (this._nudgeTimers || []).forEach(clearTimeout);
+      this._nudgeTimers = [0, 350, 900].map(delay => setTimeout(() => {
         requestAnimationFrame(() => {
-          window.scrollBy(0, -1);
-          if (needsSlack) document.body.style.minHeight = '';
+          // Fixed-height shells (chat, business dashboard) have nothing to
+          // scroll, so a bare 1px nudge would be a no-op there. Temporarily
+          // grant 2px of scroll slack — invisible on fixed shells — so the
+          // nudge always actually scrolls the document.
+          const de = document.documentElement;
+          const needsSlack = de.scrollHeight <= window.innerHeight;
+          if (needsSlack) document.body.style.minHeight = 'calc(100vh + 2px)';
+          window.scrollBy(0, 1);
+          requestAnimationFrame(() => {
+            window.scrollBy(0, -1);
+            if (needsSlack) document.body.style.minHeight = '';
+          });
         });
-      });
+      }, delay));
     },
   },
 };
