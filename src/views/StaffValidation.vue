@@ -2342,8 +2342,9 @@ export default {
     ]
     // Editor chips (place modal) — the real curatable categories PLUS the six
     // shopping sub-types, so a validator can mark WHICH kind of shop a place
-    // is (a sub-typed place should keep the umbrella 'shopping' tag too; the
-    // sub-type is what the Jewelry/Malls/… refills match on). 'jinni_events'
+    // is (the sub-type is what the Jewelry/Malls/… refills match on). Click
+    // ONLY the sub-type: the server auto-adds the umbrella 'shopping' tag,
+    // which Explore's Shops rail and the cache queries group by. 'jinni_events'
     // is excluded: it's a table view, not a PlaceCache tag — the server would
     // silently strip it.
     const expEditCategories = [
