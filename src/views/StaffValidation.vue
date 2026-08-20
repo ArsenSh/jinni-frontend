@@ -2,12 +2,41 @@
   <div class="staff-val" :class="theme">
     <!-- ── Header ────────────────────────────────────────────────────── -->
     <header class="page-header">
-      <div class="page-header-left">
-        <!-- Brand row — same identity as JinniChat/marketing: bottle + gradient name -->
+      <!-- Brand bar — same layout as the marketing page: bottle + gradient
+           name on the left, theme toggle + sign out on the same line right. -->
+      <div class="sv-brandbar">
         <div class="sv-brandrow">
           <img src="/images/bottle.png" class="sv-appicon" alt="Jinni" />
           <span class="sv-brand">Jinni</span>
         </div>
+        <div class="sv-brand-actions">
+          <button class="theme-toggle-btn" @click="toggleTheme" :title="theme === 'night-mode' ? 'Switch to day mode' : 'Switch to night mode'" :aria-label="theme === 'night-mode' ? 'Switch to day mode' : 'Switch to night mode'">
+            <svg v-if="theme === 'night-mode'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2"/>
+              <path d="M12 20v2"/>
+              <path d="m4.93 4.93 1.41 1.41"/>
+              <path d="m17.66 17.66 1.41 1.41"/>
+              <path d="M2 12h2"/>
+              <path d="M20 12h2"/>
+              <path d="m6.34 17.66-1.41 1.41"/>
+              <path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+            <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+          <button class="logout-btn" @click="confirmLogout = true" title="Sign out">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span>Sign out</span>
+          </button>
+        </div>
+      </div>
+      <div class="page-header-left">
         <h1 class="page-title">
           <span class="page-title-mark">//</span>
           {{ activeTab === 'destinations' ? 'Destinations' : activeTab === 'explore' ? 'Explore' : 'Validation' }}<span v-if="userName" class="page-title-user"> — {{ userName }}</span>
@@ -47,32 +76,6 @@
             <span class="count-pill-num">{{ fmt(destSummary.totalClicks || 0) }}</span>
           </span>
         </div>
-        <button class="theme-toggle-btn" @click="toggleTheme" :title="theme === 'night-mode' ? 'Switch to day mode' : 'Switch to night mode'" :aria-label="theme === 'night-mode' ? 'Switch to day mode' : 'Switch to night mode'">
-          <!-- Sun icon (shown in night mode → click for day) -->
-          <svg v-if="theme === 'night-mode'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2"/>
-            <path d="M12 20v2"/>
-            <path d="m4.93 4.93 1.41 1.41"/>
-            <path d="m17.66 17.66 1.41 1.41"/>
-            <path d="M2 12h2"/>
-            <path d="M20 12h2"/>
-            <path d="m6.34 17.66-1.41 1.41"/>
-            <path d="m19.07 4.93-1.41 1.41"/>
-          </svg>
-          <!-- Moon icon (shown in day mode → click for night) -->
-          <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-        </button>
-        <button class="logout-btn" @click="confirmLogout = true" title="Sign out">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          <span>Sign out</span>
-        </button>
       </div>
     </header>
 
@@ -869,14 +872,18 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="d in destinations" :key="d._id" class="biz-row" :class="{ 'row-hidden-gem': d.isHiddenGem }">
-              <td class="col-name" data-label="Name">
+            <!-- Mobile: card shows hero image + name + location; tapping the
+                 name toggles the remaining details (accordion). Desktop
+                 table unchanged — the hero img is hidden there. -->
+            <tr v-for="d in destinations" :key="d._id" class="biz-row" :class="{ 'row-hidden-gem': d.isHiddenGem, 'row-open': svAccOpen['d' + d._id] }">
+              <td class="col-name acc-visible acc-toggle" data-label="Name" @click="svToggleAcc('d' + d._id)">
+                <img v-if="d.images && d.images[0]" :src="resolveImage(d.images[0], d._id, 0)" class="dest-row-hero" loading="lazy" @error="$event.target.style.display='none'" />
                 <div class="row-name">
                   <span class="row-name-text">{{ d.name }}</span>
                   <span v-if="d.isHiddenGem" class="row-tag gem">✦ gem</span>
                 </div>
               </td>
-              <td class="col-city" data-label="Location">
+              <td class="col-city acc-visible" data-label="Location">
                 <template v-if="d.location?.city && d.location?.region && d.location.city !== d.location.region">
                   {{ d.location.city }}, {{ d.location.region }}
                 </template>
@@ -1700,8 +1707,10 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="p in expPlaces" :key="p.placeId" class="biz-row exp-row" @click="openExpPlace(p)">
-              <td class="col-name" data-label="Place">
+            <!-- Mobile: name tap toggles the accordion; desktop keeps the
+                 row click opening the moderation modal. -->
+            <tr v-for="p in expPlaces" :key="p.placeId" class="biz-row exp-row" :class="{ 'row-open': svAccOpen['e' + p.placeId] }" @click="openExpPlace(p)">
+              <td class="col-name acc-visible acc-toggle" data-label="Place" @click.stop="svAccTapExp(p)">
                 <div class="exp-place-cell">
                   <img v-if="p.imagesStored" :src="`${apiRoot}/ai/place-image/${p.placeId}/0`" class="exp-thumb" loading="lazy" @error="$event.target.style.visibility='hidden'"/>
                   <div v-else class="exp-thumb exp-thumb--empty">
@@ -1713,7 +1722,7 @@
                   </div>
                 </div>
               </td>
-              <td class="col-city" data-label="Location">{{ p.city || p.country || p.details?.formatted_address || '—' }}</td>
+              <td class="col-city acc-visible" data-label="Location">{{ p.city || p.country || p.details?.formatted_address || '—' }}</td>
               <td class="col-rating" data-label="Rating">
                 <span v-if="Number.isFinite(p.rating)" :class="{ 'exp-rating-low': p.rating < 3.5 }">★ {{ p.rating.toFixed(1) }}</span>
                 <span v-else>—</span>
@@ -2036,6 +2045,16 @@ export default {
     const limit = ref(MOBILE_PAGE ? 8 : 20)
     // Tab badge: compact thousands ("1.2k") so long counts fit the pill.
     const tabCount = (n) => n > 999 ? ((n / 1000).toFixed(n > 9950 ? 0 : 1).replace(/\.0$/, '') + 'k') : n
+    // Mobile accordion for the destinations/explore lists — 'd<id>' / 'e<placeId>'.
+    // Desktop is unaffected (the hiding CSS is mobile-only).
+    const svAccOpen = ref({})
+    const svToggleAcc = (id) => { svAccOpen.value[id] = !svAccOpen.value[id] }
+    // Explore rows open the moderation modal on click — on mobile the name tap
+    // toggles the accordion instead; desktop keeps the modal.
+    const svAccTapExp = (p) => {
+      if (window.innerWidth <= 768) svToggleAcc('e' + p.placeId)
+      else openExpPlace(p)
+    }
     const total = ref(0)
     const businesses = ref([])
     const counts = ref({})
@@ -3954,7 +3973,7 @@ export default {
       EXPLORE_INTERESTS, toggleExpInterest, toggleAiBlock,
       expSelected, expImages, expImagesLoading, openExpPlace, apiOrigin, expPrice, fmtD, expMapsUrl,
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES, DEST_PREFS, destTypeFilter, destPrefFilter, destTagLabel,
-      ALL_DEST_TYPES, PRICING_CURRENCIES, fmt, tabCount,
+      ALL_DEST_TYPES, PRICING_CURRENCIES, fmt, tabCount, svAccOpen, svToggleAcc, svAccTapExp,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
       toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords, isDay24h, setDay24h,
       destIsEvent, destIsOneTimeEvent, destEventEndsInPast, destTimezoneOptions, tzShortLabel, eventScheduleSummary,
@@ -5266,10 +5285,16 @@ html[data-theme="light"],body.theme-light,html:has(#app.day-mode),body:has(#app.
 
 /* ── Brand row — same identity as JinniChat sidebar / marketing page:
    60px bottle + gradient "Jinni" (both themes). ── */
-.sv-brandrow { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.page-header { flex-wrap: wrap; }
+.sv-brandbar { flex-basis: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+/* Actions match the 60px icon row height so both sit on one line (marketing). */
+.sv-brand-actions { display: flex; align-items: center; gap: 8px; height: 60px; }
+.sv-brandrow { display: flex; align-items: center; gap: 8px; }
 .sv-appicon { width: 60px; height: 60px; object-fit: contain; }
 .sv-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .edit-hours-day-short { display: none; }
+/* Destination list hero image exists only in the mobile cards. */
+.dest-row-hero { display: none; }
 
 /* ── Mobile refinements (2026-08-20 full audit) — ≤768px only; desktop
    untouched. Appended LAST on purpose: several desktop rules declared after
@@ -5280,8 +5305,25 @@ html[data-theme="light"],body.theme-light,html:has(#app.day-mode),body:has(#app.
      already icon-only. */
   .logout-btn span { display: none; }
   .logout-btn { padding: 8px 9px; }
-  /* Pagination: one horizontal row — ‹ Prev · Page X of Y · Next › */
-  .pagination { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 12px; }
+  /* Pagination: ONE horizontal row — ‹ Prev · Page X of Y · Next ›.
+     nowrap + a shrinkable middle: the "Page X of Y · N total" text is what
+     used to push the row into 3 stacked lines. */
+  .pagination { flex-direction: row; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 8px; }
+  .pagination span, .pagination .page-indicator { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  .pagination button, .pagination .ghost-btn { flex-shrink: 0; padding: 7px 10px; font-size: 12px; }
+  /* Destinations + Explore accordion: collapsed cards show image + name +
+     location; tapping the name expands the rest (chevron flips). */
+  .biz-table--dest tbody tr.biz-row:not(.row-open) td:not(.acc-visible),
+  .biz-table--explore tbody tr.biz-row:not(.row-open) td:not(.acc-visible) { display: none; }
+  .biz-table td.acc-toggle { cursor: pointer; position: relative; padding-right: 26px; }
+  .biz-table td.acc-toggle::after { content: '▾'; position: absolute; right: 6px; top: 10px; font-size: 13px; opacity: 0.5; transition: transform 0.18s; }
+  .biz-table tr.row-open td.acc-toggle::after { transform: rotate(180deg); }
+  /* Hero images in the cards: destination first image (mobile-only element)
+     and the explore thumb promoted from 40px to a 16:9 card image. */
+  .dest-row-hero { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; margin: 4px 0 8px; }
+  .exp-place-cell { flex-direction: column; align-items: stretch; }
+  .exp-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; margin-bottom: 6px; }
+  .exp-thumb--empty { display: none; }
   /* Add destination + validation Refresh: full-width actions in their bars */
   .dest-toolbar .ghost-btn,
   .filter-group--right .ghost-btn { width: 100%; justify-content: center; display: flex; align-items: center; gap: 6px; padding: 10px; }

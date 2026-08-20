@@ -1757,7 +1757,7 @@
               <h2>Visibility radius per category</h2>
               <span class="card-sub">how far a business reaches in results &amp; zone boosts (meters, 50–5000)</span>
             </div>
-            <div class="loc-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px">
+            <div class="loc-grid" style="grid-template-columns: repeat(auto-fit, minmax(90px, 100px)); gap: 12px">
               <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'hidden_gems', 'souvenirs', 'clothing', 'jewelry', 'food']" :key="cat">
                 <label class="edit-label" style="text-transform: capitalize">{{ cat.replace('_', ' ') }}</label>
                 <input class="limit-input" type="number" min="50" max="5000" step="50" v-model.number="limitsZoneForm[cat]" />
@@ -9373,6 +9373,8 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .admin-shell.day-mode .ws-chip--on { border-color: transparent; }
 .provider-divider { height: 1px; background: rgba(139,92,246,0.18); margin: 16px 0; }
 .provider-actions { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+/* Coverage/provider action buttons: comfortable height (they were thin). */
+.provider-actions .action-btn { padding: 11px 18px; font-size: 12.5px; }
 .provider-save {
   font: inherit; font-size: 14px; font-weight: 600; padding: 9px 18px; border-radius: 9px;
   border: none; cursor: pointer; color: #fff;
