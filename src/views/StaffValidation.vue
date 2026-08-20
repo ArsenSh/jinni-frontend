@@ -4002,12 +4002,24 @@ export default {
 .page-subtitle{margin:4px 0 0;color:var(--text-mute);font-size:14px}
 .page-header-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 /* ── Theme toggle & logout ───────────────────────────────────────── */
-.theme-toggle-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border-radius:999px;background:transparent;color:var(--text-mute);border:none;cursor:pointer;font-family:inherit;transition:all 0.15s ease}
-.theme-toggle-btn:hover{color:var(--accent);background:var(--bg-elev-2);transform:rotate(15deg)}
-.theme-toggle-btn svg{flex-shrink:0}
-.logout-btn{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:transparent;color:var(--text-mute);border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:all 0.15s ease}
-.logout-btn:hover{border-color:var(--bad);color:var(--bad);background:rgba(248,113,113,0.06)}
-.logout-btn svg{flex-shrink:0}
+/* Theme + Sign out — the VERY SAME look as the marketing page's .mr-signout:
+   card-background pill, 12px radius, card shadow; danger red for sign out
+   (marketing day #c53030 / night #fb7185, same hover washes). */
+.theme-toggle-btn, .logout-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: none; border-radius: 12px; padding: 9px 15px;
+  font-size: 13px; font-weight: 500; font-family: inherit;
+  cursor: pointer; transition: all 0.15s;
+}
+.staff-val.day-mode .theme-toggle-btn, .staff-val.day-mode .logout-btn { background: rgba(255,255,255,0.9); color: #5c3f2e; box-shadow: 0 0 8px rgba(139,69,19,0.05); }
+.staff-val.day-mode .theme-toggle-btn:hover { background: rgba(212,175,55,0.12); color: #2c1e10; }
+.staff-val.night-mode .theme-toggle-btn, .staff-val.night-mode .logout-btn { background: #1e1438; color: #94a3b8; box-shadow: 0 0 8px rgba(139,92,246,0.2); }
+.staff-val.night-mode .theme-toggle-btn:hover { background: rgba(139,92,246,0.16); color: #e2e8f0; }
+.staff-val.day-mode .logout-btn { color: #c53030; }
+.staff-val.day-mode .logout-btn:hover { background: rgba(229,62,62,0.08); color: #c53030; }
+.staff-val.night-mode .logout-btn { color: #fb7185; }
+.staff-val.night-mode .logout-btn:hover { background: rgba(244,63,94,0.12); color: #fb7185; }
+.theme-toggle-btn svg, .logout-btn svg { flex-shrink: 0 }
 /* ── Status counts strip ─────────────────────────────────────────── */
 .counts-strip{display:flex;gap:6px;flex-wrap:wrap}
 .count-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:none;background:var(--bg-elev);color:var(--text-mute);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s ease}
@@ -5254,6 +5266,108 @@ select.edit-input { cursor: pointer; }
   margin-bottom: 8px;
 }
 
+/* ── Brand row — same identity as JinniChat sidebar / marketing page ── */
+.page-header { flex-wrap: wrap; }
+.sv-brandbar { flex-basis: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.sv-brand-actions { display: flex; align-items: center; gap: 8px; height: 60px; }
+.sv-brandrow { display: flex; align-items: center; gap: 8px; }
+.sv-appicon { width: 60px; height: 60px; object-fit: contain; }
+.sv-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.edit-hours-day-short { display: none; }
+.dest-row-hero { display: none; }
+
+/* ── Mobile refinements (2026-08-20 full audit) — ≤768px only. MUST live in
+   THIS scoped block: scoped rules carry the data-v attribute selector, so an
+   unscoped copy of these rules loses every specificity tie (that is exactly
+   what broke the first attempt — pagination, toast, modal grid…). ── */
+@media (max-width: 768px) {
+  .logout-btn span { display: none; }
+  .logout-btn { padding: 8px 9px; }
+  /* Pagination: ONE horizontal row — ‹ Prev · Page X of Y · Next › */
+  .pagination { flex-direction: row; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 8px; }
+  .pagination span, .pagination .page-indicator { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  .pagination button, .pagination .ghost-btn { flex-shrink: 0; padding: 7px 10px; font-size: 12px; }
+  /* Destinations + Explore accordion */
+  .biz-table--dest tbody tr.biz-row:not(.row-open) td:not(.acc-visible),
+  .biz-table--explore tbody tr.biz-row:not(.row-open) td:not(.acc-visible) { display: none; }
+  .biz-table td.acc-toggle { cursor: pointer; position: relative; }
+  /* Chevron sits on the NAME line (bottom of the cell), not up by the image */
+  .biz-table td.acc-toggle::after { content: '▾'; position: absolute; right: 12px; bottom: 10px; font-size: 13px; opacity: 0.5; transition: transform 0.18s; }
+  .biz-table tr.row-open td.acc-toggle::after { transform: rotate(180deg); }
+  /* Rec-card look: image bleeds edge-to-edge (row loses its side padding);
+     text content keeps comfortable side padding of its own. */
+  .biz-table tbody tr.biz-row { padding: 0 0 8px; }
+  .biz-table tbody tr.biz-row td { padding-left: 12px; padding-right: 12px; }
+  .biz-table--dest tbody tr.biz-row td.col-name,
+  .biz-table--explore tbody tr.biz-row td.col-name { padding: 0 0 8px; }
+  .biz-table td.col-name .row-name { padding: 0 34px 0 12px; }
+  .dest-row-hero { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0; margin: 0 0 8px; }
+  .exp-place-cell { flex-direction: column; align-items: stretch; }
+  .exp-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 0; margin: 0 0 6px; }
+  .exp-thumb--empty { display: none; }
+  /* Full-width bar actions */
+  .dest-toolbar .ghost-btn,
+  .filter-group--right .ghost-btn { width: 100%; justify-content: center; display: flex; align-items: center; gap: 6px; padding: 10px; }
+  .filter-group--right { width: 100%; }
+  /* Page header */
+  .page-title { flex-wrap: wrap; }
+  .page-title-user { overflow-wrap: anywhere; }
+  .page-header-right { align-items: stretch; }
+  .counts-strip { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-start; }
+  /* Tab strip: equal thirds */
+  .tab-strip { width: 100%; display: flex; }
+  .tab-btn { flex: 1; min-width: 0; padding: 9px 6px; font-size: 12px; gap: 5px; justify-content: center; }
+  .tab-mark { display: none; }
+  .tab-label { overflow: hidden; text-overflow: ellipsis; }
+  .tab-count { flex-shrink: 0; font-size: 9.5px; padding: 1px 5px; min-width: 0; }
+  /* Filter chips wrap */
+  .filter-chips { flex-wrap: wrap; }
+  .filter-chips > * { white-space: nowrap; }
+  .dest-toolbar { align-items: stretch; }
+  /* Drawer */
+  .action-buttons { flex-wrap: wrap; }
+  .action-buttons .action-btn { flex: 1 1 100%; justify-content: center; min-width: 0; }
+  .drawer-actions { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .drawer-head-top { flex-wrap: wrap; }
+  .drawer-head-top button { flex-shrink: 0; }
+  .drawer-title { overflow-wrap: anywhere; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kv-grid { grid-template-columns: 76px 1fr; }
+  /* Row action groups wrap on narrow phones */
+  .action-group { flex-wrap: wrap; justify-content: flex-end; }
+  .biz-table--dest td.col-actions { white-space: normal; }
+  .exp-cats { max-width: none; white-space: normal; }
+  .row-name { min-width: 0; }
+  .row-name-text { overflow-wrap: anywhere; }
+  /* Explore modal */
+  .exp-modal { width: 100%; }
+  .exp-modal-actions { flex-wrap: wrap; }
+  .exp-modal-actions .action-btn { flex: 1 1 45%; justify-content: center; text-align: center; }
+  .exp-actions-spacer { display: none; }
+  /* Destination edit modal */
+  .edit-grid-2 { grid-template-columns: 1fr; }
+  .edit-header { padding: 12px 14px; flex-wrap: nowrap; gap: 8px; }
+  .edit-header-left { min-width: 0; flex: 1; display: flex; align-items: center; gap: 8px; }
+  .edit-title { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .edit-header-actions { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+  .edit-body { padding: 14px 14px 44px; }
+  .edit-panel .edit-input { min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .edit-panel input[type="date"], .edit-panel input[type="time"] { width: 100%; -webkit-appearance: none; appearance: none; }
+  /* Hours editor: compact one line per day */
+  .edit-hours-row { gap: 6px; row-gap: 4px; }
+  .edit-hours-day { width: 34px; flex-shrink: 0; }
+  .edit-hours-day-full { display: none; }
+  .edit-hours-day-short { display: inline; }
+  .edit-hours-pill { padding: 4px 7px; font-size: 10.5px; }
+  .edit-hours-time { padding: 4px 4px; font-size: 11px; min-width: 0; }
+  .edit-hours-sep { display: none; }
+  .edit-hours-all-btn { flex-basis: 100%; margin-left: 0; }
+  /* Toast pinned edge-to-edge above the safe area */
+  .toast { left: 12px; right: 12px; transform: none; max-width: none; bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .dest-lightbox-nav { width: 38px; height: 38px; }
+  .dest-lightbox-close { top: calc(10px + env(safe-area-inset-top)); }
+}
 </style>
 <!-- Unscoped: window/page scrollbar styling.
      The page-level scrollbar in this app is the WINDOW scrollbar.
@@ -5282,119 +5396,4 @@ html[data-theme="light"]::-webkit-scrollbar-thumb:hover,body.theme-light::-webki
 /* ── Firefox: themed scrollbar-color ────────────────────────────────── */
 html[data-theme="dark"],body.theme-dark,html:has(#app.night-mode),body:has(#app.night-mode){scrollbar-width:thin !important;scrollbar-color:rgba(192,132,252,0.3) transparent !important}
 html[data-theme="light"],body.theme-light,html:has(#app.day-mode),body:has(#app.day-mode){scrollbar-width:thin !important;scrollbar-color:rgba(160,82,45,0.4) transparent !important}
-
-/* ── Brand row — same identity as JinniChat sidebar / marketing page:
-   60px bottle + gradient "Jinni" (both themes). ── */
-.page-header { flex-wrap: wrap; }
-.sv-brandbar { flex-basis: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-/* Actions match the 60px icon row height so both sit on one line (marketing). */
-.sv-brand-actions { display: flex; align-items: center; gap: 8px; height: 60px; }
-.sv-brandrow { display: flex; align-items: center; gap: 8px; }
-.sv-appicon { width: 60px; height: 60px; object-fit: contain; }
-.sv-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.edit-hours-day-short { display: none; }
-/* Destination list hero image exists only in the mobile cards. */
-.dest-row-hero { display: none; }
-
-/* ── Mobile refinements (2026-08-20 full audit) — ≤768px only; desktop
-   untouched. Appended LAST on purpose: several desktop rules declared after
-   the original 768px block (.dest-toolbar, .pagination, .toast) silently
-   overrode its mobile styles — source order here wins them back. ── */
-@media (max-width: 768px) {
-  /* Sign out: icon-only square (like the marketing page); theme toggle is
-     already icon-only. */
-  .logout-btn span { display: none; }
-  .logout-btn { padding: 8px 9px; }
-  /* Pagination: ONE horizontal row — ‹ Prev · Page X of Y · Next ›.
-     nowrap + a shrinkable middle: the "Page X of Y · N total" text is what
-     used to push the row into 3 stacked lines. */
-  .pagination { flex-direction: row; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 8px; }
-  .pagination span, .pagination .page-indicator { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
-  .pagination button, .pagination .ghost-btn { flex-shrink: 0; padding: 7px 10px; font-size: 12px; }
-  /* Destinations + Explore accordion: collapsed cards show image + name +
-     location; tapping the name expands the rest (chevron flips). */
-  .biz-table--dest tbody tr.biz-row:not(.row-open) td:not(.acc-visible),
-  .biz-table--explore tbody tr.biz-row:not(.row-open) td:not(.acc-visible) { display: none; }
-  .biz-table td.acc-toggle { cursor: pointer; position: relative; padding-right: 26px; }
-  .biz-table td.acc-toggle::after { content: '▾'; position: absolute; right: 6px; top: 10px; font-size: 13px; opacity: 0.5; transition: transform 0.18s; }
-  .biz-table tr.row-open td.acc-toggle::after { transform: rotate(180deg); }
-  /* Hero images in the cards: destination first image (mobile-only element)
-     and the explore thumb promoted from 40px to a 16:9 card image. */
-  .dest-row-hero { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; margin: 4px 0 8px; }
-  .exp-place-cell { flex-direction: column; align-items: stretch; }
-  .exp-thumb { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; margin-bottom: 6px; }
-  .exp-thumb--empty { display: none; }
-  /* Add destination + validation Refresh: full-width actions in their bars */
-  .dest-toolbar .ghost-btn,
-  .filter-group--right .ghost-btn { width: 100%; justify-content: center; display: flex; align-items: center; gap: 6px; padding: 10px; }
-  .filter-group--right { width: 100%; }
-  /* Page header: title wraps; count pills wrap left-aligned instead of a
-     ragged right-anchored stack */
-  .page-title { flex-wrap: wrap; }
-  .page-title-user { overflow-wrap: anywhere; }
-  .page-header-right { align-items: stretch; }
-  .counts-strip { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-start; }
-  /* Tab strip: equal thirds, no hidden horizontally-scrolled tab */
-  .tab-strip { width: 100%; display: flex; }
-  .tab-btn { flex: 1; min-width: 0; padding: 9px 6px; font-size: 12px; gap: 5px; justify-content: center; }
-  .tab-mark { display: none; }
-  .tab-label { overflow: hidden; text-overflow: ellipsis; }
-  .tab-count { flex-shrink: 0; font-size: 9.5px; padding: 1px 5px; min-width: 0; }
-  /* Filter chips (Tier/Show/Owner/Category/Preference/Status): wrap as pill
-     rows — they neither squashed nor scrolled before */
-  .filter-chips { flex-wrap: wrap; }
-  .filter-chips > * { white-space: nowrap; }
-  /* Destinations toolbar: restore stretch stacking */
-  .dest-toolbar { align-items: stretch; }
-  /* Drawer: approve/reject bar stacks full-width; safe area under buttons */
-  .action-buttons { flex-wrap: wrap; }
-  .action-buttons .action-btn { flex: 1 1 100%; justify-content: center; min-width: 0; }
-  .drawer-actions { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
-  .drawer-head-top { flex-wrap: wrap; }
-  .drawer-head-top button { flex-shrink: 0; }
-  .drawer-title { overflow-wrap: anywhere; }
-  /* Drawer content: 2-col stats + gallery, narrower key column */
-  .stat-grid { grid-template-columns: repeat(2, 1fr); }
-  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .kv-grid { grid-template-columns: 76px 1fr; }
-  /* Card-row action groups (Edit/Deactivate/Delete…): wrap on 360px phones */
-  .action-group { flex-wrap: wrap; justify-content: flex-end; }
-  .biz-table--dest td.col-actions { white-space: normal; }
-  /* Explore rows: categories may wrap; long place names break cleanly */
-  .exp-cats { max-width: none; white-space: normal; }
-  .row-name { min-width: 0; }
-  .row-name-text { overflow-wrap: anywhere; }
-  /* Explore modal: fit the viewport; actions wrap in halves */
-  .exp-modal { width: 100%; }
-  .exp-modal-actions { flex-wrap: wrap; }
-  .exp-modal-actions .action-btn { flex: 1 1 45%; justify-content: center; text-align: center; }
-  .exp-actions-spacer { display: none; }
-  /* Destination edit modal: single-column form, tighter chrome, and native
-     date/time inputs that actually shrink */
-  .edit-grid-2 { grid-template-columns: 1fr; }
-  /* Header stays ONE row: title truncates, Save + Close pinned right. */
-  .edit-header { padding: 12px 14px; flex-wrap: nowrap; gap: 8px; }
-  .edit-header-left { min-width: 0; flex: 1; display: flex; align-items: center; gap: 8px; }
-  .edit-title { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .edit-header-actions { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
-  .edit-body { padding: 14px 14px 44px; }
-  .edit-panel .edit-input { min-width: 0; max-width: 100%; box-sizing: border-box; }
-  .edit-panel input[type="date"], .edit-panel input[type="time"] { width: 100%; -webkit-appearance: none; appearance: none; }
-  /* Hours editor: one compact line per day — 3-letter day, tight pills,
-     separator dropped (same pattern as the admin edit panel). */
-  .edit-hours-row { gap: 6px; row-gap: 4px; }
-  .edit-hours-day { width: 34px; flex-shrink: 0; }
-  .edit-hours-day-full { display: none; }
-  .edit-hours-day-short { display: inline; }
-  .edit-hours-pill { padding: 4px 7px; font-size: 10.5px; }
-  .edit-hours-time { padding: 4px 4px; font-size: 11px; min-width: 0; }
-  .edit-hours-sep { display: none; }
-  .edit-hours-all-btn { flex-basis: 100%; margin-left: 0; }
-  /* Toast: was right-anchored AND translated -50% (two conflicting desktop
-     declarations) → landed half off-screen. Pin edge-to-edge above safe area. */
-  .toast { left: 12px; right: 12px; transform: none; max-width: none; bottom: calc(16px + env(safe-area-inset-bottom)); }
-  /* Lightbox controls: smaller arrows, close button clear of the notch */
-  .dest-lightbox-nav { width: 38px; height: 38px; }
-  .dest-lightbox-close { top: calc(10px + env(safe-area-inset-top)); }
-}
 </style>

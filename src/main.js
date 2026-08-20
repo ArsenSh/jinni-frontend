@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'
 import App from './App.vue'
 import router from './router'
-import { installPageChrome } from './utils/pageChrome'
 import store from './store'
 import messages from './locales'
 import './assets/styles/genie-theme.css'
@@ -28,8 +27,3 @@ const i18n = createI18n({
 })
 
 createApp(App).use(i18n).use(store).use(router).mount('#app')
-
-// Browser-chrome color sync: samples each page's real edge colors (no
-// hardcoded tones) — see utils/pageChrome.js. Installed after mount so the
-// first sample sees rendered content.
-installPageChrome(router)
