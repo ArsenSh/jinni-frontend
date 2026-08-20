@@ -4899,7 +4899,9 @@ export default {
     ]
     const retTipRows = (d) => [
       { k: 'Active', v: d.active },
-      { k: 'Returning', v: d.returning, c: '#8b5cf6' },
+      // Returning bars are violet at night but GOLD in day mode (see the
+      // .day-mode .ret-bar-returning override) — the tooltip dot must follow.
+      { k: 'Returning', v: d.returning, c: theme.value === 'day-mode' ? '#D4AF37' : '#8b5cf6' },
       { k: 'New', v: d.newUsers, c: '#38bdf8' }
     ]
     const aiChartMax = computed(() => Math.max(...aiDailyStats.value.map(d => d.tokens), 1))
@@ -8490,7 +8492,8 @@ export default {
 
 /* Returning Users card — stacked day columns, admin two-series palette
  * (returning = gold→violet like the primary series, new = sky→indigo). */
-.ret-legend-returning { background: linear-gradient(90deg, #D4AF37, #a78bfa); }
+.ret-legend-returning { background: linear-gradient(90deg, #a78bfa, #8b5cf6); }
+.admin-shell.day-mode .ret-legend-returning { background: linear-gradient(90deg, #e0c050, #D4AF37); }
 .ret-legend-new { background: linear-gradient(90deg, #38bdf8, #818cf8); }
 .ret-kpis { display: flex; gap: 22px; flex-wrap: wrap; padding: 6px 20px 2px; }
 .ret-kpi { display: flex; flex-direction: column; gap: 2px; font-size: 11px; }
@@ -8685,7 +8688,9 @@ export default {
   .card-head h2 { font-size: 13px; }
   .card-head-spacer { display: none; }
   .chart-legend { width: 100%; margin-top: 2px; }
-  .sparkbar-wrap { padding: 6px 14px 10px; height: 100px; }
+  /* Height must stay ≥120px: bars scale to 80px + always-visible value row
+     (10px) + date label + padding. 100px clipped the tallest bar's number. */
+  .sparkbar-wrap { padding: 6px 14px 10px; height: 120px; }
   .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
   .toolbar > .action-btn { align-self: flex-start; }
   .search-wrap { max-width: 100%; }

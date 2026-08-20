@@ -112,7 +112,13 @@
               <span class="grid-tick">{{ t }}</span>
             </div>
           </div>
-          <div class="mr-bars" @pointerleave="tip.show = false">
+          <!-- Touch: finger-drag scrubs across days (page scroll suppressed inside
+               the chart); tooltip auto-hides shortly after the finger lifts.
+               Same pattern as the admin Overview charts. -->
+          <div class="mr-bars" @pointerleave="tip.show = false"
+               @touchstart="scrubTip($event)"
+               @touchmove.prevent="scrubTip($event)"
+               @touchend="tip.show = false">
             <div v-for="d in report.daily" :key="d.day" class="bar-band" tabindex="0"
                  :aria-label="barAria(d)"
                  @pointermove="showTip($event, d)" @focus="showTipFocus($event, d)" @blur="tip.show = false">
@@ -465,7 +471,30 @@ export default {
     placeTip(x, y, d) {
       this.tip = { show: true, x: Math.min(x + 14, window.innerWidth - 190), y: y + 14, day: this.fmtDay(d.day), new: d.newUsers, ret: d.returning, total: d.active };
     },
-    showTip(e, d) { this.placeTip(e.clientX, e.clientY, d); },
+    showTip(e, d) {
+      // Touch is handled by scrubTip (pointermove also fires on touch and,
+      // without pointerleave, left the tooltip stuck on screen).
+      if (e.pointerType === 'touch') return;
+      this.placeTip(e.clientX, e.clientY, d);
+    },
+    scrubTip(e) {
+      const t = e.touches && e.touches[0];
+      const list = this.report?.daily || [];
+      if (!t || !list.length) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const idx = Math.min(list.length - 1, Math.max(0, Math.floor(((t.clientX - rect.left) / rect.width) * list.length)));
+      const d = list[idx];
+      this.tip = {
+        show: true,
+        x: Math.max(8, Math.min(t.clientX - 85, window.innerWidth - 190)),
+        y: Math.max(8, rect.top - 95),
+        day: this.fmtDay(d.day), new: d.newUsers, ret: d.returning, total: d.active
+      };
+      // Touch has no pointerleave — hide shortly after the last move so the
+      // tooltip never sticks to the screen.
+      clearTimeout(this._tipTimer);
+      this._tipTimer = setTimeout(() => { this.tip.show = false; }, 2500);
+    },
     showTipFocus(e, d) {
       const r = e.target.getBoundingClientRect();
       this.placeTip(r.left + r.width / 2, r.top, d);
