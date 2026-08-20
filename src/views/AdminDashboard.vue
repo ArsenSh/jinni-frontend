@@ -1385,18 +1385,20 @@
           </div>
           <div class="card table-card">
             <div class="card-head"><h2>Destination Directory</h2><span class="card-sub">{{ destinations.length }} results</span></div>
-            <table class="data-table">
+            <table class="data-table data-table--acc">
               <thead><tr><th>Name</th><th>Location</th><th>Views</th><th>Clicks</th><th>Added by</th><th>Action</th></tr></thead>
               <tbody>
                 <tr v-if="destLoading"><td colspan="6" class="loading-cell"><div class="loader-ring loader-ring--sm"></div> Loading…</td></tr>
                 <tr v-else-if="!destinations.length"><td colspan="6" class="empty-cell">No destinations found.</td></tr>
-                <tr v-for="d in destinations" :key="d._id" class="table-row table-row--clickable" :class="{ 'row-hidden-gem': d.isHiddenGem }" @click="openEdit('destination', d)" title="Click to view / edit">
-                  <td class="user-name" data-label="Name">
+                <!-- Name tap: toggles the accordion on mobile, opens the edit
+                     panel on desktop (rows stay fully clickable there). -->
+                <tr v-for="d in destinations" :key="d._id" class="table-row table-row--clickable" :class="{ 'row-hidden-gem': d.isHiddenGem, 'row-open': accOpen['d' + d._id] }" @click="openEdit('destination', d)" title="Click to view / edit">
+                  <td class="user-name acc-visible acc-toggle" data-label="Name" @click.stop="accRowTap('d' + d._id, 'destination', d)">
                     <img v-if="d.images && d.images[0]" :src="resolveImage(d.images[0])" class="row-thumb" loading="lazy" @error="hideBrokenThumb" />
                     {{ d.name }}
                     <span v-if="d.isHiddenGem" class="gem-badge">✦ Hidden Gem</span>
                   </td>
-                  <td class="dim-cell" data-label="Location">{{ (() => { const c = d.location?.city; const r = d.location?.region; if (c && r && c !== r) return c + ', ' + r; return c || r || '—'; })() }}</td>
+                  <td class="dim-cell acc-visible" data-label="Location">{{ (() => { const c = d.location?.city; const r = d.location?.region; if (c && r && c !== r) return c + ', ' + r; return c || r || '—'; })() }}</td>
                   <td class="num-cell" data-label="Views">{{ fmt(d.analytics?.views) }}</td>
                   <td class="num-cell" data-label="Clicks">{{ fmt(d.analytics?.clicks) }}</td>
                   <td class="dim-cell" data-label="Added by">
@@ -1839,7 +1841,7 @@
                                  placeholder="arrival e.g. Q1 2027" v-model="covForm.market[g.name].eta" />
                         </div>
                       </td>
-                      <td v-for="c in covData.categories" :key="c" class="cov-country-agg">
+                      <td v-for="c in covData.categories" :key="c" class="cov-country-agg" :data-label="covCatLabel(c)">
 <b>{{ g.cats[c].pct }}%</b><span>{{ g.cats[c].count }}</span>
                       </td>
                     </tr>
@@ -4255,6 +4257,12 @@ export default {
     // 's<id>'. Toggling on desktop is harmless (the hiding CSS is mobile-only).
     const accOpen = ref({})
     const toggleAccRow = (id) => { accOpen.value[id] = !accOpen.value[id] }
+    // Clickable-row tables (destinations): on mobile the name tap toggles the
+    // accordion; on desktop it opens the edit panel like the rest of the row.
+    const accRowTap = (id, kind, item) => {
+      if (window.innerWidth <= 768) toggleAccRow(id)
+      else openEdit(kind, item)
+    }
     const destSummary = ref({})
     const expandedTypes = ref({})
     const quickActionStats = ref({ actions: [], chatStream: { count: 0 }, quickActionTotal: 0, chatStreamTotal: 0, grandTotal: 0 })
@@ -7258,7 +7266,7 @@ export default {
       eventTimezoneOptions, tzShortLabel,
       togglePremium, toggleCooldown, deleteUser, clearCooldown,
       fetchUsers, fetchUserLocations, fetchAIUsage, fetchBusinesses, fetchDestinations, fetchPlaces, fetchGoogleUsage,
-      toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, accOpen, toggleAccRow, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
+      toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, accOpen, toggleAccRow, accRowTap, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
       deletePlace, setExploreStatus, placesExploreFilter, placesExploreOpts, backfillRegions, backfillBusy, purgeStale, onImgError,
       chatLog, openChatLog, openChatSession, closeChatLog, resolveImage, fmtMsg,
       purgeOpts, purgeDays, purgeDropdownOpen, purgeNeverUsed, selectedPurgeOpt,
@@ -8851,24 +8859,28 @@ export default {
   .cov-table { min-width: 0; }
   .cov-table thead { display: none; }
   .cov-table, .cov-table tbody { display: block; width: 100%; }
-  .cov-table tr.cov-country-row { display: block; padding: 8px 0 2px; }
-  .cov-country-row .cov-country-agg { display: none; }
-  .cov-country-cell { display: block; width: 100%; }
-  /* Each city reads as its own card: soft panel behind its category grid. */
-  .cov-table tr.cov-city-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; margin: 6px 0; border-radius: 12px; }
+  /* Country card: header full-width, then its 8 aggregate numbers as a 4×2
+     grid of labeled tiles (they were hidden before — now visible). */
+  .cov-table tr.cov-country-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; border-radius: 12px; padding: 10px; margin-top: 10px; }
+  .admin-shell.night-mode .cov-table tr.cov-country-row { background: rgba(139,92,246,0.07); }
+  .admin-shell.day-mode  .cov-table tr.cov-country-row { background: rgba(212,175,55,0.09); }
+  .cov-country-cell { grid-column: 1 / -1; display: block; width: 100%; }
+  .cov-country-row .cov-country-agg { display: block; border-radius: 8px; padding: 5px 6px; text-align: left; }
+  .admin-shell.night-mode .cov-country-row .cov-country-agg { background: rgba(255,255,255,0.05); }
+  .admin-shell.day-mode  .cov-country-row .cov-country-agg { background: rgba(0,0,0,0.05); }
+  .cov-country-agg::before { content: attr(data-label); display: block; font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; opacity: 0.6; }
+  .cov-country-agg b { font-size: 11px; }
+  .cov-country-agg span { display: block; font-size: 9px; opacity: 0.55; }
+  /* City card: 8 category cells as a 4×2 grid (Arsen: 4 + 4 below). */
+  .cov-table tr.cov-city-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px; margin: 6px 0; border-radius: 12px; }
   .admin-shell.night-mode .cov-table tr.cov-city-row { background: rgba(255,255,255,0.03); }
   .admin-shell.day-mode  .cov-table tr.cov-city-row { background: rgba(139,69,19,0.04); }
   .cov-city-row .cov-city { grid-column: 1 / -1; padding-left: 0; max-width: none; display: block; }
-  /* Country header keeps its accent tone from the desktop rule but drops the
-     per-td striping (tds are stacked blocks here). */
-  .admin-shell.night-mode .cov-country-row td { background: transparent; }
-  .admin-shell.day-mode  .cov-country-row td { background: transparent; }
-  .cov-table tr.cov-country-row { border-radius: 12px; padding: 10px; margin-top: 10px; }
-  .admin-shell.night-mode .cov-table tr.cov-country-row { background: rgba(139,92,246,0.07); }
-  .admin-shell.day-mode  .cov-table tr.cov-country-row { background: rgba(212,175,55,0.09); }
-  .cov-table td { padding: 0; }
-  .cov-cell { min-width: 0; width: 100%; padding: 7px 9px; }
-  .cov-cell::before { content: attr(data-label); display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.65; margin-bottom: 1px; }
+  .cov-table td { padding: 0; background: transparent !important; }
+  .cov-cell { min-width: 0; width: 100%; padding: 5px 6px; }
+  .cov-cell b { font-size: 11px; }
+  .cov-cell span { font-size: 9px; }
+  .cov-cell::before { content: attr(data-label); display: block; font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; opacity: 0.65; margin-bottom: 1px; }
   .cov-cell em { display: none; }
   /* Coverage gate card: stack the action buttons — three long labels in one
      flex row overflowed the block. */
@@ -9407,9 +9419,12 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .admin-shell.night-mode .cov-country-row:hover td { background: rgba(139,92,246,0.07); }
 .admin-shell.day-mode .cov-country-row:hover td { background: rgba(212,175,55,0.08); }
 .cov-country-row td { padding-top: 9px; padding-bottom: 9px; }
-/* Country rows sit a tone apart from the city rows they expand (Arsen). */
+/* Country rows sit a tone apart from the city rows they expand (Arsen);
+   city rows get their own fainter wash so both levels read distinctly. */
 .admin-shell.night-mode .cov-country-row td { background: rgba(139,92,246,0.05); }
 .admin-shell.day-mode  .cov-country-row td { background: rgba(212,175,55,0.07); }
+.admin-shell.night-mode .cov-city-row td { background: rgba(255,255,255,0.015); }
+.admin-shell.day-mode  .cov-city-row td { background: rgba(139,69,19,0.025); }
 .cov-country-name { display: flex; align-items: center; gap: 7px; }
 .cov-country-name b { font-size: 13.5px; font-weight: 700; }
 .cov-chev { transition: transform 0.18s; opacity: 0.55; flex-shrink: 0; }
