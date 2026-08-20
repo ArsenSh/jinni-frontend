@@ -936,6 +936,7 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import { isNightTime } from '@/utils/timeUtils'
+import { useStore } from 'vuex'
 
 export default {
   name: 'BusinessOnboarding',
@@ -958,7 +959,10 @@ export default {
     const verificationScore = ref(null)   // score returned from apply
     const verificationFlags = ref([])
     const submitError = ref('')
-    const currentTheme = computed(() => isNightTime() ? 'night-mode' : 'day-mode')
+    // Theme follows the app STORE (was clock-based — page/chrome split when the
+    // saved preference disagreed with the hour). Chrome painting is App.vue's.
+    const themeStore = useStore()
+    const currentTheme = computed(() => themeStore.getters['settings/effectiveTheme'] === 'dark' ? 'night-mode' : 'day-mode')
     const form = reactive({
       tier: 'verified',
       name: '',
@@ -2192,25 +2196,7 @@ export default {
       setTimeout(() => { isVisible.value = true }, 100)
       const tierParam = route.query.tier
       if (tierParam && ['verified', 'spotlight', 'signature'].includes(tierParam)) {selectTier(tierParam)}
-      syncThemeColor()
     })
-    watch(currentTheme, syncThemeColor)
-    // Keep the browser chrome (mobile address-bar) + page background in sync with
-    // the day/night look — same colors/approach App.vue + LandingPage use.
-    const THEME_COLORS = { dark: '#0a0118', light: '#f9f5eb' }
-    function syncThemeColor() {
-      const theme = currentTheme.value === 'night-mode' ? 'dark' : 'light'
-      const color = THEME_COLORS[theme]
-      document.documentElement.setAttribute('data-theme', theme)
-      document.documentElement.style.backgroundColor = color
-      let meta = document.querySelector('meta[name="theme-color"]:not([media])')
-      if (!meta) {
-        meta = document.createElement('meta')
-        meta.setAttribute('name', 'theme-color')
-        document.head.appendChild(meta)
-      }
-      meta.setAttribute('content', color)
-    }
     return {
       isVisible, isSubmitting, isVerifying, showSuccess, submitError,
       showWaitlistConfirm, resolvedCoords, isEvent, usePriceRange, priceFree,

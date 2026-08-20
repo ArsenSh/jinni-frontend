@@ -45,7 +45,17 @@ export default {
     },
     setPreference({ commit, dispatch }, pref) {
       commit('SET_PREFERENCE', pref);
-      if (pref === 'auto') {dispatch('startAutoThemeCheck')} 
+      // Persist to the SAME key every page reads (jinni_settings.theme).
+      // Without this, a runtime-only preference change (e.g. the admin toggle)
+      // desynced every localStorage-reading page from the store/chrome.
+      try {
+        const saved = JSON.parse(localStorage.getItem('jinni_settings') || '{}');
+        if (saved.theme !== pref) {
+          saved.theme = pref;
+          localStorage.setItem('jinni_settings', JSON.stringify(saved));
+        }
+      } catch (e) { console.warn('theme persist failed:', e); }
+      if (pref === 'auto') {dispatch('startAutoThemeCheck')}
       else {dispatch('stopAutoThemeCheck')}
     },
   },

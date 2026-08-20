@@ -155,30 +155,16 @@ export default {
         setTimeout(() => { document.addEventListener('click', handleClickOutside, { once: true }) }, 0)
       } else { clearAutoCloseTimer() }
     })
-    const isNightMode = computed(() => isNightTime())
+    // Theme follows the app STORE (was clock-based, which split page vs chrome
+    // whenever the saved preference disagreed with the hour). App.vue paints
+    // the browser chrome for this route (/business edge pair) — no local
+    // chrome writes needed anymore.
+    const isNightMode = computed(() => store.getters['settings/effectiveTheme'] === 'dark')
     const currentTheme = computed(() => isNightMode.value ? 'night-mode' : 'day-mode')
     onMounted(() => {
       if (store.state.i18n?.locale) selectedLanguage.value = store.state.i18n.locale
       showAllLanguages.value = false
-      syncThemeColor()
     })
-    watch(isNightMode, syncThemeColor)
-    // Keep the browser chrome (mobile address-bar) + page background in sync with
-    // the page's day/night look — same colors/approach App.vue + LandingPage use.
-    const THEME_COLORS = { dark: '#0a0118', light: '#f9f5eb' }
-    function syncThemeColor() {
-      const theme = isNightMode.value ? 'dark' : 'light'
-      const color = THEME_COLORS[theme]
-      document.documentElement.setAttribute('data-theme', theme)
-      document.documentElement.style.backgroundColor = color
-      let meta = document.querySelector('meta[name="theme-color"]:not([media])')
-      if (!meta) {
-        meta = document.createElement('meta')
-        meta.setAttribute('name', 'theme-color')
-        document.head.appendChild(meta)
-      }
-      meta.setAttribute('content', color)
-    }
     onBeforeUnmount(() => { clearAutoCloseTimer() })
     function goHome()  { router.push('/') }
     function goApply(tier = 'verified') { router.push({ path: '/business/apply', query: { tier } }) }

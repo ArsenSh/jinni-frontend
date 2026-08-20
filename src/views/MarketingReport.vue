@@ -390,10 +390,13 @@ export default {
     }
   },
   async mounted() {
-    /* Same theme system as the admin / staff pages: manual toggle persisted
-     * to the shared 'adminTheme' key (night is the default, like admin). */
+    /* Theme follows the app STORE (so the browser chrome App.vue paints always
+     * matches this page), falling back to the shared 'adminTheme' key. The old
+     * dark-by-default seed guaranteed a dark page under light chrome for every
+     * first-time viewer at daytime. */
+    const storeTheme = this.$store?.getters['settings/effectiveTheme'];
     const saved = localStorage.getItem('adminTheme');
-    this.isDark = saved ? saved === 'night-mode' : true;
+    this.isDark = storeTheme ? storeTheme === 'dark' : (saved === 'night-mode');
     /* Greet logged-in marketing accounts by the name the admin set. */
     if (this.authedMode) {
       try { this.viewerName = JSON.parse(localStorage.getItem('user') || '{}').name || ''; } catch { /* no name, no greeting */ }
@@ -420,6 +423,9 @@ export default {
     toggleTheme() {
       this.isDark = !this.isDark;
       localStorage.setItem('adminTheme', this.isDark ? 'night-mode' : 'day-mode');
+      // Tell the app store so App.vue repaints the browser chrome to match
+      // (and every other page picks the same theme up).
+      this.$store?.dispatch('settings/setPreference', this.isDark ? 'dark' : 'light');
     },
     /* isRefetch=true = a filter change: keep the current render dimmed
      * instead of flashing back to the loading state. */
