@@ -613,7 +613,11 @@ export default {
       document.body.appendChild(a); a.click(); a.remove();
     },
     goChat() { this.$router.push({ name: 'JinniChat' }).catch(() => { window.location.href = '/chat'; }); },
-    goBack() { if (window.history.length > 1) this.$router.back(); else this.goChat(); },
+    // "Meet Jinni" is an invitation, not a return trip (see the template
+    // comment) — history.back() walked users into whatever page they came
+    // FROM, which after the preferences round-trip was the ONBOARDING page.
+    // Always go to the chat.
+    goBack() { this.goChat(); },
     // `editing: 'true'` is REQUIRED: the router guard bounces onboarding-
     // completed users from /onboarding back to JinniChat unless the editing
     // flag is set (router/index.js `completedOnboarding` check) — without it
