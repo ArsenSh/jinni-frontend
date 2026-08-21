@@ -1,6 +1,15 @@
 <template>
   <div id="app" :class="themeClass">
     <router-view />
+    <!-- iOS bottom-bar tint shim. The modern iOS Safari bottom bar is
+         translucent glass over the PIXELS beneath it — no CSS color, canvas
+         or theme-color meta can tint it (device-proven 2026-08-21 across five
+         builds). JinniChat always looked right because its input area puts a
+         page-colored fade under the bar; this gives every page the same
+         thing: a fixed fade into the page's derived bottom-edge color, so the
+         glass always sits over correctly-colored pixels at any scroll
+         position. Non-interactive; sits under modals and chat's own input. -->
+    <div v-if="isIos" class="ios-bottom-fade" :style="fadeStyle" aria-hidden="true"></div>
   </div>
 </template>
 
@@ -120,7 +129,21 @@ function findPagePaint(rootEl) {
 
 export default {
   name: 'App',
-  computed: {...mapGetters('settings', ['effectiveTheme', 'themeClass'])},
+  data() {
+    return { edgeBottom: '' };
+  },
+  computed: {
+    ...mapGetters('settings', ['effectiveTheme', 'themeClass']),
+    isIos() { return IS_IOS; },
+    fadeStyle() {
+      if (!this.edgeBottom) return { display: 'none' };
+      // Solid over the zone the glass bar actually occupies (~bar + home
+      // indicator), fading out above it — same pattern as chat's input fade.
+      return {
+        backgroundImage: `linear-gradient(to top, ${this.edgeBottom} 0%, ${this.edgeBottom} 45%, transparent 100%)`,
+      };
+    },
+  },
   watch: {
     effectiveTheme: {
       immediate: true,
@@ -240,25 +263,24 @@ export default {
       // background image verbatim (or none for flat pages) over a solid color.
       document.body.style.backgroundImage = (paint && paint.image) ? paint.image : 'none';
       document.body.style.backgroundColor = top;
-      // <meta theme-color> — on iOS Safari the URL bar sits at the BOTTOM, so
-      // this meta colors the BOTTOM bar, and it must carry the page's BOTTOM
-      // edge. This was the "external factor" behind the day-mode-only bottom
-      // defects (device-settled 2026-08-21): the meta held the TOP color the
-      // whole time — night hid it (both edges near-black), day exposed it
-      // (cream meta under a sandy page bottom = the "true white" bars).
-      // The TOP strip is driven by body's background-color, set above.
-      // When the color CHANGES the node is REPLACED rather than mutated:
-      // several iOS versions ignore content edits on an existing meta during
-      // SPA navigation but re-read a freshly inserted one.
+      // The iOS bottom bar reads NONE of this — it is glass over the pixels
+      // beneath it; the .ios-bottom-fade template shim handles it. Publish
+      // the derived bottom color for that shim:
+      this.edgeBottom = bottom;
+      // <meta theme-color> — ignored by modern iOS (device-proven), but
+      // Android Chrome and desktop PWAs tint their TOP chrome with it, so it
+      // carries the page's TOP edge. Node REPLACED rather than mutated when
+      // the color changes: some browsers ignore content edits on an existing
+      // meta during SPA navigation but re-read a freshly inserted one.
       let meta = document.querySelector('meta[name="theme-color"]:not([media])');
-      if (meta && meta.getAttribute('content') !== bottom) {
+      if (meta && meta.getAttribute('content') !== top) {
         meta.remove();
         meta = null;
       }
       if (!meta) {
         meta = document.createElement('meta');
         meta.setAttribute('name', 'theme-color');
-        meta.setAttribute('content', bottom);
+        meta.setAttribute('content', top);
         document.head.appendChild(meta);
       }
 
@@ -332,5 +354,16 @@ html[data-theme="dark"], html[data-theme="dark"] body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+/* iOS bottom-bar tint shim (see template comment). z-index 50: above page
+ * content, below chat's input container (100) and every modal. */
+.ios-bottom-fade {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(env(safe-area-inset-bottom, 0px) + 96px);
+  pointer-events: none;
+  z-index: 50;
 }
 </style>
