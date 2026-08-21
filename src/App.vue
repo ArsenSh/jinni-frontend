@@ -24,6 +24,9 @@ const FALLBACK_EDGES = {
   light: ['#f9f5eb', '#f9f5eb'],
 };
 
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 /* Alpha of a computed CSS color ('rgb(…)', 'rgba(…)', '#hex', keyword). */
 function colorAlpha(str) {
   if (!str) return 0;
@@ -121,7 +124,26 @@ export default {
   watch: {
     effectiveTheme: {
       immediate: true,
-      handler() { this.applyGlobalTheme(); },
+      handler(val, oldVal) {
+        this.applyGlobalTheme();
+        // iOS Safari freezes its chrome tint at page LOAD (device-verified:
+        // no meta change, repaint or scroll re-tints it). So when the RESOLVED
+        // theme changes MID-SESSION — the account's server settings arriving
+        // after login (dark load → day account = white page under dark bars),
+        // a manual toggle, or the 21:00 auto flip — the only real fix is one
+        // reload. localStorage already holds the new theme by now (the store
+        // persists it), so the reloaded page pre-paints correctly. The
+        // sessionStorage guard makes it one-shot per theme value — a reloaded
+        // page starts with oldVal undefined, so it can never loop.
+        if (IS_IOS && oldVal && val !== oldVal) {
+          try {
+            if (sessionStorage.getItem('jinni_theme_reloaded') !== val) {
+              sessionStorage.setItem('jinni_theme_reloaded', val);
+              window.location.reload();
+            }
+          } catch (e) { /* private mode denying sessionStorage — just skip */ }
+        }
+      },
     },
     // Re-derive after every navigation — nextTick so the NEW view is in the
     // DOM before its background is read (the watcher fires before router-view
