@@ -2049,7 +2049,13 @@ export default {
       try { if (yes(JSON.parse(localStorage.getItem('user') || '{}'))) return true; } catch {}
       try {
         const token = localStorage.getItem('authToken');
-        if (token) return yes(JSON.parse(atob(token.split('.')[1])));
+        if (token) {
+          // JWT payloads are base64url — atob() chokes on '-'/'_' and missing
+          // padding, so normalize before decoding or the check silently fails.
+          const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+          const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
+          return yes(JSON.parse(atob(padded)));
+        }
       } catch {}
       return false;
     },
