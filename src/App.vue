@@ -207,21 +207,24 @@ export default {
       const top = paint ? paint.top : fbTop;
       const bottom = paint ? paint.bottom : fbBottom;
 
-      // <html> canvas: the area revealed beyond the page at top and bottom.
-      // Painted in NATURAL orientation — top color in the top half, bottom
-      // color in the bottom half. (An earlier version swapped the halves on a
-      // "Safari tiles the canvas" theory; device testing 2026-08-21 showed it
-      // does NOT tile — the swap put the desert BOTTOM color above the page
-      // and cream below it on day-mode landing/business/contact/auth.)
+      // <html> canvas: the area beyond the page at top and bottom. Safari
+      // TILES (repeats) this gradient beyond the document — the original
+      // swap theory was CORRECT (re-verified on device 2026-08-21 after a
+      // wrong "natural orientation" detour): with natural halves the repeated
+      // tile BELOW the page starts with its TOP half, so every bottom bar
+      // showed the page's TOP color ("true white" on day landing/contact/
+      // explore/business, #0a0118 instead of blue on contact night). Swapped
+      // halves (bottom color first): the tile below the page leads with the
+      // BOTTOM color and the tile above ends with the TOP color — both
+      // overscroll edges correct.
       // CRITICAL: background-color is set as a LONGHAND, always solid. The
       // old code wrote the `background` shorthand with a gradient, which
-      // resets background-color to TRANSPARENT — and iOS Safari tints the
-      // keyboard band / collapsed URL-pill area from background-color alone,
-      // so it fell back to WHITE (the white-band screenshots).
+      // resets background-color to TRANSPARENT — and iOS Safari tints from
+      // background-color, so it fell back to WHITE (the white-band shots).
       const de = document.documentElement;
       de.style.backgroundImage = top === bottom
         ? 'none'
-        : `linear-gradient(${top} 50%, ${bottom} 50%)`;
+        : `linear-gradient(${bottom} 50%, ${top} 50%)`;
       // SPLIT tint sources — settled by the Iphone_Jinni_Look screenshots
       // (2026-08-21): iOS Safari tints the TOP strip from <body>'s
       // background-color and the BOTTOM bar / keyboard band from <html>'s.
