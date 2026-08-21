@@ -7111,6 +7111,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .streaming-lamp{margin:0;flex-shrink:0}
 .recommendation-card{position:relative;border-radius:12px;overflow:hidden;transition:all 0.3s ease;cursor:pointer;display:flex;flex-direction:column;height:100%;flex:1 1 auto;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
 .inline-recommendation-wrapper{margin:16px 0 16px 0;display:flex;justify-content:flex-start}
+/* Flex items shrink to content — a short description shrank the whole card.
+   Full width regardless of text length (chat inline cards only; other card
+   surfaces keep their own sizing). */
+.inline-recommendation-wrapper .rec-card-wrapper{width:100%}
 /* width:100% so the card is horizontally full at ALL times — including DURING
    streaming (that template omits .inline-card) and when the description ends
    up short. The image/content never dictates card width. */
