@@ -4651,6 +4651,10 @@ export default {
                     this.messages[messageIndex].nearbyMode = data.nearbyMode;
                     this.messages[messageIndex].contentParts = data.contentParts;
                     this.messages[messageIndex].recommendations = data.recommendations;
+                    // Cards ⇒ chat-rec message (drives the large-card style). v1 sets
+                    // this via streaming_recommendation events; v2 emits cards only at
+                    // complete, so derive it here — a no-op when already true.
+                    if (data.recommendations?.length) { this.messages[messageIndex].isChatRecommendation = true; }
                     this.messages[messageIndex].textSections = null;
                     this.messages[messageIndex].currentText = null;
                     // Light up like/dislike for any of these places the user voted on
