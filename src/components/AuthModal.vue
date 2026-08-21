@@ -1,11 +1,5 @@
 <template>
   <div class="auth-modal-overlay" :class="currentTheme" v-if="show" @click.self="close">
-    <!-- Bottom-edge fade (the JinniChat pattern): iOS Safari's bottom bar is
-         glass over the pixels beneath it, and the white auth card used to
-         reach the bar — so the bar read as white. The card now scrolls under
-         a fade into the overlay's own bottom tone (sandy day / deep night),
-         keeping correctly-colored pixels under the bar at any scroll. -->
-    <div class="auth-bottom-fade" aria-hidden="true"><div class="auth-bottom-fade-paint"></div></div>
     <div class="auth-container">
       <div class="auth-card">
         <button class="close-button" @click="close">
@@ -653,15 +647,12 @@ export default {
 .password-hints span { font-size: 0.75rem; color: #666; transition: color 0.2s; }
 .password-hints span.met { color: #0c6; }
 .auth-modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,#1a0933 0%,#0f0520 50%,#05020d 80%,#000 100%);display:flex;align-items:flex-start;justify-content:center;z-index:1000;backdrop-filter:blur(5px);overflow-y:auto;padding:40px 20px}
-/* Bottom-edge fade — see template comment. Fixed inside the overlay, above
- * the card (z), non-interactive. The transparent stop uses the SAME hue at
- * alpha 0 (plain `transparent` fades through gray-black on Safari). */
-.auth-bottom-fade{position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom, 0px) + 110px);overflow:hidden;pointer-events:none;z-index:6;-webkit-mask-image:linear-gradient(to top,#000 55%,transparent 100%);mask-image:linear-gradient(to top,#000 55%,transparent 100%)}
-/* The shim exists only for the iOS bottom glass bar — desktop (real mouse)
- * has no such bar and must not show it. */
-@media (hover:hover) and (pointer:fine){.auth-bottom-fade{display:none}}
-.auth-bottom-fade-paint{position:absolute;left:0;right:0;bottom:0;height:100dvh;background:radial-gradient(ellipse at center,#1a0933 0%,#0f0520 50%,#05020d 80%,#000 100%)}
-.auth-modal-overlay.day-mode .auth-bottom-fade-paint{background:linear-gradient(to bottom,#f9f5eb 0%,#f2e3d3 8%,#ecd6c2 16%,#e9ccb3 24%,#ebc4a6 32%,#efbc9b 40%,#f3b692 48%,#f7be98 56%,#f9c8a0 64%,#f5c099 72%,#f0b893 80%,#ebb08d 88%,#e6a888 96%,#e0a082 100%)}
+/* NOTE (2026-08-21): a fixed "bottom fade" shim (the JinniChat pattern) was
+ * tried here to keep iOS Safari's glass bottom bar tinted while the white
+ * card sits under it — removed at Arsen's call: every variant read as a
+ * shadow. The overlay's mobile bottom padding below keeps the SIGN-IN card
+ * ending above the bar (bar shows the sandy/night overlay); the taller
+ * sign-up form accepts a light bar while the card is beneath it. */
 .auth-container{width:100%;max-width:450px;padding:20px;position:relative;margin:auto}
 .close-button{position:absolute;top:20px;right:20px;background:0 0;border:none;color:#aaa;font-size:1.8rem;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all .3s ease;z-index:10;border-radius:50%}
 .close-button:hover{color:#d4af37;background:rgba(255,255,255,.1)}
