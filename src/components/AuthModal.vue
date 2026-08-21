@@ -657,6 +657,9 @@ export default {
  * the card (z), non-interactive. The transparent stop uses the SAME hue at
  * alpha 0 (plain `transparent` fades through gray-black on Safari). */
 .auth-bottom-fade{position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom, 0px) + 110px);overflow:hidden;pointer-events:none;z-index:6;-webkit-mask-image:linear-gradient(to top,#000 55%,transparent 100%);mask-image:linear-gradient(to top,#000 55%,transparent 100%)}
+/* The shim exists only for the iOS bottom glass bar — desktop (real mouse)
+ * has no such bar and must not show it. */
+@media (hover:hover) and (pointer:fine){.auth-bottom-fade{display:none}}
 .auth-bottom-fade-paint{position:absolute;left:0;right:0;bottom:0;height:100dvh;background:radial-gradient(ellipse at center,#1a0933 0%,#0f0520 50%,#05020d 80%,#000 100%)}
 .auth-modal-overlay.day-mode .auth-bottom-fade-paint{background:linear-gradient(to bottom,#f9f5eb 0%,#f2e3d3 8%,#ecd6c2 16%,#e9ccb3 24%,#ebc4a6 32%,#efbc9b 40%,#f3b692 48%,#f7be98 56%,#f9c8a0 64%,#f5c099 72%,#f0b893 80%,#ebb08d 88%,#e6a888 96%,#e0a082 100%)}
 .auth-container{width:100%;max-width:450px;padding:20px;position:relative;margin:auto}
