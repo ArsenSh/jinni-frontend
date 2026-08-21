@@ -240,19 +240,25 @@ export default {
       // background image verbatim (or none for flat pages) over a solid color.
       document.body.style.backgroundImage = (paint && paint.image) ? paint.image : 'none';
       document.body.style.backgroundColor = top;
-      // <meta theme-color> — Safari/Chrome top chrome. When the color CHANGES,
-      // the node is REPLACED rather than mutated: several iOS versions ignore
-      // content edits on an existing meta during SPA navigation but re-read a
-      // freshly inserted one (the auth → business-onboarding stale-bar case).
+      // <meta theme-color> — on iOS Safari the URL bar sits at the BOTTOM, so
+      // this meta colors the BOTTOM bar, and it must carry the page's BOTTOM
+      // edge. This was the "external factor" behind the day-mode-only bottom
+      // defects (device-settled 2026-08-21): the meta held the TOP color the
+      // whole time — night hid it (both edges near-black), day exposed it
+      // (cream meta under a sandy page bottom = the "true white" bars).
+      // The TOP strip is driven by body's background-color, set above.
+      // When the color CHANGES the node is REPLACED rather than mutated:
+      // several iOS versions ignore content edits on an existing meta during
+      // SPA navigation but re-read a freshly inserted one.
       let meta = document.querySelector('meta[name="theme-color"]:not([media])');
-      if (meta && meta.getAttribute('content') !== top) {
+      if (meta && meta.getAttribute('content') !== bottom) {
         meta.remove();
         meta = null;
       }
       if (!meta) {
         meta = document.createElement('meta');
         meta.setAttribute('name', 'theme-color');
-        meta.setAttribute('content', top);
+        meta.setAttribute('content', bottom);
         document.head.appendChild(meta);
       }
 
