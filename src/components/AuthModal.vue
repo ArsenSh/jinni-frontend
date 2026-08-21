@@ -713,14 +713,7 @@ export default {
 .auth-footer a{color:#d4af37;text-decoration:none;transition:color .3s ease}
 .auth-footer a:hover{color:#ff8c00}
 @media(max-width:768px){.auth-card{padding:30px 20px}.auth-title{font-size:2.5rem}.social-buttons{flex-direction:column}}
-/* Mobile: the JinniChat layout pattern. The overlay is a FIXED, non-scrolling
- * shell; the bottom strip (bar zone) is reserved padding where only the
- * overlay's sandy/night gradient ever paints — so iOS Safari's glass bar
- * always tints from it, by pure geometry. The card is capped to the
- * remaining height and tall forms (sign-up) scroll INSIDE the rounded card
- * (its overflow-y:auto + gold scrollbar already existed). No shims, no
- * fades — nothing white can ever reach the bar zone. */
-@media(max-width:480px){.auth-modal-overlay{padding:8px 0 calc(env(safe-area-inset-bottom, 0px) + 84px);overflow:hidden}.auth-container{height:100%;display:flex;flex-direction:column;justify-content:center;padding:8px 12px}.auth-card{max-height:100%;padding:23px}.close-button{top:12px;right:12px}.verification-input{font-size:1rem;letter-spacing:.15rem;padding:12px 16px}.timer{font-size:.9rem;padding:6px 12px}.verification-info{padding:20px}.back-btn{font-size:.9rem;padding:10px 20px}}
+@media(max-width:480px){.auth-modal-overlay{padding:0 0 calc(env(safe-area-inset-bottom, 0px) + 96px)}.auth-card{padding:23px}.close-button{top:12px;right:12px}.verification-input{font-size:1rem;letter-spacing:.15rem;padding:12px 16px}.timer{font-size:.9rem;padding:6px 12px}.verification-info{padding:20px}.back-btn{font-size:.9rem;padding:10px 20px}}
 .back-btn:focus,.resend-btn:focus{outline:2px solid #d4af37;outline-offset:2px}
 .bottle-container{display:flex;justify-content:center;align-items:center;margin-bottom:0}
 .bottle-image{width:130px;height:70px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(212,175,55,.3))}
