@@ -7072,7 +7072,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .message-bubble{width:100%;flex-shrink:0}
 .message-bubble.user{display:flex;flex-direction:column;align-items:flex-end;margin-top:40px;margin-bottom:40px}
 .message-bubble .content{padding:12px 15px;border-radius:12px;max-width:100%;width:auto;min-width:0;word-wrap:break-word;display:flex;flex-direction:column;justify-content:center}
-.message-bubble.ai .content{border-radius:0 !important;box-shadow:none !important;color:inherit !important;padding:15px 0 !important;margin:0}
+/* width:100% matters: .content is otherwise shrink-to-fit, so an answer with
+   SHORT prose lines let the cards (width:100% OF THE CONTENT BOX) collapse to
+   ~70% — v1 masked it with long paragraphs; v2's concise intros exposed it. */
+.message-bubble.ai .content{border-radius:0 !important;box-shadow:none !important;color:inherit !important;padding:15px 0 !important;margin:0;width:100%}
 .message-bubble.ai .typing-content{box-shadow:none !important;padding:15px 0 !important;background:transparent !important;border:transparent !important}
 
 
@@ -7108,7 +7111,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .streaming-lamp{margin:0;flex-shrink:0}
 .recommendation-card{position:relative;border-radius:12px;overflow:hidden;transition:all 0.3s ease;cursor:pointer;display:flex;flex-direction:column;height:100%;flex:1 1 auto;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
 .inline-recommendation-wrapper{margin:16px 0 16px 0;display:flex;justify-content:flex-start}
-.inline-recommendation-wrapper .recommendation-card{margin-left:0;float:left;max-width:100%;display:block}
+/* width:100% so the card is horizontally full at ALL times — including DURING
+   streaming (that template omits .inline-card) and when the description ends
+   up short. The image/content never dictates card width. */
+.inline-recommendation-wrapper .recommendation-card{margin-left:0;float:left;max-width:100%;width:100%;display:block}
 .inline-card{width:100%}
 .large-card{display:flex;flex-direction:column;border-radius:12px;overflow:hidden;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
 .large-card .rec-image{height:auto;aspect-ratio:3 / 2;max-height:380px;width:100%;box-sizing:border-box}
