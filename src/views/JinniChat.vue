@@ -1,5 +1,9 @@
 <template xmlns="http://www.w3.org/1999/html">
   <div class="genie-chat-container" :class="currentTheme">
+    <!-- iOS keyboard gap filler: covers the strip between the shrunk chat
+         shell and the keyboard in the page's own bottom tone (see the
+         visualViewport handler in mounted). Hidden whenever kbStripTop is 0. -->
+    <div v-if="kbStripTop" class="kb-strip" :style="{ top: kbStripTop + 'px' }" aria-hidden="true"></div>
     <SwitchModeOverlay :visible="isSwitching" :label="t('chat.switch_mode.switching')" :theme="currentTheme === 'night-mode' ? 'dark' : 'light'" />
     <div v-if="mobileSidebarOpen && !isDesktop" class="sidebar-overlay" @click="handleOverlayClick"></div>
     <div class="sidebar" :class="{ 'sidebar-collapsed': !sidebarOpen, 'sidebar-open': mobileSidebarOpen }" ref="sidebar">
@@ -1704,6 +1708,9 @@ export default {
   components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView },
   data() {
     return {
+      // iOS keyboard: top offset (px) of the fixed filler strip that covers
+      // the gap between the shrunk chat shell and the keyboard. 0 = hidden.
+      kbStripTop: 0,
       // Per-session signature of the last persisted message state, keyed by
       // session id. saveCurrentSession() compares against this and skips the
       // PATCH (and the updatedAt bump) when nothing has actually changed —
@@ -2313,8 +2320,14 @@ export default {
           el.style.height = vv.height + 'px';
           window.scrollTo(0, 0);
           this.scrollToBottom();
+          // The shrunk shell ends at vv.height; the strip from there to the
+          // keyboard would otherwise show the body backdrop's MID-gradient
+          // ("the upper color"). The fixed .kb-strip covers exactly that gap
+          // in the page's own bottom tone.
+          this.kbStripTop = Math.round(vv.height + vv.offsetTop);
         } else {
           el.style.height = '';
+          this.kbStripTop = 0;
         }
       };
       window.visualViewport.addEventListener('resize', this._vvHandler);
@@ -6911,6 +6924,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .saved-panel.day .saved-panel-body::-webkit-scrollbar-thumb:hover{background:rgba(160,82,45,0.5)}
 
 .genie-chat-container{display:flex;height:100vh;color:#fff;top:0;left:0;right:0;bottom:0;overflow:hidden;min-height:0;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* iOS keyboard gap filler — bottom tones of the chat gradients. */
+.kb-strip{position:fixed;left:0;right:0;bottom:0;pointer-events:none;z-index:99}
+.genie-chat-container.night-mode .kb-strip{background:#16213e}
+.genie-chat-container.day-mode .kb-strip{background:#efe4cf}
 .sidebar-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:99;display:block}
 .sidebar{width:280px;display:flex;flex-direction:column;z-index:10;transition:width 0.3s ease,transform 0.3s ease}
 .sidebar-collapsed{width:60px;transition:width 0.3s ease,transform 0.3s ease}

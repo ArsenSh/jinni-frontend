@@ -5,7 +5,10 @@
     <!-- maximum-scale=1 blocks iOS Safari's automatic zoom-in when focusing
          inputs (the chat box "sometimes zooms" bug). iOS still allows manual
          pinch-zoom regardless of this value, so accessibility is preserved. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+    <!-- interactive-widget=resizes-content: browsers that support it shrink
+         the LAYOUT when the keyboard opens (native-app behavior); others
+         ignore it and JinniChat's visualViewport handler covers the gap. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Jinni - Your AI Guide</title>
     <!-- Pre-paint theme. The JS bundle is large, so the first paint happens
          long before Vue mounts — with no background here the page (and the
