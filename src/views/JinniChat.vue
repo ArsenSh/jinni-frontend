@@ -2039,14 +2039,19 @@ export default {
       } catch { return null }
     },
     // Gates the engine toggle in settings: agency reviewers / normal users
-    // must never wander into the V2 beta by accident.
+    // must never wander into the V2 beta by accident. Checks ALL the places an
+    // admin flag can live — the component user, the stored blob (which may
+    // predate the isAdmin field for old logins), and the JWT payload itself
+    // (the same source the router trusts for the Admin page).
     isAdminUser() {
+      const yes = (u) => !!(u && (u.isAdmin || u.role === 'admin'));
+      try { if (yes(this.localUser)) return true; } catch {}
+      try { if (yes(JSON.parse(localStorage.getItem('user') || '{}'))) return true; } catch {}
       try {
-        const u = this.localUser && (this.localUser.isAdmin !== undefined || this.localUser.role)
-          ? this.localUser
-          : JSON.parse(localStorage.getItem('user') || '{}');
-        return !!(u?.isAdmin || u?.role === 'admin');
-      } catch { return false }
+        const token = localStorage.getItem('authToken');
+        if (token) return yes(JSON.parse(atob(token.split('.')[1])));
+      } catch {}
+      return false;
     },
     userEmail() { return this.localUser?.email || '' },
     userAvatar() { return this.localUser?.avatar || null },
