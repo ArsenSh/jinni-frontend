@@ -222,20 +222,21 @@ export default {
       de.style.backgroundImage = top === bottom
         ? 'none'
         : `linear-gradient(${top} 50%, ${bottom} 50%)`;
-      // SPLIT tint sources (device-verified 2026-08-21): Safari tints the TOP
-      // region from <html>'s background-color and the BOTTOM bar / keyboard
-      // band from <body>'s. With both set to `bottom`, night looked fine (its
-      // two darks are near-identical) but day-mode desert pages showed the
-      // sandy BOTTOM color at the top of the phone. html carries the page's
-      // top edge; body carries the bottom edge. Both are ALWAYS solid
-      // longhands — the old `background` shorthand blanked background-color
-      // to transparent and Safari's tint fell back to WHITE.
-      de.style.backgroundColor = top;
+      // SPLIT tint sources — settled by the Iphone_Jinni_Look screenshots
+      // (2026-08-21): iOS Safari tints the TOP strip from <body>'s
+      // background-color and the BOTTOM bar / keyboard band from <html>'s.
+      // (IMG_1362/1364/1367: top strip showed the color assigned to body;
+      // IMG_1361: auth's bottom bar showed the color assigned to html.)
+      // So <html> carries the page's BOTTOM edge and <body> its TOP edge.
+      // Both are ALWAYS solid longhands — the old `background` shorthand
+      // blanked background-color to transparent and Safari's tint fell back
+      // to WHITE (the original white-band screenshots).
+      de.style.backgroundColor = bottom;
       // <body> backdrop: exposed when the iOS keyboard shifts the visual
       // viewport behind fixed-100vh shells. Carries the page's OWN computed
       // background image verbatim (or none for flat pages) over a solid color.
       document.body.style.backgroundImage = (paint && paint.image) ? paint.image : 'none';
-      document.body.style.backgroundColor = bottom;
+      document.body.style.backgroundColor = top;
       // <meta theme-color> — Safari/Chrome top chrome. When the color CHANGES,
       // the node is REPLACED rather than mutated: several iOS versions ignore
       // content edits on an existing meta during SPA navigation but re-read a
