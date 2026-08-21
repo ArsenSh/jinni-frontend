@@ -1,5 +1,11 @@
 <template>
-  <div class="auth-modal-overlay" :class="currentTheme" v-if="show" @click.self="close">  
+  <div class="auth-modal-overlay" :class="currentTheme" v-if="show" @click.self="close">
+    <!-- Bottom-edge fade (the JinniChat pattern): iOS Safari's bottom bar is
+         glass over the pixels beneath it, and the white auth card used to
+         reach the bar — so the bar read as white. The card now scrolls under
+         a fade into the overlay's own bottom tone (sandy day / deep night),
+         keeping correctly-colored pixels under the bar at any scroll. -->
+    <div class="auth-bottom-fade" aria-hidden="true"></div>
     <div class="auth-container">
       <div class="auth-card">
         <button class="close-button" @click="close">
@@ -647,6 +653,11 @@ export default {
 .password-hints span { font-size: 0.75rem; color: #666; transition: color 0.2s; }
 .password-hints span.met { color: #0c6; }
 .auth-modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,#1a0933 0%,#0f0520 50%,#05020d 80%,#000 100%);display:flex;align-items:flex-start;justify-content:center;z-index:1000;backdrop-filter:blur(5px);overflow-y:auto;padding:40px 20px}
+/* Bottom-edge fade — see template comment. Fixed inside the overlay, above
+ * the card (z), non-interactive. The transparent stop uses the SAME hue at
+ * alpha 0 (plain `transparent` fades through gray-black on Safari). */
+.auth-bottom-fade{position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom, 0px) + 104px);pointer-events:none;z-index:6;background:linear-gradient(to top,#05020d 0%,#05020d 38%,rgba(5,2,13,0) 100%)}
+.auth-modal-overlay.day-mode .auth-bottom-fade{background:linear-gradient(to top,#e0a082 0%,#e0a082 38%,rgba(224,160,130,0) 100%)}
 .auth-container{width:100%;max-width:450px;padding:20px;position:relative;margin:auto}
 .close-button{position:absolute;top:20px;right:20px;background:0 0;border:none;color:#aaa;font-size:1.8rem;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all .3s ease;z-index:10;border-radius:50%}
 .close-button:hover{color:#d4af37;background:rgba(255,255,255,.1)}
