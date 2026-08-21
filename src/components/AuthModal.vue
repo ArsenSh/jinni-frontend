@@ -656,8 +656,8 @@ export default {
 /* Bottom-edge fade — see template comment. Fixed inside the overlay, above
  * the card (z), non-interactive. The transparent stop uses the SAME hue at
  * alpha 0 (plain `transparent` fades through gray-black on Safari). */
-.auth-bottom-fade{position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom, 0px) + 104px);pointer-events:none;z-index:6;background:linear-gradient(to top,#05020d 0%,#05020d 38%,rgba(5,2,13,0) 100%)}
-.auth-modal-overlay.day-mode .auth-bottom-fade{background:linear-gradient(to top,#e0a082 0%,#e0a082 38%,rgba(224,160,130,0) 100%)}
+.auth-bottom-fade{position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom, 0px) + 68px);pointer-events:none;z-index:6;background:linear-gradient(to top,#05020d 0%,#05020d 45%,rgba(5,2,13,0) 100%)}
+.auth-modal-overlay.day-mode .auth-bottom-fade{background:linear-gradient(to top,#e0a082 0%,#e0a082 45%,rgba(224,160,130,0) 100%)}
 .auth-container{width:100%;max-width:450px;padding:20px;position:relative;margin:auto}
 .close-button{position:absolute;top:20px;right:20px;background:0 0;border:none;color:#aaa;font-size:1.8rem;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all .3s ease;z-index:10;border-radius:50%}
 .close-button:hover{color:#d4af37;background:rgba(255,255,255,.1)}
@@ -718,7 +718,7 @@ export default {
 .auth-footer a{color:#d4af37;text-decoration:none;transition:color .3s ease}
 .auth-footer a:hover{color:#ff8c00}
 @media(max-width:768px){.auth-card{padding:30px 20px}.auth-title{font-size:2.5rem}.social-buttons{flex-direction:column}}
-@media(max-width:480px){.auth-modal-overlay{padding:0}.auth-card{padding:23px}.close-button{top:12px;right:12px}.verification-input{font-size:1rem;letter-spacing:.15rem;padding:12px 16px}.timer{font-size:.9rem;padding:6px 12px}.verification-info{padding:20px}.back-btn{font-size:.9rem;padding:10px 20px}}
+@media(max-width:480px){.auth-modal-overlay{padding:0 0 calc(env(safe-area-inset-bottom, 0px) + 96px)}.auth-card{padding:23px}.close-button{top:12px;right:12px}.verification-input{font-size:1rem;letter-spacing:.15rem;padding:12px 16px}.timer{font-size:.9rem;padding:6px 12px}.verification-info{padding:20px}.back-btn{font-size:.9rem;padding:10px 20px}}
 .back-btn:focus,.resend-btn:focus{outline:2px solid #d4af37;outline-offset:2px}
 .bottle-container{display:flex;justify-content:center;align-items:center;margin-bottom:0}
 .bottle-image{width:130px;height:70px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(212,175,55,.3))}
