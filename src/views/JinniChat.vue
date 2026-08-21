@@ -1336,9 +1336,9 @@
             </div>
           </div>
         </div>
-        <div v-if="isAdminUser" class="settings-section">
-          <h4>Chat engine (admin)</h4>
-          <p class="settings-description">Comparison testing only — V2 is the new engine being built in parallel. Applies to chat messages; quick actions stay on V1.</p>
+        <div class="settings-section">
+          <h4>Chat engine</h4>
+          <p class="settings-description">V2 is the new engine being built in parallel (beta). Applies to chat messages; quick actions stay on V1.</p>
           <div class="setting-item">
             <div class="theme-buttons">
               <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v1' }" @click="setChatEngine('v1')">V1 · stable</button>
