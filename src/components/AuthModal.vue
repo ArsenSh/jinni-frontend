@@ -656,8 +656,8 @@ export default {
 /* Bottom-edge fade — see template comment. Fixed inside the overlay, above
  * the card (z), non-interactive. The transparent stop uses the SAME hue at
  * alpha 0 (plain `transparent` fades through gray-black on Safari). */
-.auth-bottom-fade{position:fixed;left:0;right:0;bottom:0;height:calc(env(safe-area-inset-bottom, 0px) + 68px);pointer-events:none;z-index:6;background:linear-gradient(to top,#05020d 0%,#05020d 45%,rgba(5,2,13,0) 100%)}
-.auth-modal-overlay.day-mode .auth-bottom-fade{background:linear-gradient(to top,#e0a082 0%,#e0a082 45%,rgba(224,160,130,0) 100%)}
+.auth-bottom-fade{position:fixed;inset:0;pointer-events:none;z-index:6;background:radial-gradient(ellipse at center,#1a0933 0%,#0f0520 50%,#05020d 80%,#000 100%);-webkit-mask-image:linear-gradient(to top,#000 calc(env(safe-area-inset-bottom, 0px) + 46px),transparent calc(env(safe-area-inset-bottom, 0px) + 110px));mask-image:linear-gradient(to top,#000 calc(env(safe-area-inset-bottom, 0px) + 46px),transparent calc(env(safe-area-inset-bottom, 0px) + 110px))}
+.auth-modal-overlay.day-mode .auth-bottom-fade{background:linear-gradient(to bottom,#f9f5eb 0%,#f2e3d3 8%,#ecd6c2 16%,#e9ccb3 24%,#ebc4a6 32%,#efbc9b 40%,#f3b692 48%,#f7be98 56%,#f9c8a0 64%,#f5c099 72%,#f0b893 80%,#ebb08d 88%,#e6a888 96%,#e0a082 100%)}
 .auth-container{width:100%;max-width:450px;padding:20px;position:relative;margin:auto}
 .close-button{position:absolute;top:20px;right:20px;background:0 0;border:none;color:#aaa;font-size:1.8rem;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all .3s ease;z-index:10;border-radius:50%}
 .close-button:hover{color:#d4af37;background:rgba(255,255,255,.1)}
