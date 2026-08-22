@@ -458,6 +458,7 @@ import RecommendationMap from '@/components/ui/RecommendationMap.vue';
 import ItineraryMap from '@/components/ui/ItineraryMap.vue';
 import DOMPurify from 'dompurify';
 import { isNightTime } from '@/utils/timeUtils';
+import { setThemeColorMeta, getThemeColorMeta } from '@/utils/themeColorMeta';
 import { useI18n } from 'vue-i18n';
 
 // Locales the app ships (matches the locale JSON files). A share opens in the
@@ -686,19 +687,14 @@ export default {
           dataTheme: document.documentElement.getAttribute('data-theme'),
           htmlBg: document.documentElement.style.backgroundColor,
           bodyBg: document.body.style.backgroundColor,
-          meta: document.querySelector('meta[name="theme-color"]:not([media])')?.getAttribute('content') ?? null,
+          meta: getThemeColorMeta(),   // {top, bottom} — pointer-split metas (2026-08-22)
         };
       }
       document.documentElement.setAttribute('data-theme', this.theme === 'night-mode' ? 'dark' : 'light');
       document.documentElement.style.backgroundColor = color;
       document.body.style.backgroundColor = color;
-      let meta = document.querySelector('meta[name="theme-color"]:not([media])');
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'theme-color');
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute('content', color);
+      // Share pages are one flat color — both chrome edges carry it.
+      setThemeColorMeta({ top: color, bottom: color });
     },
     restoreChrome() {
       const s = this._chromeSaved;
@@ -707,8 +703,9 @@ export default {
       else document.documentElement.setAttribute('data-theme', s.dataTheme);
       document.documentElement.style.backgroundColor = s.htmlBg;
       document.body.style.backgroundColor = s.bodyBg;
-      const meta = document.querySelector('meta[name="theme-color"]:not([media])');
-      if (meta && s.meta !== null) meta.setAttribute('content', s.meta);
+      if (s.meta && (s.meta.top !== null || s.meta.bottom !== null)) {
+        setThemeColorMeta({ top: s.meta.top, bottom: s.meta.bottom });
+      }
       this._chromeSaved = null;
     },
     getImageUrl(url) {

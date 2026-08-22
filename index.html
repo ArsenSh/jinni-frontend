@@ -17,7 +17,13 @@
          WHITE, then cream, then the real theme. This mirrors the settings
          store: jinni_settings.theme, 'auto' = night 21:00–06:00 (timeUtils).
          App.vue takes over with per-page edge colors right after mount. -->
-    <meta name="theme-color" content="#f9f5eb">
+    <!-- Two media-scoped metas (2026-08-22): iPhone's URL bar is at the
+         BOTTOM (coarse pointer → page bottom color), desktop Safari's
+         toolbar is at the TOP (fine pointer → page top color). One un-scoped
+         meta painted the ocean-blue page bottom across the macOS tab bar.
+         App.vue (utils/themeColorMeta) keeps both current per page. -->
+    <meta name="theme-color" media="(pointer: coarse)" content="#f9f5eb">
+    <meta name="theme-color" media="(pointer: fine)" content="#f9f5eb">
     <script>
       (function () {
         var theme = 'auto';
@@ -33,8 +39,9 @@
         // in the right theme (no cream flash for night users).
         d.setAttribute('data-theme', theme);
         d.style.background = c;
-        var m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.setAttribute('content', c);
+        document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
+          m.setAttribute('content', c);
+        });
       })();
     </script>
     <!-- Tight-cropped lamp icons — the raw logo PNG has big transparent

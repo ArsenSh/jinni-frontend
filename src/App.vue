@@ -6,6 +6,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { setThemeColorMeta } from '@/utils/themeColorMeta';
 
 const THEME_COLORS = {
   dark:  '#0a0118',
@@ -240,27 +241,13 @@ export default {
       // background image verbatim (or none for flat pages) over a solid color.
       document.body.style.backgroundImage = (paint && paint.image) ? paint.image : 'none';
       document.body.style.backgroundColor = top;
-      // <meta theme-color> — on iOS Safari the URL bar sits at the BOTTOM, so
-      // this meta colors the BOTTOM bar, and it must carry the page's BOTTOM
-      // edge. This was the "external factor" behind the day-mode-only bottom
-      // defects (device-settled 2026-08-21): the meta held the TOP color the
-      // whole time — night hid it (both edges near-black), day exposed it
-      // (cream meta under a sandy page bottom = the "true white" bars).
-      // The TOP strip is driven by body's background-color, set above.
-      // When the color CHANGES the node is REPLACED rather than mutated:
-      // several iOS versions ignore content edits on an existing meta during
-      // SPA navigation but re-read a freshly inserted one.
-      let meta = document.querySelector('meta[name="theme-color"]:not([media])');
-      if (meta && meta.getAttribute('content') !== bottom) {
-        meta.remove();
-        meta = null;
-      }
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'theme-color');
-        meta.setAttribute('content', bottom);
-        document.head.appendChild(meta);
-      }
+      // <meta theme-color> — SPLIT by pointer type (2026-08-22): iPhone
+      // Safari's URL bar sits at the BOTTOM (coarse pointer → bottom edge,
+      // the device-settled 2026-08-21 rule), while macOS Safari's toolbar
+      // sits at the TOP and reads the same meta — one un-scoped meta painted
+      // the ocean-blue page bottom across the desktop tab bar. The helper
+      // keeps two media-scoped metas current (replace-on-change quirk kept).
+      setThemeColorMeta({ top, bottom });
 
       // Watch the CURRENT page root: local theme toggles (admin / validator /
       // marketing), the landing's clock-based sky swap, and v-if backdrop
