@@ -304,6 +304,12 @@
                           </div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
                             <div v-if="(getRecommendationAtPosition(message, position).verifiedId || getRecommendationAtPosition(message, position).id?.startsWith('db-')) && getRecommendationAtPosition(message, position)._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(getRecommendationAtPosition(message, position))]" v-html="getPartnerIcon(getRecommendationAtPosition(message, position)) + ' ' + getPartnerLabel(getRecommendationAtPosition(message, position))"></div>
+                            <a v-if="getRecommendationAtPosition(message, position).sourceUrl" :href="getRecommendationAtPosition(message, position).sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                              </svg>
+                              <span>{{ t('chat.event.check_listing') || 'Check listing' }}</span>
+                            </a>
                             <div class="rec-card-footer">
                               <div class="rec-footer-actions">
                                 <button @click.stop="toggleRecFeedback(getRecommendationAtPosition(message, position), 'like', $event, message)" class="feedback-btn rec-footer-btn" :class="{ active: getRecFeedback(getRecommendationAtPosition(message, position)) === 'like' }" :title="t('chat.feedback.like')">
@@ -421,6 +427,12 @@
                         </div><!-- /recommendation-card -->
                         <div class="rec-card-bottom">
                           <div v-if="(message.recommendations[part.index].verifiedId || message.recommendations[part.index].id?.startsWith('db-')) && message.recommendations[part.index]._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(message.recommendations[part.index])]" v-html="getPartnerIcon(message.recommendations[part.index]) + ' ' + getPartnerLabel(message.recommendations[part.index])"></div>
+                          <a v-if="message.recommendations[part.index].sourceUrl" :href="message.recommendations[part.index].sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            <span>{{ t('chat.event.check_listing') || 'Check listing' }}</span>
+                          </a>
                           <div class="rec-card-footer">
                             <div class="rec-footer-actions">
                               <button @click.stop="toggleRecFeedback(message.recommendations[part.index], 'like', $event, message)" class="feedback-btn rec-footer-btn" :class="{ active: getRecFeedback(message.recommendations[part.index]) === 'like' }" :title="t('chat.feedback.like')">
