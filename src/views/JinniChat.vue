@@ -1829,7 +1829,11 @@ export default {
       // Admin-only engine switch: 'v1' (production chat-stream) or 'v2' (the
       // parallel engine at /chat-stream-v2). Persisted locally so comparison
       // testing survives reloads. Applies to chat only — quick actions stay v1.
-      chatEngine: localStorage.getItem('jinni_chat_engine') || 'v1',
+      // THE CUTOVER (2026-08-22, ~18:30): v2 becomes the default engine after
+      // the battery re-runs passed (vegan/rooftops/events full pass, uzbek
+      // honest with a cosmetic deck-size miss). A stored explicit choice wins
+      // — the settings toggle stays as the instant rollback to v1.
+      chatEngine: localStorage.getItem('jinni_chat_engine') || 'v2',
       settingsSaved: false,
       settingsSaveTimeout: null,
       userSettings: {
