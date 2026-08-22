@@ -8,7 +8,10 @@
     <!-- interactive-widget=resizes-content: browsers that support it shrink
          the LAYOUT when the keyboard opens (native-app behavior); others
          ignore it and JinniChat's visualViewport handler covers the gap. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+    <!-- interactive-widget is Android-Chrome-only; Safari logs a console
+         error for the unknown key, so the boot script injects it on Android
+         instead of shipping it statically (2026-08-23). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
     <title>Jinni - Your AI Guide</title>
     <!-- Pre-paint theme. The JS bundle is large, so the first paint happens
          long before Vue mounts — with no background here the page (and the
@@ -42,6 +45,13 @@
         document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
           m.setAttribute('content', c);
         });
+        // interactive-widget=resizes-content: Android-Chrome-only viewport key
+        // (keyboard shrinks the layout instead of overlaying it). Injected
+        // here so Safari never parses it and never logs the unknown-key error.
+        if (/Android/i.test(navigator.userAgent)) {
+          var vp = document.querySelector('meta[name="viewport"]');
+          if (vp) vp.setAttribute('content', vp.getAttribute('content') + ', interactive-widget=resizes-content');
+        }
       })();
     </script>
     <!-- Tight-cropped lamp icons — the raw logo PNG has big transparent

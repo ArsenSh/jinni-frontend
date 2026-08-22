@@ -8,6 +8,12 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [vue()],
     resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+    // Production builds strip debug logging (Arsen 2026-08-23: "how get rid
+    // of these console logs from frontend?") — console.warn/error survive so
+    // real problems still surface in user consoles.
+    esbuild: mode === 'production'
+      ? { pure: ['console.log', 'console.info', 'console.debug'] }
+      : undefined,
     server: {
       host: '0.0.0.0',
       proxy: {
