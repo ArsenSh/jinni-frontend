@@ -679,9 +679,12 @@
                        bottom, dim, after everything the traveler actually asked
                        for. -->
                   <div v-if="message.engineDebug && !message.streaming" class="engine-debug">
-                    {{ message.engineDebug.candidates != null ? `${message.engineDebug.shown}/${message.engineDebug.candidates} candidates` : 'no cards' }}
-                    <span v-if="message.engineDebug.cacheHit"> · cache HIT</span>
-                    · {{ message.engineDebug.ms }}ms
+                    <!-- "no cards" told nobody anything: a reply with no cards
+                         is visibly a reply with no cards (Arsen 2026-08-24 —
+                         "it is needless"). The timing still earns its place. -->
+                    <span v-if="message.engineDebug.candidates != null">{{ message.engineDebug.shown }}/{{ message.engineDebug.candidates }} candidates ·</span>
+                    <span v-if="message.engineDebug.cacheHit">cache HIT · </span>
+                    {{ message.engineDebug.ms }}ms
                   </div>
 
                   <!-- Message feedback (only after the response has fully arrived —
