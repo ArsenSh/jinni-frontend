@@ -4720,6 +4720,15 @@ export default {
                     hasProcessedCompletion = true;
                     this.engineStage = '';
                     this.messages[messageIndex].engineDebug = data.metadata?.debug || null;
+                    // A preference Jinni changed on request is already saved
+                    // server-side, but nothing told the app — so localUser kept
+                    // the old values and the Preferences screen still showed
+                    // them. From the outside that is indistinguishable from not
+                    // having saved at all (Arsen 2026-08-24: "it is not editing
+                    // in user settings, it is editing in his mind only").
+                    if (data.metadata?.prefApplied) {
+                      this.loadUser().catch(() => {});
+                    }
                     if (messageIndex === -1) return;
                     // console.log('🎯 COMPLETION RECEIVED FOR ASK AI:');
                     // console.log('   isChatRecommendation:', this.messages[messageIndex].isChatRecommendation);
