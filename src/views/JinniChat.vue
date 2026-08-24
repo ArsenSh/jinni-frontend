@@ -1470,7 +1470,13 @@
                DID read off the page never reached the traveler. -->
           <div class="pd-fact" v-if="infoTicketPrice">
             <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
-            <div class="pd-fact-body">{{ infoTicketPrice }}</div>
+            <div class="pd-fact-body">
+              {{ infoTicketPrice }}
+              <!-- The listing's own number is the fact and stays untouched; this
+                   is a rounded conversion into the traveler's currency, and it
+                   says so with ≈. Absent whenever it would be a guess. -->
+              <span v-if="infoTicketApprox" class="pd-price-approx">{{ infoTicketApprox }}</span>
+            </div>
           </div>
 
           <div class="pd-fact">
@@ -2059,6 +2065,9 @@ export default {
     // Same reasoning for the ticket price the reader lifted off the listing.
     infoTicketPrice() {
       return this.placeDetails?.eventPrice || this.selectedPlace?.eventPrice || null;
+    },
+    infoTicketApprox() {
+      return this.placeDetails?.eventPriceApprox || this.selectedPlace?.eventPriceApprox || null;
     },
     infoModalTierClass() {
       const rec = this.selectedPlace;
@@ -7198,6 +7207,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .engine-stage{font-size:0.85rem;font-style:italic;opacity:0.72;animation:stageIn 0.35s ease-out}
 /* The date is the fact; the time is its detail. They used to render at
    identical size and colour, which read as two separate facts. */
+.pd-price-approx{margin-left:8px;font-size:0.86em;opacity:0.62;white-space:nowrap}
 .info-modal .event-schedule-primary{font-weight:600}
 .info-modal .event-schedule-secondary{font-size:0.86em;opacity:0.72;font-variant-numeric:tabular-nums}
 @keyframes stageIn{from{opacity:0}to{opacity:0.72}}
