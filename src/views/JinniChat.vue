@@ -211,6 +211,10 @@
                   <!-- ============= STREAMING MODE ============= -->
                   <template v-if="message.streaming || streamingLampAnimatingIds.has(message.id)">
                     <AnimatedLamp :isLoading="message.streaming && !message.currentText && !message.textSections?.length && !message.recommendations?.length" class="streaming-lamp" :theme="resolveTheme()"/>
+                    <!-- What Jinni is doing right now. An event hunt reads live
+                         listing pages and can take 20s; without this the app
+                         just looks frozen. Cleared the moment prose starts. -->
+                    <div v-if="message.streaming && engineStage && !message.currentText" class="engine-stage">{{ engineStage }}</div>
                     <!-- Render interleaved structure -->
                     <template v-if="(message.textSections || message.recommendations) && message.isChatRecommendation">
                       <!-- Loop through all positions -->
@@ -668,6 +672,17 @@
                        vanish instantly. Hotel-choosing still hides it instantly on
                        purpose (its dust would cover the first hotel cards). -->
                   <AnimatedLamp v-if="(message.itineraryStreaming || message.itineraryLampExiting) && !message.itineraryHotelChoosing" :isLoading="!!message.itineraryStreaming" class="streaming-lamp itin-lamp" :theme="resolveTheme()" />
+
+                  <!-- Engine trace. It used to be appended to the prose, where it
+                       read as something Jinni was saying; it belongs at the
+                       bottom, dim, after everything the traveler actually asked
+                       for. -->
+                  <div v-if="message.engineDebug && !message.streaming" class="engine-debug">
+                    🧪 {{ message.engineDebug.engine }} ·
+                    {{ message.engineDebug.candidates != null ? `${message.engineDebug.shown}/${message.engineDebug.candidates} candidates` : 'no cards' }}
+                    <span v-if="message.engineDebug.cacheHit"> · cache HIT</span>
+                    · {{ message.engineDebug.ms }}ms
+                  </div>
 
                   <!-- Message feedback (only after the response has fully arrived —
                        i.e. streaming finished AND the lamp/bottle animation ended) -->
@@ -1399,12 +1414,12 @@
                or phone). isEventRec() checks both the eventSchedule object
                (preferred, from formatBusinessDetails) and falls back to the
                category label for legacy/cached recs. -->
-          <div class="info-row info-row--event" v-if="isEventRec(placeDetails || selectedPlace) && formatEventScheduleFull(placeDetails || selectedPlace)">
-            <span class="label">{{ formatEventScheduleFull(placeDetails || selectedPlace).recurring ? t('chat.event.schedule') : t('chat.event.event_date') }}</span>
+          <div class="info-row info-row--event" v-if="isEventRec(infoEventSource) && formatEventScheduleFull(infoEventSource)">
+            <span class="label">{{ formatEventScheduleFull(infoEventSource).recurring ? t('chat.event.schedule') : t('chat.event.event_date') }}</span>
             <div class="value event-schedule-value">
-              <span class="event-schedule-primary">{{ formatEventScheduleFull(placeDetails || selectedPlace).primary }}</span>
-              <span v-if="formatEventScheduleFull(placeDetails || selectedPlace).secondary" class="event-schedule-secondary">
-                {{ formatEventScheduleFull(placeDetails || selectedPlace).secondary }}
+              <span class="event-schedule-primary">{{ formatEventScheduleFull(infoEventSource).primary }}</span>
+              <span v-if="formatEventScheduleFull(infoEventSource).secondary" class="event-schedule-secondary">
+                {{ formatEventScheduleFull(infoEventSource).secondary }}
               </span>
               <span v-if="(placeDetails?._isExpired || selectedPlace?._isExpired)" class="event-schedule-ended-pill">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1459,6 +1474,14 @@
                 <span v-if="h.time" class="pd-hours-time">{{ h.time }}</span>
               </div>
             </div>
+          </div>
+
+          <!-- Ticket price, verbatim from the listing ("3000 AMD"). Events
+               never carry Google's `pricing`, so without this row the price we
+               DID read off the page never reached the traveler. -->
+          <div class="pd-fact" v-if="infoTicketPrice">
+            <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+            <div class="pd-fact-body">{{ infoTicketPrice }}</div>
           </div>
 
           <div class="pd-fact" v-if="placeDetails?.pricing">
@@ -1772,6 +1795,9 @@ export default {
       modeSwitchNotice: '',
       modeSwitchTimer: null,
       contextMenu: { sessionId: null, x: 0, y: 0 },
+      // Live progress note from the engine's `stage` events — one stream at a
+      // time, so one field is enough. Cleared when prose starts or the turn ends.
+      engineStage: '',
       showInfoModal: false,
       selectedPlace: null,
       placeDetails: null,
@@ -2015,6 +2041,20 @@ export default {
         if (idx > 0) return { day: this._translateDayTokens(s.slice(0, idx).trim()), time: s.slice(idx + 2).trim() };
         return { day: this._translateDayTokens(s.trim()), time: '' };
       });
+    },
+    // Whichever of the two records actually carries the event's dates. The
+    // modal used to read `placeDetails || selectedPlace`, and /place-details
+    // returns a Google-shaped payload with no eventSchedule — so opening
+    // "More" on an event showed an address and nothing else, even though the
+    // card behind it displayed the date fine.
+    infoEventSource() {
+      if (this.placeDetails?.eventSchedule) return this.placeDetails;
+      if (this.selectedPlace?.eventSchedule) return this.selectedPlace;
+      return this.placeDetails || this.selectedPlace;
+    },
+    // Same reasoning for the ticket price the reader lifted off the listing.
+    infoTicketPrice() {
+      return this.placeDetails?.eventPrice || this.selectedPlace?.eventPrice || null;
     },
     infoModalTierClass() {
       const rec = this.selectedPlace;
@@ -4558,6 +4598,13 @@ export default {
                   if (data.type === 'token' && data.content) {
                     currentTextSection += data.content;
                     this.messages[messageIndex].currentText = currentTextSection;
+                    this.engineStage = '';
+                    this.$forceUpdate();
+                  }
+                  // Progress note from the engine ("Reading the city's event
+                  // listings…"). Shown beside the lamp until prose arrives.
+                  else if (data.type === 'stage') {
+                    this.engineStage = data.text || '';
                     this.$forceUpdate();
                   }
                   else if (data.type === 'streaming_recommendation') {
@@ -4655,6 +4702,8 @@ export default {
                     }
                     if (currentTextSection.trim()) { textSections.push({ type: 'text', content: currentTextSection, position: this.messages[messageIndex].recommendations?.length || 0 }) }
                     hasProcessedCompletion = true;
+                    this.engineStage = '';
+                    this.messages[messageIndex].engineDebug = data.metadata?.debug || null;
                     if (messageIndex === -1) return;
                     // console.log('🎯 COMPLETION RECEIVED FOR ASK AI:');
                     // console.log('   isChatRecommendation:', this.messages[messageIndex].isChatRecommendation);
@@ -7125,6 +7174,13 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 
 
 .streaming-lamp{margin:0;flex-shrink:0}
+/* Progress note beside the lamp, and the engine trace at the foot of a reply.
+   Both are quiet by design — they report, they don't speak. */
+.engine-stage{font-size:0.85rem;font-style:italic;opacity:0.72;margin:6px 0 2px;animation:stageIn 0.35s ease-out}
+@keyframes stageIn{from{opacity:0}to{opacity:0.72}}
+.engine-debug{font-size:0.68rem;letter-spacing:0.01em;opacity:0.42;margin-top:10px;font-variant-numeric:tabular-nums}
+.genie-chat-container.night-mode .engine-stage,.genie-chat-container.night-mode .engine-debug{color:#aeb8c7}
+.genie-chat-container.day-mode .engine-stage,.genie-chat-container.day-mode .engine-debug{color:rgba(92,74,66,0.85)}
 .recommendation-card{position:relative;border-radius:12px;overflow:hidden;transition:all 0.3s ease;cursor:pointer;display:flex;flex-direction:column;height:100%;flex:1 1 auto;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
 .inline-recommendation-wrapper{margin:16px 0 16px 0;display:flex;justify-content:flex-start}
 /* Flex items shrink to content — a short description shrank the whole card.
