@@ -3335,6 +3335,37 @@ export default {
         this.loadSettingsFromLocalStorage();
       }
     },      
+    /* A preference Jinni changed is saved server-side — but this screen does not
+       read the server. userSettings, which renders the Preferences "Location"
+       tile, comes entirely from localStorage.jinni_settings, and localUser only
+       covers preferences. So the database said Dubai while the tile said
+       Yerevan, indefinitely (Arsen 2026-08-24: "location has not been saved …
+       i noticed in preferences page too").
+
+       OnboardingPage.vue does not have this problem because it writes both
+       localStorage keys itself right after saving. This does the same thing,
+       from the server's copy rather than from a guess about what changed. */
+    async syncUserAfterPrefChange() {
+      try {
+        await this.loadUser();
+        const u = this.localUser;
+        if (!u) return;
+        if (u.settings) {
+          this.userSettings = {
+            ...this.userSettings,
+            ...u.settings,
+            location: { ...(this.userSettings?.location || {}), ...(u.settings.location || {}) },
+            searchRadius: { ...(this.userSettings?.searchRadius || {}), ...(u.settings.searchRadius || {}) },
+            privacy: { ...(this.userSettings?.privacy || {}), ...(u.settings.privacy || {}) },
+          };
+          localStorage.setItem('jinni_settings', JSON.stringify(this.userSettings));
+          this.applySettings();
+        }
+        // Onboarding reads this one, so a change made in chat must show there too.
+        localStorage.setItem('user', JSON.stringify(u));
+      } catch (err) { console.error('Failed to refresh after a preference change:', err) }
+    },
+
     loadSettingsFromLocalStorage() {
       try {
         const saved = localStorage.getItem('jinni_settings');
@@ -4727,7 +4758,7 @@ export default {
                     // having saved at all (Arsen 2026-08-24: "it is not editing
                     // in user settings, it is editing in his mind only").
                     if (data.metadata?.prefApplied) {
-                      this.loadUser().catch(() => {});
+                      this.syncUserAfterPrefChange();
                     }
                     if (messageIndex === -1) return;
                     // console.log('🎯 COMPLETION RECEIVED FOR ASK AI:');
