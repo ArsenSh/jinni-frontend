@@ -5171,7 +5171,15 @@ export default {
         // id is deliberately NOT adopted as the event's identity), but it does carry
         // venuePlaceId. Fall back to it so "more images" returns the venue's photos
         // instead of searching Google for an event name that has no listing.
-        const imagePayload = { imageRequest: { placeName: recommendation.name, placeId: recommendation.placeId || recommendation.venuePlaceId || null, verifiedId: resolvedVerifiedId, location: this.userLocation } };
+        // An EVENT has no photos of its own. With a resolved venue we ask by
+        // its placeId; without one we must ask by the VENUE'S NAME, never the
+        // event's. Searching "Սև ու սպիտակ մածուն" returned photos of unrelated
+        // places, because no venue on earth is called that (live 2026-08-24).
+        const askPlaceId = recommendation.placeId || recommendation.venuePlaceId || null;
+        const askName = (!askPlaceId && this.isEventRec(recommendation) && recommendation.venueName)
+            ? recommendation.venueName
+            : recommendation.name;
+        const imagePayload = { imageRequest: { placeName: askName, placeId: askPlaceId, verifiedId: resolvedVerifiedId, location: this.userLocation } };
         console.log('🖼️ [IMAGE BTN] recommendation object:', JSON.stringify({ name: recommendation.name, placeId: recommendation.placeId, verifiedId: resolvedVerifiedId, source: recommendation.source }, null, 2));
         console.log('🖼️ [IMAGE BTN] sending payload:', JSON.stringify(imagePayload, null, 2));
         const response = await fetch(`${API_BASE_URL}/api/ai/image-request-only`, {
@@ -5207,7 +5215,13 @@ export default {
     },
     isButtonDisabled(recommendation) {
       const state = this.getButtonState(recommendation);
-      return state === 'loading' || this.globalImageRequest;
+      if (state === 'loading' || this.globalImageRequest) return true;
+      // An event with neither a resolved venue nor a venue name has nothing
+      // real to show. Firing anyway is how the button returned photos of
+      // unrelated places; an honest dead button beats a confident wrong one.
+      if (this.isEventRec(recommendation)
+          && !recommendation.placeId && !recommendation.venuePlaceId && !recommendation.venueName) return true;
+      return false;
     },
     handleQuickAction(action) {
       if (action === 'Open Settings') {
