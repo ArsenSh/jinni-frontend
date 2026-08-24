@@ -210,11 +210,12 @@
                 <div class="content">
                   <!-- ============= STREAMING MODE ============= -->
                   <template v-if="message.streaming || streamingLampAnimatingIds.has(message.id)">
-                    <AnimatedLamp :isLoading="message.streaming && !message.currentText && !message.textSections?.length && !message.recommendations?.length" class="streaming-lamp" :theme="resolveTheme()"/>
-                    <!-- What Jinni is doing right now. An event hunt reads live
-                         listing pages and can take 20s; without this the app
-                         just looks frozen. Cleared the moment prose starts. -->
-                    <div v-if="message.streaming && engineStage && !message.currentText" class="engine-stage">{{ engineStage }}</div>
+<!-- The lamp and what it is busy with, on ONE line: the note reads as
+                         the lamp's own voice beside it, not as a caption under it. -->
+                    <div class="streaming-lamp-row">
+                      <AnimatedLamp :isLoading="message.streaming && !message.currentText && !message.textSections?.length && !message.recommendations?.length" class="streaming-lamp" :theme="resolveTheme()"/>
+                      <div v-if="message.streaming && engineStage && !message.currentText" class="engine-stage">{{ engineStage }}</div>
+                    </div>
                     <!-- Render interleaved structure -->
                     <template v-if="(message.textSections || message.recommendations) && message.isChatRecommendation">
                       <!-- Loop through all positions -->
@@ -678,7 +679,6 @@
                        bottom, dim, after everything the traveler actually asked
                        for. -->
                   <div v-if="message.engineDebug && !message.streaming" class="engine-debug">
-                    🧪 {{ message.engineDebug.engine }} ·
                     {{ message.engineDebug.candidates != null ? `${message.engineDebug.shown}/${message.engineDebug.candidates} candidates` : 'no cards' }}
                     <span v-if="message.engineDebug.cacheHit"> · cache HIT</span>
                     · {{ message.engineDebug.ms }}ms
@@ -1415,7 +1415,10 @@
                (preferred, from formatBusinessDetails) and falls back to the
                category label for legacy/cached recs. -->
           <div class="info-row info-row--event" v-if="isEventRec(infoEventSource) && formatEventScheduleFull(infoEventSource)">
-            <span class="label">{{ formatEventScheduleFull(infoEventSource).recurring ? t('chat.event.schedule') : t('chat.event.event_date') }}</span>
+            <!-- No "Event date" label: the subtitle directly above already
+                 says Event, so the words were pure repetition. A recurring
+                 schedule still needs its word, since "Weekly" alone is odd. -->
+            <span v-if="formatEventScheduleFull(infoEventSource).recurring" class="label">{{ t('chat.event.schedule') }}</span>
             <div class="value event-schedule-value">
               <span class="event-schedule-primary">{{ formatEventScheduleFull(infoEventSource).primary }}</span>
               <span v-if="formatEventScheduleFull(infoEventSource).secondary" class="event-schedule-secondary">
@@ -1460,7 +1463,16 @@
 
           <div class="pd-divider"></div>
 
-          <!-- Icon-leading facts -->
+          <!-- Icon-leading facts. Price leads: for an event it is the fact
+               a traveler decides on, and it used to sit below the address. -->
+          <!-- Ticket price, verbatim from the listing ("3000 AMD"). Events
+               never carry Google's `pricing`, so without this row the price we
+               DID read off the page never reached the traveler. -->
+          <div class="pd-fact" v-if="infoTicketPrice">
+            <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+            <div class="pd-fact-body">{{ infoTicketPrice }}</div>
+          </div>
+
           <div class="pd-fact">
             <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
             <div class="pd-fact-body">{{ placeDetails?.address || selectedPlace?.address }}</div>
@@ -1474,14 +1486,6 @@
                 <span v-if="h.time" class="pd-hours-time">{{ h.time }}</span>
               </div>
             </div>
-          </div>
-
-          <!-- Ticket price, verbatim from the listing ("3000 AMD"). Events
-               never carry Google's `pricing`, so without this row the price we
-               DID read off the page never reached the traveler. -->
-          <div class="pd-fact" v-if="infoTicketPrice">
-            <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
-            <div class="pd-fact-body">{{ infoTicketPrice }}</div>
           </div>
 
           <div class="pd-fact" v-if="placeDetails?.pricing">
@@ -7176,7 +7180,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .streaming-lamp{margin:0;flex-shrink:0}
 /* Progress note beside the lamp, and the engine trace at the foot of a reply.
    Both are quiet by design — they report, they don't speak. */
-.engine-stage{font-size:0.85rem;font-style:italic;opacity:0.72;margin:6px 0 2px;animation:stageIn 0.35s ease-out}
+.streaming-lamp-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.engine-stage{font-size:0.85rem;font-style:italic;opacity:0.72;animation:stageIn 0.35s ease-out}
+/* The date is the fact; the time is its detail. They used to render at
+   identical size and colour, which read as two separate facts. */
+.info-modal .event-schedule-primary{font-weight:600}
+.info-modal .event-schedule-secondary{font-size:0.86em;opacity:0.72;font-variant-numeric:tabular-nums}
 @keyframes stageIn{from{opacity:0}to{opacity:0.72}}
 .engine-debug{font-size:0.68rem;letter-spacing:0.01em;opacity:0.42;margin-top:10px;font-variant-numeric:tabular-nums}
 .genie-chat-container.night-mode .engine-stage,.genie-chat-container.night-mode .engine-debug{color:#aeb8c7}
