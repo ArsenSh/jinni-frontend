@@ -5282,7 +5282,7 @@ select.edit-input { cursor: pointer; }
 .sv-brand-actions { display: flex; align-items: center; gap: 8px; height: 60px; }
 .sv-brandrow { display: flex; align-items: center; gap: 8px; }
 .sv-appicon { width: 60px; height: 60px; object-fit: contain; }
-.sv-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.sv-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .edit-hours-day-short { display: none; }
 /* Destination list image: small inline thumb on desktop (Arsen 2026-08-20),
    promoted to the full-width hero inside the mobile cards. */

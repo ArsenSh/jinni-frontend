@@ -212,7 +212,7 @@ export default {
 
 <style scoped>
 /* Base */
-.contact-page{min-height:100vh;transition:background 0.5s ease,color 0.3s ease;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;position:relative;z-index:1}
+.contact-page{min-height:100vh;transition:background 0.5s ease,color 0.3s ease;font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans Armenian',sans-serif;display:flex;flex-direction:column;position:relative;z-index:1}
 /* Header */
 .contact-header{display:flex;flex-direction:column;padding:1.5rem 2rem;max-width:1400px;margin:0 auto;width:100%;position:relative;z-index:2;}
 .header-top{width:100%;display:flex;justify-content:center}

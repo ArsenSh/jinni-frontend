@@ -556,7 +556,7 @@ export default {
   min-height: 100vh;
   background: var(--mr-page);
   color: var(--mr-ink);
-  font-family: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'DM Sans', 'Segoe UI', system-ui, -apple-system, 'Noto Sans Armenian', sans-serif;
   padding: 24px 16px 48px;
   transition: background 0.35s, color 0.35s;
 }
@@ -582,7 +582,7 @@ export default {
 .mr-head-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 /* Brand name mirrors JinniChat's sidebar .app-name exactly: same font stack,
    size, weight, and the gold→orange gradient text (identical in both themes). */
-.mr-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.mr-brand { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif; font-size: 1.6rem; font-weight: 600; color: #FFD700; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .mr-head h1 { margin: 6px 0 6px; font-size: clamp(23px, 4vw, 30px); font-weight: 650; }
 .mr-sub { color: var(--mr-muted); font-size: 13px; margin: 0; }
 .mr-welcome { color: var(--mr-ink2); font-size: 14px; margin: 2px 0 6px; }

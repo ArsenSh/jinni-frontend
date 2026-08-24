@@ -5,7 +5,19 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Armenian gets a real face, and it must sit BEFORE the generic fallback.
+       Font matching is per-CHARACTER: none of Segoe UI / Tahoma / Geneva /
+       Verdana carries Armenian on a Mac or iPhone, so every Armenian letter
+       used to be substituted individually by the OS — different letters
+       landing in different faces, and a synthesised (smeared) bold wherever
+       the face the OS picked had no real one. Hence "some characters bolder
+       than others" (Arsen 2026-08-24). Latin and Cyrillic are unaffected:
+       they still resolve in the families ahead of this one. */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif;
+    /* Never fake a weight. With the real family loaded above there is nothing
+       to fake; if it ever fails to load, a genuinely lighter weight reads
+       better than a smeared one. */
+    font-synthesis-weight: none;
     background-color: #f9f5eb; /* day default — matches App.vue */
     color: #1a1a1a;
     overflow-x: hidden;
