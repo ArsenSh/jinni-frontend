@@ -4760,6 +4760,18 @@ export default {
                     if (data.metadata?.prefApplied) {
                       this.syncUserAfterPrefChange();
                     }
+                    // The Discovery/Nearby toggle is a CONTROL, not a label, and
+                    // it sits in the chat input container where the traveler is
+                    // already looking. When Jinni switches the mode they should
+                    // watch the button move — that IS the confirmation. Leaving
+                    // it on the old setting would put the contradiction on
+                    // screen, inches from the reply announcing the change.
+                    const modeChange = (data.metadata?.settingsApplied || [])
+                      .find(s => s.field === 'searchMode');
+                    if (modeChange) {
+                      this.nearbyMode = modeChange.value === 'nearby';
+                      try { localStorage.setItem('nearbyMode', this.nearbyMode.toString()); } catch (_) {}
+                    }
                     if (messageIndex === -1) return;
                     // console.log('🎯 COMPLETION RECEIVED FOR ASK AI:');
                     // console.log('   isChatRecommendation:', this.messages[messageIndex].isChatRecommendation);
