@@ -1615,8 +1615,8 @@
           <button class="chip" :class="{ active: !expCategory }" @click="expCategory = ''; expPage = 1; loadExplorePlaces()">All</button>
           <button v-for="c in expCategories" :key="c.value"
                   class="chip" :class="{ active: expCategory === c.value, 'chip--jinni': c.value === 'jinni_events' }"
-                  @click="expCategory = c.value; expPage = 1; c.value === 'jinni_events' ? loadAiEvents() : loadExplorePlaces()">
-            {{ c.label }}<span v-if="c.value === 'jinni_events' && aiEvents.length" class="chip-count"> {{ aiEvents.length }}</span>
+                  @click="expCategory = c.value; expPage = 1; c.value === 'jinni_events' ? loadAiEvents() : (c.value === 'links' ? loadEventSources() : loadExplorePlaces())">
+            {{ c.label }}<span v-if="c.value === 'jinni_events' && aiEvents.length" class="chip-count"> {{ aiEvents.length }}</span><span v-if="c.value === 'links' && eventSources.length" class="chip-count"> {{ eventSources.length }}</span>
           </button>
         </div>
       </div>
@@ -1677,6 +1677,69 @@
                     <button class="action-btn exp-btn-hide" title="Blocklist: Jinni will never recommend this event again" @click="hideAiEvent(ev)">Hide</button>
                     <button class="action-btn btn-muted" title="Delete this record (the event may reappear here if Jinni finds it again — use Hide to block it permanently)" @click="dismissAiEvent(ev)">Delete</button>
                   </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+
+        <!-- ── Links: the event-source registry. These are the pages the hunt
+             reads DIRECTLY, which is why a curated city never pays for a web
+             search. The list is scoped server-side to this validator's own
+             territory. Yield is shown per row so a dead feed is visible
+             rather than silently missing. -->
+        <template v-else-if="expCategory === 'links'">
+          <div class="src-add">
+            <input v-model="srcForm.name" class="filter-input" placeholder="Name (e.g. Tomsarkgh)" />
+            <input v-model="srcForm.url" class="filter-input src-add-url" placeholder="https://…" />
+            <input v-model="srcForm.city" class="filter-input" placeholder="City (blank = whole country)" />
+            <input v-model="srcForm.country" class="filter-input" placeholder="Country" />
+            <button class="chip chip--jinni" :disabled="srcSaving" @click="saveEventSource()">
+              {{ srcSaving ? 'Saving…' : 'Add source' }}
+            </button>
+          </div>
+          <div v-if="srcError" class="src-error">{{ srcError }}</div>
+
+          <div v-if="!eventSources.length" class="table-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            <span>{{ srcLoaded ? 'No event sources registered for your territory yet. Add the pages that list events in your city — Jinni will read them directly instead of searching the web.' : 'Loading…' }}</span>
+          </div>
+
+          <table v-else class="biz-table biz-table--explore">
+            <thead>
+              <tr><th>Source</th><th>Where</th><th>Origin</th><th>Last read</th><th>Yield</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="s in eventSources" :key="s._id" :class="{ 'src-off': !s.enabled }">
+                <td>
+                  <div class="exp-name">{{ s.name }}</div>
+                  <a class="src-url" :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.url }}</a>
+                </td>
+                <td>{{ [s.city, s.country].filter(Boolean).join(', ') || '—' }}</td>
+                <td>
+                  <!-- discoveredAt is set only when the hunt registered the
+                       page itself, having earned it by producing dated events. -->
+                  <span class="exp-cats">{{ s.discoveredAt ? 'found by Jinni' : 'added by staff' }}</span>
+                </td>
+                <td>{{ s.lastReadAt ? new Date(s.lastReadAt).toLocaleDateString() : 'never' }}</td>
+                <td>
+                  <span v-if="s.lastFoundCount === null || s.lastFoundCount === undefined">—</span>
+                  <span v-else>{{ s.lastFoundCount }} event{{ s.lastFoundCount === 1 ? '' : 's' }}</span>
+                  <span v-if="s.zeroStreak > 0" class="src-warn"> · {{ s.zeroStreak }} empty read{{ s.zeroStreak === 1 ? '' : 's' }}</span>
+                </td>
+                <td>
+                  <span :class="s.enabled ? 'src-on-tag' : 'src-off-tag'">{{ s.enabled ? 'on' : 'off' }}</span>
+                  <div v-if="s.disabledReason" class="src-warn">{{ s.disabledReason }}</div>
+                </td>
+                <td class="src-actions">
+                  <!-- Disabling beats deleting: the hunt and discovery both
+                       honour `enabled:false`, so a page switched off is never
+                       silently re-registered. A deleted row can come back. -->
+                  <button class="chip" @click="toggleEventSource(s)">{{ s.enabled ? 'Disable' : 'Enable' }}</button>
+                  <button class="chip" @click="deleteEventSource(s)">Delete</button>
                 </td>
               </tr>
             </tbody>
@@ -2374,6 +2437,10 @@ export default {
       { value: 'photo_spots', label: 'Photo spots' }, { value: 'hidden_gems', label: 'Hidden gems' },
       { value: 'shopping', label: 'Shops' },
       { value: 'activities', label: 'Activities' },
+      // Not a PlaceCache category either: switches the table to the EventSource
+      // registry — the pages the hunt reads for events instead of paying for a
+      // web search. Scoped server-side to this validator's own country/city.
+      { value: 'links', label: 'Links' },
       // Not a PlaceCache category: switches the table to the AiFoundEvent
       // review queue (dated events the AI actually served to users).
       { value: 'jinni_events', label: 'Jinni events' },
@@ -2386,7 +2453,10 @@ export default {
     // is excluded: it's a table view, not a PlaceCache tag — the server would
     // silently strip it.
     const expEditCategories = [
-      ...expCategories.filter(c => c.value !== 'jinni_events'),
+      // Both sentinels are excluded: neither is a PlaceCache category, so
+      // offering them as editor chips would let a validator tag a place with
+      // a value the backend allowlist then strips.
+      ...expCategories.filter(c => c.value !== 'jinni_events' && c.value !== 'links'),
       { value: 'souvenirs', label: 'Souvenirs & gifts' },
       { value: 'clothing',  label: 'Clothing & boutiques' },
       { value: 'market',    label: 'Markets & bazaars' },
@@ -3517,6 +3587,63 @@ export default {
     // review what the AI recommended, in the same place.
     const aiEvents = ref([])
     const aiEvLoaded = ref(false)
+
+    // ── Event sources ("Links") — the registry the hunt reads instead of
+    //    paying for a web search. The staff endpoint filters by this
+    //    validator's assigned scope, so the list is already their territory.
+    const eventSources = ref([])
+    const srcLoaded = ref(false)
+    const srcSaving = ref(false)
+    const srcError = ref('')
+    const srcForm = ref({ name: '', url: '', city: '', country: '' })
+
+    async function loadEventSources() {
+      try {
+        const { data } = await axios.get(`${API_URL}/staff/event-sources`, { headers: authHeader() })
+        eventSources.value = data?.data || []
+        srcLoaded.value = true
+      } catch (e) {
+        srcError.value = e?.response?.data?.error || e.message
+        srcLoaded.value = true
+      }
+    }
+
+    async function saveEventSource() {
+      srcError.value = ''
+      const f = srcForm.value
+      if (!f.name.trim() || !f.url.trim()) { srcError.value = 'Name and URL are required.'; return }
+      // The hunt looks sources up by city or by country — a row with neither
+      // is unreachable and would sit in the registry never being read.
+      if (!f.city.trim() && !f.country.trim()) { srcError.value = 'Give a city, or a country for a nationwide source.'; return }
+      srcSaving.value = true
+      try {
+        await axios.post(`${API_URL}/staff/event-sources`, {
+          name: f.name.trim(), url: f.url.trim(),
+          city: f.city.trim() || null, country: f.country.trim() || null,
+        }, { headers: authHeader() })
+        srcForm.value = { name: '', url: '', city: '', country: '' }
+        await loadEventSources()
+      } catch (e) {
+        srcError.value = e?.response?.data?.error || e.message
+      } finally { srcSaving.value = false }
+    }
+
+    async function toggleEventSource(s) {
+      try {
+        await axios.patch(`${API_URL}/staff/event-sources/${s._id}`, { enabled: !s.enabled }, { headers: authHeader() })
+        await loadEventSources()
+      } catch (e) { srcError.value = e?.response?.data?.error || e.message }
+    }
+
+    async function deleteEventSource(s) {
+      // Deleting is the harsher option: discovery can find the page again and
+      // re-register it, whereas a disabled row is remembered as off.
+      if (!confirm(`Delete "${s.name}"? Disabling keeps it off permanently; a deleted source can be re-discovered.`)) return
+      try {
+        await axios.delete(`${API_URL}/staff/event-sources/${s._id}`, { headers: authHeader() })
+        await loadEventSources()
+      } catch (e) { srcError.value = e?.response?.data?.error || e.message }
+    }
     async function loadAiEvents() {
       try {
         const { data } = await axios.get(`${API_URL}/staff/ai-events`, { params: { status: 'new' }, headers: authHeader() })
@@ -3973,6 +4100,8 @@ export default {
       destSearchInput, onDestSearchInput, loadDestinations, changeDestPage,
       // Found by Jinni (AI-served events queue — 'Jinni events' category in the Explore tab)
       aiEvents, aiEvLoaded, loadAiEvents, aiEvDates, aiEvImg, approveAiEvent, hideAiEvent, dismissAiEvent,
+      eventSources, srcLoaded, srcSaving, srcError, srcForm,
+      loadEventSources, saveEventSource, toggleEventSource, deleteEventSource,
       filteredAiEvents, openAiEventRow,
       // Explore moderation tab
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
@@ -4733,6 +4862,22 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .exp-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex: none; background: var(--bg-elev-2); }
 .exp-thumb--empty { display: grid; place-items: center; color: var(--text-faint); }
 .exp-cats { display: block; font-size: 11px; color: var(--text-faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+
+/* ── Links (event sources) ─────────────────────────────────────────────── */
+.src-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 0 14px; }
+.src-add .filter-input { flex: 1 1 150px; min-width: 130px; }
+.src-add-url { flex: 2 1 260px; }
+.src-error { color: #c0392b; font-size: 12px; padding: 0 0 10px; }
+.src-url { display: block; font-size: 11px; color: var(--text-faint); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+.src-url:hover { text-decoration: underline; }
+/* A disabled source stays legible but visibly inert — it is still read by
+   nobody, and hiding it would make the registry look emptier than it is. */
+.src-off { opacity: 0.55; }
+.src-on-tag  { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(46,160,67,0.14); color: #2ea043; }
+.src-off-tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(128,128,128,0.16); color: var(--text-faint); }
+.src-warn { font-size: 11px; color: #b8860b; }
+.src-actions { white-space: nowrap; }
+.src-actions .chip { margin-left: 6px; }
 .exp-rating-low { color: var(--bad); font-weight: 600; }
 .exp-fb { font-size: 12px; white-space: nowrap; }
 .exp-status { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }

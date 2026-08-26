@@ -1349,6 +1349,76 @@
         </section>
 
         <!-- ── DESTINATIONS ── -->
+        <!-- ── EVENT SOURCES ───────────────────────────────────────────────
+             The registry the events hunt reads DIRECTLY. A city with sources
+             registered never pays for a web search, so this is the single
+             biggest lever on what events cost. Validators manage their own
+             territory; this view spans every country. -->
+        <section v-if="activeTab === 'event-sources'" class="tab-section">
+          <div class="src-head">
+            <h2>Event Sources</h2>
+            <p class="src-sub">
+              Pages Jinni reads for events. A registered city is read for free — web search is only the
+              fallback for places nobody has curated.
+            </p>
+          </div>
+
+          <div class="src-add">
+            <input v-model="srcForm.name" class="src-input" placeholder="Name (e.g. Tomsarkgh)" />
+            <input v-model="srcForm.url" class="src-input src-add-url" placeholder="https://…" />
+            <input v-model="srcForm.city" class="src-input" placeholder="City (blank = whole country)" />
+            <input v-model="srcForm.country" class="src-input" placeholder="Country" />
+            <button class="src-btn src-btn--primary" :disabled="srcSaving" @click="saveAdminSource()">
+              {{ srcSaving ? 'Saving…' : 'Add source' }}
+            </button>
+          </div>
+          <div v-if="srcError" class="src-error">{{ srcError }}</div>
+
+          <div class="src-filters">
+            <FilterDropdown :options="srcOriginOpts" v-model="srcOriginFilter" @change="loadAdminSources()" />
+            <FilterDropdown :options="srcEnabledOpts" v-model="srcEnabledFilter" @change="loadAdminSources()" />
+            <span class="src-count">{{ adminSources.length }} source{{ adminSources.length === 1 ? '' : 's' }}</span>
+          </div>
+
+          <div v-if="!adminSources.length" class="src-empty">
+            <span>{{ srcLoaded ? 'No event sources match this filter.' : 'Loading…' }}</span>
+          </div>
+
+          <table v-else class="src-table">
+            <thead>
+              <tr><th>Source</th><th>Where</th><th>Origin</th><th>Last read</th><th>Yield</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="s in adminSources" :key="s._id" :class="{ 'src-off': !s.enabled }">
+                <td>
+                  <div class="src-name">{{ s.name }}</div>
+                  <a class="src-url" :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.url }}</a>
+                </td>
+                <td>{{ [s.city, s.country].filter(Boolean).join(', ') || '—' }}</td>
+                <!-- discoveredAt is set only when the hunt registered the page
+                     itself, having earned it by producing dated events. -->
+                <td>{{ s.discoveredAt ? 'found by Jinni' : 'added by staff' }}</td>
+                <td>{{ s.lastReadAt ? new Date(s.lastReadAt).toLocaleDateString() : 'never' }}</td>
+                <td>
+                  <span v-if="s.lastFoundCount === null || s.lastFoundCount === undefined">—</span>
+                  <span v-else>{{ s.lastFoundCount }}</span>
+                  <span v-if="s.zeroStreak > 0" class="src-warn"> · {{ s.zeroStreak }} empty</span>
+                </td>
+                <td>
+                  <span :class="s.enabled ? 'src-on-tag' : 'src-off-tag'">{{ s.enabled ? 'on' : 'off' }}</span>
+                  <div v-if="s.disabledReason" class="src-warn">{{ s.disabledReason }}</div>
+                </td>
+                <td class="src-actions">
+                  <!-- Disabling is remembered by discovery, so a page switched
+                       off is never silently re-registered; a delete can be. -->
+                  <button class="src-btn" @click="toggleAdminSource(s)">{{ s.enabled ? 'Disable' : 'Enable' }}</button>
+                  <button class="src-btn" @click="deleteAdminSource(s)">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
         <section v-if="activeTab === 'destinations'" class="tab-section">
           <div class="kpi-grid kpi-grid--3">
             <div class="kpi-card">
@@ -4618,6 +4688,78 @@ export default {
     }
     // ── /STAFF MANAGEMENT ────────────────────────────────────────────────────
 
+    // ── Event sources ─────────────────────────────────────────────────────
+    // Admin sees every country; the staff route filters to a validator's own
+    // territory. Same collection, two doors.
+    const adminSources = ref([])
+    const srcLoaded = ref(false)
+    const srcSaving = ref(false)
+    const srcError = ref('')
+    const srcForm = ref({ name: '', url: '', city: '', country: '' })
+    const srcOriginFilter = ref('')
+    const srcEnabledFilter = ref('')
+    const srcOriginOpts = [
+      { value: '', label: 'Any origin' },
+      { value: 'staff', label: 'Added by staff' },
+      { value: 'discovered', label: 'Found by Jinni' },
+    ]
+    const srcEnabledOpts = [
+      { value: '', label: 'On and off' },
+      { value: 'true', label: 'Enabled only' },
+      { value: 'false', label: 'Disabled only' },
+    ]
+
+    async function loadAdminSources() {
+      try {
+        const params = {}
+        if (srcOriginFilter.value) params.origin = srcOriginFilter.value
+        if (srcEnabledFilter.value) params.enabled = srcEnabledFilter.value
+        const { data } = await axios.get(`${API_URL}/admin/event-sources`, { params, headers: authHeader() })
+        adminSources.value = data?.data || []
+        srcLoaded.value = true
+      } catch (e) {
+        srcError.value = e?.response?.data?.error || e.message
+        srcLoaded.value = true
+      }
+    }
+
+    async function saveAdminSource() {
+      srcError.value = ''
+      const f = srcForm.value
+      if (!f.name.trim() || !f.url.trim()) { srcError.value = 'Name and URL are required.'; return }
+      // The hunt looks sources up by city or by country — a row with neither
+      // is unreachable and would sit in the registry never being read.
+      if (!f.city.trim() && !f.country.trim()) { srcError.value = 'Give a city, or a country for a nationwide source.'; return }
+      srcSaving.value = true
+      try {
+        await axios.post(`${API_URL}/admin/event-sources`, {
+          name: f.name.trim(), url: f.url.trim(),
+          city: f.city.trim() || null, country: f.country.trim() || null,
+        }, { headers: authHeader() })
+        srcForm.value = { name: '', url: '', city: '', country: '' }
+        await loadAdminSources()
+      } catch (e) {
+        srcError.value = e?.response?.data?.error || e.message
+      } finally { srcSaving.value = false }
+    }
+
+    async function toggleAdminSource(s) {
+      try {
+        await axios.patch(`${API_URL}/admin/event-sources/${s._id}`, { enabled: !s.enabled }, { headers: authHeader() })
+        await loadAdminSources()
+      } catch (e) { srcError.value = e?.response?.data?.error || e.message }
+    }
+
+    async function deleteAdminSource(s) {
+      // Disabling is remembered by discovery; a deleted page can be found and
+      // re-registered on the next hunt, so say which is which.
+      if (!confirm(`Delete "${s.name}"? Disabling keeps it off permanently; a deleted source can be re-discovered.`)) return
+      try {
+        await axios.delete(`${API_URL}/admin/event-sources/${s._id}`, { headers: authHeader() })
+        await loadAdminSources()
+      } catch (e) { srcError.value = e?.response?.data?.error || e.message }
+    }
+
     const tabs = computed(() => [
       { id: 'overview', label: 'Overview', icon: 'overview' },
       { id: 'users', label: 'Users', icon: 'users' },
@@ -4627,6 +4769,9 @@ export default {
       { id: 'businesses', label: 'Businesses', icon: 'businesses' },
       { id: 'destinations', label: 'Destinations', icon: 'destinations' },
       { id: 'places', label: 'Places Cache', icon: 'places', badge: placesSummary.value.totalPlaces || null },
+      // The pages the events hunt reads directly. A curated city never pays
+      // for a web search, so this registry is the lever on events cost.
+      { id: 'event-sources', label: 'Event Sources', icon: 'places', badge: adminSources.value.length || null },
       { id: 'limits', label: 'Limits', icon: 'limits' },
       { id: 'coverage', label: 'Coverage', icon: 'coverage' },
       { id: 'prices', label: 'Prices', icon: 'prices' }
@@ -6566,6 +6711,7 @@ export default {
       hideChartTip()   // a stuck tooltip must never survive a tab switch
       if (tab === 'limits' && !limitsData.value) fetchLimits()
       if (tab === 'coverage' && !covData.value) fetchCoverage()
+      if (tab === 'event-sources' && !srcLoaded.value) loadAdminSources()
       if (tab === 'places' && !aiEvents.value.length) fetchAiEvents()
       if (tab === 'places' && !places.value.length) fetchPlaces()
       if (tab === 'google' && !googleUsage.value.totalPlaces) fetchGoogleUsage()
@@ -7254,7 +7400,10 @@ export default {
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
-      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
+      covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellStat,
+      adminSources, srcLoaded, srcSaving, srcError, srcForm,
+      srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
+      loadAdminSources, saveAdminSource, toggleAdminSource, deleteAdminSourcee, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
       placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag, toggleCacheTag, placeInfoGeo,
@@ -9548,4 +9697,40 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
   .cov-cell { min-width: 0; width: 100%; padding: 6px 8px; box-sizing: border-box; }
   .cov-city { max-width: none; }
 }
+
+/* ── Event sources ──────────────────────────────────────────────────────────
+   Self-contained on purpose: this page has no shared table/button utilities,
+   so the section carries its own rather than borrowing names that only exist
+   in other views. */
+.src-head h2 { margin: 0 0 4px; font-size: 18px; }
+.src-sub { margin: 0 0 16px; font-size: 13px; color: var(--text-faint, #888); max-width: 640px; line-height: 1.5; }
+.src-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.src-input { flex: 1 1 150px; min-width: 130px; padding: 8px 10px; font: inherit; font-size: 13px;
+  border: 1px solid var(--border, rgba(128,128,128,0.3)); border-radius: 8px; background: transparent; color: inherit; }
+.src-add-url { flex: 2 1 260px; }
+.src-btn { padding: 7px 12px; font-size: 12px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border, rgba(128,128,128,0.3)); background: transparent; color: inherit; }
+.src-btn:hover { background: rgba(128,128,128,0.1); }
+.src-btn--primary { background: #D4AF37; border-color: #D4AF37; color: #1a1a1a; font-weight: 600; }
+.src-btn--primary:disabled { opacity: 0.6; cursor: default; }
+.src-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; }
+.src-filters { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.src-count { font-size: 12px; color: var(--text-faint, #888); }
+.src-empty { padding: 28px 0; text-align: center; font-size: 13px; color: var(--text-faint, #888); }
+.src-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.src-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--text-faint, #888); padding: 8px 10px; border-bottom: 1px solid var(--border, rgba(128,128,128,0.2)); }
+.src-table td { padding: 10px; border-bottom: 1px solid var(--border, rgba(128,128,128,0.12)); vertical-align: top; }
+.src-name { font-weight: 600; }
+.src-url { display: block; font-size: 11px; color: var(--text-faint, #888); text-decoration: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+.src-url:hover { text-decoration: underline; }
+/* A disabled source stays legible but visibly inert — hiding it would make
+   the registry look emptier than it is. */
+.src-off { opacity: 0.55; }
+.src-on-tag  { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(46,160,67,0.14); color: #2ea043; }
+.src-off-tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(128,128,128,0.16); color: var(--text-faint, #888); }
+.src-warn { font-size: 11px; color: #b8860b; }
+.src-actions { white-space: nowrap; }
+.src-actions .src-btn { margin-left: 6px; }
 </style>
