@@ -1841,6 +1841,11 @@ export default {
         { id: 'historical', maxCount: 15, defaultCount: 6 },
         { id: 'events', maxCount: 25, defaultCount: 10 },
         { id: 'photo_spots', maxCount: 15, defaultCount: 7 },
+        // Activities: ONE chip with NO clarifier, deliberately unlike shopping.
+        // The interests picked at onboarding do the narrowing, so a relaxation
+        // user gets spas and a nightlife user gets bars from the same button
+        // (V3 §10.2).
+        { id: 'activities', maxCount: 15, defaultCount: 8 },
         // Shopping asks a follow-up ("what are you shopping for?") before
         // searching — `clarify: true` makes the button open the sub-type chips
         // instead of firing a search immediately.
@@ -2217,6 +2222,7 @@ export default {
           photo_spots: this.t('share.itinerary.category.photo_spots'),
           viewpoint:   this.t('share.itinerary.category.viewpoint'),
           shopping:    this.t('share.itinerary.category.shopping'),
+          activities:  this.t('share.itinerary.category.activities'),
           nature:      this.t('share.itinerary.category.nature'),
         },
         findReplacement: this.t('chat.itinerary.find_replacement'),
@@ -5973,7 +5979,8 @@ export default {
           'historical': this.t('chat.session_titles.historical'),
           'events': this.t('chat.session_titles.events'),
           'photo_spots': this.t('chat.session_titles.photo_spots'),
-          'shopping': this.t('chat.session_titles.shopping')
+          'shopping': this.t('chat.session_titles.shopping'),
+          'activities': this.t('chat.session_titles.activities')
         };
         await this.setSessionTitle(titles[actionId] || 'Quick Search');
       }  
@@ -5987,7 +5994,7 @@ export default {
         const currentUsage = this.getTotalActionUsage(actionId);
         const totalRecsShown = this.getTotalRecommendationsShown(actionId);
         const action = this.quickActions.find(a => a.id === actionId);
-        const limits = { 'restaurants': { maxRequests: 4, maxTotal: 35 }, 'hotels': { maxRequests: 4, maxTotal: 25 }, 'historical': { maxRequests: 4, maxTotal: 25 }, 'hidden_gems': { maxRequests: 4, maxTotal: 20 }, 'events': { maxRequests: 4, maxTotal: 40 }, 'photo_spots': { maxRequests: 4, maxTotal: 30 }, 'shopping': { maxRequests: 4, maxTotal: 35 } };
+        const limits = { 'restaurants': { maxRequests: 4, maxTotal: 35 }, 'hotels': { maxRequests: 4, maxTotal: 25 }, 'historical': { maxRequests: 4, maxTotal: 25 }, 'hidden_gems': { maxRequests: 4, maxTotal: 20 }, 'events': { maxRequests: 4, maxTotal: 40 }, 'photo_spots': { maxRequests: 4, maxTotal: 30 }, 'shopping': { maxRequests: 4, maxTotal: 35 }, 'activities': { maxRequests: 4, maxTotal: 30 } };
         const limit = limits[actionId] || { maxRequests: 3, maxTotal: 20 };
         if (currentUsage >= limit.maxRequests || totalRecsShown >= limit.maxTotal) {
           const suggestionMessage = { id: Date.now(), sender: 'ai', text: this.generateLimitMessage(actionId, action.label), timestamp: new Date(), isLimitReached: true };
