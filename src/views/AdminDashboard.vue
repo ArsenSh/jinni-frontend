@@ -1374,12 +1374,19 @@
             <div v-if="srcError" class="src-error">{{ srcError }}</div>
 
             <div class="src-filters">
+              <input v-model="srcSearch" class="src-input src-search" placeholder="Search name, url, city or country…" />
               <FilterDropdown :options="srcOriginOpts" v-model="srcOriginFilter" @change="loadAdminSources()" />
               <FilterDropdown :options="srcEnabledOpts" v-model="srcEnabledFilter" @change="loadAdminSources()" />
-              <span class="src-count">{{ adminSources.length }} source{{ adminSources.length === 1 ? '' : 's' }}</span>
+              <!-- Says what it is showing AGAINST THE TOTAL whenever a filter is
+                   on. "6 sources" under an active filter reads as a shrinking
+                   registry; "6 of 20" reads as a filter. -->
+              <span class="src-count">
+                <template v-if="srcSearch.trim()">{{ filteredSources.length }} of {{ adminSources.length }}</template>
+                <template v-else>{{ adminSources.length }} source{{ adminSources.length === 1 ? '' : 's' }}</template>
+              </span>
             </div>
 
-            <div v-if="!adminSources.length" class="src-empty">
+            <div v-if="!filteredSources.length" class="src-empty">
               {{ srcLoaded ? 'No event sources match this filter.' : 'Loading…' }}
             </div>
 
@@ -1391,7 +1398,7 @@
                   <tr><th>Source</th><th>Where</th><th>Origin</th><th>Last read</th><th>Yield</th><th>Status</th><th></th></tr>
                 </thead>
                 <tbody>
-                  <tr v-for="s in adminSources" :key="s._id" class="table-row" :class="{ 'src-off': !s.enabled }">
+                  <tr v-for="s in filteredSources" :key="s._id" class="table-row" :class="{ 'src-off': !s.enabled }">
                     <td data-label="Source">
                       <div class="src-name">{{ s.name }}</div>
                       <a class="src-url" :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.url }}</a>
@@ -4700,6 +4707,16 @@ export default {
     const srcSaving = ref(false)
     const srcError = ref('')
     const srcForm = ref({ name: '', url: '', city: '', country: '' })
+    // One field over four columns: at this size you know a fragment and
+    // rarely care which column it lives in. Client-side because the endpoint
+    // returns the whole registry in one response.
+    const srcSearch = ref('')
+    const filteredSources = computed(() => {
+      const q = srcSearch.value.trim().toLowerCase()
+      if (!q) return adminSources.value
+      return adminSources.value.filter(s =>
+        [s.name, s.url, s.city, s.country].filter(Boolean).some(v => String(v).toLowerCase().includes(q)))
+    })
     const srcOriginFilter = ref('')
     const srcEnabledFilter = ref('')
     const srcOriginOpts = [
@@ -7407,7 +7424,7 @@ export default {
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
       covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState,
-      adminSources, srcLoaded, srcSaving, srcError, srcForm,
+      adminSources, filteredSources, srcSearch, srcLoaded, srcSaving, srcError, srcForm,
       srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
       loadAdminSources, saveAdminSource, toggleAdminSource, deleteAdminSource, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
@@ -9723,6 +9740,7 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .src-btn--primary:disabled { opacity: 0.6; cursor: default; }
 .src-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; }
 .src-filters { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.src-search { flex: 1 1 240px; max-width: 340px; }
 .src-count { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-faint, #888); }
 .src-empty { padding: 28px 0; text-align: center; font-size: 13px; color: var(--text-faint, #888); }
 .src-table-scroll { width: 100%; overflow-x: auto; }

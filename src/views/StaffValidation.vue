@@ -1700,7 +1700,17 @@
           </div>
           <div v-if="srcError" class="src-error">{{ srcError }}</div>
 
-          <div v-if="!eventSources.length" class="table-empty">
+          <div v-if="eventSources.length" class="src-filters">
+            <input v-model="srcSearch" class="filter-input src-search" placeholder="Search name, url, city or country…" />
+            <!-- Shows the match count AGAINST THE TOTAL while filtering, so a
+                 narrowed view never reads as a shrinking registry. -->
+            <span class="src-count">
+              <template v-if="srcSearch.trim()">{{ filteredSources.length }} of {{ eventSources.length }}</template>
+              <template v-else>{{ eventSources.length }} source{{ eventSources.length === 1 ? '' : 's' }}</template>
+            </span>
+          </div>
+
+          <div v-if="!filteredSources.length" class="table-empty">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
@@ -1727,7 +1737,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="s in eventSources" :key="s._id" class="biz-row" :class="{ 'src-off': !s.enabled }">
+              <tr v-for="s in filteredSources" :key="s._id" class="biz-row" :class="{ 'src-off': !s.enabled }">
                 <td class="col-name col-src" data-label="Source">
                   <div class="exp-name">{{ s.name }}</div>
                   <a class="src-url" :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.url }}</a>
@@ -3613,6 +3623,15 @@ export default {
     const srcSaving = ref(false)
     const srcError = ref('')
     const srcForm = ref({ name: '', url: '', city: '', country: '' })
+    // One field across four columns. Client-side: the staff endpoint returns
+    // this validator's whole territory in one response.
+    const srcSearch = ref('')
+    const filteredSources = computed(() => {
+      const q = srcSearch.value.trim().toLowerCase()
+      if (!q) return eventSources.value
+      return eventSources.value.filter(s =>
+        [s.name, s.url, s.city, s.country].filter(Boolean).some(v => String(v).toLowerCase().includes(q)))
+    })
 
     async function loadEventSources() {
       try {
@@ -4117,7 +4136,7 @@ export default {
       destSearchInput, onDestSearchInput, loadDestinations, changeDestPage,
       // Found by Jinni (AI-served events queue — 'Jinni events' category in the Explore tab)
       aiEvents, aiEvLoaded, loadAiEvents, aiEvDates, aiEvImg, approveAiEvent, hideAiEvent, dismissAiEvent,
-      eventSources, srcLoaded, srcSaving, srcError, srcForm,
+      eventSources, filteredSources, srcSearch, srcLoaded, srcSaving, srcError, srcForm,
       loadEventSources, saveEventSource, toggleEventSource, deleteEventSource,
       filteredAiEvents, openAiEventRow,
       // Explore moderation tab
@@ -4892,6 +4911,9 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .src-add-url { flex: 2 1 220px; }
 .src-add .chip { flex: 0 0 auto; white-space: nowrap; }
 .src-error { color: #c0392b; font-size: 12px; padding: 0 14px 10px; }
+.src-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 0 14px 12px; }
+.src-search { flex: 1 1 240px; max-width: 340px; min-width: 0; }
+.src-count { font-size: 11px; color: var(--text-mute); }
 .src-table-scroll { width: 100%; overflow-x: auto; padding-bottom: 4px; }
 .src-table-scroll .biz-table--links { min-width: 880px; }
 
