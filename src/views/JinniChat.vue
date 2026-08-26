@@ -4244,6 +4244,14 @@ export default {
       cleanedText = result.join('|||NL|||');
       let formatted = cleanedText;
       formatted = formatted.replace(/\b(Preferences?)\b/gi, '<button class="inline-preference-btn" onclick="window.openPreferences()">$1</button>');
+      // Settings is a destination too. Jinni now names it for the things it
+      // deliberately will not change itself — the search radii live on this
+      // screen, not Preferences (Arsen 2026-08-26: "radius change is from
+      // settings, not preferences") — so without this the one actionable word in
+      // a refusal rendered as dead text. Case-sensitive on purpose: the backend
+      // sends the screen name capitalised, and a lowercase "settings" in ordinary
+      // prose is not a place to tap.
+      formatted = formatted.replace(/\b(Settings)\b/g, '<button class="inline-preference-btn" onclick="window.openJinniSettings()">$1</button>');
       formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
       formatted = formatted.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
       formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -4317,7 +4325,12 @@ export default {
       const win = window.open(url, '_blank');
       if (win) win.opener = null;
     },
-    setupPreferenceButtonHandler() {window.openPreferences = () => {this.editPreferences()}},
+    setupPreferenceButtonHandler() {
+      window.openPreferences = () => {this.editPreferences()};
+      // The radius sliders live in the Settings modal, so a refusal that names
+      // Settings has to be able to open it.
+      window.openJinniSettings = () => {this.showSettings()};
+    },
     handleImageError(event) {
       console.warn('Image failed to load:', event.target.src);
       event.target.style.display = 'none';
