@@ -1710,37 +1710,45 @@
 
           <!-- .table-wrap is overflow:hidden, so a seven-column table with long
                URLs would be CLIPPED rather than scrollable. Its own scroll
-               container keeps every column reachable at any window width. -->
+               container keeps every column reachable at any window width.
+               On mobile the page's shared rules turn each row into a stacked
+               card, which is why every cell carries a data-label. -->
           <div v-else class="src-table-scroll">
-          <table class="biz-table biz-table--explore">
+          <table class="biz-table biz-table--explore biz-table--links">
             <thead>
-              <tr><th>Source</th><th>Where</th><th>Origin</th><th>Last read</th><th>Yield</th><th>Status</th><th></th></tr>
+              <tr>
+                <th class="col-src">Source</th>
+                <th class="col-where">Where</th>
+                <th class="col-origin">Origin</th>
+                <th class="col-read">Last read</th>
+                <th class="col-yield">Yield</th>
+                <th class="col-state">Status</th>
+                <th class="col-act"></th>
+              </tr>
             </thead>
             <tbody>
-              <tr v-for="s in eventSources" :key="s._id" :class="{ 'src-off': !s.enabled }">
-                <td>
+              <tr v-for="s in eventSources" :key="s._id" class="biz-row" :class="{ 'src-off': !s.enabled }">
+                <td class="col-name col-src" data-label="Source">
                   <div class="exp-name">{{ s.name }}</div>
                   <a class="src-url" :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.url }}</a>
                 </td>
-                <td>{{ [s.city, s.country].filter(Boolean).join(', ') || '—' }}</td>
-                <td>
-                  <!-- discoveredAt is set only when the hunt registered the
-                       page itself, having earned it by producing dated events. -->
-                  <span class="exp-cats">{{ s.discoveredAt ? 'found by Jinni' : 'added by staff' }}</span>
-                </td>
-                <td>{{ s.lastReadAt ? new Date(s.lastReadAt).toLocaleDateString() : 'never' }}</td>
-                <td>
+                <td class="col-where" data-label="Where">{{ [s.city, s.country].filter(Boolean).join(', ') || '—' }}</td>
+                <!-- discoveredAt is set only when the hunt registered the page
+                     itself, having earned it by producing dated events. -->
+                <td class="col-origin" data-label="Origin">{{ s.discoveredAt ? 'found by Jinni' : 'added by staff' }}</td>
+                <td class="col-read" data-label="Last read">{{ s.lastReadAt ? new Date(s.lastReadAt).toLocaleDateString() : 'never' }}</td>
+                <td class="col-yield" data-label="Yield">
                   <span v-if="s.lastFoundCount === null || s.lastFoundCount === undefined">—</span>
-                  <span v-else>{{ s.lastFoundCount }} event{{ s.lastFoundCount === 1 ? '' : 's' }}</span>
-                  <span v-if="s.zeroStreak > 0" class="src-warn"> · {{ s.zeroStreak }} empty read{{ s.zeroStreak === 1 ? '' : 's' }}</span>
+                  <span v-else>{{ s.lastFoundCount }}</span>
+                  <span v-if="s.zeroStreak > 0" class="src-warn"> · {{ s.zeroStreak }} empty</span>
                 </td>
-                <td>
+                <td class="col-state" data-label="Status">
                   <span :class="s.enabled ? 'src-on-tag' : 'src-off-tag'">{{ s.enabled ? 'on' : 'off' }}</span>
                   <div v-if="s.disabledReason" class="src-warn">{{ s.disabledReason }}</div>
                 </td>
-                <td class="src-actions">
+                <td class="col-act src-actions" data-label="">
                   <!-- Disabling beats deleting: the hunt and discovery both
-                       honour `enabled:false`, so a page switched off is never
+                       honour enabled:false, so a page switched off is never
                        silently re-registered. A deleted row can come back. -->
                   <button class="chip" @click="toggleEventSource(s)">{{ s.enabled ? 'Disable' : 'Enable' }}</button>
                   <button class="chip" @click="deleteEventSource(s)">Delete</button>
@@ -4533,6 +4541,27 @@ export default {
 
   /* Pagination: stack the buttons + indicator vertically with breathing room */
   .pagination{flex-direction:column;gap:10px;text-align:center}
+
+  /* ── Links on mobile ──────────────────────────────────────────────────
+     The rows use the shared card conversion above (biz-row + data-label),
+     so only three things need saying here. */
+  /* The desktop min-width would force a horizontal scrollbar around cards
+     that already stack — the whole point of the conversion. */
+  .src-table-scroll{overflow-x:visible}
+  .src-table-scroll .biz-table--links{min-width:0}
+  /* The fixed column widths are meaningless once each cell is a full-width
+     row, and they fight the flex layout the card conversion applies. */
+  .biz-table--links td[class*="col-"]{width:auto !important}
+  /* The add row's fields stack instead of squeezing four across a phone. */
+  .src-add{flex-direction:column;align-items:stretch;padding:12px}
+  .src-add .filter-input,.src-add .chip{width:100%;flex:none}
+  /* The URL sits under the name in the card header, so let it use the width
+     rather than truncating at a desktop-sized cap. */
+  .biz-table--links td.col-name .src-url{max-width:100%}
+  /* Actions become full-width buttons rather than a cramped right-aligned
+     pair; the empty data-label leaves no stray heading above them. */
+  .biz-table--links td.col-act{display:flex;gap:8px;padding:10px 14px 12px}
+  .biz-table--links td.col-act .chip{flex:1;margin-left:0;text-align:center}
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -4872,28 +4901,37 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .exp-thumb--empty { display: grid; place-items: center; color: var(--text-faint); }
 .exp-cats { display: block; font-size: 11px; color: var(--text-faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
 
-/* ── Links (event sources) ─────────────────────────────────────────────── */
-/* 14px horizontal padding matches .biz-table's cell inset, so the fields line
-   up with the column content below instead of running into the card edge
-   (.table-wrap has no padding of its own). */
+/* ── Links (event sources) ───────────────────────────────────────────────────
+   The add row is inset 14px so it lines up with .biz-table's cell padding —
+   .table-wrap carries none of its own. */
 .src-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px; box-sizing: border-box; }
 /* min-width:0 is what actually prevents the overflow: without it a flex item
    refuses to shrink below its content width and pushes past the container. */
 .src-add .filter-input { flex: 1 1 150px; min-width: 0; box-sizing: border-box; }
 .src-add-url { flex: 2 1 220px; }
-/* The button sizes to its label rather than stretching with the fields. */
 .src-add .chip { flex: 0 0 auto; white-space: nowrap; }
 .src-error { color: #c0392b; font-size: 12px; padding: 0 14px 10px; }
-/* The card clips overflow, so the table scrolls inside its own container
-   rather than losing its right-hand columns. */
-.src-table-scroll { width: 100%; overflow-x: auto; }
-.src-table-scroll .biz-table { min-width: 820px; }
-/* The empty state sits on the same 14px inset as the fields above it. */
-.src-add + .table-empty, .src-error + .table-empty { padding-left: 14px; padding-right: 14px; }
+.src-table-scroll { width: 100%; overflow-x: auto; padding-bottom: 4px; }
+.src-table-scroll .biz-table--links { min-width: 880px; }
+
+/* Column widths: the source (name + url) takes the slack, everything else is
+   sized to its content so the row reads as columns rather than drifting. */
+.biz-table--links th.col-src,    .biz-table--links td.col-src    { width: auto; min-width: 260px; text-align: left; }
+.biz-table--links th.col-where,  .biz-table--links td.col-where  { width: 150px; }
+.biz-table--links th.col-origin, .biz-table--links td.col-origin { width: 130px; }
+.biz-table--links th.col-read,   .biz-table--links td.col-read   { width: 110px; }
+.biz-table--links th.col-yield,  .biz-table--links td.col-yield  { width: 120px; }
+.biz-table--links th.col-state,  .biz-table--links td.col-state  { width: 100px; }
+.biz-table--links th.col-act,    .biz-table--links td.col-act    { width: 170px; text-align: right; white-space: nowrap; }
+/* The last column's buttons would otherwise sit flush against the card edge. */
+.biz-table--links th.col-act, .biz-table--links td.col-act { padding-right: 14px; }
+/* Breathing room under the final row so it does not meet the card's edge. */
+.biz-table--links tbody tr:last-child td { border-bottom: none; padding-bottom: 14px; }
+
 .src-url { display: block; font-size: 11px; color: var(--text-faint); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
 .src-url:hover { text-decoration: underline; }
-/* A disabled source stays legible but visibly inert — it is still read by
-   nobody, and hiding it would make the registry look emptier than it is. */
+/* A disabled source stays legible but visibly inert — hiding it would make
+   the registry look emptier than it is. */
 .src-off { opacity: 0.55; }
 .src-on-tag  { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(46,160,67,0.14); color: #2ea043; }
 .src-off-tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(128,128,128,0.16); color: var(--text-faint); }

@@ -25,6 +25,7 @@
           <svg v-else-if="tab.icon === 'prices'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <svg v-else-if="tab.icon === 'limits'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
           <svg v-else-if="tab.icon === 'coverage'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          <svg v-else-if="tab.icon === 'links'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           <svg v-else-if="tab.icon === 'staff'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
           <span class="nav-label">{{ tab.label }}</span>
         </button>
@@ -4717,7 +4718,8 @@ export default {
         const params = {}
         if (srcOriginFilter.value) params.origin = srcOriginFilter.value
         if (srcEnabledFilter.value) params.enabled = srcEnabledFilter.value
-        const { data } = await axios.get(`${API_URL}/admin/event-sources`, { params, headers: authHeader() })
+        const qs = new URLSearchParams(params).toString()
+        const data = await apiFetch(`/event-sources${qs ? `?${qs}` : ''}`)
         adminSources.value = data?.data || []
         srcLoaded.value = true
       } catch (e) {
@@ -4735,10 +4737,10 @@ export default {
       if (!f.city.trim() && !f.country.trim()) { srcError.value = 'Give a city, or a country for a nationwide source.'; return }
       srcSaving.value = true
       try {
-        await axios.post(`${API_URL}/admin/event-sources`, {
+        await apiFetch('/event-sources', { method: 'POST', body: JSON.stringify({
           name: f.name.trim(), url: f.url.trim(),
           city: f.city.trim() || null, country: f.country.trim() || null,
-        }, { headers: authHeader() })
+        }) })
         srcForm.value = { name: '', url: '', city: '', country: '' }
         await loadAdminSources()
       } catch (e) {
@@ -4748,7 +4750,7 @@ export default {
 
     async function toggleAdminSource(s) {
       try {
-        await axios.patch(`${API_URL}/admin/event-sources/${s._id}`, { enabled: !s.enabled }, { headers: authHeader() })
+        await apiFetch(`/event-sources/${s._id}`, { method: 'PATCH', body: JSON.stringify({ enabled: !s.enabled }) })
         await loadAdminSources()
       } catch (e) { srcError.value = e?.response?.data?.error || e.message }
     }
@@ -4758,7 +4760,7 @@ export default {
       // re-registered on the next hunt, so say which is which.
       if (!confirm(`Delete "${s.name}"? Disabling keeps it off permanently; a deleted source can be re-discovered.`)) return
       try {
-        await axios.delete(`${API_URL}/admin/event-sources/${s._id}`, { headers: authHeader() })
+        await apiFetch(`/event-sources/${s._id}`, { method: 'DELETE' })
         await loadAdminSources()
       } catch (e) { srcError.value = e?.response?.data?.error || e.message }
     }
