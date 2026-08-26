@@ -852,7 +852,8 @@
       "historical": "Historical Places",
       "events": "Local Events & Activities",
       "photo_spots": "Photo Spots",
-      "shopping": "Shopping"
+      "shopping": "Shopping",
+      "activities": "Activities"
     },
     "ai_prompts": {
       "restaurant": "Tell me about {name} - price range, key dishes, and how to make reservations",
@@ -1079,7 +1080,8 @@
       "events": "Events",
       "photo_spots": "Photo spots",
       "hidden_gems": "Hidden gems",
-      "shopping": "Shops"
+      "shopping": "Shops",
+      "activities": "Activities"
     },
     "photos": "Photos",
     "search_ph": "Where to? City, region, country…",
@@ -1225,7 +1227,8 @@
         "photo_spots": "Photo spot",
         "viewpoint": "Viewpoint",
         "shopping": "Shopping",
-        "nature": "Nature"
+        "nature": "Nature",
+        "activities": "Activity"
       }
     },
     "approximate_path": "Approximate path"

@@ -856,7 +856,8 @@
       "hotel_suggestions": "酒店建议",
       "hidden_gems": "隐藏宝藏发现",
       "historical": "历史遗址",
-      "events": "当地活动"
+      "events": "当地活动",
+      "activities": "娱乐活动"
     },
     "ai_prompts": {
       "restaurant": "告诉我关于 {name} - 价格范围、主要菜品和如何预订",
@@ -1083,7 +1084,8 @@
       "events": "活动",
       "photo_spots": "拍照胜地",
       "hidden_gems": "隐藏宝藏",
-      "shopping": "商店"
+      "shopping": "商店",
+      "activities": "娱乐活动"
     },
     "photos": "照片",
     "search_ph": "去哪里？城市、地区、国家…",
@@ -1229,7 +1231,8 @@
         "photo_spots": "拍照点",
         "viewpoint": "观景点",
         "shopping": "购物",
-        "nature": "自然"
+        "nature": "自然",
+        "activities": "娱乐"
       }
     },
     "approximate_path": "大致路线"

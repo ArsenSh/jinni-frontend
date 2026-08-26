@@ -299,6 +299,7 @@ const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && impor
 const CAT_LABELS = {
   restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical sites',
   events: 'Events', photo_spots: 'Photo spots', hidden_gems: 'Hidden gems', shopping: 'Shops',
+  activities: 'Activities',
 };
 
 export default {
@@ -335,7 +336,9 @@ export default {
       // fall back to a sensible default. Only categories that have places.
       const order = (Array.isArray(this.serverOrder) && this.serverOrder.length)
         ? this.serverOrder
-        : ['restaurants', 'historical', 'hidden_gems', 'photo_spots', 'events', 'shopping', 'hotels'];
+        // A category missing from this array is filtered out and never
+        // rendered whenever the server sends no explicit order.
+        : ['restaurants', 'historical', 'hidden_gems', 'activities', 'photo_spots', 'events', 'shopping', 'hotels'];
       return order.filter(c => this.categories[c] && this.categories[c].length);
     },
     hasAny() { return this.orderedCategories.length > 0; },

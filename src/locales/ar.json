@@ -847,7 +847,8 @@
       "hotel_suggestions": "اقتراحات الفنادق",
       "hidden_gems": "اكتشاف الكنوز المخفية",
       "historical": "الأماكن التاريخية",
-      "events": "الأحداث والأنشطة المحلية"
+      "events": "الأحداث والأنشطة المحلية",
+      "activities": "أنشطة"
     },
     "ai_prompts": {
       "restaurant": "أخبرني عن {name} - النطاق السعري، الأطباق الرئيسية، وكيفية الحجز",
@@ -1074,7 +1075,8 @@
       "events": "فعاليات",
       "photo_spots": "أماكن للتصوير",
       "hidden_gems": "جواهر خفية",
-      "shopping": "متاجر"
+      "shopping": "متاجر",
+      "activities": "أنشطة"
     },
     "photos": "الصور",
     "search_ph": "إلى أين؟ مدينة، منطقة، دولة…",
@@ -1220,7 +1222,8 @@
         "photo_spots": "موقع تصوير",
         "viewpoint": "نقطة مشاهدة",
         "shopping": "تسوق",
-        "nature": "طبيعة"
+        "nature": "طبيعة",
+        "activities": "نشاط"
       }
     },
     "approximate_path": "مسار تقريبي"

@@ -858,7 +858,8 @@
       "hotel_suggestions": "Suggestions d'hôtels",
       "hidden_gems": "Découverte de trésors cachés",
       "historical": "Lieux historiques",
-      "events": "Événements et activités locaux"
+      "events": "Événements et activités locaux",
+      "activities": "Activités"
     },
     "ai_prompts": {
       "restaurant": "Parlez-moi de {name} - gamme de prix, plats principaux et comment réserver",
@@ -1098,7 +1099,8 @@
       "events": "Événements",
       "photo_spots": "Spots photo",
       "hidden_gems": "Trésors cachés",
-      "shopping": "Boutiques"
+      "shopping": "Boutiques",
+      "activities": "Activités"
     },
     "photos": "Photos",
     "search_ph": "Où ? Ville, région, pays…",
@@ -1244,7 +1246,8 @@
         "photo_spots": "Spot photo",
         "viewpoint": "Point de vue",
         "shopping": "Shopping",
-        "nature": "Nature"
+        "nature": "Nature",
+        "activities": "Activité"
       }
     },
     "approximate_path": "Trajet approximatif"

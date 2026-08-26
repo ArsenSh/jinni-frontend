@@ -490,6 +490,7 @@ const ITIN_CAT = {
   restaurants: 'Food', cafe: 'Café', hotels: 'Hotel', hidden_gems: 'Hidden gem',
   historical: 'Historical', museum: 'Museum', events: 'Event',
   photo_spots: 'Photo spot', viewpoint: 'Viewpoint', shopping: 'Shopping', nature: 'Nature',
+  activities: 'Activity',
 };
 
 export default {

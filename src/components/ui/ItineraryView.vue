@@ -417,6 +417,9 @@ const CATEGORY_TO_ACTION = {
   hidden_gems: 'hidden_gems', historical: 'historical', museum: 'historical',
   events: 'events', photo_spots: 'photo_spots', viewpoint: 'photo_spots',
   shopping: 'shopping', nature: 'hidden_gems',
+  // Without this, "Replace" on an activity slot falls through to the
+  // `|| 'hidden_gems'` default and quietly fetches the wrong kind.
+  activities: 'activities',
 };
 
 const DEFAULT_LABELS = {
@@ -461,6 +464,7 @@ const DEFAULT_LABELS = {
     restaurants: 'Food', cafe: 'Café', hotels: 'Hotel', hidden_gems: 'Hidden gem',
     historical: 'Historical', museum: 'Museum', events: 'Event',
     photo_spots: 'Photo spot', viewpoint: 'Viewpoint', shopping: 'Shopping', nature: 'Nature',
+    activities: 'Activity',
   },
   allDay: 'All day',
   perPersonDay: 'per person / day',
@@ -566,7 +570,7 @@ export default {
     requestDays() { return Math.min(this.req?.daysCount || 3, 7); },
     // Fetches run sequentially, so the first row without a count is the one
     // currently in flight — the only one that should animate.
-    addCategories() { return ['restaurants', 'hidden_gems', 'historical', 'events', 'photo_spots', 'shopping']; },
+    addCategories() { return ['restaurants', 'hidden_gems', 'historical', 'events', 'photo_spots', 'activities', 'shopping']; },
     otherDays() { return this.days.filter(d => d.dayNumber !== this.activeDay); },
     // One past the last day = the "+ Day N" chip in the move picker; null once
     // the 10-day cap (DAY_COLORS depth, backend-enforced too) is reached.
@@ -778,10 +782,15 @@ export default {
         const plan = [
           //  action        target                   minimum (never settle below this)
           ['restaurants', Math.min(26, days * 3),  days * 2],
-          ['historical',  share(0.26, 18),         Math.min(14, days + 3)],
-          ['hidden_gems', share(0.26, 18),         Math.min(14, days + 3)],
-          ['photo_spots', share(0.20, 16),         Math.min(10, days + 1)],
-          ['shopping',    share(0.16, 12),         Math.min(7, Math.ceil(days / 2) + 1)],
+          // Non-restaurant shares sum to 1.00 by construction. 'activities'
+          // was funded by trimming historical and hidden_gems 0.04 each and
+          // photo_spots/shopping 0.02 each — appending without rebalancing
+          // would over-collect and burn Google taps.
+          ['historical',  share(0.22, 18),         Math.min(14, days + 3)],
+          ['hidden_gems', share(0.22, 18),         Math.min(14, days + 3)],
+          ['activities',  share(0.12, 14),         Math.min(8, days + 1)],
+          ['photo_spots', share(0.18, 16),         Math.min(10, days + 1)],
+          ['shopping',    share(0.14, 12),         Math.min(7, Math.ceil(days / 2) + 1)],
           // Events are a calendar lottery — a town may honestly have none this
           // week, so no minimum: never burn taps chasing them.
           ['events',      share(0.12, 10),         0],

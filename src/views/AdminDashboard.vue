@@ -1758,7 +1758,7 @@
               <span class="card-sub">how far a business reaches in results &amp; zone boosts (meters, 50–5000)</span>
             </div>
             <div class="loc-grid" style="grid-template-columns: repeat(auto-fit, minmax(90px, 100px)); gap: 12px">
-              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'hidden_gems', 'souvenirs', 'clothing', 'jewelry', 'food']" :key="cat">
+              <div class="edit-field" v-for="cat in ['restaurants', 'hotels', 'events', 'hidden_gems', 'activities', 'souvenirs', 'clothing', 'jewelry', 'food']" :key="cat">
                 <label class="edit-label" style="text-transform: capitalize">{{ cat.replace('_', ' ') }}</label>
                 <input class="limit-input" type="number" min="50" max="5000" step="50" v-model.number="limitsZoneForm[cat]" />
               </div>
@@ -4251,6 +4251,7 @@ export default {
       { value: 'hidden_gems', label: 'Hidden Gems' },
       { value: 'souvenirs,clothing,market,mall,jewelry,food', label: 'Shopping' },
       { value: 'photo_spots', label: 'Photo Spots' },
+      { value: 'activities', label: 'Activities' },
     ]
     const bizCategoryFilterOpts = categoryFilterOpts.filter(o => o.value !== 'photo_spots')
     // Mobile accordion state for the Users/Staff tables — keys are 'u<id>' /
@@ -5145,6 +5146,7 @@ export default {
       { id: 'hidden_gems',  label: 'Hidden gems' },
       { id: 'photo_spots',  label: 'Photo spots' },
       { id: 'shopping',     label: 'Shopping' },
+      { id: 'activities',   label: 'Activities' },
     ]
     // Chat and Quick Actions each have their own category list — `field`
     // picks which one a chip row edits.
@@ -5548,7 +5550,7 @@ export default {
     const ALL_TYPES = [
       'cultural','history','adventure','relaxation','nature','art','nightlife','food&drink',
       'family','romantic','luxury','budget',
-      'restaurants','hotels','historical','events','hidden_gems',
+      'restaurants','hotels','historical','events','hidden_gems','activities',
       // Parity with StaffValidation: photo spots + shopping sub-types (there
       // is no plain 'shopping' tag — see the Destination schema comment).
       'photo_spots',
@@ -6619,6 +6621,7 @@ export default {
       { value: 'events',      label: 'Events' },
       { value: 'photo_spots', label: 'Photo spots' },
       { value: 'shopping',    label: 'Shopping' },
+      { value: 'activities',  label: 'Activities' },
     ]
     const placesSortOpts = [
       { value: 'useCount', label: 'Most used' },
@@ -6773,7 +6776,7 @@ export default {
     // ── Limits tab: tier config + analytics ──
     const limitsData = ref(null)
     const limitsForm = ref({ freeTokens: 10000, freePlaces: 100, premiumTokens: 50000, premiumPlaces: 200 })
-    const limitsZoneForm = ref({ restaurants: 300, hotels: 900, events: 300, hidden_gems: 900, souvenirs: 300, clothing: 300, jewelry: 300, food: 300 })
+    const limitsZoneForm = ref({ restaurants: 300, hotels: 900, events: 300, hidden_gems: 900, activities: 900, souvenirs: 300, clothing: 300, jewelry: 300, food: 300 })
     const limitsSaving = ref(false)
     const fetchLimits = async () => {
       try {
@@ -6810,7 +6813,7 @@ export default {
     const covData = ref(null)
     const covForm = ref({ gate: false, cutoff: 90, targets: {}, cityTargets: {}, overrides: {}, market: {} })
     const covSaving = ref(false)
-    const COV_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical', hidden_gems: 'Hidden gems', photo_spots: 'Photo spots', shopping: 'Shopping', events: 'Event venues', jinni_events: 'Jinni events' }
+    const COV_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical', hidden_gems: 'Hidden gems', photo_spots: 'Photo spots', shopping: 'Shopping', activities: 'Activities', events: 'Event venues', jinni_events: 'Jinni events' }
     const covCatLabel = c => COV_LABELS[c] || c
     const fetchCoverage = async () => {
       try {
@@ -6935,7 +6938,10 @@ export default {
     // Includes the six shopping sub-types (souvenirs…food): the cache tagger
     // and validators record WHICH kind of shop a place is — keep the umbrella
     // 'shopping' tag on sub-typed places too (Explore groups by it).
-    const placeEditCategories = ['restaurants', 'hotels', 'historical', 'events', 'photo_spots', 'hidden_gems', 'shopping',
+    // ALLOWLIST: startPlaceEdit filters a place's actions[] through this before
+    // savePlaceEdit PATCHes the array back wholesale, so a tag missing here is
+    // stripped the moment an admin opens and saves the row.
+    const placeEditCategories = ['restaurants', 'hotels', 'historical', 'events', 'photo_spots', 'hidden_gems', 'shopping', 'activities',
       'souvenirs', 'clothing', 'market', 'mall', 'jewelry', 'food']
     const placeEditInterests = ['nature', 'family', 'romantic', 'art', 'cultural', 'history', 'adventure', 'relaxation', 'nightlife', 'food&drink', 'luxury', 'budget']
     const togglePlaceEditTag = (field, v) => {

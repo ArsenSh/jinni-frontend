@@ -1989,7 +1989,7 @@ const TIERS = [
   { key: 'spotlight', label: 'Spotlight' },
   { key: 'signature', label: 'Signature' },
 ]
-const PRIMARY_CATS = ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems', 'souvenirs', 'clothing', 'market', 'jewelry', 'food']
+const PRIMARY_CATS = ['restaurants', 'hotels', 'events', 'historical', 'hidden_gems', 'activities', 'souvenirs', 'clothing', 'market', 'jewelry', 'food']
 const INTEREST_TAGS = ['cultural','history','adventure','relaxation','nature','art','nightlife','food&drink']
 const STYLE_TAGS    = ['family','romantic','luxury','budget']
 
@@ -2243,7 +2243,7 @@ export default {
     // ════════════════════════════════════════════════════════════════
     //  DESTINATIONS TAB STATE
     // ════════════════════════════════════════════════════════════════
-    const DEST_PRIMARY   = ['restaurants', 'hotels', 'historical', 'events', 'hidden_gems', 'photo_spots', 'market', 'mall']
+    const DEST_PRIMARY   = ['restaurants', 'hotels', 'historical', 'events', 'hidden_gems', 'photo_spots', 'activities', 'market', 'mall']
     const DEST_INTERESTS = ['cultural','history','adventure','relaxation','nature','art','nightlife','food&drink']
     const DEST_STYLES    = ['family','romantic','luxury','budget']
 
@@ -2253,7 +2253,7 @@ export default {
     const ALL_DEST_TYPES = [
       'cultural','history','adventure','relaxation','nature','art','nightlife','food&drink',
       'family','romantic','luxury','budget',
-      'restaurants','hotels','historical','events','hidden_gems',
+      'restaurants','hotels','historical','events','hidden_gems','activities',
       // Photo spots + shopping. NOTE: there is no plain 'shopping' tag by
       // design (see Destination schema) — "Shopping" is the quick-action
       // button, and a shop destination carries its concrete sub-type, which
@@ -2373,6 +2373,7 @@ export default {
       { value: 'historical', label: 'Historical' }, { value: 'events', label: 'Events' },
       { value: 'photo_spots', label: 'Photo spots' }, { value: 'hidden_gems', label: 'Hidden gems' },
       { value: 'shopping', label: 'Shops' },
+      { value: 'activities', label: 'Activities' },
       // Not a PlaceCache category: switches the table to the AiFoundEvent
       // review queue (dated events the AI actually served to users).
       { value: 'jinni_events', label: 'Jinni events' },
