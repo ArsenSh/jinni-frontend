@@ -1708,7 +1708,11 @@
             <span>{{ srcLoaded ? 'No event sources registered for your territory yet. Add the pages that list events in your city — Jinni will read them directly instead of searching the web.' : 'Loading…' }}</span>
           </div>
 
-          <table v-else class="biz-table biz-table--explore">
+          <!-- .table-wrap is overflow:hidden, so a seven-column table with long
+               URLs would be CLIPPED rather than scrollable. Its own scroll
+               container keeps every column reachable at any window width. -->
+          <div v-else class="src-table-scroll">
+          <table class="biz-table biz-table--explore">
             <thead>
               <tr><th>Source</th><th>Where</th><th>Origin</th><th>Last read</th><th>Yield</th><th>Status</th><th></th></tr>
             </thead>
@@ -1744,6 +1748,7 @@
               </tr>
             </tbody>
           </table>
+          </div>
         </template>
 
         <div v-else-if="expLoading && !expPlaces.length" class="table-empty">
@@ -1819,7 +1824,11 @@
       </section>
     </main>
 
-    <div v-if="expCategory !== 'jinni_events' && expPlaces.length && expTotalPages > 1" class="pagination">
+    <!-- Both sentinels are excluded: expPlaces/expTotalPages describe the
+         CACHED PLACES list, which is still populated behind these views, so
+         without this a pager appears under Links and pages the wrong data.
+         The source registry is returned whole (limit 500), so it needs none. -->
+    <div v-if="expCategory !== 'jinni_events' && expCategory !== 'links' && expPlaces.length && expTotalPages > 1" class="pagination">
       <button :disabled="expPage <= 1 || expLoading" @click="changeExpPage(-1)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Prev
       </button>
@@ -4864,10 +4873,23 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .exp-cats { display: block; font-size: 11px; color: var(--text-faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
 
 /* ── Links (event sources) ─────────────────────────────────────────────── */
-.src-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 0 14px; }
-.src-add .filter-input { flex: 1 1 150px; min-width: 130px; }
-.src-add-url { flex: 2 1 260px; }
-.src-error { color: #c0392b; font-size: 12px; padding: 0 0 10px; }
+/* 14px horizontal padding matches .biz-table's cell inset, so the fields line
+   up with the column content below instead of running into the card edge
+   (.table-wrap has no padding of its own). */
+.src-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px; box-sizing: border-box; }
+/* min-width:0 is what actually prevents the overflow: without it a flex item
+   refuses to shrink below its content width and pushes past the container. */
+.src-add .filter-input { flex: 1 1 150px; min-width: 0; box-sizing: border-box; }
+.src-add-url { flex: 2 1 220px; }
+/* The button sizes to its label rather than stretching with the fields. */
+.src-add .chip { flex: 0 0 auto; white-space: nowrap; }
+.src-error { color: #c0392b; font-size: 12px; padding: 0 14px 10px; }
+/* The card clips overflow, so the table scrolls inside its own container
+   rather than losing its right-hand columns. */
+.src-table-scroll { width: 100%; overflow-x: auto; }
+.src-table-scroll .biz-table { min-width: 820px; }
+/* The empty state sits on the same 14px inset as the fields above it. */
+.src-add + .table-empty, .src-error + .table-empty { padding-left: 14px; padding-right: 14px; }
 .src-url { display: block; font-size: 11px; color: var(--text-faint); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
 .src-url:hover { text-decoration: underline; }
 /* A disabled source stays legible but visibly inert — it is still read by
