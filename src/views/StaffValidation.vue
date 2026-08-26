@@ -4542,26 +4542,7 @@ export default {
   /* Pagination: stack the buttons + indicator vertically with breathing room */
   .pagination{flex-direction:column;gap:10px;text-align:center}
 
-  /* ── Links on mobile ──────────────────────────────────────────────────
-     The rows use the shared card conversion above (biz-row + data-label),
-     so only three things need saying here. */
-  /* The desktop min-width would force a horizontal scrollbar around cards
-     that already stack — the whole point of the conversion. */
-  .src-table-scroll{overflow-x:visible}
-  .src-table-scroll .biz-table--links{min-width:0}
-  /* The fixed column widths are meaningless once each cell is a full-width
-     row, and they fight the flex layout the card conversion applies. */
-  .biz-table--links td[class*="col-"]{width:auto !important}
-  /* The add row's fields stack instead of squeezing four across a phone. */
-  .src-add{flex-direction:column;align-items:stretch;padding:12px}
-  .src-add .filter-input,.src-add .chip{width:100%;flex:none}
-  /* The URL sits under the name in the card header, so let it use the width
-     rather than truncating at a desktop-sized cap. */
-  .biz-table--links td.col-name .src-url{max-width:100%}
-  /* Actions become full-width buttons rather than a cramped right-aligned
-     pair; the empty data-label leaves no stray heading above them. */
-  .biz-table--links td.col-act{display:flex;gap:8px;padding:10px 14px 12px}
-  .biz-table--links td.col-act .chip{flex:1;margin-left:0;text-align:center}
+
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -4938,6 +4919,41 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .src-warn { font-size: 11px; color: #b8860b; }
 .src-actions { white-space: nowrap; }
 .src-actions .chip { margin-left: 6px; }
+
+/* ── Links on mobile ─────────────────────────────────────────────────────────
+   This block MUST come after the desktop rules above: they share specificity,
+   so source order is what decides. Sitting earlier (inside the page's main
+   768px block) meant min-width:880px stayed in force on a phone and the grid
+   scrolled sideways instead of stacking. */
+@media (max-width: 768px) {
+  /* The page's shared conversion already turns each row into a card and
+     prints data-label beside each value; these only undo the desktop sizing
+     that would otherwise fight it. */
+  .src-table-scroll { overflow-x: visible; padding-bottom: 0; }
+  .src-table-scroll .biz-table--links { min-width: 0; }
+  .biz-table--links th.col-src, .biz-table--links td.col-src { min-width: 0; width: auto; }
+  .biz-table--links td[class*="col-"] { width: auto !important; padding-right: 14px; }
+  /* The last row keeps the card's own bottom edge rather than the desktop
+     spacer, which read as a gap inside the card. */
+  .biz-table--links tbody tr:last-child td { padding-bottom: 8px; }
+
+  /* Four fields across a phone is unusable — stack them full width. */
+  .src-add { flex-direction: column; align-items: stretch; padding: 12px; }
+  .src-add .filter-input, .src-add .chip { width: 100%; flex: none; }
+
+  /* The URL sits under the name in the card header, so give it the width
+     instead of truncating at a desktop-sized cap. */
+  .biz-table--links td.col-name .src-url { max-width: 100%; white-space: normal; word-break: break-all; }
+
+  /* Actions: two equal full-width buttons. The empty data-label would
+     otherwise render an empty ::before and push them off-centre. */
+  .biz-table--links td.col-act { display: flex; gap: 8px; padding: 10px 14px 12px; }
+  .biz-table--links td.col-act::before { display: none; }
+  .biz-table--links td.col-act .chip { flex: 1; margin-left: 0; text-align: center; }
+  /* Status and yield read better left-aligned against their label than
+     right-aligned with a lone pill floating at the edge. */
+  .biz-table--links td.col-state, .biz-table--links td.col-yield { align-items: center; }
+}
 .exp-rating-low { color: var(--bad); font-weight: 600; }
 .exp-fb { font-size: 12px; white-space: nowrap; }
 .exp-status { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }

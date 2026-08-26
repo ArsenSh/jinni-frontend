@@ -1391,22 +1391,22 @@
                   <tr><th>Source</th><th>Where</th><th>Origin</th><th>Last read</th><th>Yield</th><th>Status</th><th></th></tr>
                 </thead>
                 <tbody>
-                  <tr v-for="s in adminSources" :key="s._id" :class="{ 'src-off': !s.enabled }">
-                    <td>
+                  <tr v-for="s in adminSources" :key="s._id" class="table-row" :class="{ 'src-off': !s.enabled }">
+                    <td data-label="Source">
                       <div class="src-name">{{ s.name }}</div>
                       <a class="src-url" :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.url }}</a>
                     </td>
-                    <td>{{ [s.city, s.country].filter(Boolean).join(', ') || '—' }}</td>
+                    <td data-label="Where">{{ [s.city, s.country].filter(Boolean).join(', ') || '—' }}</td>
                     <!-- discoveredAt is set only when the hunt registered the
                          page itself, having earned it by producing dated events. -->
-                    <td>{{ s.discoveredAt ? 'found by Jinni' : 'added by staff' }}</td>
-                    <td>{{ s.lastReadAt ? new Date(s.lastReadAt).toLocaleDateString() : 'never' }}</td>
-                    <td>
+                    <td data-label="Origin">{{ s.discoveredAt ? 'found by Jinni' : 'added by staff' }}</td>
+                    <td data-label="Last read">{{ s.lastReadAt ? new Date(s.lastReadAt).toLocaleDateString() : 'never' }}</td>
+                    <td data-label="Yield">
                       <span v-if="s.lastFoundCount === null || s.lastFoundCount === undefined">—</span>
                       <span v-else>{{ s.lastFoundCount }}</span>
                       <span v-if="s.zeroStreak > 0" class="src-warn"> · {{ s.zeroStreak }} empty</span>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span :class="s.enabled ? 'src-on-tag' : 'src-off-tag'">{{ s.enabled ? 'on' : 'off' }}</span>
                       <div v-if="s.disabledReason" class="src-warn">{{ s.disabledReason }}</div>
                     </td>
@@ -9741,4 +9741,24 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .src-warn { font-size: 11px; color: #b8860b; }
 .src-actions { white-space: nowrap; }
 .src-actions .src-btn { margin-left: 6px; }
+
+/* ── Links on mobile ─────────────────────────────────────────────────────────
+   Must sit AFTER the desktop rules above: equal specificity, so source order
+   decides. The page's own 768px block turns .data-table rows into cards; this
+   only undoes the desktop sizing that would otherwise fight it. */
+@media (max-width: 768px) {
+  .src-table-scroll { overflow-x: visible; }
+  .src-table-scroll .data-table { min-width: 0; }
+  /* Four fields across a phone is unusable — stack them full width. */
+  .src-add { flex-direction: column; align-items: stretch; }
+  .src-input, .src-btn { width: 100%; flex: none; }
+  /* The URL wraps under the name instead of truncating at a desktop cap. */
+  .src-url { max-width: 100%; white-space: normal; word-break: break-all; }
+  /* Filters stack rather than crowding the row. */
+  .src-filters { flex-direction: column; align-items: stretch; }
+  /* Actions: two equal buttons on their own line, not a right-aligned pair. */
+  .data-table tbody tr.table-row td.src-actions { display: flex; gap: 8px; }
+  .data-table tbody tr.table-row td.src-actions::before { display: none; }
+  .src-actions .src-btn { flex: 1; margin-left: 0; text-align: center; }
+}
 </style>
