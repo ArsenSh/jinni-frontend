@@ -1349,74 +1349,77 @@
         </section>
 
         <!-- ── DESTINATIONS ── -->
-        <!-- ── EVENT SOURCES ───────────────────────────────────────────────
+        <!-- ── LINKS (event sources) ───────────────────────────────────────
              The registry the events hunt reads DIRECTLY. A city with sources
              registered never pays for a web search, so this is the single
              biggest lever on what events cost. Validators manage their own
              territory; this view spans every country. -->
         <section v-if="activeTab === 'event-sources'" class="tab-section">
-          <div class="src-head">
-            <h2>Event Sources</h2>
-            <p class="src-sub">
-              Pages Jinni reads for events. A registered city is read for free — web search is only the
-              fallback for places nobody has curated.
-            </p>
-          </div>
+          <div class="card" style="padding: 18px 20px">
+            <div class="card-head" style="padding: 0 0 10px">
+              <h2>Links</h2>
+              <span class="card-sub">pages Jinni reads for events &middot; a registered city is read free &rArr; web search is only the fallback</span>
+            </div>
 
-          <div class="src-add">
-            <input v-model="srcForm.name" class="src-input" placeholder="Name (e.g. Tomsarkgh)" />
-            <input v-model="srcForm.url" class="src-input src-add-url" placeholder="https://…" />
-            <input v-model="srcForm.city" class="src-input" placeholder="City (blank = whole country)" />
-            <input v-model="srcForm.country" class="src-input" placeholder="Country" />
-            <button class="src-btn src-btn--primary" :disabled="srcSaving" @click="saveAdminSource()">
-              {{ srcSaving ? 'Saving…' : 'Add source' }}
-            </button>
-          </div>
-          <div v-if="srcError" class="src-error">{{ srcError }}</div>
+            <div class="src-add">
+              <input v-model="srcForm.name" class="src-input" placeholder="Name (e.g. Tomsarkgh)" />
+              <input v-model="srcForm.url" class="src-input src-add-url" placeholder="https://…" />
+              <input v-model="srcForm.city" class="src-input" placeholder="City (blank = whole country)" />
+              <input v-model="srcForm.country" class="src-input" placeholder="Country" />
+              <button class="src-btn src-btn--primary" :disabled="srcSaving" @click="saveAdminSource()">
+                {{ srcSaving ? 'Saving…' : 'Add source' }}
+              </button>
+            </div>
+            <div v-if="srcError" class="src-error">{{ srcError }}</div>
 
-          <div class="src-filters">
-            <FilterDropdown :options="srcOriginOpts" v-model="srcOriginFilter" @change="loadAdminSources()" />
-            <FilterDropdown :options="srcEnabledOpts" v-model="srcEnabledFilter" @change="loadAdminSources()" />
-            <span class="src-count">{{ adminSources.length }} source{{ adminSources.length === 1 ? '' : 's' }}</span>
-          </div>
+            <div class="src-filters">
+              <FilterDropdown :options="srcOriginOpts" v-model="srcOriginFilter" @change="loadAdminSources()" />
+              <FilterDropdown :options="srcEnabledOpts" v-model="srcEnabledFilter" @change="loadAdminSources()" />
+              <span class="src-count">{{ adminSources.length }} source{{ adminSources.length === 1 ? '' : 's' }}</span>
+            </div>
 
-          <div v-if="!adminSources.length" class="src-empty">
-            <span>{{ srcLoaded ? 'No event sources match this filter.' : 'Loading…' }}</span>
-          </div>
+            <div v-if="!adminSources.length" class="src-empty">
+              {{ srcLoaded ? 'No event sources match this filter.' : 'Loading…' }}
+            </div>
 
-          <table v-else class="src-table">
-            <thead>
-              <tr><th>Source</th><th>Where</th><th>Origin</th><th>Last read</th><th>Yield</th><th>Status</th><th></th></tr>
-            </thead>
-            <tbody>
-              <tr v-for="s in adminSources" :key="s._id" :class="{ 'src-off': !s.enabled }">
-                <td>
-                  <div class="src-name">{{ s.name }}</div>
-                  <a class="src-url" :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.url }}</a>
-                </td>
-                <td>{{ [s.city, s.country].filter(Boolean).join(', ') || '—' }}</td>
-                <!-- discoveredAt is set only when the hunt registered the page
-                     itself, having earned it by producing dated events. -->
-                <td>{{ s.discoveredAt ? 'found by Jinni' : 'added by staff' }}</td>
-                <td>{{ s.lastReadAt ? new Date(s.lastReadAt).toLocaleDateString() : 'never' }}</td>
-                <td>
-                  <span v-if="s.lastFoundCount === null || s.lastFoundCount === undefined">—</span>
-                  <span v-else>{{ s.lastFoundCount }}</span>
-                  <span v-if="s.zeroStreak > 0" class="src-warn"> · {{ s.zeroStreak }} empty</span>
-                </td>
-                <td>
-                  <span :class="s.enabled ? 'src-on-tag' : 'src-off-tag'">{{ s.enabled ? 'on' : 'off' }}</span>
-                  <div v-if="s.disabledReason" class="src-warn">{{ s.disabledReason }}</div>
-                </td>
-                <td class="src-actions">
-                  <!-- Disabling is remembered by discovery, so a page switched
-                       off is never silently re-registered; a delete can be. -->
-                  <button class="src-btn" @click="toggleAdminSource(s)">{{ s.enabled ? 'Disable' : 'Enable' }}</button>
-                  <button class="src-btn" @click="deleteAdminSource(s)">Delete</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <!-- .card is overflow:hidden, so the table scrolls in its own
+                 container rather than losing its right-hand columns. -->
+            <div v-else class="src-table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr><th>Source</th><th>Where</th><th>Origin</th><th>Last read</th><th>Yield</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                  <tr v-for="s in adminSources" :key="s._id" :class="{ 'src-off': !s.enabled }">
+                    <td>
+                      <div class="src-name">{{ s.name }}</div>
+                      <a class="src-url" :href="s.url" target="_blank" rel="noopener noreferrer">{{ s.url }}</a>
+                    </td>
+                    <td>{{ [s.city, s.country].filter(Boolean).join(', ') || '—' }}</td>
+                    <!-- discoveredAt is set only when the hunt registered the
+                         page itself, having earned it by producing dated events. -->
+                    <td>{{ s.discoveredAt ? 'found by Jinni' : 'added by staff' }}</td>
+                    <td>{{ s.lastReadAt ? new Date(s.lastReadAt).toLocaleDateString() : 'never' }}</td>
+                    <td>
+                      <span v-if="s.lastFoundCount === null || s.lastFoundCount === undefined">—</span>
+                      <span v-else>{{ s.lastFoundCount }}</span>
+                      <span v-if="s.zeroStreak > 0" class="src-warn"> · {{ s.zeroStreak }} empty</span>
+                    </td>
+                    <td>
+                      <span :class="s.enabled ? 'src-on-tag' : 'src-off-tag'">{{ s.enabled ? 'on' : 'off' }}</span>
+                      <div v-if="s.disabledReason" class="src-warn">{{ s.disabledReason }}</div>
+                    </td>
+                    <td class="src-actions">
+                      <!-- Disabling is remembered by discovery, so a page switched
+                           off is never silently re-registered; a delete can be. -->
+                      <button class="src-btn" @click="toggleAdminSource(s)">{{ s.enabled ? 'Disable' : 'Enable' }}</button>
+                      <button class="src-btn" @click="deleteAdminSource(s)">Delete</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         <section v-if="activeTab === 'destinations'" class="tab-section">
@@ -4771,7 +4774,7 @@ export default {
       { id: 'places', label: 'Places Cache', icon: 'places', badge: placesSummary.value.totalPlaces || null },
       // The pages the events hunt reads directly. A curated city never pays
       // for a web search, so this registry is the lever on events cost.
-      { id: 'event-sources', label: 'Event Sources', icon: 'places', badge: adminSources.value.length || null },
+      { id: 'event-sources', label: 'Links', icon: 'links', badge: adminSources.value.length || null },
       { id: 'limits', label: 'Limits', icon: 'limits' },
       { id: 'coverage', label: 'Coverage', icon: 'coverage' },
       { id: 'prices', label: 'Prices', icon: 'prices' }
@@ -4795,6 +4798,7 @@ export default {
       prices:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
       limits:       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
       coverage:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
+      links:        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
       staff:        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',
       themeMoon:    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
       themeSun:     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
@@ -9698,32 +9702,34 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
   .cov-city { max-width: none; }
 }
 
-/* ── Event sources ──────────────────────────────────────────────────────────
-   Self-contained on purpose: this page has no shared table/button utilities,
-   so the section carries its own rather than borrowing names that only exist
-   in other views. */
-.src-head h2 { margin: 0 0 4px; font-size: 18px; }
-.src-sub { margin: 0 0 16px; font-size: 13px; color: var(--text-faint, #888); max-width: 640px; line-height: 1.5; }
+/* ── Links (event sources) ──────────────────────────────────────────────────
+   Chrome comes from the house classes — .card / .card-head / .card-sub for the
+   panel and .data-table for the grid — so this section reads like every other
+   tab. Only what genuinely has no equivalent lives here. */
 .src-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-.src-input { flex: 1 1 150px; min-width: 130px; padding: 8px 10px; font: inherit; font-size: 13px;
-  border: 1px solid var(--border, rgba(128,128,128,0.3)); border-radius: 8px; background: transparent; color: inherit; }
-.src-add-url { flex: 2 1 260px; }
-.src-btn { padding: 7px 12px; font-size: 12px; border-radius: 8px; cursor: pointer;
-  border: 1px solid var(--border, rgba(128,128,128,0.3)); background: transparent; color: inherit; }
+/* min-width:0 is what prevents overflow: a flex item otherwise refuses to
+   shrink below its content width and pushes past the card. */
+.src-input { flex: 1 1 150px; min-width: 0; box-sizing: border-box; padding: 8px 10px;
+  font: inherit; font-size: 13px; border: 1px solid var(--border, rgba(128,128,128,0.3));
+  border-radius: 8px; background: transparent; color: inherit; }
+.src-add-url { flex: 2 1 220px; }
+.src-btn { flex: 0 0 auto; white-space: nowrap; padding: 7px 12px; font-size: 12px;
+  border-radius: 8px; cursor: pointer; border: 1px solid var(--border, rgba(128,128,128,0.3));
+  background: transparent; color: inherit; }
 .src-btn:hover { background: rgba(128,128,128,0.1); }
 .src-btn--primary { background: #D4AF37; border-color: #D4AF37; color: #1a1a1a; font-weight: 600; }
 .src-btn--primary:disabled { opacity: 0.6; cursor: default; }
 .src-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; }
 .src-filters { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-.src-count { font-size: 12px; color: var(--text-faint, #888); }
+.src-count { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-faint, #888); }
 .src-empty { padding: 28px 0; text-align: center; font-size: 13px; color: var(--text-faint, #888); }
-.src-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.src-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
-  color: var(--text-faint, #888); padding: 8px 10px; border-bottom: 1px solid var(--border, rgba(128,128,128,0.2)); }
-.src-table td { padding: 10px; border-bottom: 1px solid var(--border, rgba(128,128,128,0.12)); vertical-align: top; }
-.src-name { font-weight: 600; }
-.src-url { display: block; font-size: 11px; color: var(--text-faint, #888); text-decoration: none;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+.src-table-scroll { width: 100%; overflow-x: auto; }
+.src-table-scroll .data-table { min-width: 820px; }
+/* The first column is left-aligned by .data-table; the name/url stack needs
+   to follow it rather than inherit the centred default. */
+.src-name { font-weight: 600; text-align: left; }
+.src-url { display: block; text-align: left; font-size: 11px; color: var(--text-faint, #888);
+  text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
 .src-url:hover { text-decoration: underline; }
 /* A disabled source stays legible but visibly inert — hiding it would make
    the registry look emptier than it is. */
