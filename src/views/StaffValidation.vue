@@ -1724,7 +1724,11 @@
                On mobile the page's shared rules turn each row into a stacked
                card, which is why every cell carries a data-label. -->
           <div v-else class="src-table-scroll">
-          <table class="biz-table biz-table--explore biz-table--links">
+          <!-- Deliberately NOT biz-table--explore: that modifier turns rows into a
+               COLLAPSED accordion on mobile, showing only cells marked
+               .acc-visible. None of these cells are, so every row rendered
+               empty. Links is a flat list, not an expandable record. -->
+          <table class="biz-table biz-table--links">
             <thead>
               <tr>
                 <th class="col-src">Source</th>
