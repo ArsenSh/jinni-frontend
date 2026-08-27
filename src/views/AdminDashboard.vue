@@ -1373,6 +1373,39 @@
             </div>
             <div v-if="srcError" class="src-error">{{ srcError }}</div>
 
+            <!-- Discovery: proposes, never saves. Every candidate below has
+                 already passed DNS+SSRF, a real fetch, a city-name check and a
+                 count of >=3 dated events. You still choose what gets added. -->
+            <div class="src-discover">
+              <input v-model="discForm.country" class="src-input" placeholder="Country to search" />
+              <input v-model="discForm.city" class="src-input" placeholder="City (optional)" />
+              <button class="src-btn" :disabled="discBusy" @click="runDiscover(false)">
+                {{ discBusy ? 'Searching…' : 'Find sources with AI' }}
+              </button>
+              <span v-if="discBusy" class="src-count">this takes 30–60s — verifying each page</span>
+            </div>
+
+            <div v-if="discResult" class="src-disc-out">
+              <div v-if="discResult.candidates.length">
+                <div class="src-disc-head">{{ discResult.candidates.length }} verified — each shows real dated events. Nothing is saved until you add it.</div>
+                <div v-for="c in discResult.candidates" :key="c.url" class="src-disc-row">
+                  <div>
+                    <div class="src-name">{{ c.name }}</div>
+                    <a class="src-url" :href="c.url" target="_blank" rel="noopener noreferrer">{{ c.url }}</a>
+                    <span class="src-count"> · {{ c.datedEvents }} dated events found<template v-if="c.searchConfirmed"> · confirmed by search</template></span>
+                  </div>
+                  <button class="src-btn src-btn--primary" @click="addDiscovered(c)">Add</button>
+                </div>
+              </div>
+              <div v-else class="src-disc-head">Nothing passed verification for this place.</div>
+              <div v-if="discResult.alreadyRegistered.length" class="src-count">Already registered: {{ discResult.alreadyRegistered.join(', ') }}</div>
+              <!-- Shown deliberately: the point is that the filtering happened. -->
+              <div v-if="discResult.rejected.length" class="src-count">
+                Rejected: <span v-for="(r, i) in discResult.rejected" :key="r.host">{{ i ? ', ' : '' }}{{ r.host }} ({{ discWhy(r.why) }})</span>
+              </div>
+              <button v-if="discResult.cachedAt" class="src-btn" @click="runDiscover(true)">Search again (ignore the 7-day cache)</button>
+            </div>
+
             <div class="src-filters">
               <input v-model="srcSearch" class="src-input src-search" placeholder="Search name, url, city or country…" />
               <FilterDropdown :options="srcOriginOpts" v-model="srcOriginFilter" @change="loadAdminSources()" />
@@ -4710,6 +4743,36 @@ export default {
     // One field over four columns: at this size you know a fragment and
     // rarely care which column it lives in. Client-side because the endpoint
     // returns the whole registry in one response.
+    // Discovery panel. Proposes only — see the endpoint comment.
+    const discForm = ref({ country: '', city: '' })
+    const discBusy = ref(false)
+    const discResult = ref(null)
+    const discWhy = (w) => ({
+      not_a_real_domain: 'not a real domain',
+      unreachable_and_unconfirmed: 'unreachable, unconfirmed',
+      no_events_for_this_city: 'no dated events for this city',
+    }[w] || w)
+    async function runDiscover(force) {
+      if (!discForm.value.country.trim()) { srcError.value = 'Give a country to search.'; return }
+      srcError.value = ''; discBusy.value = true; discResult.value = null
+      try {
+        discResult.value = await apiFetch('/event-sources/discover', {
+          method: 'POST',
+          body: JSON.stringify({ country: discForm.value.country.trim(), city: discForm.value.city.trim() || null, force }),
+        })
+      } catch (e) { srcError.value = e.message } finally { discBusy.value = false }
+    }
+    async function addDiscovered(c) {
+      try {
+        await apiFetch('/event-sources', { method: 'POST', body: JSON.stringify({
+          name: c.name, url: c.url,
+          city: discForm.value.city.trim() || null, country: discForm.value.country.trim(),
+        }) })
+        discResult.value.candidates = discResult.value.candidates.filter(x => x.url !== c.url)
+        await loadAdminSources()
+      } catch (e) { srcError.value = e.message }
+    }
+
     const srcSearch = ref('')
     const filteredSources = computed(() => {
       const q = srcSearch.value.trim().toLowerCase()
@@ -7424,7 +7487,7 @@ export default {
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
       covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState,
-      adminSources, filteredSources, srcSearch, srcLoaded, srcSaving, srcError, srcForm,
+      adminSources, filteredSources, srcSearch, discForm, discBusy, discResult, discWhy, runDiscover, addDiscovered, srcLoaded, srcSaving, srcError, srcForm,
       srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
       loadAdminSources, saveAdminSource, toggleAdminSource, deleteAdminSource, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
@@ -9741,6 +9804,10 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .src-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; }
 .src-filters { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
 .src-search { flex: 1 1 240px; max-width: 340px; }
+.src-discover { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; }
+.src-disc-out { border: 1px dashed var(--border, rgba(128,128,128,0.3)); border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+.src-disc-head { font-size: 12px; margin-bottom: 8px; }
+.src-disc-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--border, rgba(128,128,128,0.12)); }
 .src-count { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-faint, #888); }
 .src-empty { padding: 28px 0; text-align: center; font-size: 13px; color: var(--text-faint, #888); }
 .src-table-scroll { width: 100%; overflow-x: auto; }
