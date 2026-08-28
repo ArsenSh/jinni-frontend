@@ -13,6 +13,29 @@
          instead of shipping it statically (2026-08-23). -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
     <title>Jinni - Your AI Guide</title>
+    <meta name="description" content="Ask Jinni where to go — restaurants, events, hidden gems in Yerevan and beyond. Real verified places, instant answers.">
+    <!-- Open Graph / Twitter cards: what Facebook, Instagram, TikTok, Telegram
+         and WhatsApp render when a jinni.travel link is shared. Crawlers fetch
+         this raw HTML and never run Vue, so the tags must live HERE, static,
+         with ABSOLUTE image URLs. og-image.jpg is 1200x630 (the standard
+         large-card size), kept under ~300KB (WhatsApp skips big images). -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Jinni">
+    <meta property="og:title" content="Jinni — Your AI Guide">
+    <meta property="og:description" content="Ask Jinni where to go — restaurants, events, hidden gems in Yerevan and beyond. Real verified places, instant answers.">
+    <meta property="og:url" content="https://jinni.travel/">
+    <meta property="og:image" content="https://jinni.travel/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:alt" content="Jinni — your journey starts here. A golden genie lamp with magic smoke.">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="hy_AM">
+    <meta property="og:locale:alternate" content="ru_RU">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Jinni — Your AI Guide">
+    <meta name="twitter:description" content="Ask Jinni where to go — restaurants, events, hidden gems in Yerevan and beyond. Real verified places, instant answers.">
+    <meta name="twitter:image" content="https://jinni.travel/og-image.jpg">
     <!-- Armenian text (event names, venues, ticket prices) had no font of its
          own: the app stack is Latin-only, so each Armenian character was
          substituted separately by the OS and bold was synthesised. One real
@@ -62,14 +85,15 @@
         }
       })();
     </script>
-    <!-- Tight-cropped lamp icons — the raw logo PNG has big transparent
-         margins that made the favicon look tiny in browser tabs. -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png">
-    <!-- v2 filename busts Safari/Cloudflare caches — the old URL may be
-         cached for a long time and kept serving the unbalanced icon. -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-v2.png">
+    <!-- Glowing-lamp icon set (v3, 2026-08-29, from new_bottle.png): lamp on
+         BLACK — the glow needs the dark ground, and iOS renders transparent
+         app-icon pixels black anyway. -->
+    <!-- v3 filenames bust Safari/Cloudflare caches — an old URL may be
+         cached for a long time and keep serving the previous icon. -->
+    <link rel="icon" type="image/x-icon" href="/favicon-v3.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32-v3.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64-v3.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-v3.png">
 </head>
 <body>
 <div id="app"></div>
