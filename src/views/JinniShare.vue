@@ -5,7 +5,7 @@
     <header class="share-header">
       <div class="share-header-inner">
         <div class="brand">
-          <img src="/images/bottle.png" class="brand-icon" alt="Jinni">
+          <img src="/images/bottle.png?v=2" class="brand-icon" alt="Jinni">
         </div>
       </div>
     </header>

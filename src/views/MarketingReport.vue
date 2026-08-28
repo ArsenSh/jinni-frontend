@@ -4,7 +4,7 @@
       <div class="mr-head-top">
         <div>
           <div class="mr-brandrow">
-            <img src="/images/bottle.png" class="mr-appicon" alt="Jinni" />
+            <img src="/images/bottle.png?v=2" class="mr-appicon" alt="Jinni" />
             <span class="mr-brand">Jinni</span>
           </div>
           <h1>Growth &amp; Retention</h1>

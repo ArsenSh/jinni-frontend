@@ -2,7 +2,7 @@
   <div class="explore" :class="theme">
     <!-- ═══ Header — centered, chat-glacier back pill ═══ -->
     <header class="ex-head">
-      <img src="/images/bottle.png" class="ex-app-icon" alt="Jinni"/>
+      <img src="/images/bottle.png?v=2" class="ex-app-icon" alt="Jinni"/>
       <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
       <!-- Framed as an open, growing set rather than a finished one. Saying
            Jinni "already analysed/visited" these places would read as a closed

@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <img src="/images/bottle.png" alt="Jinni" class="brand-logo" />
+        <img src="/images/bottle.png?v=2" alt="Jinni" class="brand-logo" />
         <span class="brand-text">Ars</span>
       </div>
 

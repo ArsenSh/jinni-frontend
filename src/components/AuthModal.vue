@@ -9,7 +9,7 @@
         </button>
         <div class="auth-header">
           <div class="bottle-container">
-            <img src="/images/bottle.png" alt="Jinni Bottle" class="bottle-image" />
+            <img src="/images/bottle.png?v=2" alt="Jinni Bottle" class="bottle-image" />
           </div>
           <h1 class="auth-title">{{ $t('auth.title') }}</h1>
           <p class="auth-subtitle">

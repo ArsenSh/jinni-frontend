@@ -6,7 +6,7 @@
         <div class="smoke-container" ref="smokeContainerEl"></div>
         <!-- Bottle wrap: rotation driven by JS so speed can ramp up from 0 -->
         <div class="switch-bottle-wrap" ref="bottleWrapEl">
-          <img src="/images/bottle.png"  alt="Jinni"  class="switch-bottle"  :class="isNight ? 'night-glow' : 'day-glow'"/>
+          <img src="/images/bottle.png?v=2"  alt="Jinni"  class="switch-bottle"  :class="isNight ? 'night-glow' : 'day-glow'"/>
         </div>
       </div>
       <p class="switch-label">{{ label }}</p>

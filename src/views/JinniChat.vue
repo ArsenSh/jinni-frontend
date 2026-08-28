@@ -9,7 +9,7 @@
     <div class="sidebar" :class="{ 'sidebar-collapsed': !sidebarOpen, 'sidebar-open': mobileSidebarOpen }" ref="sidebar">
       <div class="app-header">
         <div v-if="sidebarOpen || mobileSidebarOpen" class="app-brand">
-          <img src="/images/bottle.png" class="app-icon" alt="Jinni">
+          <img src="/images/bottle.png?v=2" class="app-icon" alt="Jinni">
           <span class="app-name">{{ t('chat.sidebar.app_name') }}</span>
           <button @click="toggleSidebar" class="collapse-btn collapse-btn-inline">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -18,7 +18,7 @@
           </button>
         </div>
         <div v-else class="app-brand-collapsed">
-          <img src="/images/bottle.png" class="app-icon-collapsed" alt="Jinni">
+          <img src="/images/bottle.png?v=2" class="app-icon-collapsed" alt="Jinni">
         </div>
       </div>
 
@@ -758,7 +758,7 @@
       <div class="fixed-input-container" :class="{ 'empty-chat': messages.length === 0 }">
         <div class="centered-content">
           <div class="ai-greeting" v-if="messages.length === 0">
-            <img src="/images/bottle.png" class="greeting-icon" alt="Jinni">
+            <img src="/images/bottle.png?v=2" class="greeting-icon" alt="Jinni">
             <div class="greeting">{{ t('chat.greeting.how_can_help') }}</div>
           </div>
           <div class="chat-input-container">
