@@ -4,7 +4,7 @@
       <div class="onboarding-container" :class="{ 'fade-in': isVisible }">
         <div class="header-section">
           <div class="logo-container">
-            <img src="/images/bottle.png?v=2" alt="Jinni Logo" class="logo-icon" />
+            <img src="/images/bottle.png?v=3" alt="Jinni Logo" class="logo-icon" />
             <h1 class="brand-name">Jinni</h1>
           </div>
           <h2 class="page-title">

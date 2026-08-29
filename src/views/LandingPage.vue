@@ -17,7 +17,7 @@
     </div>
     <section class="hero">
       <div class="hero-content">
-        <img src="/images/bottle.png?v=2" alt="Genie Bottle" class="static-bottle">
+        <img src="/images/bottle.png?v=3" alt="Genie Bottle" class="static-bottle">
         <h1 class="magic-title">{{ $t('landing.hero.title') }}</h1>
         <p class="magic-subtitle">{{ $t('landing.hero.subtitle') }}</p>
         <MagicButton @click="openAuthModal">{{ $t('landing.hero.cta') }}</MagicButton>

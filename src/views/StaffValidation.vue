@@ -6,7 +6,7 @@
            name on the left, theme toggle + sign out on the same line right. -->
       <div class="sv-brandbar">
         <div class="sv-brandrow">
-          <img src="/images/bottle.png?v=2" class="sv-appicon" alt="Jinni" />
+          <img src="/images/bottle.png?v=3" class="sv-appicon" alt="Jinni" />
           <span class="sv-brand">Jinni</span>
         </div>
         <div class="sv-brand-actions">

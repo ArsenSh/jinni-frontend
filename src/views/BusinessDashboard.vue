@@ -11,7 +11,7 @@
       <!-- Brand header -->
       <div class="app-header">
         <div v-if="sidebarOpen || mobileNavOpen" class="app-brand">
-          <img src="/images/bottle.png?v=2" class="app-icon" alt="Jinni" />
+          <img src="/images/bottle.png?v=3" class="app-icon" alt="Jinni" />
           <span class="app-name">Jinni</span>
           <button v-if="isDesktop" @click="sidebarOpen = false" class="collapse-btn collapse-btn-inline">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -20,7 +20,7 @@
           </button>
         </div>
         <div v-else class="app-brand-collapsed">
-          <img src="/images/bottle.png?v=2" class="app-icon-collapsed" alt="Jinni" />
+          <img src="/images/bottle.png?v=3" class="app-icon-collapsed" alt="Jinni" />
         </div>
       </div>
 
