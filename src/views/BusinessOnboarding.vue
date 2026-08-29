@@ -1063,7 +1063,7 @@ export default {
       { key: 'luxury', label: 'Luxury' },
       { key: 'budget', label: 'Budget' }
     ]
-    const currencies = ['USD', 'EUR', 'GBP', 'RUB', 'AED']
+    const currencies = ['USD', 'EUR', 'GBP', 'RUB', 'AED', 'AMD']
     const highlightPlaceholders = ['Award-winning chef', 'Stunning views', 'Live music', 'Locally sourced ingredients']
     
     // Paid tiers barrier — payments aren't configured yet. Flip to false to

@@ -414,7 +414,8 @@
       "USD": "USD",
       "RUB": "RUB",
       "EUR": "EUR",
-      "GBP": "GBP"
+      "GBP": "GBP",
+      "AMD": "AMD"
     },
     "interests": {
       "family": "Family",

@@ -1481,7 +1481,7 @@
                   <div class="edit-field edit-field-full" v-if="editForm.priceMode !== 'free'">
                     <label class="edit-label">Currency</label>
                     <div class="edit-price-mode-chips">
-                      <div v-for="cur in ['USD','EUR','GBP', 'RUB','AED']" :key="cur"
+                      <div v-for="cur in ['USD','EUR','GBP', 'RUB','AED','AMD']" :key="cur"
                         class="edit-price-chip"
                         :class="{ selected: editForm.priceCurrency === cur }"
                         @click="editForm.priceCurrency = cur">{{ cur }}</div>
