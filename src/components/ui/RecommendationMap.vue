@@ -3,7 +3,7 @@
        transformed/filtered ancestor in JinniChat (otherwise "fullscreen" is
        clipped to that ancestor on mobile). Inline when not fullscreen. -->
   <Teleport to="body" :disabled="!fullscreen">
-  <div v-if="mappable.length" class="rec-map" :class="[theme, { 'is-open': expanded, 'is-fullscreen': fullscreen, 'has-cards': showCards, 'popup-open': popupOpen }]">
+  <div v-if="mappable.length" class="rec-map" :class="[theme, { 'is-open': expanded, 'is-fullscreen': fullscreen, 'has-cards': showCards, 'popup-open': popupOpen, 'route-only-map': routeOnly }]">
     <!-- Bar: tap the text to open/close the inline map; one fullscreen button -->
     <div v-show="!fullscreen" class="rec-map-bar">
       <button class="rec-map-toggle" type="button" :aria-expanded="expanded ? 'true' : 'false'" @click="toggle">
@@ -243,6 +243,11 @@ function navArrowSvg(color) {
 export default {
   name: 'RecommendationMap',
   props: {
+    // Route-answer mode (founder 2026-09-01): the map exists only as the
+    // See-route button's fullscreen destination — chrome hidden. A prop,
+    // NOT a parent :class: the root here is <Teleport>, and Vue cannot
+    // merge parent attrs onto a Teleport (they were silently dropped).
+    routeOnly: { type: Boolean, default: false },
     recommendations: { type: Array, default: () => [] },
     theme: { type: String, default: 'day-mode' },
     autoOpen: { type: Boolean, default: false },
@@ -1688,6 +1693,7 @@ export default {
 
 
 <style scoped>
+.rec-map.route-only-map:not(.is-fullscreen) { display: none; }
 .rec-map {
   margin: 12px 0 4px;
   border-radius: 14px;
