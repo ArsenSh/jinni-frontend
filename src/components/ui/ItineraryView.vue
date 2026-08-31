@@ -1557,7 +1557,7 @@ export default {
 /* ── Header ── */
 .itin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .itin-head-main { flex: 1; min-width: 0; }
-.itin-title { font-weight: 800; font-size: 16px; line-height: 1.3; color: var(--it-heading); }
+.itin-title { font-weight: 800; font-size: 1rem; line-height: 1.3; color: var(--it-heading); }
 .itin-sub { font-size: 12.5px; color: var(--it-muted); margin-top: 2px; }
 .itin-estimate { font-size: 12.5px; font-weight: 700; color: var(--it-heading); margin-top: 3px; }
 .itin-estimate-note { font-weight: 400; color: var(--it-muted); font-size: 11.5px; }
@@ -1594,7 +1594,7 @@ export default {
 
 /* ── Pool collection checklist ── */
 .itin-pool-progress { margin-bottom: 12px; display: flex; flex-direction: column; gap: 7px; }
-.itin-pool-row { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--it-muted); }
+.itin-pool-row { display: flex; align-items: center; gap: 9px; font-size: 0.8125rem; color: var(--it-muted); }
 .itin-pool-row.is-done { color: var(--it-biz); }
 .itin-pool-row svg { color: #27ae60; flex: none; }
 .itin-pool-label { flex: 1; }
@@ -1619,7 +1619,7 @@ export default {
 .itin-tabs::-webkit-scrollbar { display: none; }
 .itin-tab {
   flex: none; border: none; cursor: pointer;
-  border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 700;
+  border-radius: 999px; padding: 7px 14px; font-size: 0.8125rem; font-weight: 700;
   display: flex; flex-direction: column; align-items: center; line-height: 1.15;
   color: var(--it-chip-text); background: var(--it-chip-bg);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -1632,7 +1632,7 @@ export default {
 .itin-tab.active { font-weight: 800; }
 .itin-tab-date { font-size: 10.5px; font-weight: 500; opacity: 0.85; }
 
-.itin-day-title { font-weight: 700; font-size: 18px; margin: 4px 0 10px;
+.itin-day-title { font-weight: 700; font-size: 1.125rem; margin: 4px 0 10px;
   display: flex; align-items: center; gap: 7px; min-width: 0; }
 .itin-day-title-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Pencil — quiet until pointed at; inherits the day colour via currentColor */
@@ -1672,8 +1672,8 @@ export default {
 .itin-slot-body { flex: 1; min-width: 0; padding-bottom: 14px; }
 
 .itin-slot-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.itin-slot-time { font-size: 12px; font-weight: 800; color: var(--it-text); font-variant-numeric: tabular-nums; }
-.itin-slot-cat { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
+.itin-slot-time { font-size: 0.75rem; font-weight: 800; color: var(--it-text); font-variant-numeric: tabular-nums; }
+.itin-slot-cat { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
   color: var(--it-muted); margin-right: auto; }
 
 /* ── Cards — recommendation-card recipe ──
@@ -1807,11 +1807,11 @@ export default {
 .itin-img-btn:hover:not(.is-loading) { background: var(--it-glass-hover); box-shadow: var(--it-ring-hover); }
 .itin-img-btn.is-loading { cursor: default; }
 .itin-card-name { font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--it-biz); }
-.itin-card-region { font-size: 12px; color: var(--it-muted); margin-top: -15px; margin-right: 42px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.itin-card-note { font-size: 12px; color: var(--it-muted); margin-top: 4px; font-style: italic; }
+.itin-card-region { font-size: 0.75rem; color: var(--it-muted); margin-top: -15px; margin-right: 42px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.itin-card-note { font-size: 0.75rem; color: var(--it-muted); margin-top: 4px; font-style: italic; }
 .itin-card--failed { flex-direction: column; align-items: flex-start; gap: 6px;
   background: rgba(224,85,85,0.06); box-shadow: none; }
-.itin-failed-note { font-size: 12px; color: #d16a6a; }
+.itin-failed-note { font-size: 0.75rem; color: #d16a6a; }
 
 /* ── Per-slot icon buttons — small glacier chips ── */
 .itin-slot-actions { display: flex; gap: 6px; margin-top: 6px; }
@@ -1860,8 +1860,8 @@ export default {
 .itin-cand:hover { background: var(--it-glass-hover); }
 .itin-cand--sk { height: 118px; box-shadow: none; background: var(--it-shimmer); }
 .itin-cand img { width: 100%; height: 62px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 5px; }
-.itin-cand-name { font-size: 12px; font-weight: 700; line-height: 1.2; display: block; }
-.itin-cand-dist { font-size: 11px; color: var(--it-muted); }
+.itin-cand-name { font-size: 0.75rem; font-weight: 700; line-height: 1.2; display: block; }
+.itin-cand-dist { font-size: 0.6875rem; color: var(--it-muted); }
 /* Hotel variant — bigger card so the photo is actually judgeable, plus a
    rating/distance meta row and a Details button (opens the info-modal). */
 .itin-cand--hotel, .itin-cand--rich { width: 158px; display: flex; flex-direction: column; }
@@ -1870,7 +1870,7 @@ export default {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   min-height: 2.4em;
 }
-.itin-cand-meta { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--it-muted); margin-top: 2px; }
+.itin-cand-meta { display: flex; align-items: center; gap: 8px; font-size: 0.6875rem; color: var(--it-muted); margin-top: 2px; }
 .itin-cand-rating { font-weight: 700; color: var(--it-text); }
 .itin-cand-actions { display: flex; gap: 5px; margin-top: 6px; }
 .itin-cand-info {
@@ -1897,7 +1897,7 @@ export default {
 .itin-btn:hover:not(:disabled) { background: var(--it-glass-hover); box-shadow: var(--it-ring-hover); }
 .itin-btn:active:not(:disabled) { transform: scale(0.97); }
 .itin-btn:disabled { opacity: 0.3; cursor: default; }
-.itin-btn--small { padding: 6px 12px; font-size: 12px; }
+.itin-btn--small { padding: 6px 12px; font-size: 0.75rem; }
 /* Action-chip variant — matches the per-slot glacier action buttons
    (chip bg / chip ring / chip text) instead of the warmer view-more pill. */
 .itin-btn--action {
@@ -1907,10 +1907,10 @@ export default {
 }
 .itin-btn--action:hover:not(:disabled) { background: var(--it-chip-bg-hover); box-shadow: var(--it-chip-ring); }
 .itin-add-cats { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.itin-add-prompt { font-size: 12px; font-weight: 600; color: var(--it-muted); margin-right: 2px; align-self: center; }
+.itin-add-prompt { font-size: 0.75rem; font-weight: 600; color: var(--it-muted); margin-right: 2px; align-self: center; }
 .itin-chip {
   border: none; cursor: pointer; border-radius: 20px; padding: 6px 13px;
-  font-size: 12px; font-weight: 600; color: var(--it-chip-text);
+  font-size: 0.75rem; font-weight: 600; color: var(--it-chip-text);
   background: var(--it-chip-bg); box-shadow: var(--it-chip-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
   transition: all 0.25s ease;
@@ -1925,7 +1925,7 @@ export default {
 
 /* Breakfast question inside the hotel chooser (post-pick) */
 .itin-breakfast-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
-.itin-breakfast-q { font-size: 14px; font-weight: 600; margin-right: 2px; }
+.itin-breakfast-q { font-size: 0.875rem; font-weight: 600; margin-right: 2px; }
 
 /* ════════════════ Partner tier — badge + card tint ════════════════
    Ported 1:1 from JinniChat's tier styling so a verified stop reads the

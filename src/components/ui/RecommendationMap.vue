@@ -1737,13 +1737,13 @@ export default {
 .rec-map-toggle {
   flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 11px 6px 11px 14px; background: transparent; border: none; cursor: pointer;
-  color: var(--rm-text); font-size: 14px; font-weight: 600;
+  color: var(--rm-text); font-size: 0.875rem; font-weight: 600;
   transition: background 0.18s ease;
 }
 .rec-map-toggle:hover { background: transparent; }
 .rec-map-toggle-left { display: flex; align-items: center; gap: 9px; }
 .rec-map-toggle-left > svg { color: var(--svg-color); flex-shrink: 0; }
-.rec-map-count { font-size: 12px; font-weight: 700; color: var(--rm-muted); background: var(--rm-hover); border-radius: 10px; padding: 1px 8px; }
+.rec-map-count { font-size: 0.75rem; font-weight: 700; color: var(--rm-muted); background: var(--rm-hover); border-radius: 10px; padding: 1px 8px; }
 .rec-map-bar-actions { display: flex; align-items: center; gap: 2px; padding-right: 8px; }
 .rec-map-iconbtn {
   width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
@@ -1829,7 +1829,7 @@ export default {
   left: 50%; transform: translateX(-50%);
   z-index: 1300; max-width: min(86%, 420px);
   padding: 10px 14px; border-radius: 12px;
-  font-size: 13px; font-weight: 600; line-height: 1.35; text-align: center;
+  font-size: 0.8125rem; font-weight: 600; line-height: 1.35; text-align: center;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
   box-shadow: 0 4px 16px rgba(0,0,0,0.22), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
@@ -1855,7 +1855,7 @@ export default {
 .rec-map-filterbtn, .rec-map-filteropt {
   display: inline-flex; align-items: center; gap: 7px;
   height: 44px; padding: 0 14px; border: none; border-radius: 12px; cursor: pointer;
-  font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap;
+  font-size: 0.8125rem; font-weight: 700; line-height: 1; white-space: nowrap;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
   box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
@@ -1886,7 +1886,7 @@ export default {
   box-shadow: 0 0 6px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center;
   border: 2px solid #fff;
 }
-:deep(.rec-map-pin span) { transform: rotate(45deg); color: #fff; font-size: 13px; font-weight: 700; }
+:deep(.rec-map-pin span) { transform: rotate(45deg); color: #fff; font-size: 0.8125rem; font-weight: 700; }
 /* Photo marker */
 :deep(.rec-map-photo-pin) { position: relative; width: 46px; height: 46px; }
 :deep(.rec-map-photo) {
@@ -1900,7 +1900,7 @@ export default {
 :deep(.rec-map-badge) {
   position: absolute; top: -5px; right: -5px; min-width: 19px; height: 19px; padding: 0 4px;
   border-radius: 10px; background: var(--pin-color, linear-gradient(135deg, rgb(212,175,55), rgb(255,140,0)));
-  color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 0.6875rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
   border: 1.5px solid #fff; box-shadow: 0 0 3px rgba(0,0,0,0.35);
 }
 /* Route summary chip — bottom-centre glass pill */
@@ -1910,7 +1910,7 @@ export default {
   left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 8px;
   padding: 8px 8px 8px 13px; border-radius: 13px;
-  font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap;
+  font-size: 0.8125rem; font-weight: 700; line-height: 1; white-space: nowrap;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
   box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
@@ -1947,7 +1947,7 @@ export default {
 .rec-map-maneuver--warn .rec-map-maneuver-dist { color: #f59e0b; }
 .rec-map-maneuver-ic :deep(svg) { display: block; }
 .rec-map-maneuver-body { min-width: 0; }
-.rec-map-maneuver-dist { font-size: 18px; font-weight: 800; line-height: 1.15; }
+.rec-map-maneuver-dist { font-size: 1.125rem; font-weight: 800; line-height: 1.15; }
 .rec-map-maneuver-instr {
   margin-top: 2px; font-size: 12.5px; font-weight: 600; color: var(--rm-ctrl-text);
   line-height: 1.25;
@@ -1970,14 +1970,14 @@ export default {
 .rec-map-arrive-ic { flex: 0 0 auto; display: flex; }
 .rec-map-arrive-ic svg { display: block; }
 .rec-map-arrive-body { min-width: 0; }
-.rec-map-arrive-title { font-size: 15px; font-weight: 800; line-height: 1.2; }
+.rec-map-arrive-title { font-size: 0.9375rem; font-weight: 800; line-height: 1.2; }
 .rec-map-arrive-sub {
   margin-top: 1px; font-size: 12.5px; font-weight: 600; color: var(--rm-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
 }
 .rec-map-arrive-done {
   flex: 0 0 auto; margin-left: 4px; border: none; cursor: pointer;
-  padding: 8px 16px; border-radius: 11px; font: inherit; font-size: 13px; font-weight: 700;
+  padding: 8px 16px; border-radius: 11px; font: inherit; font-size: 0.8125rem; font-weight: 700;
   -webkit-appearance: none; appearance: none;
   color: #fff; background: #1a73e8;
   box-shadow: 0 1px 4px rgba(0,0,0,0.25);
@@ -2057,23 +2057,23 @@ export default {
 }
 .rec-map-card-info { min-width: 0; flex: 1; }
 .rec-map-card-name {
-  font-size: 14px; font-weight: 700; line-height: 1.25; color: var(--rm-biz-text);
+  font-size: 0.875rem; font-weight: 700; line-height: 1.25; color: var(--rm-biz-text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .rec-map-card-cat {
-  margin-top: 2px; font-size: 12px; color: var(--rm-muted);
+  margin-top: 2px; font-size: 0.75rem; color: var(--rm-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .rec-map-card-route {
   display: inline-flex; align-items: center; gap: 5px;
-  margin-top: 6px; font-size: 12px; font-weight: 700;
+  margin-top: 6px; font-size: 0.75rem; font-weight: 700;
 }
 .rec-map-card-route svg { flex-shrink: 0; }
 .rec-map-card-route--loading { color: var(--rm-muted); font-weight: 600; }
 /* The "Tap for distance" button — the sole route/distance trigger. Frosted glass
    to match the popup buttons; it's a real <button> now, hence the resets. */
 .rec-map-card-route--cta {
-  color: var(--rm-ctrl-text); font: inherit; font-size: 12px; font-weight: 600;
+  color: var(--rm-ctrl-text); font: inherit; font-size: 0.75rem; font-weight: 600;
   cursor: pointer; -webkit-appearance: none; appearance: none; border: none;
   padding: 5px 12px 5px 9px; border-radius: 999px;
   background: var(--rm-glass); box-shadow: var(--rm-glass-ring);
@@ -2196,13 +2196,13 @@ export default {
 .rec-map :deep(.rec-map-popup .leaflet-popup-close-button:hover) { background: var(--rm-hover); }
 :deep(.rec-pop-img) { width: 100%; height: 120px; background-size: cover; background-position: center; }
 :deep(.rec-pop-body) { padding: 12px 14px 14px; }
-:deep(.rec-pop-name) { font-weight: 700; font-size: 15px; line-height: 1.25; margin-bottom: 2px; color: var(--rm-biz-text); }
-:deep(.rec-pop-cat) { font-size: 12px; color: var(--rm-muted); margin-bottom: 11px; }
+:deep(.rec-pop-name) { font-weight: 700; font-size: 0.9375rem; line-height: 1.25; margin-bottom: 2px; color: var(--rm-biz-text); }
+:deep(.rec-pop-cat) { font-size: 0.75rem; color: var(--rm-muted); margin-bottom: 11px; }
 .rec-map.day-mode :deep(.rec-pop-cat) { color: #5a4a42; }
 /* Tier label inside the popup — mirrors JinniChat's partner-label colours */
 :deep(.rec-pop-tier) {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+  font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em;
   margin: -4px 0 11px;
 }
 :deep(.rec-pop-tier svg) { width: 12px; height: 12px; flex-shrink: 0; }
