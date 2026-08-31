@@ -5767,6 +5767,7 @@ export default {
     // tolerance — text-wrap:balance evens the two lines inside it. Then the
     // container's justify-content:center finally has a shrink-wrapped pair.
     _fitGreeting() {
+      try {
       const el = this.$el?.querySelector?.('.greeting');
       if (!el) return;
       if (window.innerWidth > 768) { el.style.maxWidth = ''; return; }
@@ -5776,7 +5777,10 @@ export default {
       const w = el.scrollWidth;
       el.style.whiteSpace = prevWS || '';
       const avail = (el.parentElement?.clientWidth || window.innerWidth) - 100;
-      el.style.maxWidth = (w > avail ? Math.ceil(w / 2) + 28 : w + 2) + 'px';
+      const box = (w > avail ? Math.ceil(w / 2) + 28 : w + 2) + 'px';
+      el.style.maxWidth = box;
+      el.style.width = box;
+      } catch (e) { /* a failed fit must never break the chat */ }
     },
     registerRecMap(id, el) {
       if (!this._recMaps) this._recMaps = {};
@@ -8615,11 +8619,16 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    centered lines float mid-box — reading as a big gap beside the lamp
    (founder 2026-08-31). Left-anchor the text against the lamp; the slack
    moves to the right edge where it is invisible. Desktop keeps center. */
-@media (max-width:768px){.greeting{justify-content:flex-start;text-align:left}}
+@media (max-width:768px){.greeting{justify-content:flex-start;text-align:left}.greeting-icon{height:44px;width:auto;align-self:auto}}
 
 /* Route answers ("how to reach X"): the map exists only for the See-route
    button's fullscreen trip — its inline "Show on map" bar is noise next to
    the CTA (founder 2026-08-31). Keep it mounted, hide its chrome. */
 :deep(.rec-map.route-only-map .rec-map-bar){display:none}
 :deep(.rec-map.route-only-map){margin:0}
+
+/* Greeting ink (founder 2026-09-01: "magical"): gradient text — works in
+   every script the greeting speaks, unlike a Latin display font. */
+.greeting{background:linear-gradient(105deg,#b45309 10%,#7c3aed 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.01em}
+.genie-chat-container.night-mode .greeting{background:linear-gradient(105deg,#c084fc 10%,#60a5fa 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 </style>
