@@ -1260,6 +1260,18 @@
             </div>
           </div>
           <div class="setting-item">
+            <label>{{ t('settings.display.font_style') }}</label>
+            <div class="pill-row">
+              <button v-for="f in ['standard','classic','elegant','rounded']" :key="f" type="button" class="pill-opt" :class="{ 'pill-opt--on': (userSettings.fontStyle || 'standard') === f }" @click="setDisplayPref('fontStyle', f)">{{ t('settings.display.font_' + f) }}</button>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>{{ t('settings.display.text_size') }}</label>
+            <div class="pill-row">
+              <button v-for="z in ['small','normal','big']" :key="z" type="button" class="pill-opt" :class="{ 'pill-opt--on': (userSettings.textSize || 'normal') === z }" @click="setDisplayPref('textSize', z)">{{ t('settings.display.size_' + z) }}</button>
+            </div>
+          </div>
+          <div class="setting-item">
             <label>{{ t('settings.display.theme') }}</label>
             <div class="theme-buttons">
               <button @click="setTheme('light')" :class="{ active: userSettings.theme === 'light' }" class="theme-btn day-btn" type="button">
@@ -3602,12 +3614,39 @@ export default {
       } catch (error) { console.error('Failed to load settings:', error) }
       return null;
     },
+    // Font style + text size (founder 2026-09-01). System font STACKS on
+    // purpose: the app speaks 6 scripts — a webfont covers at best two and
+    // throws the rest into mismatched fallback; system stacks render every
+    // script with the OS's best face, instantly. Text size scales the ROOT
+    // font-size so every rem-based measure in the app scales together (the
+    // standard accessibility mechanism).
+    applyDisplayPrefs() {
+      try {
+        const size = this.userSettings.textSize || 'normal';
+        document.documentElement.style.fontSize = size === 'small' ? '93.75%' : size === 'big' ? '112.5%' : '';
+        const FONTS = {
+          standard: '',
+          classic: "Georgia, 'Times New Roman', serif",
+          elegant: "'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif",
+          rounded: "'Trebuchet MS', Verdana, sans-serif",
+        };
+        const el = document.querySelector('.genie-chat-container');
+        if (el) el.style.fontFamily = FONTS[this.userSettings.fontStyle || 'standard'] || '';
+      } catch (e) { /* display prefs must never break the chat */ }
+    },
+    setDisplayPref(key, val) {
+      this.userSettings[key] = val;
+      try { localStorage.setItem('jinni_settings', JSON.stringify(this.userSettings)); } catch (e) {}
+      this.applyDisplayPrefs();
+      this.saveSettings();
+    },
     applySettings() {
       const theme = this.resolveTheme();
       // console.log('🎨 Applying theme:', theme); 
       document.documentElement.setAttribute('data-theme', theme);    
       document.body.classList.remove('theme-light', 'theme-dark');
       document.body.classList.add(`theme-${theme}`);
+      this.applyDisplayPrefs();
     },
     getSearchRadius() {
       const radiusKm = this.nearbyMode ? this.userSettings.searchRadius.nearby : this.userSettings.searchRadius.discovery;    
@@ -8665,4 +8704,11 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    every script the greeting speaks, unlike a Latin display font. */
 .greeting{background:linear-gradient(105deg,#b45309 10%,#7c3aed 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.01em}
 .genie-chat-container.night-mode .greeting{background:linear-gradient(105deg,#c084fc 10%,#60a5fa 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Display prefs pills (font style / text size). */
+.pill-row{display:flex;gap:8px;flex-wrap:wrap}
+.pill-opt{padding:7px 14px;border-radius:14px;border:1px solid rgba(0,0,0,0.15);background:transparent;cursor:pointer;font:inherit;font-size:0.85rem;color:inherit}
+.pill-opt--on{border-color:#7c3aed;color:#7c3aed;font-weight:600}
+.genie-chat-container.night-mode .pill-opt{border-color:rgba(255,255,255,0.2);color:#aeb8c7}
+.genie-chat-container.night-mode .pill-opt--on{border-color:#c084fc;color:#c084fc}
 </style>
