@@ -8574,4 +8574,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 
 /* Greeting: balanced wrapping so no single word sits alone on a line. */
 .greeting{text-wrap:balance}
+
+/* Mobile: a wrapped greeting's text box expands to full remaining width and
+   centered lines float mid-box — reading as a big gap beside the lamp
+   (founder 2026-08-31). Left-anchor the text against the lamp; the slack
+   moves to the right edge where it is invisible. Desktop keeps center. */
+@media (max-width:768px){.greeting{justify-content:flex-start;text-align:left}}
 </style>
