@@ -2180,4 +2180,11 @@ export default {
    depth. ── */
 .itin-map.day-mode :deep(.leaflet-tile-pane) { filter: sepia(0.18) saturate(1.06) hue-rotate(-6deg) brightness(1.01); }
 .itin-map.night-mode :deep(.leaflet-tile-pane) { filter: sepia(0.6) hue-rotate(192deg) saturate(1.7) brightness(1.12) contrast(1.02); }
+
+/* Night pins (founder 2026-09-01): the white рамка glowed against the
+   indigo night tiles — frame in the chat's deep-indigo family instead.
+   Pins with an explicit --pin-color (partner tiers) keep their color. */
+.itin-map.night-mode :deep(.itin-map-photo) { border-color: var(--pin-color, #2b2059); box-shadow: 0 0 5px rgba(0,0,0,0.55); }
+.itin-map.night-mode :deep(.itin-map-photo-pin::after) { border-top-color: var(--pin-color, #2b2059); }
+.itin-map.night-mode :deep(.itin-map-badge) { border-color: #2b2059; }
 </style>
