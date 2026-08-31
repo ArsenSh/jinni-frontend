@@ -1261,14 +1261,27 @@
           </div>
           <div class="setting-item">
             <label>{{ t('settings.display.font_style') }}</label>
-            <div class="pill-row">
-              <button v-for="f in ['standard','classic','elegant','rounded']" :key="f" type="button" class="pill-opt" :class="{ 'pill-opt--on': (userSettings.fontStyle || 'standard') === f }" @click="setDisplayPref('fontStyle', f)">{{ t('settings.display.font_' + f) }}</button>
+            <div class="expandable-selector" :class="{ 'expanded': showFontDropdown }">
+              <button @click="showFontDropdown = !showFontDropdown" class="selector-trigger" type="button">
+                <span class="current-selection"><span>{{ t('settings.display.font_' + (userSettings.fontStyle || 'standard')) }}</span></span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ 'rotated': showFontDropdown }"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <transition name="expand">
+                <div v-if="showFontDropdown" class="selector-dropdown-inline">
+                  <div class="dropdown-list">
+                    <div v-for="f in ['standard','classic','elegant','rounded']" :key="f" @click="setDisplayPref('fontStyle', f); showFontDropdown = false" class="dropdown-item" :class="{ 'selected': (userSettings.fontStyle || 'standard') === f }">
+                      <span class="item-name">{{ t('settings.display.font_' + f) }}</span>
+                      <svg v-if="(userSettings.fontStyle || 'standard') === f" class="checkmark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </transition>
             </div>
           </div>
           <div class="setting-item">
             <label>{{ t('settings.display.text_size') }}</label>
-            <div class="pill-row">
-              <button v-for="z in ['small','normal','big']" :key="z" type="button" class="pill-opt" :class="{ 'pill-opt--on': (userSettings.textSize || 'normal') === z }" @click="setDisplayPref('textSize', z)">{{ t('settings.display.size_' + z) }}</button>
+            <div class="theme-buttons">
+              <button v-for="z in ['small','normal','big']" :key="z" type="button" class="theme-btn" :class="{ active: (userSettings.textSize || 'normal') === z }" @click="setDisplayPref('textSize', z)">{{ t('settings.display.size_' + z) }}</button>
             </div>
           </div>
           <div class="setting-item">
@@ -1935,6 +1948,7 @@ export default {
       cityOptions: [],
       loadingCities: false,
       showLanguageDropdown: false,
+      showFontDropdown: false,
       showCountryDropdown: false,
       showCityDropdown: false,    
       languageSearch: '',
