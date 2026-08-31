@@ -480,7 +480,16 @@
                   <!-- FALLBACK: Old messages with recommendations (quick actions) -->
                   <template v-else-if="message.recommendations && message.recommendations.length > 0">
                     <div v-if="message.text" class="text message-text" v-html="renderMessage(message.text, message)"></div>
-                    <div class="recommendations" :class="{'streaming-recommendations': message.streaming}">
+                    <button
+                      v-if="!message.streaming && routeCtaFor(message)"
+                      class="route-cta-btn"
+                      type="button"
+                      @click="openRouteFullscreen(message)"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.4"/><circle cx="18" cy="5" r="2.4"/><path d="M8.4 18.4h6.2a2.8 2.8 0 0 0 0-5.6H9.4a2.8 2.8 0 0 1 0-5.6h6.2"/></svg>
+                      See route
+                    </button>
+                    <div v-if="!(message.metadata && message.metadata.routeTo)" class="recommendations" :class="{'streaming-recommendations': message.streaming}">
                       <div class="section-title">
                         {{ message.isViewMore ? t('chat.recommendations.more_recommendations') : t('chat.recommendations.recommended') }}
                         <span v-if="message.recommendations.length > 0" class="results-count">
@@ -603,6 +612,7 @@
                         </div><!-- /rec-card-wrapper -->
                       </div><!-- /recommendation-grid -->
                       <RecommendationMap
+                        :class="{ 'route-only-map': !!(message.metadata && message.metadata.routeTo) }"
                         :ref="el => registerRecMap(message.id, el)"
                         :recommendations="message.recommendations"
                         :theme="currentTheme"
