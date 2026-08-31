@@ -2170,7 +2170,9 @@ export default {
         const t = v ? new Date(v).getTime() : 0;
         return Number.isFinite(t) ? t : 0;
       };
-      return [...this.chatSessions].sort((a, b) => ts(b) - ts(a));
+      return [...this.chatSessions]
+        .filter(s => (s.messages?.length || 0) > 0)
+        .sort((a, b) => ts(b) - ts(a));
     },
     isNightTime() { return isNightTime() },
     currentTheme() {
@@ -3846,12 +3848,11 @@ export default {
         this.messages = [];
         return; 
       }
-      const existingEmptySession = this.chatSessions.find(s => {
-        const messageCount = s.messages?.length || 0;
-        const isNewChat = s.title === this.t('chat.header.new_chat_title');
-        const isCompletelyEmpty = messageCount === 0;
-        return isNewChat && isCompletelyEmpty;
-      });
+      // Empty = reusable, judged by COUNT only — the old title comparison
+      // (s.title === localized "New Chat") went blind after a language
+      // switch and piled up one empty session per language (founder catch,
+      // 2026-09-01).
+      const existingEmptySession = this.chatSessions.find(s => (s.messages?.length || 0) === 0);
       if (existingEmptySession) {
         // console.log(`✅ Reusing existing empty session: "${existingEmptySession.title}"`);
         await this.loadChatSession(existingEmptySession.id);
