@@ -2346,6 +2346,9 @@ export default {
     canShare() { return !!navigator.share },
   },
   watch: {
+    // Empty-chat greeting (re)appeared — new chat, or cleared session: fit
+    // its box so the lamp+text pair centers (see _fitGreeting).
+    'messages.length'(len) { if (len === 0) this.$nextTick(() => this._fitGreeting()); },
     // When the preference bar reveals, auto-hide it after PREFERENCE_BAR_HIDE_MS.
     // A fresh reveal (e.g. reopening the actions popover or typing after
     // clearing) restarts it. 3s was not long enough to read the chips while
@@ -2409,6 +2412,7 @@ export default {
   },
   mounted() {
     this.checkScreenSize();
+    this.$nextTick(() => this._fitGreeting());
     document.addEventListener('click', this.handlePlaceSearchClick);
     window.addEventListener('resize', this.checkScreenSize);
     this.setupPreferenceButtonHandler();
@@ -5756,6 +5760,24 @@ export default {
       this._greetText = line;   // the send path materializes this as Jinni's first bubble
       return line.replace(/ (\S+)$/, '\u00A0$1');
     },
+    // Mobile centering (founder rounds 3-4): a wrapped text box always fills
+    // the remaining row width, so lamp+text could never center as a pair by
+    // CSS alone. The greeting is static per visit, so measure once: unwrapped
+    // width W; if it fits, box = W (one line); if not, box ≈ W/2 + a word of
+    // tolerance — text-wrap:balance evens the two lines inside it. Then the
+    // container's justify-content:center finally has a shrink-wrapped pair.
+    _fitGreeting() {
+      const el = this.$el?.querySelector?.('.greeting');
+      if (!el) return;
+      if (window.innerWidth > 768) { el.style.maxWidth = ''; return; }
+      el.style.maxWidth = 'none';
+      const prevWS = el.style.whiteSpace;
+      el.style.whiteSpace = 'nowrap';
+      const w = el.scrollWidth;
+      el.style.whiteSpace = prevWS || '';
+      const avail = (el.parentElement?.clientWidth || window.innerWidth) - 100;
+      el.style.maxWidth = (w > avail ? Math.ceil(w / 2) + 28 : w + 2) + 'px';
+    },
     registerRecMap(id, el) {
       if (!this._recMaps) this._recMaps = {};
       if (el) this._recMaps[id] = el;
@@ -8593,7 +8615,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    centered lines float mid-box — reading as a big gap beside the lamp
    (founder 2026-08-31). Left-anchor the text against the lamp; the slack
    moves to the right edge where it is invisible. Desktop keeps center. */
-@media (max-width:768px){.greeting{justify-content:flex-start;text-align:left;max-width:26ch}}
+@media (max-width:768px){.greeting{justify-content:flex-start;text-align:left}}
 
 /* Route answers ("how to reach X"): the map exists only for the See-route
    button's fullscreen trip — its inline "Show on map" bar is noise next to
