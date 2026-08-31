@@ -838,7 +838,7 @@ export default {
 
 /* Empty / not explored */
 .ex-empty { max-width: 520px; margin: 60px auto; padding: 0 24px; text-align: center; }
-.ex-empty-icon { font-size: 44px; margin-bottom: 14px; }
+.ex-empty-icon { font-size: 2.75rem; margin-bottom: 14px; }
 .ex-empty-title { font-size: 1.25rem; font-weight: 800; color: var(--ex-heading); margin: 0 0 8px; }
 .ex-empty-sub { font-size: 0.95rem; color: var(--ex-muted); line-height: 1.5; margin: 0 0 22px; }
 .ex-cta { padding: 11px 24px; border: none; border-radius: 999px; cursor: pointer; font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #fff;
@@ -956,7 +956,7 @@ export default {
 .info-modal .pd-highlight-check{width:15px;height:15px;margin-top:1px}
 .pd-chips{display:flex;flex-wrap:wrap;gap:6px}
 .social-links{display:flex;flex-wrap:wrap;gap:8px;padding-top:2px}
-.social-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;text-decoration:none;transition:opacity 0.15s}
+.social-link{display:inline-flex;align-items:center;gap:5px;font-size: 0.75rem;font-weight:500;padding:4px 10px;border-radius:20px;text-decoration:none;transition:opacity 0.15s}
 .social-link:hover{opacity:0.8}
 .social-link--instagram{background:rgba(225,48,108,0.12);color:#e1306c}
 .social-link--facebook{background:rgba(24,119,242,0.12);color:#1877f2}

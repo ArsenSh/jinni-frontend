@@ -62,7 +62,7 @@ export default {
 .fd-btn {
   display: inline-flex; align-items: center; gap: 8px;
   border: none; cursor: pointer; border-radius: 10px; padding: 8px 13px;
-  font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem; font-weight: 600; font-family: 'DM Sans', sans-serif;
   transition: all 0.15s; white-space: nowrap;
 }
 .fd-chev { transition: transform 0.2s; opacity: 0.6; flex-shrink: 0; }

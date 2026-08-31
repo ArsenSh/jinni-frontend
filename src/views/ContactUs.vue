@@ -216,7 +216,7 @@ export default {
 /* Header */
 .contact-header{display:flex;flex-direction:column;padding:1.5rem 2rem;max-width:1400px;margin:0 auto;width:100%;position:relative;z-index:2;}
 .header-top{width:100%;display:flex;justify-content:center}
-.back-btn{margin-bottom: 30px;display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s ease;background:transparent;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+.back-btn{margin-bottom: 30px;display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-size: 0.875rem;font-weight:500;cursor:pointer;transition:all 0.2s ease;background:transparent;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .header-content{text-align:center;width:100%}
 .page-title{font-size:2rem;font-weight:700;margin-bottom:0.5rem}
 .page-subtitle{font-size:1rem;opacity:0.9;line-height:1.6;max-width:600px;margin:0 auto}

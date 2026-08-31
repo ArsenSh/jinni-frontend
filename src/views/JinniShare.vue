@@ -1180,11 +1180,11 @@ export default {
 .info-modal.day .btn-secondary { color: #8b6b3d; background: rgba(255,255,255,0.5); border: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6); }
 .info-modal.day .btn-secondary:hover { color: #5a4a42; background: rgba(255,255,255,0.75); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.9); }
 .highlights-list { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 2px; }
-.highlight-tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: rgba(139,92,246,0.12); color: #a78bfa; }
+.highlight-tag { font-size: 0.6875rem; padding: 2px 8px; border-radius: 20px; background: rgba(139,92,246,0.12); color: #a78bfa; }
 .info-modal.night .highlight-tag { background: rgba(192,132,252,0.12); color: #e7defb; box-shadow: inset 0 0 0 0.8px rgba(192,132,252,0.22); }
 .info-modal.day .highlight-tag { background: rgba(212,175,55,0.14); color: #7a5f1e; box-shadow: inset 0 0 0 1px rgba(212,175,55,0.28); }
 .social-links { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 2px; }
-.social-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; text-decoration: none; transition: opacity 0.15s; }
+.social-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 500; padding: 4px 10px; border-radius: 20px; text-decoration: none; transition: opacity 0.15s; }
 .social-link:hover { opacity: 0.8; }
 .social-link--instagram { background: rgba(225,48,108,0.12); color: #e1306c; }
 .social-link--facebook { background: rgba(24,119,242,0.12); color: #1877f2; }
@@ -1386,7 +1386,7 @@ export default {
 /* ── Header ── */
 .itin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .itin-head-main { flex: 1; min-width: 0; }
-.itin-title { font-weight: 800; font-size: 16px; line-height: 1.3; color: var(--it-heading); }
+.itin-title { font-weight: 800; font-size: 1rem; line-height: 1.3; color: var(--it-heading); }
 .itin-sub { font-size: 12.5px; color: var(--it-muted); margin-top: 2px; }
 
 /* ── Day tabs — glacier chips; active carries the day colour ── */
@@ -1394,7 +1394,7 @@ export default {
 .itin-tabs::-webkit-scrollbar { display: none; }
 .itin-tab {
   flex: none; border: none; cursor: pointer;
-  border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 700;
+  border-radius: 999px; padding: 7px 14px; font-size: 0.8125rem; font-weight: 700;
   display: flex; flex-direction: column; align-items: center; line-height: 1.15;
   color: var(--it-chip-text); background: var(--it-chip-bg);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -1412,7 +1412,7 @@ export default {
 .itin-tab.active { font-weight: 800; }
 .itin-tab-date { font-size: 10.5px; font-weight: 500; opacity: 0.85; }
 
-.itin-day-title { font-weight: 700; font-size: 18px; margin: 4px 0 10px; }
+.itin-day-title { font-weight: 700; font-size: 1.125rem; margin: 4px 0 10px; }
 
 /* ── Slots timeline ── */
 .itin-slots { margin-top: 12px; }
@@ -1426,8 +1426,8 @@ export default {
 .itin-slot-line { flex: 1; width: 2px; background: var(--it-line); margin: 4px 0; min-height: 18px; }
 .itin-slot-body { flex: 1; min-width: 0; padding-bottom: 14px; }
 .itin-slot-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.itin-slot-time { font-size: 12px; font-weight: 800; color: var(--it-text); font-variant-numeric: tabular-nums; }
-.itin-slot-cat { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
+.itin-slot-time { font-size: 0.75rem; font-weight: 800; color: var(--it-text); font-variant-numeric: tabular-nums; }
+.itin-slot-cat { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
   color: var(--it-muted); margin-right: auto; }
 
 /* ── Cards — recommendation-card recipe ── */
@@ -1466,8 +1466,8 @@ export default {
 }
 .itin-card-info { min-width: 0; }
 .itin-card-name { font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--it-biz); }
-.itin-card-region { font-size: 12px; color: var(--it-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.itin-card-note { font-size: 12px; color: var(--it-muted); margin-top: 4px; font-style: italic; }
+.itin-card-region { font-size: 0.75rem; color: var(--it-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.itin-card-note { font-size: 0.75rem; color: var(--it-muted); margin-top: 4px; font-style: italic; }
 .itin-card--failed { flex-direction: column; align-items: flex-start; gap: 6px;
   background: rgba(224,85,85,0.06); box-shadow: none; }
 
