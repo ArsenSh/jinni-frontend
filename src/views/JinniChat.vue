@@ -8737,4 +8737,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .pill-opt--on{border-color:#7c3aed;color:#7c3aed;font-weight:600}
 .genie-chat-container.night-mode .pill-opt{border-color:rgba(255,255,255,0.2);color:#aeb8c7}
 .genie-chat-container.night-mode .pill-opt--on{border-color:#c084fc;color:#c084fc}
+
+/* Mode toggle (Discovery/Nearby): svg was inline-baseline while the label
+   carried the body line-height — text and icon sat at different optical
+   heights (founder 2026-09-01). */
+.mode-toggle-inline, .mode-toggle{line-height:1}
+.mode-toggle-inline svg, .mode-toggle svg{display:block;flex-shrink:0}
 </style>
