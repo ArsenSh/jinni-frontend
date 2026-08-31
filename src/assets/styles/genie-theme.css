@@ -2,11 +2,12 @@
    set on :root by displayPrefs.js; unset = the app's base stack below.
    Form controls inherit so BUTTONS and inputs follow the chosen font
    (HTML buttons default to the UA font otherwise). */
-button, input, select, textarea { font: inherit; }
-/* font (not just font-family): form controls otherwise keep the UA's fixed
-   13.3px size and ignore the text-size setting — the sidebar New Chat
-   button was the visible case (founder 2026-09-01). Components with their
-   own font-size still win by normal cascade. */
+button, input, select, textarea { font-family: inherit; font-size: inherit; }
+/* family + size (NOT the font shorthand): controls otherwise keep the UA's
+   fixed 13.3px and ignore the text-size setting (sidebar New Chat). The
+   shorthand also dragged in the chat's 1.6 line-height and inflated the
+   input wrapper / unseated the send button (founder, same day) — controls
+   keep their own line-height. Explicit component sizes win by cascade. */
 
 * {
     margin: 0;
