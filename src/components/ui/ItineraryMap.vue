@@ -2187,4 +2187,9 @@ export default {
 .itin-map.night-mode :deep(.itin-map-photo) { border-color: var(--pin-color, #2b2059); box-shadow: 0 0 5px rgba(0,0,0,0.55); }
 .itin-map.night-mode :deep(.itin-map-photo-pin::after) { border-top-color: var(--pin-color, #2b2059); }
 .itin-map.night-mode :deep(.itin-map-badge) { border-color: #2b2059; }
+
+/* Leaflet's stylesheet hardcodes Helvetica/12px on .leaflet-container —
+   everything inside the map surface (popups, controls) ignored the user's
+   font + text-size settings (founder 2026-09-01). Re-anchor to the app. */
+.itin-map :deep(.leaflet-container){font-family:var(--app-font, 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif);font-size:0.75rem}
 </style>
