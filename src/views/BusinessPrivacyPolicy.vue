@@ -203,7 +203,7 @@ export default {
 
 
 <style scoped>
-.legal-page{min-height:100vh;transition:background 0.5s ease,color 0.3s ease;font-family:'Segoe UI',system-ui,-apple-system,'Noto Sans Armenian',sans-serif;display:flex;flex-direction:column;position:relative;z-index:1}
+.legal-page{min-height:100vh;transition:background 0.5s ease,color 0.3s ease;font-family: var(--app-font, 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif);display:flex;flex-direction:column;position:relative;z-index:1}
 .legal-header{display:flex;flex-direction:column;padding:2rem 2rem 0 2rem;max-width:1400px;margin:0 auto;width:100%;position:relative;z-index:10}
 .header-top{width:100%;display:flex;justify-content:flex-start}
 .back-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s ease;background:transparent}

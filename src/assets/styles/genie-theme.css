@@ -1,3 +1,9 @@
+/* User display prefs (Settings → font style / text size): --app-font is
+   set on :root by displayPrefs.js; unset = the app's base stack below.
+   Form controls inherit so BUTTONS and inputs follow the chosen font
+   (HTML buttons default to the UA font otherwise). */
+button, input, select, textarea { font-family: inherit; }
+
 * {
     margin: 0;
     padding: 0;
@@ -13,7 +19,7 @@ body {
        the face the OS picked had no real one. Hence "some characters bolder
        than others" (Arsen 2026-08-24). Latin and Cyrillic are unaffected:
        they still resolve in the families ahead of this one. */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif;
+    font-family: var(--app-font, 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif);
     /* Never fake a weight. With the real family loaded above there is nothing
        to fake; if it ever fails to load, a genuinely lighter weight reads
        better than a smeared one. */

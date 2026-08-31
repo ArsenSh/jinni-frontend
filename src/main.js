@@ -5,6 +5,7 @@ import router from './router'
 import store from './store'
 import messages from './locales'
 import './assets/styles/genie-theme.css'
+import { applyDisplayPrefs } from './utils/displayPrefs'
 import './assets/styles/animations.css'
 
 // The app persists the chosen language as 'jinni_language' (and inside
@@ -26,4 +27,5 @@ const i18n = createI18n({
     messages
 })
 
+applyDisplayPrefs()   // font style + text size, before first paint
 createApp(App).use(i18n).use(store).use(router).mount('#app')

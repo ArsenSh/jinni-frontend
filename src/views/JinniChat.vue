@@ -3621,18 +3621,9 @@ export default {
     // font-size so every rem-based measure in the app scales together (the
     // standard accessibility mechanism).
     applyDisplayPrefs() {
-      try {
-        const size = this.userSettings.textSize || 'normal';
-        document.documentElement.style.fontSize = size === 'small' ? '93.75%' : size === 'big' ? '112.5%' : '';
-        const FONTS = {
-          standard: '',
-          classic: "Georgia, 'Times New Roman', serif",
-          elegant: "'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif",
-          rounded: "'Trebuchet MS', Verdana, sans-serif",
-        };
-        const el = document.querySelector('.genie-chat-container');
-        if (el) el.style.fontFamily = FONTS[this.userSettings.fontStyle || 'standard'] || '';
-      } catch (e) { /* display prefs must never break the chat */ }
+      // Shared util: app-wide (--app-font var + root font-size) so every
+      // page follows, not just the chat. See src/utils/displayPrefs.js.
+      require('../utils/displayPrefs').applyDisplayPrefs(this.userSettings);
     },
     setDisplayPref(key, val) {
       this.userSettings[key] = val;
