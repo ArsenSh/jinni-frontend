@@ -198,8 +198,14 @@ function resolveImg(url) {
 }
 // Tiles match MapSelector.vue: voyager (day) / light_all (night).
 // dark_all is intentionally NOT used — it renders effectively invisible here.
-const TILE_DAY   = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-const TILE_NIGHT = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+// CARTO began requiring a (free) basemap API key — without one the label
+// tiles render every street/place name as "api_key_required" (live
+// 2026-08-31). Free key: carto.com/basemaps/apikey → set VITE_CARTO_KEY at
+// build time. Empty key keeps the old keyless URLs (graceful, not fixed).
+const CARTO_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CARTO_KEY) || '';
+const TILE_KEY = CARTO_KEY ? `?key=${CARTO_KEY}` : '';
+const TILE_DAY   = `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png${TILE_KEY}`;
+const TILE_NIGHT = `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png${TILE_KEY}`;
 // Driving marker: a Google-style navigation chevron (coloured fill, white
 // casing), pointing "up". Heading is applied by rotating the wrapper (north-up)
 // or by rotating the whole map (heading-up), so the glyph itself stays upright.
