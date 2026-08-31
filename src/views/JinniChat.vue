@@ -7877,7 +7877,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .mode-toggle-inline.disabled-cooldown{opacity:0.5;pointer-events:none}
 .mobile-actions-popover-container{position:relative;display:flex}
 .mobile-actions-popover{position:absolute;bottom:calc(100% + 50px);right:24px;border-radius:12px;z-index:1000;margin-bottom:8px;overflow:hidden;display:flex;flex-direction:column;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}
-.popover-actions-list{display:flex;flex-direction:column;max-height:400px;overflow-y:auto}
+.popover-actions-list{display:flex;flex-direction:column;max-height:450px;overflow-y:auto}
 .popover-action-btn{display:flex;justify-content:center;align-items:center;padding:10px 12px;border:none;background:transparent;text-align:center;cursor:pointer;transition:all 0.2s ease}
 .mobile-toggle-inline{display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;transition:all 0.25s ease;padding:0;border-radius:50%;margin-right:4px;position:absolute;right:46px;bottom:5px;z-index:2;width:40px;height:40px}
 .mobile-toggle-inline svg{transition:transform 0.2s ease}
