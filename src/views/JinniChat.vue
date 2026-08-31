@@ -4776,6 +4776,9 @@ export default {
                     // them. From the outside that is indistinguishable from not
                     // having saved at all (Arsen 2026-08-24: "it is not editing
                     // in user settings, it is editing in his mind only").
+                    // Chat→map bridge: transport answers about a shown card
+                    // carry routeTo — trace it on that card's map.
+                    if (data.metadata?.routeTo) this.autoRouteOnMap(data.metadata.routeTo);
                     if (data.metadata?.prefApplied) {
                       this.syncUserAfterPrefChange();
                     }
@@ -5706,6 +5709,22 @@ export default {
       if (!this._recMaps) this._recMaps = {};
       if (el) this._recMaps[id] = el;
       else delete this._recMaps[id];
+    },
+    // Chat→map bridge: a transport answer named a card ("how do I get to
+    // X?") — find the NEWEST message whose deck holds that place and ask its
+    // map to trace the route (same flow as "Tap for distance"). Best-effort:
+    // a missing map instance simply means no trace, never an error.
+    autoRouteOnMap(target) {
+      const norm = s => String(s || '').toLowerCase().trim();
+      for (let i = this.messages.length - 1; i >= 0; i--) {
+        const msg = this.messages[i];
+        const has = (msg?.recommendations || []).some(r =>
+          (target.placeId && r.placeId && r.placeId === target.placeId)
+          || (target.name && norm(r.name) === norm(target.name)));
+        if (!has) continue;
+        this.$nextTick(() => { try { this._recMaps?.[msg.id]?.routeToPlace(target); } catch (e) { /* best-effort */ } });
+        return;
+      }
     },
     async handleViewMore(message) {
       if (this.isOnCooldown) {

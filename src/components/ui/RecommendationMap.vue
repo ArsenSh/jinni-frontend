@@ -1592,6 +1592,25 @@ export default {
         this.map.flyTo([m.lat, m.lng], z, { duration: 0.5 });
       }
     },
+    // Chat→map bridge: called by JinniChat when a transport answer names a
+    // card on THIS map ("how do I get to X?"). Opens the map and starts the
+    // exact "Tap for distance" flow for that card. Retries briefly because
+    // open() builds the map + markers asynchronously.
+    routeToPlace(target, _attempt = 0) {
+      if (!target) return false;
+      const norm = s => String(s || '').toLowerCase().trim();
+      const mi = this.mappable.findIndex(({ rec }) =>
+        (target.placeId && rec.placeId && rec.placeId === target.placeId)
+        || (target.name && norm(rec.name) === norm(target.name)));
+      if (mi < 0) return false;
+      if (!this.expanded) this.open();
+      if (!this.map || !(this._markers || []).length) {
+        if (_attempt < 25) setTimeout(() => this.routeToPlace(target, _attempt + 1), 200);
+        return true;
+      }
+      this.onCardRoute(mi);
+      return true;
+    },
     // The "Tap for distance" button — the one and only way to start a route. It
     // draws the route line, shows the distance/time, and begins turn-by-turn
     // (tapping a map pin just opens its details popup now).
