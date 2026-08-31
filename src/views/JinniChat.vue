@@ -1785,6 +1785,7 @@ import SwitchModeOverlay from '@/components/ui/SwitchModeOverlay.vue';
 import RecommendationMap from '@/components/ui/RecommendationMap.vue';
 import ItineraryView from '@/components/ui/ItineraryView.vue';
 import { isNightTime } from '@/utils/timeUtils';
+import { applyDisplayPrefs as applyDisplayPrefsGlobal } from '../utils/displayPrefs'
 import { useI18n } from 'vue-i18n';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000';
 /** How long the preference bar stays visible after it reveals. */
@@ -3637,7 +3638,7 @@ export default {
     applyDisplayPrefs() {
       // Shared util: app-wide (--app-font var + root font-size) so every
       // page follows, not just the chat. See src/utils/displayPrefs.js.
-      require('../utils/displayPrefs').applyDisplayPrefs(this.userSettings);
+      applyDisplayPrefsGlobal(this.userSettings);
     },
     setDisplayPref(key, val) {
       this.userSettings[key] = val;
