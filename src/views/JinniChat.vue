@@ -7428,7 +7428,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 
 /* =============================TEXT CONTENT - Base Typography=========================== */
 .text{line-height:1.5;word-wrap:break-word;overflow-wrap:break-word;min-width:0}
-.message-bubble.ai .text{line-height:1.4;margin:0;padding:0;transition:none}
+.message-bubble.ai .text{line-height:1.6;margin:0;padding:0;transition:none}
 /* =================================DEEP SELECTORS======================================= */
 .text :deep(strong){font-weight:600}
 .text :deep(a){text-decoration:underline}
