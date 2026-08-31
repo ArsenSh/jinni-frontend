@@ -75,7 +75,7 @@ export default {
 .fd-item {
   display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
   background: transparent; border: none; padding: 8px 12px; border-radius: 8px;
-  font-size: 12.5px; font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 0.78125rem; font-family: 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .fd-check { flex-shrink: 0; }
 .fd-spacer { width: 12px; flex-shrink: 0; display: inline-block; }

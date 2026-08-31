@@ -1830,7 +1830,7 @@ export default {
 .itin-map-maneuver-body { min-width: 0; }
 .itin-map-maneuver-dist { font-size: 1.125rem; font-weight: 800; line-height: 1.15; }
 .itin-map-maneuver-instr {
-  margin-top: 2px; font-size: 12.5px; font-weight: 600; color: var(--rm-ctrl-text);
+  margin-top: 2px; font-size: 0.78125rem; font-weight: 600; color: var(--rm-ctrl-text);
   line-height: 1.25;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
@@ -1853,7 +1853,7 @@ export default {
 .itin-map-arrive-body { min-width: 0; }
 .itin-map-arrive-title { font-size: 0.9375rem; font-weight: 800; line-height: 1.2; }
 .itin-map-arrive-sub {
-  margin-top: 1px; font-size: 12.5px; font-weight: 600; color: var(--rm-muted);
+  margin-top: 1px; font-size: 0.78125rem; font-weight: 600; color: var(--rm-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
 }
 
@@ -2143,7 +2143,7 @@ export default {
 :deep(.itin-pop-btn) {
   display: inline-flex; align-items: center; gap: 7px; box-sizing: border-box;
   padding: 9px 14px; border: none; border-radius: 22px; text-decoration: none; white-space: nowrap;
-  font-family: inherit; font-size: 12.5px; font-weight: 600; line-height: 1; color: var(--rm-text);
+  font-family: inherit; font-size: 0.78125rem; font-weight: 600; line-height: 1; color: var(--rm-text);
   -webkit-appearance: none; appearance: none; cursor: pointer;
   background: var(--rm-glass); box-shadow: var(--rm-glass-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -2166,7 +2166,7 @@ export default {
 :deep(.itin-pop-dirs) { display: none; gap: 7px; margin-top: 8px; }
 :deep(.itin-pop.show-dirs .itin-pop-dirs) { display: flex; flex-wrap: wrap; }
 :deep(.itin-pop-dir) {
-  padding: 8px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 600; text-decoration: none;
+  padding: 8px 14px; border-radius: 20px; font-size: 0.78125rem; font-weight: 600; text-decoration: none;
   color: var(--rm-text); background: var(--rm-glass); box-shadow: var(--rm-glass-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
   transition: background 0.2s ease;

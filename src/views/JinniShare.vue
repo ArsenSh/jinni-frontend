@@ -1387,7 +1387,7 @@ export default {
 .itin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .itin-head-main { flex: 1; min-width: 0; }
 .itin-title { font-weight: 800; font-size: 1rem; line-height: 1.3; color: var(--it-heading); }
-.itin-sub { font-size: 12.5px; color: var(--it-muted); margin-top: 2px; }
+.itin-sub { font-size: 0.78125rem; color: var(--it-muted); margin-top: 2px; }
 
 /* ── Day tabs — glacier chips; active carries the day colour ── */
 .itin-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; scrollbar-width: none; }
@@ -1410,7 +1410,7 @@ export default {
    glass/backdrop-filter above stays in effect, so it reads as glacier glass
    rather than a solid pill. No shadow at rest — the ring is hover-only. */
 .itin-tab.active { font-weight: 800; }
-.itin-tab-date { font-size: 10.5px; font-weight: 500; opacity: 0.85; }
+.itin-tab-date { font-size: 0.65625rem; font-weight: 500; opacity: 0.85; }
 
 .itin-day-title { font-weight: 700; font-size: 1.125rem; margin: 4px 0 10px; }
 
@@ -1419,7 +1419,7 @@ export default {
 .itin-slot { display: flex; gap: 10px; }
 .itin-slot-rail { display: flex; flex-direction: column; align-items: center; flex: none; }
 .itin-slot-num {
-  width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 12.5px; font-weight: 800;
+  width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 0.78125rem; font-weight: 800;
   display: grid; place-items: center; flex: none;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.25);
 }
@@ -1465,7 +1465,7 @@ export default {
   .itin-card-info { width: 100%; }
 }
 .itin-card-info { min-width: 0; }
-.itin-card-name { font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--it-biz); }
+.itin-card-name { font-weight: 700; font-size: 0.84375rem; line-height: 1.25; color: var(--it-biz); }
 .itin-card-region { font-size: 0.75rem; color: var(--it-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-card-note { font-size: 0.75rem; color: var(--it-muted); margin-top: 4px; font-style: italic; }
 .itin-card--failed { flex-direction: column; align-items: flex-start; gap: 6px;

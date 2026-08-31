@@ -1955,7 +1955,7 @@ export default {
 .rec-map-maneuver-body { min-width: 0; }
 .rec-map-maneuver-dist { font-size: 1.125rem; font-weight: 800; line-height: 1.15; }
 .rec-map-maneuver-instr {
-  margin-top: 2px; font-size: 12.5px; font-weight: 600; color: var(--rm-ctrl-text);
+  margin-top: 2px; font-size: 0.78125rem; font-weight: 600; color: var(--rm-ctrl-text);
   line-height: 1.25;
   /* up to two lines, so "Turn left onto <street>" stays readable */
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -1978,7 +1978,7 @@ export default {
 .rec-map-arrive-body { min-width: 0; }
 .rec-map-arrive-title { font-size: 0.9375rem; font-weight: 800; line-height: 1.2; }
 .rec-map-arrive-sub {
-  margin-top: 1px; font-size: 12.5px; font-weight: 600; color: var(--rm-muted);
+  margin-top: 1px; font-size: 0.78125rem; font-weight: 600; color: var(--rm-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
 }
 .rec-map-arrive-done {
@@ -2113,7 +2113,7 @@ export default {
 :deep(.rec-pop.show-dirs .rec-pop-dirs) { display: flex; flex-wrap: wrap; }
 :deep(.rec-pop-dir) {
   flex: 1; min-width: 80px; text-align: center; text-decoration: none;
-  padding: 10px 12px; border-radius: 22px; font-size: 12.5px; font-weight: 600;
+  padding: 10px 12px; border-radius: 22px; font-size: 0.78125rem; font-weight: 600;
   color: var(--rm-text); background: var(--rm-glass); box-shadow: var(--rm-glass-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
   transition: background 0.2s ease;
@@ -2224,7 +2224,7 @@ export default {
 :deep(.rec-pop-btn) {
   display: inline-flex; align-items: center; gap: 7px; box-sizing: border-box;
   padding: 9px 14px; border: none; border-radius: 22px; text-decoration: none; white-space: nowrap;
-  font-family: inherit; font-size: 12.5px; font-weight: 600; line-height: 1; color: var(--rm-text);
+  font-family: inherit; font-size: 0.78125rem; font-weight: 600; line-height: 1; color: var(--rm-text);
   -webkit-appearance: none; appearance: none; cursor: pointer;
   background: var(--rm-glass); box-shadow: var(--rm-glass-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);

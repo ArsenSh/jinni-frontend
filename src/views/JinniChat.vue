@@ -7725,7 +7725,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .profile-details h4{margin:0 0 3px 0;font-size:1.22rem;font-weight:700;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .profile-details p{margin:0;opacity:0.55;font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .profile-plan-tag{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.plan-expiry{font-size:10.5px;font-weight:600;opacity:0.5;white-space:nowrap;letter-spacing:0.01em}
+.plan-expiry{font-size: 0.65625rem;font-weight:600;opacity:0.5;white-space:nowrap;letter-spacing:0.01em}
 
 /* ── Preferences: tiles, not bordered rows ── */
 .prefs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 11px}
@@ -7734,8 +7734,8 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .pref-tile{display:flex;flex-direction:column;gap:7px;padding:13px 14px;border-radius:14px;background:rgba(120,120,120,0.08);min-width:0}
 .modal-content.night .pref-tile{background:rgba(255,255,255,0.055)}
 .pref-tile--wide{grid-column:1 / -1}
-.pref-tile-label{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;opacity:0.55}
-.pref-tile-value{font-size:13.5px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.pref-tile-label{display:flex;align-items:center;gap:7px;font-size: 0.71875rem;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;opacity:0.55}
+.pref-tile-value{font-size: 0.84375rem;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
 .pref-tile-value.is-empty{font-weight:500;opacity:0.45}
 .pref-chips{display:flex;flex-wrap:wrap;gap:6px}
 .pref-chip{padding:4.5px 11px;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(120,120,120,0.15);color:#4a4a4a}
@@ -7752,7 +7752,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .plan-badge.is-free{background:rgba(120,120,120,0.15);color:inherit;opacity:0.7}
 .plan-badge.is-premium{background:linear-gradient(135deg,rgb(212,175,55),rgb(255,140,0));color:#fff}
 .plan-usage{display:flex;flex-direction:column;gap:13px}
-.plan-meter-top{display:flex;align-items:baseline;justify-content:space-between;font-size:12.5px;margin-bottom:6px;opacity:0.8}
+.plan-meter-top{display:flex;align-items:baseline;justify-content:space-between;font-size: 0.78125rem;margin-bottom:6px;opacity:0.8}
 .plan-meter-num{font-weight:700;font-variant-numeric:tabular-nums;opacity:1}
 /* Track: a warm tint rather than neutral grey, so an empty bar still belongs
    to this page. */
@@ -7767,12 +7767,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .plan-bar-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#D4AF37,#E8A33D);transition:width 0.35s ease,background 0.3s ease}
 .plan-bar-fill.is-warning{background:#FF8C00}
 .plan-bar-fill.is-critical{background:#E05555}
-.plan-cooldown{padding:9px 11px;border-radius:11px;font-size:12.5px;font-weight:600;color:#e05555;background:rgba(224,85,85,0.12)}
-.plan-reset{font-size:11.5px;opacity:0.6;margin-top:2px}
+.plan-cooldown{padding:9px 11px;border-radius:11px;font-size: 0.78125rem;font-weight:600;color:#e05555;background:rgba(224,85,85,0.12)}
+.plan-reset{font-size: 0.71875rem;opacity:0.6;margin-top:2px}
 .plan-meter-skeleton{display:block;height:26px;border-radius:8px;background:rgba(128,128,128,0.14);animation:planPulse 1.4s ease-in-out infinite}
 @keyframes planPulse{50%{opacity:0.45}}
 @media (prefers-reduced-motion:reduce){.plan-meter-skeleton{animation:none}.plan-bar-fill{transition:none}}
-.plan-cta{width:auto;margin:14px 0 0;padding:7px 14px;border:none;border-radius:999px;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;color:#3c2a1e;background:rgba(120,120,120,0.18);transition:background 0.18s ease,transform 0.15s ease}
+.plan-cta{width:auto;margin:14px 0 0;padding:7px 14px;border:none;border-radius:999px;cursor:pointer;font-family:inherit;font-size: 0.78125rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;color:#3c2a1e;background:rgba(120,120,120,0.18);transition:background 0.18s ease,transform 0.15s ease}
 .modal-content.night .plan-cta{color:#e2e8f0;background:rgba(255,255,255,0.14)}
 .plan-cta:hover{background:rgba(120,120,120,0.26)}
 .modal-content.night .plan-cta:hover{background:rgba(255,255,255,0.2)}
@@ -8258,7 +8258,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .info-modal.day .social-link{background:rgba(255,255,255,0.55);color:#6b5840;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7)}
 .info-modal.day .social-link:hover{background:rgba(255,255,255,0.8);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.95);opacity:1}
 /* ── Refined highlight chips (frosted accent + sparkle) ───────────────── */
-.info-modal .highlight-tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:20px;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
+.info-modal .highlight-tag{display:inline-flex;align-items:center;gap:5px;font-size: 0.71875rem;font-weight:600;padding:5px 11px;border-radius:20px;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%)}
 .info-modal.night .highlight-tag{background:rgba(192,132,252,0.12);color:#e7defb;box-shadow:inset 0 0 0 0.8px rgba(192,132,252,0.22)}
 .info-modal.day .highlight-tag{background:rgba(212,175,55,0.14);color:#7a5f1e;box-shadow:inset 0 0 0 1px rgba(212,175,55,0.28)}
 /* ── Highlights showcase panel ────────────────────────────────────────── */
@@ -8680,7 +8680,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 
 /* ── Quota notice above the composer ── */
 .chat-input-container{position:relative}
-.usage-notice{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:7px;max-width:min(92%,460px);padding:8px 13px;border-radius:999px;font-size:12.5px;font-weight:500;line-height:1.3;text-align:left;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%)}
+.usage-notice{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:7px;max-width:min(92%,460px);padding:8px 13px;border-radius:999px;font-size: 0.78125rem;font-weight:500;line-height:1.3;text-align:left;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%)}
 .usage-notice svg{flex:0 0 auto}
 /* Desktop has the room, so use it (Arsen 2026-08-24: "that in desktop mode can
    be longer horizontally"). The 460px cap is a phone measurement; on a 800px

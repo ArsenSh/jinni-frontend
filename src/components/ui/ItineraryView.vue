@@ -1558,21 +1558,21 @@ export default {
 .itin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .itin-head-main { flex: 1; min-width: 0; }
 .itin-title { font-weight: 800; font-size: 1rem; line-height: 1.3; color: var(--it-heading); }
-.itin-sub { font-size: 12.5px; color: var(--it-muted); margin-top: 2px; }
-.itin-estimate { font-size: 12.5px; font-weight: 700; color: var(--it-heading); margin-top: 3px; }
-.itin-estimate-note { font-weight: 400; color: var(--it-muted); font-size: 11.5px; }
+.itin-sub { font-size: 0.78125rem; color: var(--it-muted); margin-top: 2px; }
+.itin-estimate { font-size: 0.78125rem; font-weight: 700; color: var(--it-heading); margin-top: 3px; }
+.itin-estimate-note { font-weight: 400; color: var(--it-muted); font-size: 0.71875rem; }
 .itin-stage { margin-left: 8px; font-style: italic; animation: itin-pulse 1.4s ease-in-out infinite; }
 @keyframes itin-pulse { 50% { opacity: 0.35; } }
 
 /* Inline edit failure — same glass recipe, tighter, sits above the day. */
 .itin-error--inline {
   justify-content: space-between; margin-bottom: 10px;
-  padding: 8px 10px 8px 12px; font-size: 12.5px;
+  padding: 8px 10px 8px 12px; font-size: 0.78125rem;
 }
 .itin-error--inline .itin-icon { color: #e05555; flex: none; }
 
 .itin-error {
-  padding: 11px 14px; border-radius: 14px; font-size: 13.5px;
+  padding: 11px 14px; border-radius: 14px; font-size: 0.84375rem;
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   color: #e05555; background: rgba(224,85,85,0.1); box-shadow: inset 0 0 0 1px rgba(224,85,85,0.25);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -1630,7 +1630,7 @@ export default {
    glass/backdrop-filter above stays in effect, so it reads as glacier glass
    rather than a solid pill. */
 .itin-tab.active { font-weight: 800; }
-.itin-tab-date { font-size: 10.5px; font-weight: 500; opacity: 0.85; }
+.itin-tab-date { font-size: 0.65625rem; font-weight: 500; opacity: 0.85; }
 
 .itin-day-title { font-weight: 700; font-size: 1.125rem; margin: 4px 0 10px;
   display: flex; align-items: center; gap: 7px; min-width: 0; }
@@ -1664,7 +1664,7 @@ export default {
 .itin-slot.is-failed .itin-slot-time { color: #e05555; }
 .itin-slot-rail { display: flex; flex-direction: column; align-items: center; flex: none; }
 .itin-slot-num {
-  width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 12.5px; font-weight: 800;
+  width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 0.78125rem; font-weight: 800;
   display: grid; place-items: center; flex: none;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.25);
 }
@@ -1809,7 +1809,7 @@ export default {
 }
 .itin-img-btn:hover:not(.is-loading) { background: var(--it-glass-hover); box-shadow: var(--it-ring-hover); }
 .itin-img-btn.is-loading { cursor: default; }
-.itin-card-name { font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--it-biz); }
+.itin-card-name { font-weight: 700; font-size: 0.84375rem; line-height: 1.25; color: var(--it-biz); }
 .itin-card-region { font-size: 0.75rem; color: var(--it-muted); margin-top: -18px; margin-right: 42px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-card-note { font-size: 0.75rem; color: var(--it-muted); margin-top: 4px; font-style: italic; }
 .itin-card--failed { flex-direction: column; align-items: flex-start; gap: 6px;
@@ -1851,7 +1851,7 @@ export default {
   backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
 .itin-choose-head { display: flex; align-items: center; justify-content: space-between;
-  font-size: 12.5px; font-weight: 700; color: var(--it-heading); margin-bottom: 8px; }
+  font-size: 0.78125rem; font-weight: 700; color: var(--it-heading); margin-bottom: 8px; }
 .itin-choose-list, .itin-choose-loading { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
 .itin-cand {
   flex: none; width: 120px; border: none; border-radius: 12px; padding: 6px;
@@ -1878,7 +1878,7 @@ export default {
 .itin-cand-actions { display: flex; gap: 5px; margin-top: 6px; }
 .itin-cand-info {
   flex: 1; height: 26px; padding: 0; border: none; border-radius: 8px;
-  font-size: 11.5px; font-weight: 600; cursor: pointer; color: var(--it-biz);
+  font-size: 0.71875rem; font-weight: 600; cursor: pointer; color: var(--it-biz);
   background: var(--it-glass); box-shadow: var(--it-ring);
   display: inline-flex; align-items: center; justify-content: center;
 }
@@ -1886,7 +1886,7 @@ export default {
 /* Square block — same fixed height as Details, equal width. */
 .itin-cand-photo { flex: 0 0 26px; width: 26px; height: 26px; }
 .itin-cand-photo.is-loading { cursor: default; }
-.itin-choose-empty { font-size: 12.5px; color: var(--it-muted); padding: 6px 2px; }
+.itin-choose-empty { font-size: 0.78125rem; color: var(--it-muted); padding: 6px 2px; }
 
 /* ── Day-level actions — view-more-btn glacier pills ── */
 .itin-day-actions { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
