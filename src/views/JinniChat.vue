@@ -455,6 +455,15 @@
                         </div><!-- /rec-card-wrapper -->
                       </div><!-- /inline-recommendation-wrapper -->
                     </template>
+                    <button
+                      v-if="!message.streaming && routeCtaFor(message)"
+                      class="route-cta-btn"
+                      type="button"
+                      @click="openRouteFullscreen(message)"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.4"/><circle cx="18" cy="5" r="2.4"/><path d="M8.4 18.4h6.2a2.8 2.8 0 0 0 0-5.6H9.4a2.8 2.8 0 0 1 0-5.6h6.2"/></svg>
+                      See route
+                    </button>
                     <RecommendationMap
                       v-if="!message.streaming && message.recommendations && message.recommendations.length"
                       :ref="el => registerRecMap(message.id, el)"
@@ -4776,9 +4785,6 @@ export default {
                     // them. From the outside that is indistinguishable from not
                     // having saved at all (Arsen 2026-08-24: "it is not editing
                     // in user settings, it is editing in his mind only").
-                    // Chat→map bridge: transport answers about a shown card
-                    // carry routeTo — trace it on that card's map.
-                    if (data.metadata?.routeTo) this.autoRouteOnMap(data.metadata.routeTo);
                     if (data.metadata?.prefApplied) {
                       this.syncUserAfterPrefChange();
                     }
@@ -5710,27 +5716,26 @@ export default {
       if (el) this._recMaps[id] = el;
       else delete this._recMaps[id];
     },
-    // Chat→map bridge: a transport answer named a card ("how do I get to
-    // X?") — find the NEWEST message whose deck holds that place and ask its
-    // map to trace the route (same flow as "Tap for distance"). Best-effort:
-    // a missing map instance simply means no trace, never an error.
-    autoRouteOnMap(target) {
+    // Chat→map bridge v3 (founder 2026-08-31: "show go to map button instead
+    // of opening map; after clicking navigate to full screen and route
+    // calculated"). The transport answer carries its own card +
+    // metadata.routeTo — a "See route" button renders on that message;
+    // tapping it opens ITS map in fullscreen and runs the exact
+    // Tap-for-distance flow. Nothing auto-opens (the old auto-route also
+    // raced message state and traced on the previous deck's map).
+    routeCtaFor(message) {
+      const target = message?.metadata?.routeTo;
+      if (!target) return null;
       const norm = s => String(s || '').toLowerCase().trim();
-      for (let i = this.messages.length - 1; i >= 0; i--) {
-        const msg = this.messages[i];
-        const has = (msg?.recommendations || []).some(r =>
-          (target.placeId && r.placeId && r.placeId === target.placeId)
-          || (target.name && norm(r.name) === norm(target.name)));
-        if (!has) continue;
-        // The answer's OWN map may still be mounting — retry briefly.
-        const tryRoute = (left) => {
-          const map = this._recMaps?.[msg.id];
-          if (map) { try { map.routeToPlace(target); } catch (e) { /* best-effort */ } return; }
-          if (left > 0) setTimeout(() => tryRoute(left - 1), 300);
-        };
-        this.$nextTick(() => tryRoute(6));
-        return;
-      }
+      const has = (message.recommendations || []).some(r =>
+        (target.placeId && r.placeId && r.placeId === target.placeId)
+        || (target.name && norm(r.name) === norm(target.name)));
+      return has ? target : null;
+    },
+    openRouteFullscreen(message) {
+      const target = this.routeCtaFor(message);
+      const map = this._recMaps?.[message.id];
+      if (target && map) { try { map.routeToPlace(target, { fullscreen: true }); } catch (e) { /* best-effort */ } }
     },
     async handleViewMore(message) {
       if (this.isOnCooldown) {
@@ -8528,4 +8533,11 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    the pointer cursor. */
 .text :deep(.place-search) { border-bottom: 1px dotted currentColor; cursor: pointer; text-underline-offset: 3px; transition: opacity 0.15s ease; }
 .text :deep(.place-search:hover) { opacity: 0.65; }
+
+/* Chat→map "See route" CTA (transport answers with a routable card) —
+   light/color feedback only on hover, never movement (founder rule). */
+.route-cta-btn{display:inline-flex;align-items:center;gap:7px;margin:10px 0 4px;padding:9px 16px;border:1px solid rgba(0,0,0,0.12);border-radius:12px;background:#fff;color:#b45309;font-weight:700;font-size:0.92rem;cursor:pointer}
+.route-cta-btn:hover{background:#fff7ed}
+.genie-chat-container.night-mode .route-cta-btn{background:rgba(255,255,255,0.07);border:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);color:#c084fc}
+.genie-chat-container.night-mode .route-cta-btn:hover{background:rgba(255,255,255,0.16)}
 </style>

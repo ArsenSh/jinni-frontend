@@ -1596,7 +1596,7 @@ export default {
     // card on THIS map ("how do I get to X?"). Opens the map and starts the
     // exact "Tap for distance" flow for that card. Retries briefly because
     // open() builds the map + markers asynchronously.
-    routeToPlace(target, _attempt = 0) {
+    routeToPlace(target, opts = {}, _attempt = 0) {
       if (!target) return false;
       const norm = s => String(s || '').toLowerCase().trim();
       const mi = this.mappable.findIndex(({ rec }) =>
@@ -1605,9 +1605,12 @@ export default {
       if (mi < 0) return false;
       if (!this.expanded) this.open();
       if (!this.map || !(this._markers || []).length) {
-        if (_attempt < 25) setTimeout(() => this.routeToPlace(target, _attempt + 1), 200);
+        if (_attempt < 25) setTimeout(() => this.routeToPlace(target, opts, _attempt + 1), 200);
         return true;
       }
+      // Founder UX 2026-08-31: the "See route" button goes straight to the
+      // full-screen map with the route calculated.
+      if (opts.fullscreen && !this.fullscreen) this.enterFullscreen();
       this.onCardRoute(mi);
       return true;
     },
