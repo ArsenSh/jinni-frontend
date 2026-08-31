@@ -4779,6 +4779,13 @@ export default {
                     hasProcessedCompletion = true;
                     this.engineStage = '';
                     this.messages[messageIndex].engineDebug = data.metadata?.debug || null;
+                    // Persist the chat→map bridge target — the "See route"
+                    // CTA renders from message.metadata.routeTo (live
+                    // 2026-08-31: the handler copied only selected fields,
+                    // so the button never appeared).
+                    if (data.metadata?.routeTo) {
+                      this.messages[messageIndex].metadata = { ...(this.messages[messageIndex].metadata || {}), routeTo: data.metadata.routeTo };
+                    }
                     // A preference Jinni changed on request is already saved
                     // server-side, but nothing told the app — so localUser kept
                     // the old values and the Preferences screen still showed
