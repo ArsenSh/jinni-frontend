@@ -3734,6 +3734,7 @@
                     {{ (placeInfoModal.data?.explore?.status || placeInfoModal.row?.explore?.status) === 'verified' ? '✓ Verified' : (placeInfoModal.data?.explore?.status || placeInfoModal.row?.explore?.status) === 'hidden' ? 'Hidden' : 'Visible' }}
                   </span>
                   <span class="pim-status pim-status--hidden" v-if="placeInfoModal.data?.aiBlocked">AI blocked</span>
+                  <span class="pim-status pim-status--hidden" v-if="placeInfoModal.data?.nameAskPending" :title="'Appeared via a direct name ask (asked ' + (placeInfoModal.data?.askedByNameCount || 1) + '×) — invisible to other users until admitted'">⏳ From direct ask — pending</span>
                 </h3>
                 <div class="pim-cats">
                   <button v-for="c in placeEditCategories" :key="'ic-' + c" type="button" class="pim-chip"
@@ -3799,6 +3800,10 @@
                 <label style="display:flex; align-items:center; gap:8px; margin-top:14px; cursor:pointer; font-size:13px">
                   <input type="checkbox" v-model="placeEditForm.aiBlocked" />
                   <span>AI-blocked — never surfaced by chat / quick-action recommendations</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; margin-top:8px; cursor:pointer; font-size:13px">
+                  <input type="checkbox" v-model="placeEditForm.nameAskPending" />
+                  <span>Name-ask quarantine — appeared via a direct ask; hidden from other users until unchecked</span>
                 </label>
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
                   <button class="action-btn btn-muted" @click="placeInfoModal.editing = false" :disabled="placeEditSaving">Cancel — back to details</button>
@@ -7164,7 +7169,7 @@ export default {
 
     // ── Place-cache "click to read" modal ──
     const placeInfoModal = ref({ open: false, loading: false, editing: false, row: null, data: null })
-    const placeEditForm = ref({ name: '', address: '', phone: '', website: '', actions: [], interests: [], aiBlocked: false })
+    const placeEditForm = ref({ name: '', address: '', phone: '', website: '', actions: [], interests: [], aiBlocked: false, nameAskPending: false })
     const placeEditSaving = ref(false)
     // Same vocab the staff Explore drawer edits (validated server-side too)
     // Includes the six shopping sub-types (souvenirs…food): the cache tagger
@@ -7190,7 +7195,8 @@ export default {
         website: det.website || '',
         actions: [...(d.actions || r.actions || [])].filter(a => placeEditCategories.includes(a)),
         interests: [...(d.interests || [])],
-        aiBlocked: !!d.aiBlocked
+        aiBlocked: !!d.aiBlocked,
+        nameAskPending: !!d.nameAskPending
       }
       placeInfoModal.value.editing = true
     }
@@ -7208,10 +7214,10 @@ export default {
           }),
           staffFetch(`/explore-places/${encodeURIComponent(placeId)}/actions`, {
             method: 'PATCH',
-            body: JSON.stringify({ actions: placeEditForm.value.actions, interests: placeEditForm.value.interests, aiBlocked: placeEditForm.value.aiBlocked })
+            body: JSON.stringify({ actions: placeEditForm.value.actions, interests: placeEditForm.value.interests, aiBlocked: placeEditForm.value.aiBlocked, nameAskPending: placeEditForm.value.nameAskPending })
           })
         ])
-        placeInfoModal.value.data = { ...res.data, actions: placeEditForm.value.actions, interests: placeEditForm.value.interests, aiBlocked: placeEditForm.value.aiBlocked }
+        placeInfoModal.value.data = { ...res.data, actions: placeEditForm.value.actions, interests: placeEditForm.value.interests, aiBlocked: placeEditForm.value.aiBlocked, nameAskPending: placeEditForm.value.nameAskPending }
         placeInfoModal.value.editing = false
         // Reflect the changes on the card grid without a refetch
         const row = places.value.find(x => x.placeId === placeId)

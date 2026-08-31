@@ -1858,6 +1858,8 @@
                   {{ p.explore?.status === 'verified' ? '✓ Verified' : (p.explore?.status === 'hidden' ? 'Hidden' : 'Visible') }}
                 </span>
                 <span v-if="p.aiBlocked" class="exp-status exp-status--hidden" title="Blocked from AI recommendations">AI ✕</span>
+                <span v-if="p.nameAskPending" class="exp-status exp-status--asked" :title="'Appeared via a DIRECT name ask (asked ' + (p.askedByNameCount || 1) + '×) — invisible to other users until admitted'">⏳ Asked{{ (p.askedByNameCount || 1) > 1 ? ' ×' + p.askedByNameCount : '' }}</span>
+                <button v-if="p.nameAskPending" class="exp-status exp-status--admit" :disabled="expBusy === p.placeId" @click.stop="admitNameAsk(p)" title="Admit — make this place visible to all users">Admit</button>
               </td>
               <td class="col-actions" data-label="Action" @click.stop>
                 <div class="action-group">
@@ -2616,6 +2618,18 @@ export default {
         showToast(place.aiBlocked ? `"${place.name}" blocked from AI recommendations` : `"${place.name}" allowed for AI again`)
       } catch (err) {
         showToast(err.response?.data?.error || 'Failed to update AI block', 'error')
+      } finally { expBusy.value = null }
+    }
+    // Admit a name-ask-quarantined place (founder 2026-08-31: rows born from
+    // a direct "Do you know X?" serve only their asker until staff admit).
+    async function admitNameAsk(place) {
+      expBusy.value = place.placeId
+      try {
+        const { data } = await axios.patch(`${API_URL}/staff/explore-places/${place.placeId}/actions`, { nameAskPending: false }, { headers: authHeader() })
+        place.nameAskPending = data?.place?.nameAskPending ?? false
+        showToast(`"${place.name}" admitted — now visible to all users`)
+      } catch (err) {
+        showToast(err.response?.data?.error || 'Failed to admit place', 'error')
       } finally { expBusy.value = null }
     }
     // Toggle a place's membership in one Explore category (PATCHes the full
@@ -4209,7 +4223,7 @@ export default {
       apiRoot, expPlaces, expTotal, expPage, expTotalPages, expLoading, expBusy,
       expStatus, expStatusOpts, expCategory, expCategories, expEditCategories, expCounts,
       expSearchInput, onExpSearchInput, loadExplorePlaces, changeExpPage, setExpStatus, toggleExpAction,
-      EXPLORE_INTERESTS, toggleExpInterest, toggleAiBlock,
+      EXPLORE_INTERESTS, toggleExpInterest, toggleAiBlock, admitNameAsk,
       expSelected, expImages, expImagesLoading, openExpPlace, apiOrigin, expPrice, fmtD, expMapsUrl,
       DEST_PRIMARY, DEST_INTERESTS, DEST_STYLES, DEST_PREFS, destTypeFilter, destPrefFilter, destTagLabel,
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt, tabCount, svAccOpen, svToggleAcc, svAccTapExp,
@@ -5051,6 +5065,8 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .exp-status { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
 .exp-status--visible  { background: var(--bg-elev-2); color: var(--text-mute); }
 .exp-status--hidden   { background: rgba(239,68,68,0.12); color: var(--bad); }
+.exp-status--asked    { background: rgba(245,158,11,0.14); color: #d97706; }
+.exp-status--admit    { background: rgba(34,197,94,0.14); color: #16a34a; border: none; cursor: pointer; font: inherit; }
 .exp-status--verified { background: rgba(52,211,153,0.14); color: var(--good); }
 .exp-btn-verify { background: rgba(52,211,153,0.12); color: var(--good); }
 .exp-btn-hide   { background: rgba(239,68,68,0.10); color: var(--bad); }
