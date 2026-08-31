@@ -665,9 +665,10 @@ export default {
       const L = this.L;
       if (!this.map || this.pathPoints.length < 2) return;
       this._routeToken++;   // invalidate any in-flight roads fetch
-      const casing = L.polyline(this.pathPoints.map(p => [p.lat, p.lng]), { color: '#ffffff', weight: 6, opacity: 0.8, interactive: false });
+      const night = this.theme === 'night-mode';
+      const casing = night ? null : L.polyline(this.pathPoints.map(p => [p.lat, p.lng]), { color: '#ffffff', weight: 6, opacity: 0.8, interactive: false });
       const line = L.polyline(this.pathPoints.map(p => [p.lat, p.lng]), { color: this.dayColor, weight: 3, opacity: 0.8, interactive: false });
-      this.routeLayer = L.layerGroup([casing, line]).addTo(this.map);
+      this.routeLayer = L.layerGroup(casing ? [casing, line] : [line]).addTo(this.map);
       this.routeDistance = null; this.routeDuration = null; this.routeFallback = false;
     },
 
@@ -687,9 +688,10 @@ export default {
         if (this.routeLayer) { this.map.removeLayer(this.routeLayer); this.routeLayer = null; }
         if (data.success && data.geometry) {
           // Casing + coloured line, same layering idea as rec-map's route.
-          const casing = L.geoJSON(data.geometry, { interactive: false, style: { color: '#ffffff', weight: 8, opacity: 0.9 } });
+          const night2 = this.theme === 'night-mode';
+          const casing = night2 ? null : L.geoJSON(data.geometry, { interactive: false, style: { color: '#ffffff', weight: 8, opacity: 0.9 } });
           const line = L.geoJSON(data.geometry, { interactive: false, style: { color: this.dayColor, weight: 4.5, opacity: 0.95 } });
-          this.routeLayer = L.layerGroup([casing, line]).addTo(this.map);
+          this.routeLayer = L.layerGroup(casing ? [casing, line] : [line]).addTo(this.map);
           this.routeDistance = data.distance; this.routeDuration = data.duration;
           this.routeFallback = false;
         } else {
