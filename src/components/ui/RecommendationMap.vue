@@ -2250,4 +2250,14 @@ export default {
   background: rgba(255,255,255,0.14);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
 }
+
+/* ── Basemap tinting: the map speaks JinniChat's palette (founder
+   2026-08-31: day felt cool next to the cream/amber chat; night 'dark' was
+   black-gray while the chat is indigo #0a0118→#1a0b2e→#16213e). Applied to
+   the TILE PANE ONLY — pins, badges, and route lines keep their own colors.
+   THE TUNING KNOBS ARE THESE TWO LINES: sepia adds chroma to grays,
+   hue-rotate spins it toward the target family, saturate/brightness set
+   depth. ── */
+.rec-map.day-mode :deep(.leaflet-tile-pane) { filter: sepia(0.18) saturate(1.06) hue-rotate(-6deg) brightness(1.01); }
+.rec-map.night-mode :deep(.leaflet-tile-pane) { filter: sepia(0.55) hue-rotate(205deg) saturate(1.7) brightness(0.82) contrast(1.06); }
 </style>
