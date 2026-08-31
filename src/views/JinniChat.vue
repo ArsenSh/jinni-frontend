@@ -5784,6 +5784,10 @@ export default {
       const box = Math.min(avail, Math.ceil(w / lines) + 28) + 'px';
       el.style.maxWidth = box;
       el.style.width = box;
+      // The lamp keeps the text's scale (founder: a 44px lamp beside one
+      // short line reads oversized): 1 line → petite, 2 → standard, 3+ → tall.
+      const icon = this.$el.querySelector('.greeting-icon');
+      if (icon) icon.style.height = lines === 1 ? '34px' : lines === 2 ? '44px' : '52px';
       } catch (e) { /* a failed fit must never break the chat */ }
     },
     registerRecMap(id, el) {
