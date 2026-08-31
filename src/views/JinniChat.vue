@@ -778,7 +778,7 @@
       <div class="fixed-input-container" :class="{ 'empty-chat': messages.length === 0 }">
         <div class="centered-content">
           <div class="ai-greeting" v-if="messages.length === 0">
-            <img src="/images/bottle-greeting.png?v=1" class="greeting-icon" alt="Jinni">
+            <img src="/images/bottle-greeting.png?v=2" class="greeting-icon" alt="Jinni">
             <div class="greeting">{{ greetingLine() }}</div>
           </div>
           <div class="chat-input-container">
