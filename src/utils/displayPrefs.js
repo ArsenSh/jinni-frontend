@@ -17,6 +17,9 @@ export function applyDisplayPrefs(settings = null) {
     if (!s) { try { s = JSON.parse(localStorage.getItem('jinni_settings') || '{}'); } catch (e) { s = {}; } }
     const size = s.textSize || 'normal';
     document.documentElement.style.fontSize = size === 'small' ? '93.75%' : size === 'big' ? '112.5%' : '';
+    // Stamp the choice for CSS that needs EXACT per-size values (e.g. the
+    // itinerary region overlap, hand-tuned per size by the founder).
+    document.documentElement.setAttribute('data-text-size', size);
     const stack = FONT_STACKS[s.fontStyle || 'standard'] || '';
     if (stack) document.documentElement.style.setProperty('--app-font', stack);
     else document.documentElement.style.removeProperty('--app-font');

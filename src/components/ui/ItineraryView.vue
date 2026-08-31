@@ -1810,7 +1810,7 @@ export default {
 .itin-img-btn:hover:not(.is-loading) { background: var(--it-glass-hover); box-shadow: var(--it-ring-hover); }
 .itin-img-btn.is-loading { cursor: default; }
 .itin-card-name { font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--it-biz); }
-.itin-card-region { font-size: 0.75rem; color: var(--it-muted); margin-top: -20px; margin-right: 42px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.itin-card-region { font-size: 0.75rem; color: var(--it-muted); margin-top: -18px; margin-right: 42px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-card-note { font-size: 0.75rem; color: var(--it-muted); margin-top: 4px; font-style: italic; }
 .itin-card--failed { flex-direction: column; align-items: flex-start; gap: 6px;
   background: rgba(224,85,85,0.06); box-shadow: none; }
@@ -2057,4 +2057,9 @@ export default {
 .itin.day-mode .itin-tier--signature .itin-overlay-btn--info:hover { background: rgba(212,175,55,0.45); box-shadow: inset 0 0 0 0.8px rgba(212,175,55,0.6); }
 .itin.day-mode .itin-tier--signature .itin-slot-actions .itin-icon:not(.is-on):not(.is-liked):not(.is-disliked):not(.is-saved):not(.itin-icon--danger) { background: rgba(212,175,55,0.12); box-shadow: inset 0 0 0 1px rgba(212,175,55,0.2); }
 .itin.day-mode .itin-tier--signature .itin-slot-actions .itin-icon:not(.is-on):not(.is-liked):not(.is-disliked):not(.is-saved):not(.itin-icon--danger):hover:not(:disabled) { background: rgba(212,175,55,0.22); }
+
+/* Region overlap, founder-tuned per text size (2026-09-01): -18 normal,
+   -20 large, -17.5 small — read from the data-text-size stamp. */
+html[data-text-size="big"] .itin-card-region { margin-top: -20px; }
+html[data-text-size="small"] .itin-card-region { margin-top: -17.5px; }
 </style>
