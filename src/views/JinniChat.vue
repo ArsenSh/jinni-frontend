@@ -8746,4 +8746,9 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 
 .new-chat-btn svg, .new-chat-btn-collapsed svg{display:block;flex-shrink:0}
 .new-chat-btn-collapsed{line-height:1}
+
+/* Input row at Large: 18px x 1.4 + 30px padding outgrew the 50px round
+   buttons beside it — trim vertical padding so the row stays ~50px
+   (founder 2026-09-01). Normal/Small already land right at 15px. */
+html[data-text-size="big"] .input-wrapper textarea{padding-top:12px;padding-bottom:12px}
 </style>
