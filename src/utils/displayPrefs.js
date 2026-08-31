@@ -8,7 +8,7 @@ export const FONT_STACKS = {
   standard: '',
   classic: "Georgia, 'Times New Roman', serif",
   elegant: "'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif",
-  rounded: "'Trebuchet MS', Verdana, sans-serif",
+  modern: "'Avenir Next', Futura, 'Century Gothic', 'Trebuchet MS', sans-serif",
 };
 
 export function applyDisplayPrefs(settings = null) {
