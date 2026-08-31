@@ -4541,7 +4541,10 @@ export default {
         return;
       }
       if (this.messages.length === 0 && this._greetText) {
-        this.messages.push({ id: `greet-${Date.now()}`, sender: 'ai', text: this._greetText, timestamp: new Date() });
+        // hidden: the engine sees it in history (context for replies TO the
+        // greeting), the traveler never sees it as a bubble (founder
+        // 2026-09-01: "ai can see but user not").
+        this.messages.push({ id: `greet-${Date.now()}`, sender: 'ai', text: this._greetText, timestamp: new Date(), hidden: true });
       }
       const userMessage = { id: `user-${Date.now()}`, sender: 'user', text: this.userInput, timestamp: new Date() };
       this.messages.push(userMessage);
@@ -5203,6 +5206,7 @@ export default {
         // Route answers: without this the save allowlist drops routeTo and
         // the See-route button vanishes after a refresh (live 2026-08-31).
         ...(msg.metadata?.routeTo && { metadata: { routeTo: msg.metadata.routeTo } }),
+        ...(msg.hidden && { hidden: true }),
         ...(msg.recommendations && {
           recommendations: msg.recommendations.map(rec => ({
             id: rec.id,
