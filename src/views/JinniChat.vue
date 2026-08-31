@@ -489,14 +489,14 @@
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.4"/><circle cx="18" cy="5" r="2.4"/><path d="M8.4 18.4h6.2a2.8 2.8 0 0 0 0-5.6H9.4a2.8 2.8 0 0 1 0-5.6h6.2"/></svg>
                       See route
                     </button>
-                    <div v-if="!(message.metadata && message.metadata.routeTo)" class="recommendations" :class="{'streaming-recommendations': message.streaming}">
-                      <div class="section-title">
+                    <div class="recommendations" :class="{'streaming-recommendations': message.streaming}">
+                      <div v-if="!(message.metadata && message.metadata.routeTo)" class="section-title">
                         {{ message.isViewMore ? t('chat.recommendations.more_recommendations') : t('chat.recommendations.recommended') }}
                         <span v-if="message.recommendations.length > 0" class="results-count">
                           {{ t('chat.recommendations.results_count', { count: message.recommendations.length }) }}
                         </span>
                       </div>
-                      <div class="recommendation-grid">
+                      <div v-if="!(message.metadata && message.metadata.routeTo)" class="recommendation-grid">
                         <div v-for="(rec, recIndex) in message.recommendations" :key="recIndex" :class="['rec-card-wrapper', getPartnerWrapperClass(rec)]">
                           <div class="recommendation-card" @touchstart="handleCardTouchStart(rec, $event)" @touchend="handleCardTouchEnd(rec, $event)">
                             <!-- An event with a date but no image is a DATE-CARD: the event
