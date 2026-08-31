@@ -60,7 +60,7 @@
           <div class="session-header">
             <div class="session-title">
               <input v-if="editingSessionId === session.id" v-model="session.title" @keyup.enter="saveSessionTitle(session)" @blur="saveSessionTitle(session)"  @click.stop class="title-input" ref="titleInput">
-              <span v-else>{{ session.title || t('chat.sidebar.default_chat_title', { number: index + 1 }) }}</span>
+              <span v-else>{{ session.title ? displayTitle(session.title) : t('chat.sidebar.default_chat_title', { number: index + 1 }) }}</span>
             </div>
             <div class="session-actions">
               <button v-if="contextMenu.sessionId !== session.id" @click.stop="toggleContextMenu(session, $event)" class="icon-btn" :aria-label="t('chat.sidebar.session_options')">
@@ -187,7 +187,7 @@
               </button>
             </div>
             <div class="current-session-title" v-if="messages.length !== 0">
-              {{ activeSession?.title || t('chat.header.new_chat_title') }}
+              {{ displayTitle(activeSession?.title) }}
             </div>
             <div v-if="!isDesktop && messages.length !== 0" class="mobile-new-chat">
               <button @click="startNewChat" class="mobile-menu-btn">
@@ -5790,6 +5790,18 @@ export default {
       const icon = this.$el.querySelector('.greeting-icon');
       if (icon) icon.style.height = lines === 1 ? '28px' : lines === 2 ? '38px' : '46px';
       } catch (e) { /* a failed fit must never break the chat */ }
+    },
+    // A session titled "New Chat" keeps the language it was CREATED in —
+    // stored titles don't retranslate. Display-level fix (founder
+    // 2026-09-01): any known new-chat placeholder renders in the CURRENT
+    // language; real (generated/user) titles pass through untouched.
+    displayTitle(title) {
+      const NEW_CHAT_TITLES = new Set(['New Chat', 'New chat', 'Новый чат', 'Նոր զրույց', 'محادثة جديدة', '新对话', 'Nouvelle discussion']);
+      if (!title || NEW_CHAT_TITLES.has(title)) {
+        const tt = this.t || this.$t;
+        return tt.call(this, 'chat.header.new_chat_title');
+      }
+      return title;
     },
     registerRecMap(id, el) {
       if (!this._recMaps) this._recMaps = {};
