@@ -351,7 +351,7 @@
                         <div v-html="formatTextSegment(part.content)"></div>
                       </div>
                       <!-- Recommendation cards (inline) -->
-                      <div v-else-if="part.type === 'recommendation' && message.recommendations && message.recommendations[part.index]" class="inline-recommendation-wrapper">
+                      <div v-else-if="part.type === 'recommendation' && message.recommendations && message.recommendations[part.index] && !(message.metadata && message.metadata.routeTo)" class="inline-recommendation-wrapper">
                         <div :class="['rec-card-wrapper', getPartnerWrapperClass(message.recommendations[part.index])]">
                         <div class="recommendation-card inline-card" :class="{ 'large-card': message.isChatRecommendation }" @touchstart="handleCardTouchStart(message.recommendations[part.index], $event)" @touchend="handleCardTouchEnd(message.recommendations[part.index], $event)">
                           <div class="rec-image" v-if="message.recommendations[part.index].image">
@@ -466,6 +466,7 @@
                     </button>
                     <RecommendationMap
                       v-if="!message.streaming && message.recommendations && message.recommendations.length"
+                      :class="{ 'route-only-map': !!(message.metadata && message.metadata.routeTo) }"
                       :ref="el => registerRecMap(message.id, el)"
                       :recommendations="message.recommendations"
                       :theme="currentTheme"
@@ -8580,4 +8581,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    (founder 2026-08-31). Left-anchor the text against the lamp; the slack
    moves to the right edge where it is invisible. Desktop keeps center. */
 @media (max-width:768px){.greeting{justify-content:flex-start;text-align:left}}
+
+/* Route answers ("how to reach X"): the map exists only for the See-route
+   button's fullscreen trip — its inline "Show on map" bar is noise next to
+   the CTA (founder 2026-08-31). Keep it mounted, hide its chrome. */
+:deep(.rec-map.route-only-map .rec-map-bar){display:none}
+:deep(.rec-map.route-only-map){margin:0}
 </style>
