@@ -1798,7 +1798,7 @@ export default {
 .itin-card-header { display: flex; align-items: flex-start; gap: 8px; }
 .itin-card-header .itin-card-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-img-btn {
-  width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+  width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   position: relative; overflow: hidden; transition: all 0.25s ease;
   color: var(--it-text); background: var(--it-glass); box-shadow: var(--it-ring);
@@ -1807,7 +1807,7 @@ export default {
 .itin-img-btn:hover:not(.is-loading) { background: var(--it-glass-hover); box-shadow: var(--it-ring-hover); }
 .itin-img-btn.is-loading { cursor: default; }
 .itin-card-name { font-weight: 700; font-size: 13.5px; line-height: 1.25; color: var(--it-biz); }
-.itin-card-region { font-size: 0.75rem; color: var(--it-muted); margin-top: -15px; margin-right: 42px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.itin-card-region { font-size: 0.75rem; color: var(--it-muted); margin-top: -20px; margin-right: 42px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-card-note { font-size: 0.75rem; color: var(--it-muted); margin-top: 4px; font-style: italic; }
 .itin-card--failed { flex-direction: column; align-items: flex-start; gap: 6px;
   background: rgba(224,85,85,0.06); box-shadow: none; }
