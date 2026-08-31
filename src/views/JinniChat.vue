@@ -5772,12 +5772,25 @@ export default {
       const el = this.$el?.querySelector?.('.greeting');
       if (!el) return;
       if (window.innerWidth > 768) { el.style.maxWidth = ''; return; }
+      // Measured too early (pre-layout clientWidth 0, or fonts not ready →
+      // scrollWidth 0): computed a junk box, browser ignored the invalid
+      // width, text swallowed the row and pinned the pair LEFT (founder's
+      // IMG_1501). Retry until the layout is real.
+      const parentW = el.parentElement?.clientWidth || 0;
+      if (parentW < 120) {
+        if ((this._greetFitTries = (this._greetFitTries || 0) + 1) <= 20) setTimeout(() => this._fitGreeting(), 200);
+        return;
+      }
       el.style.maxWidth = 'none';
       const prevWS = el.style.whiteSpace;
       el.style.whiteSpace = 'nowrap';
       const w = el.scrollWidth;
       el.style.whiteSpace = prevWS || '';
-      const avail = (el.parentElement?.clientWidth || window.innerWidth) - 100;
+      if (w < 40) {
+        if ((this._greetFitTries = (this._greetFitTries || 0) + 1) <= 20) setTimeout(() => this._fitGreeting(), 200);
+        return;
+      }
+      const avail = parentW - 100;
       // However many lines this language needs at this width (1, 2, 3…):
       // divide the unwrapped width across them, plus a word of tolerance,
       // clamped to what the row can hold. Balance evens the lines inside.
