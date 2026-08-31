@@ -466,7 +466,7 @@
                     </button>
                     <RecommendationMap
                       v-if="!message.streaming && message.recommendations && message.recommendations.length"
-                      :class="{ 'route-only-map': !!(message.metadata && message.metadata.routeTo) }"
+                      :route-only="!!(message.metadata && message.metadata.routeTo)"
                       :ref="el => registerRecMap(message.id, el)"
                       :recommendations="message.recommendations"
                       :theme="currentTheme"
@@ -612,7 +612,7 @@
                         </div><!-- /rec-card-wrapper -->
                       </div><!-- /recommendation-grid -->
                       <RecommendationMap
-                        :class="{ 'route-only-map': !!(message.metadata && message.metadata.routeTo) }"
+                        :route-only="!!(message.metadata && message.metadata.routeTo)"
                         :ref="el => registerRecMap(message.id, el)"
                         :recommendations="message.recommendations"
                         :theme="currentTheme"
@@ -8703,10 +8703,13 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 
 /* Chat→map "See route" CTA (transport answers with a routable card) —
    light/color feedback only on hover, never movement (founder rule). */
-.route-cta-btn{display:inline-flex;align-items:center;gap:7px;margin:10px 0 4px;padding:9px 16px;border:1px solid rgba(0,0,0,0.12);border-radius:12px;background:#fff;color:#b45309;font-weight:700;font-size:0.92rem;cursor:pointer}
-.route-cta-btn:hover{background:#fff7ed}
-.genie-chat-container.night-mode .route-cta-btn{background:rgba(255,255,255,0.07);border:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);color:#c084fc}
-.genie-chat-container.night-mode .route-cta-btn:hover{background:rgba(255,255,255,0.16)}
+/* See-route CTA — the rec-map bar's visual twin (founder 2026-09-01:
+   "make the rec-cta-btn look very same way the rec-map looks"). Same
+   surface, radius, rim, type scale and hover recipe as .rec-map/.rec-map-bar. */
+.route-cta-btn{display:flex;width:100%;align-items:center;gap:9px;margin:12px 0 4px;padding:11px 14px;border:none;border-radius:14px;background:rgba(255,255,255,0.45);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6);color:#A0522D;font-weight:600;font-size:0.875rem;cursor:pointer;backdrop-filter:blur(2px) saturate(180%);-webkit-backdrop-filter:blur(2px) saturate(180%);transition:background 0.18s ease}
+.route-cta-btn:hover{background:rgba(255,255,255,0.75)}
+.genie-chat-container.night-mode .route-cta-btn{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1);color:#c084fc}
+.genie-chat-container.night-mode .route-cta-btn:hover{background:rgba(255,255,255,0.14)}
 
 /* Greeting: balanced wrapping so no single word sits alone on a line. */
 .greeting{text-wrap:balance}
