@@ -5777,7 +5777,11 @@ export default {
       const w = el.scrollWidth;
       el.style.whiteSpace = prevWS || '';
       const avail = (el.parentElement?.clientWidth || window.innerWidth) - 100;
-      const box = (w > avail ? Math.ceil(w / 2) + 28 : w + 2) + 'px';
+      // However many lines this language needs at this width (1, 2, 3…):
+      // divide the unwrapped width across them, plus a word of tolerance,
+      // clamped to what the row can hold. Balance evens the lines inside.
+      const lines = Math.max(1, Math.ceil(w / avail));
+      const box = Math.min(avail, Math.ceil(w / lines) + 28) + 'px';
       el.style.maxWidth = box;
       el.style.width = box;
       } catch (e) { /* a failed fit must never break the chat */ }
