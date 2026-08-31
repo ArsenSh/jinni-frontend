@@ -196,6 +196,17 @@ const TILE_NIGHT = `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.p
 // and the maps render from OUR archive via protomaps-leaflet — no third-party
 // tile service at all, $0, no expiry. Unset = CARTO URLs above.
 const PMTILES_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PMTILES_URL) || '';
+// One pmtiles layer per theme. Night flavor chosen against JinniChat's night
+// chrome (deep purple-navy #0a0118→#1a0b2e→#16213e, violet accents): protomaps
+// 'dark' sits naturally under it. Founder wants it deeper? — change to 'black'.
+function pmLayer(theme) {
+  return window.protomapsL.leafletLayer({
+    url: PMTILES_URL,
+    flavor: theme === 'night-mode' ? 'dark' : 'light',
+    lang: 'en',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  });
+}
 
 // Leaflet is loaded from a CDN at runtime (shared promise with the other maps —
 // injected only once). leaflet-rotate adds map.setBearing() for heading-up
@@ -396,7 +407,12 @@ export default {
   watch: {
     theme() {
       if (!this.tileLayer || !this.map) return;
-      if (this._pmtiles) return;   // protomaps: one flavor serves both themes
+      if (this._pmtiles) {
+        // Flavors are baked into the layer — swap it for the other theme's.
+        this.map.removeLayer(this.tileLayer);
+        this.tileLayer = pmLayer(this.theme).addTo(this.map);
+        return;
+      }
       this.tileLayer.setUrl(this.tileUrl());
     },
     // Day switched / slots changed: any active navigation targets a stop that may
@@ -444,10 +460,9 @@ export default {
       const usePm = PMTILES_URL && window.protomapsL && window.protomapsL.leafletLayer;
       this._pmtiles = !!usePm;
       this.tileLayer = usePm
-        // Our own basemap. 'light' flavor for BOTH themes — the night map
-        // deliberately uses light tiles (dark renders effectively invisible
-        // here, settled decision above).
-        ? window.protomapsL.leafletLayer({ url: PMTILES_URL, flavor: 'light', lang: 'en', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(this.map)
+        // Our own basemap — light by day, protomaps 'dark' at night (matched
+        // to JinniChat's night chrome; the old CARTO dark was unusable).
+        ? pmLayer(this.theme).addTo(this.map)
         : L.tileLayer(this.tileUrl(), { attribution: '', subdomains: 'abcd', maxZoom: 19, detectRetina: true }).addTo(this.map);
       this.markerLayer = L.layerGroup().addTo(this.map);
       this.map.on('popupopen', () => { this.popupOpen = true; });
