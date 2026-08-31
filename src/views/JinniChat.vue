@@ -7552,7 +7552,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .image-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.3));display:flex;align-items:center;justify-content:center;opacity:0;z-index:2}
 .recommendation-card:hover .image-overlay{opacity:1}
 .overlay-actions{display:flex;gap:10px}
-.text-action-btn{padding:8px;border:none;border-radius:25px;cursor:pointer;font-size:0.8rem;font-weight:500;transition:all 0.25s ease;min-width:80px;text-align:center;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
+.text-action-btn{padding:8px;border:none;border-radius:25px;cursor:pointer;font-size:0.8rem;line-height:1.1;font-weight:500;transition:all 0.25s ease;min-width:80px;text-align:center;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
 .rec-details{padding:12px 12px 6px 12px}
 .rec-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .rec-name{font-weight:500;margin-bottom:4px;flex:1;line-height:1.3}
