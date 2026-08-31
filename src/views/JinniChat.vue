@@ -7355,7 +7355,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .collapse-btn svg,.collapse-btn-inline svg{width:20px;height:20px}
 .new-chat-btn svg,.new-chat-btn-collapsed svg,.saved-places-nav-btn svg{width:20px;height:20px}
 .sidebar-header{padding:10px 16px 3px 16px;display:flex;justify-content:space-between;align-items:center}
-.new-chat-btn{background:transparent;color:inherit;border:none;height:38px;font-size:0.9rem;padding:0 15px;border-radius:25px;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:500;transition:all 0.3s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
+.new-chat-btn{background:transparent;color:inherit;border:none;height:38px;font-size:0.9rem;line-height:1;padding:0 15px;border-radius:25px;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:500;transition:all 0.3s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
 .new-chat-btn:hover{background:transparent}
 .new-chat-btn-collapsed:hover{background:transparent}
 .new-chat-btn-collapsed{background:transparent;color:inherit;border:none;padding:8px;border-radius:50%;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
@@ -8743,4 +8743,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    heights (founder 2026-09-01). */
 .mode-toggle-inline, .mode-toggle{line-height:1}
 .mode-toggle-inline svg, .mode-toggle svg{display:block;flex-shrink:0}
+
+.new-chat-btn svg, .new-chat-btn-collapsed svg{display:block;flex-shrink:0}
+.new-chat-btn-collapsed{line-height:1}
 </style>
