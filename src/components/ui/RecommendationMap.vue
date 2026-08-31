@@ -164,17 +164,27 @@
 // NOT an npm package. The shared promise injects the script/CSS only once.
 let leafletPromise = null;
 function loadLeaflet() {
-  if (typeof window !== 'undefined' && window.L && window.L.Map.prototype.setBearing) return Promise.resolve(window.L);
+  if (typeof window !== 'undefined' && window.L && window.L.Map && window.L.Map.prototype.setBearing && (!PMTILES_URL || window.protomapsL)) return Promise.resolve(window.L);
   if (leafletPromise) return leafletPromise;
   leafletPromise = new Promise((resolve, reject) => {
     const done = () => resolve(window.L);
+    // protomaps-leaflet (UMD binds to the global L, same CDN approach) —
+    // loaded only when self-hosted tiles are configured. Best-effort: a
+    // failed load falls back to the raster tile layer.
+    const addProtomaps = () => {
+      if (!PMTILES_URL || (window.protomapsL && window.protomapsL.leafletLayer)) return done();
+      const pm = document.createElement('script');
+      pm.src = 'https://unpkg.com/protomaps-leaflet@5/dist/protomaps-leaflet.js';
+      pm.onload = done; pm.onerror = done;
+      document.head.appendChild(pm);
+    };
     // leaflet-rotate adds map.setBearing() for heading-up navigation. Best-effort:
     // if it can't load we resolve anyway and the map simply stays north-up.
     const addRotate = () => {
-      if (window.L && window.L.Map.prototype.setBearing) return done();
+      if (window.L && window.L.Map.prototype.setBearing) return addProtomaps();
       const p = document.createElement('script');
       p.src = 'https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.js';
-      p.onload = done; p.onerror = done;
+      p.onload = addProtomaps; p.onerror = addProtomaps;
       document.head.appendChild(p);
     };
     if (window.L && window.L.map) return addRotate();
@@ -206,6 +216,12 @@ const CARTO_KEY = (typeof import.meta !== 'undefined' && import.meta.env && impo
 const TILE_KEY = CARTO_KEY ? `?key=${CARTO_KEY}` : '';
 const TILE_DAY   = `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png${TILE_KEY}`;
 const TILE_NIGHT = `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png${TILE_KEY}`;
+// Self-hosted tiles (Protomaps .pmtiles served by OUR backend — founder
+// doctrine 2026-08-31, after CARTO's "api_key_required" watermark + 14-day
+// trial): set VITE_PMTILES_URL (e.g. https://api.jinni.travel/tiles/jinni.pmtiles)
+// and the maps render from OUR archive via protomaps-leaflet — no third-party
+// tile service at all, $0, no expiry. Unset = CARTO URLs above.
+const PMTILES_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PMTILES_URL) || '';
 // Driving marker: a Google-style navigation chevron (coloured fill, white
 // casing), pointing "up". Heading is applied by rotating the wrapper (north-up)
 // or by rotating the whole map (heading-up), so the glyph itself stays upright.
@@ -326,7 +342,11 @@ export default {
     },
   },
   watch: {
-    theme() { if (this.tileLayer && this.map) this.tileLayer.setUrl(this.tileUrl()); },
+    theme() {
+      if (!this.tileLayer || !this.map) return;
+      if (this._pmtiles) return;   // protomaps: one flavor serves both themes
+      this.tileLayer.setUrl(this.tileUrl());
+    },
     recommendations() { if (this.map) { this.activeFilter = null; this.cardRoutes = {}; this.activeCard = 0; this.exitRoute(); this.renderMarkers(); this.$nextTick(() => this.initCards()); } },
   },
   mounted() { if (this.autoOpen && this.mappable.length) this.open(); },
@@ -1335,7 +1355,14 @@ export default {
       this._rotateEnabled = typeof this.map.setBearing === 'function' && !!this.map.options.rotate && !!(L.Browser && L.Browser.any3d);
       this.map.on('focus', () => this.map.scrollWheelZoom.enable());
       this.map.on('blur', () => { if (!this.fullscreen) this.map.scrollWheelZoom.disable(); });
-      this.tileLayer = L.tileLayer(this.tileUrl(), { attribution: '', subdomains: 'abcd', maxZoom: 19, detectRetina: true }).addTo(this.map);
+      const usePm = PMTILES_URL && window.protomapsL && window.protomapsL.leafletLayer;
+      this._pmtiles = !!usePm;
+      this.tileLayer = usePm
+        // Our own basemap. 'light' flavor for BOTH themes — the night map
+        // deliberately uses light tiles (dark renders effectively invisible
+        // here, settled decision above).
+        ? window.protomapsL.leafletLayer({ url: PMTILES_URL, flavor: 'light', lang: 'en', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }).addTo(this.map)
+        : L.tileLayer(this.tileUrl(), { attribution: '', subdomains: 'abcd', maxZoom: 19, detectRetina: true }).addTo(this.map);
       this.markerLayer = L.layerGroup().addTo(this.map);
       this.map.on('popupopen', this.onPopupOpen);
       this.map.on('popupclose', () => { this.popupOpen = false; });
