@@ -2377,7 +2377,9 @@ export default {
   watch: {
     // Empty-chat greeting (re)appeared — new chat, or cleared session: fit
     // its box so the lamp+text pair centers (see _fitGreeting).
-    'messages.length'(len) { if (len === 0) this.$nextTick(() => this._fitGreeting()); },
+    'messages.length'(len) { if (len === 0) this.$nextTick(() => this._fitGreetingSoon()); },
+    // Language switch redraws the greeting in a new tongue — new width.
+    'userSettings.language'() { this.$nextTick(() => this._fitGreetingSoon()); },
     // When the preference bar reveals, auto-hide it after PREFERENCE_BAR_HIDE_MS.
     // A fresh reveal (e.g. reopening the actions popover or typing after
     // clearing) restarts it. 3s was not long enough to read the chips while
@@ -2441,7 +2443,8 @@ export default {
   },
   mounted() {
     this.checkScreenSize();
-    this.$nextTick(() => this._fitGreeting());
+    this.$nextTick(() => this._fitGreetingSoon());
+    try { document.fonts?.ready?.then(() => this._fitGreeting()); } catch (e) {}
     document.addEventListener('click', this.handlePlaceSearchClick);
     window.addEventListener('resize', this.checkScreenSize);
     this.setupPreferenceButtonHandler();
@@ -3644,6 +3647,7 @@ export default {
       this.userSettings[key] = val;
       try { localStorage.setItem('jinni_settings', JSON.stringify(this.userSettings)); } catch (e) {}
       this.applyDisplayPrefs();
+      this.$nextTick(() => this._fitGreetingSoon());
       this.saveSettings();
     },
     applySettings() {
@@ -5816,6 +5820,14 @@ export default {
     // width W; if it fits, box = W (one line); if not, box ≈ W/2 + a word of
     // tolerance — text-wrap:balance evens the two lines inside it. Then the
     // container's justify-content:center finally has a shrink-wrapped pair.
+    // Every event that changes text width re-fits through here: mount,
+    // new chat, font load, language switch, display-pref change, resize/
+    // rotation. The measure is idempotent, so a settle-window of retries
+    // costs nothing and beats guessing which single moment is "after
+    // layout" on every phone (founder: left-stuck "in lots of situations").
+    _fitGreetingSoon() {
+      [0, 200, 600, 1400].forEach(d => setTimeout(() => this._fitGreeting(), d));
+    },
     _fitGreeting() {
       try {
       const el = this.$el?.querySelector?.('.greeting');
@@ -6504,6 +6516,7 @@ export default {
       this.$router.push(`/auth?redirect=${encodeURIComponent(currentPath)}`);
     },
     checkScreenSize() {
+      if (this._fitGreetingSoon) this._fitGreetingSoon();
       this.isDesktop = window.innerWidth > 768;
       this.$forceUpdate();
     },
