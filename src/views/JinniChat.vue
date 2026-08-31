@@ -5140,6 +5140,9 @@ export default {
         isViewMore: msg.isViewMore || false,
         isLoadingMore: false,
         ...(msg.quickActions && { quickActions: msg.quickActions }),
+        // Route answers: without this the save allowlist drops routeTo and
+        // the See-route button vanishes after a refresh (live 2026-08-31).
+        ...(msg.metadata?.routeTo && { metadata: { routeTo: msg.metadata.routeTo } }),
         ...(msg.recommendations && {
           recommendations: msg.recommendations.map(rec => ({
             id: rec.id,
