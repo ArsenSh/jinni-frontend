@@ -768,7 +768,7 @@
         <div class="centered-content">
           <div class="ai-greeting" v-if="messages.length === 0">
             <img src="/images/bottle.png?v=3" class="greeting-icon" alt="Jinni">
-            <div class="greeting">{{ t('chat.greeting.how_can_help') }}</div>
+            <div class="greeting">{{ greetingLine() }}</div>
           </div>
           <div class="chat-input-container">
             <!-- Quota notice. Lives here rather than in the transcript: it is
@@ -5718,6 +5718,26 @@ export default {
     },
     // Keep a (non-reactive) handle on each message's RecommendationMap instance
     // so we can imperatively close it (e.g. when "View More" is pressed).
+    // Rotating genie greeting (founder 2026-08-31): time-bucketed by the
+    // PHONE's local hour, one line per visit (memoized — no re-roll on
+    // re-render), 25% chance of an evergreen genie line. Every line is an
+    // INVITATION, never a yes/no question — the greeting is UI only, the
+    // backend never sees it, so a bare "yes" reply could never be resolved.
+    // Missing translation falls back to the classic how_can_help. The last
+    // space becomes a no-break space so a single word never wraps alone.
+    greetingLine() {
+      if (!this._greetKey) {
+        const h = new Date().getHours();
+        const slot = h >= 5 && h < 11 ? 'm' : h >= 11 && h < 17 ? 'a' : h >= 17 && h < 22 ? 'e' : 'n';
+        this._greetKey = Math.random() < 0.25
+          ? `chat.greeting.g${1 + Math.floor(Math.random() * 3)}`
+          : `chat.greeting.${slot}${1 + Math.floor(Math.random() * 3)}`;
+      }
+      const tt = this.t || this.$t;
+      let line = tt.call(this, this._greetKey);
+      if (!line || line === this._greetKey) line = tt.call(this, 'chat.greeting.how_can_help');
+      return line.replace(/ (\S+)$/, '\u00A0$1');
+    },
     registerRecMap(id, el) {
       if (!this._recMaps) this._recMaps = {};
       if (el) this._recMaps[id] = el;
@@ -8547,4 +8567,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .route-cta-btn:hover{background:#fff7ed}
 .genie-chat-container.night-mode .route-cta-btn{background:rgba(255,255,255,0.07);border:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);color:#c084fc}
 .genie-chat-container.night-mode .route-cta-btn:hover{background:rgba(255,255,255,0.16)}
+
+/* Greeting: balanced wrapping so no single word sits alone on a line. */
+.greeting{text-wrap:balance}
 </style>

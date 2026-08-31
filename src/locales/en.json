@@ -736,7 +736,22 @@
       "new_chat_title": "New Chat"
     },
     "greeting": {
-      "how_can_help": "How can I help you?"
+      "how_can_help": "How can I help you?",
+      "m1": "Good morning ✨ Ask me where the best coffee is hiding.",
+      "m2": "A new day in the city — ask me for a breakfast spot.",
+      "m3": "Tell me your plans for today — I'll find the places.",
+      "a1": "Ask me for lunch, a walk, or somewhere you've never been.",
+      "a2": "Tell me a mood — cozy, lively, quiet — I'll find the place.",
+      "a3": "The lamp is warm ✨ Ask for a hidden corner of the city.",
+      "e1": "Ask me what's on tonight — dinner, events, or both.",
+      "e2": "Tonight deserves a plan — ask me for one.",
+      "e3": "Ask me for a dinner spot that fits your evening.",
+      "n1": "Ask me what's open right now.",
+      "n2": "Night owls — ask me for late food nearby.",
+      "n3": "Planning tomorrow? Ask me to line it up.",
+      "g1": "Rub the lamp — ask for places, events, or the way there.",
+      "g2": "Three wishes? Here you get unlimited ✨",
+      "g3": "Your genie knows this city — test me."
     },
     "input": {
       "placeholder": "Message Jinni",

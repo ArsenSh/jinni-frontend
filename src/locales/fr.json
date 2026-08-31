@@ -749,7 +749,22 @@
       "new_chat_title": "Nouvelle discussion"
     },
     "greeting": {
-      "how_can_help": "Comment puis-je vous aider ?"
+      "how_can_help": "Comment puis-je vous aider ?",
+      "m1": "Bonjour ✨ Demande-moi où se cache le meilleur café.",
+      "m2": "Un nouveau jour en ville — demande-moi où prendre le petit-déjeuner.",
+      "m3": "Raconte-moi tes plans du jour — je trouverai les lieux.",
+      "a1": "Demande-moi un déjeuner, une balade ou un endroit inconnu.",
+      "a2": "Donne-moi une ambiance — cosy, animée, calme — je trouve le lieu.",
+      "a3": "La lampe est chaude ✨ Demande un coin caché de la ville.",
+      "e1": "Demande-moi le programme du soir — dîner, événements, ou les deux.",
+      "e2": "Ce soir mérite un plan — demande-le-moi.",
+      "e3": "Demande-moi un dîner à la hauteur de ta soirée.",
+      "n1": "Demande-moi ce qui est ouvert en ce moment.",
+      "n2": "Oiseau de nuit — demande-moi où manger tard.",
+      "n3": "Tu prépares demain ? Demande-moi de tout organiser.",
+      "g1": "Frotte la lampe — demande des lieux, des événements ou le chemin.",
+      "g2": "Trois vœux ? Ici, ils sont illimités ✨",
+      "g3": "Ton génie connaît cette ville — mets-moi à l'épreuve."
     },
     "input": {
       "placeholder": "Envoyer un message",
