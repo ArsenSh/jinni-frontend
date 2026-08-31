@@ -7906,7 +7906,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .genie-chat-container.night-mode .mobile-nav .mobile-menu-btn,.genie-chat-container.night-mode .mobile-new-chat .mobile-menu-btn{color:#94a3b8;background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.1);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .genie-chat-container.night-mode .mobile-nav .mobile-menu-btn:hover,.genie-chat-container.night-mode .mobile-new-chat .mobile-menu-btn:hover{background:rgba(255,255,255,0.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .mobile-nav .mobile-menu-btn:active,.genie-chat-container.night-mode .mobile-new-chat .mobile-menu-btn:active{transform:scale(0.92)}
-.genie-chat-container.night-mode .greeting-icon{filter:drop-shadow(0 0 10px rgba(65,105,225,0.8))}
+.genie-chat-container.night-mode .greeting-icon{filter:drop-shadow(0 0 8px rgba(65,105,225,0.7))}
 .genie-chat-container.night-mode .skeleton-shimmer{color:rgba(255,255,255,0.3)}
 .genie-chat-container.night-mode .profile-menu{background:rgba(30,26,48,0.38);box-shadow:0 0 1px rgba(0,0,0,0.2),inset 0 0 0 0.7px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .profile-menu-item{color:#94a3b8;border-bottom-color:rgba(139,92,246,0.1)}
