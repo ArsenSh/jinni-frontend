@@ -1798,7 +1798,10 @@ export default {
 .itin-card-header { display: flex; align-items: flex-start; gap: 8px; }
 .itin-card-header .itin-card-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .itin-img-btn {
-  width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+  /* rem, not px: the button carries the SAME text-size multiplier as the
+     row beside it, so the tuned top/bottom fit survives Small/Large
+     (founder 2026-09-01). 2.375rem == 38px at Normal. */
+  width: 2.375rem; height: 2.375rem; border-radius: 50%; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   position: relative; overflow: hidden; transition: all 0.25s ease;
   color: var(--it-text); background: var(--it-glass); box-shadow: var(--it-ring);
