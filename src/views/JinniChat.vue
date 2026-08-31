@@ -5722,7 +5722,13 @@ export default {
           (target.placeId && r.placeId && r.placeId === target.placeId)
           || (target.name && norm(r.name) === norm(target.name)));
         if (!has) continue;
-        this.$nextTick(() => { try { this._recMaps?.[msg.id]?.routeToPlace(target); } catch (e) { /* best-effort */ } });
+        // The answer's OWN map may still be mounting — retry briefly.
+        const tryRoute = (left) => {
+          const map = this._recMaps?.[msg.id];
+          if (map) { try { map.routeToPlace(target); } catch (e) { /* best-effort */ } return; }
+          if (left > 0) setTimeout(() => tryRoute(left - 1), 300);
+        };
+        this.$nextTick(() => tryRoute(6));
         return;
       }
     },
