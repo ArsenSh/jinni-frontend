@@ -767,7 +767,7 @@
       <div class="fixed-input-container" :class="{ 'empty-chat': messages.length === 0 }">
         <div class="centered-content">
           <div class="ai-greeting" v-if="messages.length === 0">
-            <img src="/images/bottle.png?v=3" class="greeting-icon" alt="Jinni">
+            <img src="/images/bottle-greeting.png?v=1" class="greeting-icon" alt="Jinni">
             <div class="greeting">{{ greetingLine() }}</div>
           </div>
           <div class="chat-input-container">
@@ -7525,7 +7525,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .loading-more-text{font-size:0.85rem;font-style:italic;transition:opacity 1s ease-out}
 .typing-lamp{margin-left:0;flex-shrink:0}
 .ai-greeting{font-size:1.5rem;font-weight:150;padding:0 10px 25px 10px;text-align:center;display:flex;align-items:center;justify-content:center;gap:15px}
-.greeting-icon{align-self:stretch;height:auto;width:auto;max-height:88px;flex-shrink:0}
+.greeting-icon{align-self:stretch;height:auto;width:auto;max-height:56px;flex-shrink:0}
 .greeting{font-size:1.3rem;font-weight:150;margin:0;line-height:1.35;min-height:2.7em;display:flex;align-items:center;justify-content:center}
 .chat-input-container{padding:8px;border-top:none;border-radius:32px;margin:0 15px;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);position:relative;bottom:0;z-index:100;max-width:none;box-sizing:border-box;transition:all 0.3s ease}
 .input-wrapper{position:relative;display:flex;flex:1;align-items:flex-start;border-radius:25px;overflow:hidden;transition:all 0.3s ease;backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);max-height:200px}
