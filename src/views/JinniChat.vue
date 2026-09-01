@@ -7670,8 +7670,8 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .loading-more-text{font-size:0.85rem;font-style:italic;transition:opacity 1s ease-out}
 .typing-lamp{margin-left:0;flex-shrink:0}
 .ai-greeting{font-size:1.5rem;font-weight:150;padding:0 10px 14px 10px;text-align:center;display:flex;align-items:center;justify-content:center;gap:15px}
-.greeting-icon{align-self:stretch;height:auto;width:auto;max-height:50px;flex-shrink:0}
-.greeting{font-size:1.3rem;font-weight:150;margin:0;line-height:1.35;min-height:2.7em;display:flex;align-items:center;justify-content:center}
+.greeting-icon{align-self:stretch;height:auto;width:auto;min-height:44px;max-height:45px;flex-shrink:0}
+.greeting{font-size:1.3rem;font-weight:150;margin:0;line-height:1.35;display:flex;align-items:center;justify-content:center}
 .chat-input-container{padding:8px;border-top:none;border-radius:32px;margin:0 15px;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);position:relative;bottom:0;z-index:100;max-width:none;box-sizing:border-box;transition:all 0.3s ease}
 .input-wrapper{position:relative;display:flex;flex:1;align-items:flex-start;border-radius:25px;overflow:hidden;transition:all 0.3s ease;backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);max-height:200px}
 .input-wrapper textarea{flex:1;background:transparent;border:none;padding:14px 52px 14px 15px;font-size:1rem;line-height:22px;resize:none;overflow-y:auto;min-height:50px;max-height:200px}
