@@ -5821,6 +5821,18 @@ export default {
       let line = tt.call(this, this._greetKey);
       if (!line || line === this._greetKey) line = tt.call(this, 'chat.greeting.how_can_help');
       this._greetText = line;   // the send path materializes this as Jinni's first bubble
+      // Mobile: break the sentence OURSELVES near its midpoint. Pre-broken
+      // lines make width:max-content shrink-wrap the box to the true longest
+      // line — lamp gap becomes exactly the flex gap, centering is pure CSS,
+      // and no runtime measuring is involved (the iOS saga, final form).
+      if (window.innerWidth <= 768 && line.length > 28) {
+        const mid = Math.floor(line.length / 2);
+        let best = -1;
+        for (let i = 0; i < line.length; i++) {
+          if (line[i] === ' ' && (best === -1 || Math.abs(i - mid) < Math.abs(best - mid))) best = i;
+        }
+        if (best > 0) line = line.slice(0, best) + '\n' + line.slice(best + 1);
+      }
       return line.replace(/ (\S+)$/, '\u00A0$1');
     },
     // Mobile centering (founder rounds 3-4): a wrapped text box always fills
@@ -5841,6 +5853,11 @@ export default {
       try {
       const el = this.$el?.querySelector?.('.greeting');
       if (!el) return;
+      // Retired 2026-09-01: the greeting now pre-breaks its own line and
+      // shrink-wraps via width:max-content — pure CSS. The measurer only
+      // ever fought it (and never ran on iOS anyway). Clear any residue.
+      el.style.maxWidth = ''; el.style.width = '';
+      return;
       if (window.innerWidth > 768) { el.style.maxWidth = ''; return; }
       // Measured too early (pre-layout clientWidth 0, or fonts not ready →
       // scrollWidth 0): computed a junk box, browser ignored the invalid
@@ -8732,7 +8749,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    centered lines float mid-box — reading as a big gap beside the lamp
    (founder 2026-08-31). Left-anchor the text against the lamp; the slack
    moves to the right edge where it is invisible. Desktop keeps center. */
-@media (max-width:768px){.greeting{justify-content:center;text-align:center;max-width:62%}.greeting-icon{height:38px;width:auto;align-self:auto}}
+@media (max-width:768px){.greeting{justify-content:center;text-align:center;white-space:pre-line;width:max-content;max-width:72%}.greeting-icon{height:38px;width:auto;align-self:auto}}
 
 /* Route answers ("how to reach X"): the map exists only for the See-route
    button's fullscreen trip — its inline "Show on map" bar is noise next to
