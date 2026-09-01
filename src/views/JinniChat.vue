@@ -8113,7 +8113,6 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .genie-chat-container.day-mode .popover-action-btn:not(.action-disabled):not(.disabled-cooldown):hover{background:rgba(255,255,255,0.55)}
 .genie-chat-container.day-mode .view-more-hint{color:rgba(92,74,66,0.8)}
 .genie-chat-container.day-mode .greeting-icon{filter:drop-shadow(0 0 10px rgba(255,193,7,0.8))}
-.genie-chat-container.day-mode .greeting{color:#704214}
 .genie-chat-container.day-mode .message-bubble.ai .content,.genie-chat-container.day-mode .message-bubble.ai .text,.genie-chat-container.day-mode .message-bubble.ai .content .text{color:#3c2a1e}
 .genie-chat-container.day-mode .message-bubble.ai .text :deep(.section-header),.genie-chat-container.day-mode .message-bubble.ai .text :deep(.destination-link){color:#A0522D}
 .genie-chat-container.day-mode .message-bubble.ai .text :deep(strong),.genie-chat-container.day-mode .message-bubble.ai .text :deep(a){color:#A0522D}
