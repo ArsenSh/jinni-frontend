@@ -7352,8 +7352,8 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .app-header{padding:15px 15px 0 15px}
 .app-name{font-size:1.6rem;font-weight:600;color:#FFD700;background:linear-gradient(45deg,#D4AF37,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .app-brand{display:flex;align-items:center;gap:8px;justify-content:flex-start}
-.app-icon{width:60px;height:60px;object-fit:contain}
-.app-icon-collapsed{width:55px;height:55px;object-fit:contain}
+.app-icon{width:3.75rem;height:3.75rem;object-fit:contain}
+.app-icon-collapsed{width:3.4375rem;height:3.4375rem;object-fit:contain}
 .collapse-btn{background:transparent;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s ease;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .collapse-btn-inline{background:transparent;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-inline-start:auto;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .app-brand-collapsed{display:flex;justify-content:center;align-items:center}
