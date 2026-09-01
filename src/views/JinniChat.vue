@@ -8711,13 +8711,14 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 
 /* ── Quota notice above the composer ── */
 .chat-input-container{position:relative}
-.usage-notice{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:7px;max-width:min(92%,460px);padding:8px 13px;border-radius:999px;font-size: 0.78125rem;font-weight:500;line-height:1.3;text-align:left;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%)}
+.usage-notice{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:7px;max-width:95%;padding:8px 13px;border-radius:999px;font-size: 0.78125rem;font-weight:500;line-height:1.3;text-align:left;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%)}
 .usage-notice svg{flex:0 0 auto}
-/* Desktop has the room, so use it (Arsen 2026-08-24: "that in desktop mode can
-   be longer horizontally"). The 460px cap is a phone measurement; on a 800px
-   composer it wrapped the notice onto three lines with empty space either side.
-   Mobile keeps the narrow cap unchanged. */
-@media (min-width:769px){.usage-notice{max-width:min(96%,760px);white-space:normal}}
+/* Width tracks the composer at every breakpoint (Arsen 2026-09-01: "as much
+   long as the chat-input-container ... or just 5% little"). 95%, not 100%: the
+   small inset keeps it reading as a notice floating above the 32px-radius
+   composer instead of a second bar stacked on it. The old 460px/760px caps
+   were fixed phone/desktop measurements that stopped matching the composer
+   whenever its width changed. */
 .genie-chat-container.day-mode .usage-notice{color:#8a5a12;background:rgba(255,251,245,0.9);box-shadow:0 6px 20px rgba(120,80,30,0.16)}
 .genie-chat-container.night-mode .usage-notice{color:#f0d79a;background:rgba(44,30,80,0.86);box-shadow:0 6px 22px rgba(0,0,0,0.42)}
 .usage-notice-enter-active,.usage-notice-leave-active{transition:opacity 0.28s ease,transform 0.28s ease}
