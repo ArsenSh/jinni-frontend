@@ -8728,7 +8728,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    centered lines float mid-box — reading as a big gap beside the lamp
    (founder 2026-08-31). Left-anchor the text against the lamp; the slack
    moves to the right edge where it is invisible. Desktop keeps center. */
-@media (max-width:768px){.greeting{justify-content:flex-start;text-align:left}.greeting-icon{height:38px;width:auto;align-self:auto}}
+@media (max-width:768px){.greeting{justify-content:flex-start;text-align:left;max-width:76%}.greeting-icon{height:38px;width:auto;align-self:auto}}
 
 /* Route answers ("how to reach X"): the map exists only for the See-route
    button's fullscreen trip — its inline "Show on map" bar is noise next to
