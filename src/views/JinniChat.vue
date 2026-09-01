@@ -8758,8 +8758,25 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 :deep(.rec-map.route-only-map){margin:0}
 
 /* Greeting ink (founder 2026-09-01: "magical"): gradient text — works in
-   every script the greeting speaks, unlike a Latin display font. */
-.greeting{background:linear-gradient(105deg,#b45309 10%,#7c3aed 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.01em}
+   every script the greeting speaks, unlike a Latin display font.
+
+   Day stops are amber-800 -> purple-800, not amber-700 -> violet-600. Two
+   reasons, both about the cream ground (#f5edda behind a centred empty-chat
+   greeting):
+
+   - Contrast. The greeting is 1.3rem/1.05rem at weight 150 — nowhere near
+     WCAG large text, so it needs 4.5:1. The old #b45309 gave 4.31:1 at the
+     end nearest the lamp, the thinnest, least legible part. #92400e is
+     6.08:1; #6b21a8 is 7.48:1.
+   - Tone. Day mode is one warm family — sienna #A0522D, tan #8b6b3d, gold
+     #B7791F, copper #b87333 — with no purple anywhere; every other violet in
+     this file is .night-mode scoped. Electric #7c3aed was the one cool note
+     in the palette. Purple-800 has red in it, so it keeps the amber->purple
+     travel (the genie signature both modes share) while sitting with the
+     parchment instead of against it.
+
+   Night keeps #c084fc -> #60a5fa: those stops are on #16213e, not cream. */
+.greeting{background:linear-gradient(105deg,#92400e 10%,#6b21a8 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.01em}
 .genie-chat-container.night-mode .greeting{background:linear-gradient(105deg,#c084fc 10%,#60a5fa 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
 /* Display prefs pills (font style / text size). */
