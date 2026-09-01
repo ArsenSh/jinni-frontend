@@ -4886,6 +4886,26 @@ export default {
                     if (modeChange) {
                       this.nearbyMode = modeChange.value === 'nearby';
                       try { localStorage.setItem('nearbyMode', this.nearbyMode.toString()); } catch (_) {}
+                    } else if (data.metadata?.modeSwitched) {
+                      // Jinni switched the mode ITSELF this turn (v2): the toggle
+                      // said nearby, but they asked about a town they are not in,
+                      // so the answer came from discovery. Arsen 2026-09-01: "when
+                      // it worked on discovery it could send signal to front to
+                      // toggle to discovery … because when it is working context
+                      // is not nearby it is discovery."
+                      //
+                      // This is not cosmetic. The toggle IS what the next request
+                      // sends, so leaving it on nearby made the FOLLOW-UP snap
+                      // back: "what else?" carries no place name, and nearby mode
+                      // resolves to GPS — a Dilijan deck would have been followed
+                      // by Yerevan results with nothing on screen explaining why.
+                      //
+                      // Only the local control moves. Unlike settingsApplied above
+                      // — an explicit command, which the server also persists —
+                      // this switch was INFERRED, so the traveler's saved
+                      // preference is untouched and one tap puts it back.
+                      this.nearbyMode = data.metadata.modeSwitched === 'nearby';
+                      try { localStorage.setItem('nearbyMode', this.nearbyMode.toString()); } catch (_) {}
                     }
                     if (messageIndex === -1) return;
                     // console.log('🎯 COMPLETION RECEIVED FOR ASK AI:');
