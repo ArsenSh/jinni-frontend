@@ -20,6 +20,10 @@ export function applyDisplayPrefs(settings = null) {
     // Stamp the choice for CSS that needs EXACT per-size values (e.g. the
     // itinerary region overlap, hand-tuned per size by the founder).
     document.documentElement.setAttribute('data-text-size', size);
+    // Font stamp too: serif faces carry their optical mass differently, and
+    // icon-beside-text controls want per-font sub-pixel nudges (SVGs cannot
+    // take a font — they are drawings, so the correction is positional).
+    document.documentElement.setAttribute('data-font-style', s.fontStyle || 'standard');
     const stack = FONT_STACKS[s.fontStyle || 'standard'] || '';
     if (stack) document.documentElement.style.setProperty('--app-font', stack);
     else document.documentElement.style.removeProperty('--app-font');

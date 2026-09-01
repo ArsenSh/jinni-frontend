@@ -8752,4 +8752,13 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    (founder 2026-09-01). Normal/Small already land right at 15px. */
 html[data-text-size="big"] .input-wrapper textarea{padding-top:12px;padding-bottom:12px;line-height:26px}
 html[data-text-size="small"] .input-wrapper textarea{padding-top:15px;padding-bottom:15px;line-height:20px}
+
+/* Optical correction (founder 2026-09-01): serif faces (Palatino/Georgia)
+   sit their word-mass lower than the sans, so the geometric icon reads
+   high beside the label. Nudge the icon down to the serif's optical line.
+   SVGs cannot inherit a font — the correction is positional by design. */
+html[data-font-style="elegant"] .mode-toggle-inline svg,
+html[data-font-style="elegant"] .mode-toggle svg,
+html[data-font-style="classic"] .mode-toggle-inline svg,
+html[data-font-style="classic"] .mode-toggle svg{transform:translateY(1px)}
 </style>
