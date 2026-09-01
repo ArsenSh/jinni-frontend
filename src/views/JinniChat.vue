@@ -5860,8 +5860,13 @@ export default {
       // However many lines this language needs at this width (1, 2, 3…):
       // divide the unwrapped width across them, plus a word of tolerance,
       // clamped to what the row can hold. Balance evens the lines inside.
-      const lines = Math.max(1, Math.ceil(w / avail));
-      const box = Math.min(avail, Math.ceil(w / lines) + 28) + 'px';
+      // THE chronic left-stick (founder, many rounds): when w/lines needed
+      // (nearly) the FULL available width — common with Elegant+Large —
+      // the box had zero slack and nothing could center. Divide against
+      // 90% of the space instead: one more, narrower line when needed,
+      // guaranteeing visible slack for the pair to center in.
+      const lines = Math.max(1, Math.ceil(w / (avail * 0.9)));
+      const box = Math.min(Math.floor(avail * 0.92), Math.ceil(w / lines) + 28) + 'px';
       el.style.maxWidth = box;
       el.style.width = box;
       // The lamp keeps the text's scale (founder: a 44px lamp beside one
