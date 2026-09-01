@@ -2197,8 +2197,12 @@ export default {
         const t = v ? new Date(v).getTime() : 0;
         return Number.isFinite(t) ? t : 0;
       };
+      // Empty sessions are hidden EXCEPT the one the user is in right now
+      // (founder 2026-09-01: after delete-all there was NO row at all —
+      // the current chat must always be visible; stale empty duplicates
+      // still never pile up).
       return [...this.chatSessions]
-        .filter(s => (s.messages?.length || 0) > 0)
+        .filter(s => (s.messages?.length || 0) > 0 || s.id === this.activeSessionId)
         .sort((a, b) => ts(b) - ts(a));
     },
     isNightTime() { return isNightTime() },
