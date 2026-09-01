@@ -3647,6 +3647,11 @@ export default {
       this.userSettings[key] = val;
       try { localStorage.setItem('jinni_settings', JSON.stringify(this.userSettings)); } catch (e) {}
       this.applyDisplayPrefs();
+      // The auto-grow's inline height was computed at the OLD size/font and
+      // sticks until the next send — the row looked "not fixed" right after
+      // changing the setting (founder 2026-09-01). Re-measure now.
+      this.resetTextareaHeight();
+      this.$nextTick(() => { const t = this.$refs.chatInput; if (t && t.value) this.adjustTextareaHeight(); });
       this.$nextTick(() => this._fitGreetingSoon());
       this.saveSettings();
     },
