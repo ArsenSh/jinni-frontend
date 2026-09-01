@@ -8760,5 +8760,7 @@ html[data-text-size="small"] .input-wrapper textarea{padding-top:15px;padding-bo
 html[data-font-style="elegant"] .mode-toggle-inline svg,
 html[data-font-style="elegant"] .mode-toggle svg,
 html[data-font-style="classic"] .mode-toggle-inline svg,
-html[data-font-style="classic"] .mode-toggle svg{transform:translateY(1px)}
+html[data-font-style="classic"] .mode-toggle svg,
+html[data-font-style="elegant"] .new-chat-btn svg,
+html[data-font-style="classic"] .new-chat-btn svg{transform:translateY(1px)}
 </style>
