@@ -43,7 +43,14 @@
          earlier in the stack. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@300..700&display=swap">
+    <!-- Noto Sans Armenian: the Armenian face for the sans stacks (see displayPrefs).
+         Noto Serif Armenian: same job for the SERIF options — Georgia/Palatino/slab
+         carry no Armenian, and falling back to a sans mixed two styles inside one
+         sentence. Zilla Slab: so the Journal option is not a no-op on Android, which
+         ships neither American Typewriter nor Rockwell.
+         Listing a family here costs one CSS request (already being made); the .woff2
+         binaries are fetched lazily, only if a user actually selects that option. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@300..700&family=Noto+Serif+Armenian:wght@300..700&family=Zilla+Slab:wght@400;500;600;700&display=swap">
     <!-- Pre-paint theme. The JS bundle is large, so the first paint happens
          long before Vue mounts — with no background here the page (and the
          iOS Safari chrome/canvas, which derives its tint from that FIRST
