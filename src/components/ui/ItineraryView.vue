@@ -2058,8 +2058,12 @@ export default {
 .itin.day-mode .itin-tier--signature .itin-slot-actions .itin-icon:not(.is-on):not(.is-liked):not(.is-disliked):not(.is-saved):not(.itin-icon--danger) { background: rgba(212,175,55,0.12); box-shadow: inset 0 0 0 1px rgba(212,175,55,0.2); }
 .itin.day-mode .itin-tier--signature .itin-slot-actions .itin-icon:not(.is-on):not(.is-liked):not(.is-disliked):not(.is-saved):not(.itin-icon--danger):hover:not(:disabled) { background: rgba(212,175,55,0.22); }
 
-/* Region overlap, founder-tuned per text size (2026-09-01): -18 normal,
-   -20 large, -17.5 small — read from the data-text-size stamp. */
-html[data-text-size="big"] .itin-card-region { margin-top: -20px; }
-html[data-text-size="small"] .itin-card-region { margin-top: -17.5px; }
+/* Region overlap, founder-tuned per ROOT SIZE (2026-09-01): -17.5 at 93.75%,
+   -18 at 100%, -20 at 112.5%. The scale shifted up a notch on 2026-09-03, so
+   each tuned value moved to the key that now carries its percentage: Small is
+   100% and takes the -18px base, Normal is 112.5% and takes the old -20px.
+   The 125% Large row is extrapolated on the same slope (-2px per 12.5pp) and
+   is the one value here NOT eyeballed by the founder. */
+html[data-text-size="normal"] .itin-card-region { margin-top: -20px; }
+html[data-text-size="big"] .itin-card-region { margin-top: -22px; }
 </style>

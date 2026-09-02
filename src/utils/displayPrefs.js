@@ -39,8 +39,19 @@ export function applyDisplayPrefs(settings = null) {
   try {
     let s = settings;
     if (!s) { try { s = JSON.parse(localStorage.getItem('jinni_settings') || '{}'); } catch (e) { s = {}; } }
+    // Scale shifted up one notch (founder 2026-09-03: "i compare to other apps
+    // and see their sizes are my large one"). The old 93.75% step is gone; what
+    // used to be Normal is now Small, old Large is the new Normal, and Large is
+    // a new 125% step. Keys are unchanged — 'small'/'normal'/'big' are persisted
+    // in localStorage and server-side settings, and the visible labels were
+    // already Small/Normal/Large — so every existing user simply moves up one
+    // step, which is the point of the change.
+    //
+    // NOTE: CSS keyed on data-text-size is hand-tuned per size and had to move
+    // with these values, not with the key names — see .itin-card-region
+    // (ItineraryView) and .input-wrapper textarea (JinniChat).
     const size = s.textSize || 'normal';
-    document.documentElement.style.fontSize = size === 'small' ? '93.75%' : size === 'big' ? '112.5%' : '';
+    document.documentElement.style.fontSize = size === 'small' ? '' : size === 'big' ? '125%' : '112.5%';
     // Stamp the choice for CSS that needs EXACT per-size values (e.g. the
     // itinerary region overlap, hand-tuned per size by the founder).
     document.documentElement.setAttribute('data-text-size', size);

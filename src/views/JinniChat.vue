@@ -8818,8 +8818,15 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Input row at Large: 18px x 1.4 + 30px padding outgrew the 50px round
    buttons beside it — trim vertical padding so the row stays ~50px
    (founder 2026-09-01). Normal/Small already land right at 15px. */
-html[data-text-size="big"] .input-wrapper textarea{padding-top:12px;padding-bottom:12px;line-height:26px}
-html[data-text-size="small"] .input-wrapper textarea{padding-top:15px;padding-bottom:15px;line-height:20px}
+/* Composer rows, per ROOT SIZE. Every size keeps a one-line composer at
+   exactly 50px (min-height): padding-top + padding-bottom + line-height = 50.
+   The scale shifted up a notch 2026-09-03, so each tuned pair moved to the key
+   now carrying its percentage — Small is 100% and uses the 14px/22px base rule
+   above, Normal is 112.5% and takes the old 12px/26px. Large is the new 125%
+   row: 1rem = 20px there, so line-height 30 keeps the ratio climbing as the
+   founder tuned it, and 10px padding holds the 50px total. */
+html[data-text-size="normal"] .input-wrapper textarea{padding-top:12px;padding-bottom:12px;line-height:26px}
+html[data-text-size="big"] .input-wrapper textarea{padding-top:10px;padding-bottom:10px;line-height:30px}
 
 /* Optical correction (founder 2026-09-01): serif faces (Palatino/Georgia)
    sit their word-mass lower than the sans, so the geometric icon reads
