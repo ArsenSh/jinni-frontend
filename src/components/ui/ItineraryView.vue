@@ -1937,20 +1937,26 @@ export default {
   .itin-choose { padding: 12px; border-radius: 16px; }
   .itin-choose-head { font-size: 0.875rem; margin-bottom: 10px; }
   .itin-choose-list, .itin-choose-loading { gap: 12px; }
-  .itin-cand { width: 78vw; max-width: 340px; padding: 12px; border-radius: 18px; }
-  .itin-cand--sk { width: 78vw; max-width: 340px; height: 320px; }
-  .itin-cand-body { padding: 12px 12px 13px; }
-  .itin-cand-name { font-size: 1rem; }
-  .itin-cand-meta, .itin-cand-dist { font-size: 0.8125rem; gap: 10px; }
-  /* There is no hover on touch, and a tap on this card SELECTS the candidate —
-     so More cannot hide behind a reveal the way .itin-card's does. It rests
-     visible, sitting low over a lighter scrim so it never covers the subject. */
-  .itin-cand-overlay {
-    opacity: 1; pointer-events: auto; align-items: flex-end;
-    padding-bottom: 10px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(0,0,0,0.34));
-  }
-  .itin-cand-imgbtn { width: 2.75rem; height: 2.75rem; }
+  /* 10% smaller than the first mobile pass, both axes (founder 2026-09-04:
+     the card read too big in the row). Width drives the image height through
+     aspect-ratio, so -10% width IS -10% photo height; the body then loses the
+     same 10% via its padding and type. No padding on the card itself — the
+     photo is full-bleed, .itin-cand-body carries the inset. */
+  .itin-cand,
+  .itin-cand--hotel, .itin-cand--rich { width: 70vw; max-width: 306px; border-radius: 18px; }
+  .itin-cand--sk { width: 70vw; max-width: 306px; height: 288px; }
+  .itin-cand-body { padding: 11px 11px 12px; }
+  .itin-cand-name { font-size: 0.9375rem; }
+  .itin-cand-meta, .itin-cand-dist { font-size: 0.75rem; gap: 9px; }
+  /* Overlay is NOT overridden here: More reveals on hover and stays centred,
+     exactly as on desktop (founder 2026-09-04). Consequence to know — a real
+     touchscreen has no hover, and a tap on this card selects the candidate,
+     so on a phone More is effectively desktop-only and Details is reached
+     through the card itself. Reverting means giving the overlay a resting
+     state again, not adding a tap handler, which would fight selection.
+     2.375rem == 42.75px at the default root, so the photo button already
+     clears the touch target without an override. */
+  .itin-cand-imgbtn { width: 2.375rem; height: 2.375rem; }
   .itin-choose-empty { font-size: 0.875rem; padding: 10px 2px; }
 }
 
