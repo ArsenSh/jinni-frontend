@@ -1846,45 +1846,45 @@ export default {
 
 /* ── Choosers (replace / add) — frosted panel + mini cards ── */
 .itin-choose {
-  margin-top: 10px; border-radius: 14px; padding: 10px;
+  margin-top: 12px; border-radius: 16px; padding: 14px;
   background: var(--it-card-bg); box-shadow: var(--it-card-shadow);
   backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
 .itin-choose-head { display: flex; align-items: center; justify-content: space-between;
-  font-size: 0.78125rem; font-weight: 700; color: var(--it-heading); margin-bottom: 8px; }
-.itin-choose-list, .itin-choose-loading { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+  font-size: 0.875rem; font-weight: 700; color: var(--it-heading); margin-bottom: 11px; }
+.itin-choose-list, .itin-choose-loading { display: flex; gap: 11px; overflow-x: auto; padding-bottom: 2px; }
 .itin-cand {
-  flex: none; width: 120px; border: none; border-radius: 12px; padding: 6px;
+  flex: none; width: 150px; border: none; border-radius: 14px; padding: 8px;
   cursor: pointer; text-align: left; color: var(--it-biz);
   background: var(--it-glass); box-shadow: var(--it-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
   transition: all 0.25s ease;
 }
 .itin-cand:hover { background: var(--it-glass-hover); }
-.itin-cand--sk { width: 176px; height: 206px; box-shadow: none; background: var(--it-shimmer); }
-.itin-cand img { width: 100%; height: 62px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 5px; }
-.itin-cand-name { font-size: 0.8125rem; font-weight: 700; line-height: 1.2; display: block; }
-.itin-cand-dist { font-size: 0.6875rem; color: var(--it-muted); }
+.itin-cand--sk { width: 240px; height: 246px; box-shadow: none; background: var(--it-shimmer); }
+.itin-cand img { width: 100%; height: 84px; object-fit: cover; border-radius: 10px; display: block; margin-bottom: 6px; }
+.itin-cand-name { font-size: 0.875rem; font-weight: 700; line-height: 1.25; display: block; }
+.itin-cand-dist { font-size: 0.75rem; color: var(--it-muted); }
 /* Hotel variant — bigger card so the photo is actually judgeable, plus a
    rating/distance meta row and a Details button (opens the info-modal). */
-.itin-cand--hotel, .itin-cand--rich { width: 176px; display: flex; flex-direction: column; }
-.itin-cand--hotel img, .itin-cand--rich img { height: 100px; }
+.itin-cand--hotel, .itin-cand--rich { width: 240px; display: flex; flex-direction: column; }
+.itin-cand--hotel img, .itin-cand--rich img { height: 132px; }
 .itin-cand--hotel .itin-cand-name, .itin-cand--rich .itin-cand-name {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   min-height: 2.4em;
 }
-.itin-cand-meta { display: flex; align-items: center; gap: 8px; font-size: 0.6875rem; color: var(--it-muted); margin-top: 2px; }
+.itin-cand-meta { display: flex; align-items: center; gap: 9px; font-size: 0.75rem; color: var(--it-muted); margin-top: 3px; }
 .itin-cand-rating { font-weight: 700; color: var(--it-text); }
-.itin-cand-actions { display: flex; gap: 5px; margin-top: 6px; }
+.itin-cand-actions { display: flex; gap: 7px; margin-top: 8px; }
 .itin-cand-info {
-  flex: 1; height: 30px; padding: 0; border: none; border-radius: 8px;
-  font-size: 0.75rem; font-weight: 600; cursor: pointer; color: var(--it-biz);
+  flex: 1; height: 34px; padding: 0; border: none; border-radius: 10px;
+  font-size: 0.8125rem; font-weight: 600; cursor: pointer; color: var(--it-biz);
   background: var(--it-glass); box-shadow: var(--it-ring);
   display: inline-flex; align-items: center; justify-content: center;
 }
 .itin-cand-info:hover { background: var(--it-glass-hover); }
 /* Square block — same fixed height as Details, equal width. */
-.itin-cand-photo { flex: 0 0 30px; width: 30px; height: 30px; }
+.itin-cand-photo { flex: 0 0 34px; width: 34px; height: 34px; }
 .itin-cand-photo.is-loading { cursor: default; }
 .itin-choose-empty { font-size: 0.78125rem; color: var(--it-muted); padding: 6px 2px; }
 
@@ -1905,10 +1905,10 @@ export default {
   .itin-choose { padding: 12px; border-radius: 16px; }
   .itin-choose-head { font-size: 0.875rem; margin-bottom: 10px; }
   .itin-choose-list, .itin-choose-loading { gap: 12px; }
-  .itin-cand { width: 72vw; max-width: 300px; padding: 10px; border-radius: 16px; }
-  .itin-cand img { height: 150px; border-radius: 11px; margin-bottom: 7px; }
-  .itin-cand--sk { width: 72vw; max-width: 300px; height: 290px; }
-  .itin-cand-name { font-size: 0.9375rem; }
+  .itin-cand { width: 78vw; max-width: 340px; padding: 12px; border-radius: 18px; }
+  .itin-cand img { height: 176px; border-radius: 12px; margin-bottom: 8px; }
+  .itin-cand--sk { width: 78vw; max-width: 340px; height: 318px; }
+  .itin-cand-name { font-size: 1rem; }
   .itin-cand-meta, .itin-cand-dist { font-size: 0.8125rem; gap: 10px; }
   .itin-cand-actions { gap: 8px; margin-top: 9px; }
   .itin-cand-info { height: 44px; font-size: 0.875rem; border-radius: 11px; }
