@@ -1861,14 +1861,14 @@ export default {
   transition: all 0.25s ease;
 }
 .itin-cand:hover { background: var(--it-glass-hover); }
-.itin-cand--sk { height: 118px; box-shadow: none; background: var(--it-shimmer); }
+.itin-cand--sk { width: 176px; height: 206px; box-shadow: none; background: var(--it-shimmer); }
 .itin-cand img { width: 100%; height: 62px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 5px; }
-.itin-cand-name { font-size: 0.75rem; font-weight: 700; line-height: 1.2; display: block; }
+.itin-cand-name { font-size: 0.8125rem; font-weight: 700; line-height: 1.2; display: block; }
 .itin-cand-dist { font-size: 0.6875rem; color: var(--it-muted); }
 /* Hotel variant — bigger card so the photo is actually judgeable, plus a
    rating/distance meta row and a Details button (opens the info-modal). */
-.itin-cand--hotel, .itin-cand--rich { width: 158px; display: flex; flex-direction: column; }
-.itin-cand--hotel img, .itin-cand--rich img { height: 88px; }
+.itin-cand--hotel, .itin-cand--rich { width: 176px; display: flex; flex-direction: column; }
+.itin-cand--hotel img, .itin-cand--rich img { height: 100px; }
 .itin-cand--hotel .itin-cand-name, .itin-cand--rich .itin-cand-name {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   min-height: 2.4em;
@@ -1877,16 +1877,45 @@ export default {
 .itin-cand-rating { font-weight: 700; color: var(--it-text); }
 .itin-cand-actions { display: flex; gap: 5px; margin-top: 6px; }
 .itin-cand-info {
-  flex: 1; height: 26px; padding: 0; border: none; border-radius: 8px;
-  font-size: 0.71875rem; font-weight: 600; cursor: pointer; color: var(--it-biz);
+  flex: 1; height: 30px; padding: 0; border: none; border-radius: 8px;
+  font-size: 0.75rem; font-weight: 600; cursor: pointer; color: var(--it-biz);
   background: var(--it-glass); box-shadow: var(--it-ring);
   display: inline-flex; align-items: center; justify-content: center;
 }
 .itin-cand-info:hover { background: var(--it-glass-hover); }
 /* Square block — same fixed height as Details, equal width. */
-.itin-cand-photo { flex: 0 0 26px; width: 26px; height: 26px; }
+.itin-cand-photo { flex: 0 0 30px; width: 30px; height: 30px; }
 .itin-cand-photo.is-loading { cursor: default; }
 .itin-choose-empty { font-size: 0.78125rem; color: var(--it-muted); padding: 6px 2px; }
+
+/* Mobile chooser (founder 2026-09-04: "in mobile it is very uncomfortable it
+   is little to understand what to select"). This is the one place in the
+   itinerary where the user makes a real comparison — photo, rating, distance —
+   so on a phone it gets a card worth judging rather than a 158px thumbnail.
+
+   Width is viewport-relative so ONE card fills the decision, with ~28vw of the
+   next one peeking to show the row scrolls. The Details/photo buttons go
+   26px -> 44px: the previous size was under both the Apple HIG and WCAG 2.5.8
+   touch minimum, which is the "hard to select" part of the complaint.
+
+   Note the card's box was in px while its text is in rem, so the 2026-09-03
+   text-scale bump grew the type without growing the card — the base sizes
+   above were raised for the same reason. */
+@media (max-width: 768px) {
+  .itin-choose { padding: 12px; border-radius: 16px; }
+  .itin-choose-head { font-size: 0.875rem; margin-bottom: 10px; }
+  .itin-choose-list, .itin-choose-loading { gap: 12px; }
+  .itin-cand { width: 72vw; max-width: 300px; padding: 10px; border-radius: 16px; }
+  .itin-cand img { height: 150px; border-radius: 11px; margin-bottom: 7px; }
+  .itin-cand--sk { width: 72vw; max-width: 300px; height: 290px; }
+  .itin-cand-name { font-size: 0.9375rem; }
+  .itin-cand-meta, .itin-cand-dist { font-size: 0.8125rem; gap: 10px; }
+  .itin-cand-actions { gap: 8px; margin-top: 9px; }
+  .itin-cand-info { height: 44px; font-size: 0.875rem; border-radius: 11px; }
+  .itin-cand-photo { flex: 0 0 44px; width: 44px; height: 44px; }
+  .itin-cand-photo svg { width: 17px; height: 17px; }
+  .itin-choose-empty { font-size: 0.875rem; padding: 10px 2px; }
+}
 
 /* ── Day-level actions — view-more-btn glacier pills ── */
 .itin-day-actions { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
