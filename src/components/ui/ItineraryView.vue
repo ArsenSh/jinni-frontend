@@ -41,25 +41,34 @@
       <template v-else>
       <div class="itin-choose-head"><span>{{ L.chooseHotel }}</span></div>
       <div class="itin-choose-list">
-        <!-- div (not <button>) because the card hosts an inner Details button —
+        <!-- div (not <button>) because the card hosts inner More/photo buttons —
              nested buttons are invalid HTML. Details opens the same info-modal
              the place cards use (view-place → showPlaceInfo), so the user can
              see photos / rating / business info before committing to a hotel. -->
         <div v-for="h in hotelChoices" :key="h.placeId || h.name" class="itin-cand itin-cand--hotel"
              role="button" tabindex="0" @click="selectHotel(h)" @keyup.enter="selectHotel(h)">
-          <img v-if="imgUrl(h)" :src="imgUrl(h)" alt="" loading="lazy" @error="$event.target.style.display='none'"/>
-          <span class="itin-cand-name">{{ h.name }}</span>
-          <span class="itin-cand-meta">
-            <span v-if="Number.isFinite(h.rating)" class="itin-cand-rating">★ {{ h.rating.toFixed(1) }}</span>
-            <span v-if="h.distance" class="itin-cand-dist">{{ h.distance }}</span>
-          </span>
-          <span class="itin-cand-actions">
-            <button type="button" class="itin-cand-info" @click.stop="$emit('view-place', h)">{{ L.details }}</button>
-            <button type="button" class="itin-cand-info itin-cand-photo" :class="{ 'is-loading': photoLoadingId === hotelKey(h) }" :title="L.viewPhoto" @click.stop="openHotelPhotos(h)">
-              <svg v-if="photoLoadingId === hotelKey(h)" class="itin-loading-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-              <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
-            </button>
-          </span>
+          <div v-if="imgUrl(h)" class="itin-cand-imgwrap">
+            <img class="itin-cand-img" :src="imgUrl(h)" alt="" loading="lazy" @error="$event.target.parentElement.style.display='none'"/>
+            <!-- Same overlay recipe as .itin-card: More rides on the photo and is
+                 revealed on hover. On touch it rests visible (see the media query) —
+                 a tap here SELECTS the candidate, so it cannot double as a reveal. -->
+            <div class="itin-cand-overlay">
+              <button type="button" class="itin-overlay-btn itin-overlay-btn--info" @click.stop="$emit('view-place', h)">{{ L.more }}</button>
+            </div>
+          </div>
+          <div class="itin-cand-body">
+            <div class="itin-cand-header">
+              <span class="itin-cand-name">{{ h.name }}</span>
+              <button v-if="imgUrl(h)" type="button" class="itin-img-btn itin-cand-imgbtn" :class="{ 'is-loading': photoLoadingId === hotelKey(h) }" :title="L.viewPhoto" @click.stop="openHotelPhotos(h)">
+                <svg v-if="photoLoadingId === hotelKey(h)" class="itin-loading-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+              </button>
+            </div>
+            <span class="itin-cand-meta">
+              <span v-if="Number.isFinite(h.rating)" class="itin-cand-rating">★ {{ h.rating.toFixed(1) }}</span>
+              <span v-if="h.distance" class="itin-cand-dist">{{ h.distance }}</span>
+            </span>
+          </div>
         </div>
       </div>
       <div class="itin-day-actions">
@@ -311,23 +320,32 @@
                   <span v-for="n in 3" :key="n" class="itin-cand itin-cand--sk shimmer"></span>
                 </div>
                 <div v-else-if="candidates.length" class="itin-choose-list">
-                  <!-- div (not <button>) — hosts inner Details/photo buttons; nested
+                  <!-- div (not <button>) — hosts inner More/photo buttons; nested
                        buttons are invalid HTML. Same pattern as the hotel chooser. -->
                   <div v-for="c in candidates" :key="c.id || c.placeId || c.name" class="itin-cand itin-cand--rich"
                        role="button" tabindex="0" @click="pickCandidate(c)" @keyup.enter="pickCandidate(c)">
-                    <img v-if="imgUrl(c)" :src="imgUrl(c)" alt="" loading="lazy" @error="$event.target.style.display='none'"/>
-                    <span class="itin-cand-name">{{ c.name }}</span>
-                    <span class="itin-cand-meta">
-                      <span v-if="Number.isFinite(c.rating)" class="itin-cand-rating">★ {{ c.rating.toFixed(1) }}</span>
-                      <span v-if="c.distance" class="itin-cand-dist">{{ c.distance }}</span>
-                    </span>
-                    <span class="itin-cand-actions">
-                      <button type="button" class="itin-cand-info" @click.stop="$emit('view-place', c)">{{ L.details }}</button>
-                      <button type="button" class="itin-cand-info itin-cand-photo" :class="{ 'is-loading': photoLoadingId === candKey(c) }" :title="L.viewPhoto" @click.stop="openCandPhotos(c)">
-                        <svg v-if="photoLoadingId === candKey(c)" class="itin-loading-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                        <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
-                      </button>
-                    </span>
+                    <div v-if="imgUrl(c)" class="itin-cand-imgwrap">
+                      <img class="itin-cand-img" :src="imgUrl(c)" alt="" loading="lazy" @error="$event.target.parentElement.style.display='none'"/>
+                      <!-- Same overlay recipe as .itin-card: More rides on the photo and is
+                           revealed on hover. On touch it rests visible (see the media query) —
+                           a tap here SELECTS the candidate, so it cannot double as a reveal. -->
+                      <div class="itin-cand-overlay">
+                        <button type="button" class="itin-overlay-btn itin-overlay-btn--info" @click.stop="$emit('view-place', c)">{{ L.more }}</button>
+                      </div>
+                    </div>
+                    <div class="itin-cand-body">
+                      <div class="itin-cand-header">
+                        <span class="itin-cand-name">{{ c.name }}</span>
+                        <button v-if="imgUrl(c)" type="button" class="itin-img-btn itin-cand-imgbtn" :class="{ 'is-loading': photoLoadingId === candKey(c) }" :title="L.viewPhoto" @click.stop="openCandPhotos(c)">
+                          <svg v-if="photoLoadingId === candKey(c)" class="itin-loading-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+                        </button>
+                      </div>
+                      <span class="itin-cand-meta">
+                        <span v-if="Number.isFinite(c.rating)" class="itin-cand-rating">★ {{ c.rating.toFixed(1) }}</span>
+                        <span v-if="c.distance" class="itin-cand-dist">{{ c.distance }}</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div v-else class="itin-choose-empty">{{ L.noCandidates }}</div>
@@ -379,23 +397,32 @@
             <span v-for="n in 3" :key="n" class="itin-cand itin-cand--sk shimmer"></span>
           </div>
           <div v-else-if="candidates.length" class="itin-choose-list">
-            <!-- div (not <button>) — hosts inner Details/photo buttons; nested
+            <!-- div (not <button>) — hosts inner More/photo buttons; nested
                  buttons are invalid HTML. Same pattern as the hotel chooser. -->
             <div v-for="c in candidates" :key="c.id || c.placeId || c.name" class="itin-cand itin-cand--rich"
                  role="button" tabindex="0" @click="pickCandidate(c)" @keyup.enter="pickCandidate(c)">
-              <img v-if="imgUrl(c)" :src="imgUrl(c)" alt="" loading="lazy" @error="$event.target.style.display='none'"/>
-              <span class="itin-cand-name">{{ c.name }}</span>
-              <span class="itin-cand-meta">
-                <span v-if="Number.isFinite(c.rating)" class="itin-cand-rating">★ {{ c.rating.toFixed(1) }}</span>
-                <span v-if="c.distance" class="itin-cand-dist">{{ c.distance }}</span>
-              </span>
-              <span class="itin-cand-actions">
-                <button type="button" class="itin-cand-info" @click.stop="$emit('view-place', c)">{{ L.details }}</button>
-                <button type="button" class="itin-cand-info itin-cand-photo" :class="{ 'is-loading': photoLoadingId === candKey(c) }" :title="L.viewPhoto" @click.stop="openCandPhotos(c)">
-                  <svg v-if="photoLoadingId === candKey(c)" class="itin-loading-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                  <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
-                </button>
-              </span>
+              <div v-if="imgUrl(c)" class="itin-cand-imgwrap">
+                <img class="itin-cand-img" :src="imgUrl(c)" alt="" loading="lazy" @error="$event.target.parentElement.style.display='none'"/>
+                <!-- Same overlay recipe as .itin-card: More rides on the photo and is
+                     revealed on hover. On touch it rests visible (see the media query) —
+                     a tap here SELECTS the candidate, so it cannot double as a reveal. -->
+                <div class="itin-cand-overlay">
+                  <button type="button" class="itin-overlay-btn itin-overlay-btn--info" @click.stop="$emit('view-place', c)">{{ L.more }}</button>
+                </div>
+              </div>
+              <div class="itin-cand-body">
+                <div class="itin-cand-header">
+                  <span class="itin-cand-name">{{ c.name }}</span>
+                  <button v-if="imgUrl(c)" type="button" class="itin-img-btn itin-cand-imgbtn" :class="{ 'is-loading': photoLoadingId === candKey(c) }" :title="L.viewPhoto" @click.stop="openCandPhotos(c)">
+                    <svg v-if="photoLoadingId === candKey(c)" class="itin-loading-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+                  </button>
+                </div>
+                <span class="itin-cand-meta">
+                  <span v-if="Number.isFinite(c.rating)" class="itin-cand-rating">★ {{ c.rating.toFixed(1) }}</span>
+                  <span v-if="c.distance" class="itin-cand-dist">{{ c.distance }}</span>
+                </span>
+              </div>
             </div>
           </div>
           <div v-else class="itin-choose-empty">{{ addFor === '__saved' ? L.noSavedNearby : L.noCandidates }}</div>
@@ -1854,38 +1881,43 @@ export default {
   font-size: 0.875rem; font-weight: 700; color: var(--it-heading); margin-bottom: 11px; }
 .itin-choose-list, .itin-choose-loading { display: flex; gap: 11px; overflow-x: auto; padding-bottom: 2px; }
 .itin-cand {
-  flex: none; width: 150px; border: none; border-radius: 14px; padding: 8px;
+  flex: none; width: 150px; border: none; border-radius: 14px; padding: 0; overflow: hidden;
   cursor: pointer; text-align: left; color: var(--it-biz);
   background: var(--it-glass); box-shadow: var(--it-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
   transition: all 0.25s ease;
 }
 .itin-cand:hover { background: var(--it-glass-hover); }
-.itin-cand--sk { width: 240px; height: 246px; box-shadow: none; background: var(--it-shimmer); }
-.itin-cand img { width: 100%; height: 84px; object-fit: cover; border-radius: 10px; display: block; margin-bottom: 6px; }
+.itin-cand--sk { width: 240px; height: 244px; box-shadow: none; background: var(--it-shimmer); }
+/* Photo is full-bleed and width-driven, the .itin-card recipe. 3:2 rather than
+   the itinerary list's 16:9: that list is dense and compact wins, but this is a
+   comparison surface where the photo IS the decision, so it gets the taller
+   chat-card ratio (founder 2026-09-04: "the images can be greater"). */
+.itin-cand-imgwrap { position: relative; width: 100%; aspect-ratio: 3 / 2; overflow: hidden; flex: none; }
+.itin-cand-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.itin-cand-overlay {
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+}
+.itin-cand:hover .itin-cand-overlay { opacity: 1; pointer-events: auto; }
+.itin-cand-body { padding: 10px 10px 11px; min-width: 0; }
+/* Name + round photo button, same row shape as .itin-card-header. */
+.itin-cand-header { display: flex; align-items: flex-start; gap: 8px; }
+.itin-cand-header .itin-cand-name { flex: 1; min-width: 0; }
+.itin-cand-imgbtn { width: 2.125rem; height: 2.125rem; }
 .itin-cand-name { font-size: 0.875rem; font-weight: 700; line-height: 1.25; display: block; }
 .itin-cand-dist { font-size: 0.75rem; color: var(--it-muted); }
 /* Hotel variant — bigger card so the photo is actually judgeable, plus a
    rating/distance meta row and a Details button (opens the info-modal). */
 .itin-cand--hotel, .itin-cand--rich { width: 240px; display: flex; flex-direction: column; }
-.itin-cand--hotel img, .itin-cand--rich img { height: 132px; }
 .itin-cand--hotel .itin-cand-name, .itin-cand--rich .itin-cand-name {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   min-height: 2.4em;
 }
 .itin-cand-meta { display: flex; align-items: center; gap: 9px; font-size: 0.75rem; color: var(--it-muted); margin-top: 3px; }
 .itin-cand-rating { font-weight: 700; color: var(--it-text); }
-.itin-cand-actions { display: flex; gap: 7px; margin-top: 8px; }
-.itin-cand-info {
-  flex: 1; height: 34px; padding: 0; border: none; border-radius: 10px;
-  font-size: 0.8125rem; font-weight: 600; cursor: pointer; color: var(--it-biz);
-  background: var(--it-glass); box-shadow: var(--it-ring);
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.itin-cand-info:hover { background: var(--it-glass-hover); }
-/* Square block — same fixed height as Details, equal width. */
-.itin-cand-photo { flex: 0 0 34px; width: 34px; height: 34px; }
-.itin-cand-photo.is-loading { cursor: default; }
 .itin-choose-empty { font-size: 0.78125rem; color: var(--it-muted); padding: 6px 2px; }
 
 /* Mobile chooser (founder 2026-09-04: "in mobile it is very uncomfortable it
@@ -1906,14 +1938,19 @@ export default {
   .itin-choose-head { font-size: 0.875rem; margin-bottom: 10px; }
   .itin-choose-list, .itin-choose-loading { gap: 12px; }
   .itin-cand { width: 78vw; max-width: 340px; padding: 12px; border-radius: 18px; }
-  .itin-cand img { height: 176px; border-radius: 12px; margin-bottom: 8px; }
-  .itin-cand--sk { width: 78vw; max-width: 340px; height: 318px; }
+  .itin-cand--sk { width: 78vw; max-width: 340px; height: 320px; }
+  .itin-cand-body { padding: 12px 12px 13px; }
   .itin-cand-name { font-size: 1rem; }
   .itin-cand-meta, .itin-cand-dist { font-size: 0.8125rem; gap: 10px; }
-  .itin-cand-actions { gap: 8px; margin-top: 9px; }
-  .itin-cand-info { height: 44px; font-size: 0.875rem; border-radius: 11px; }
-  .itin-cand-photo { flex: 0 0 44px; width: 44px; height: 44px; }
-  .itin-cand-photo svg { width: 17px; height: 17px; }
+  /* There is no hover on touch, and a tap on this card SELECTS the candidate —
+     so More cannot hide behind a reveal the way .itin-card's does. It rests
+     visible, sitting low over a lighter scrim so it never covers the subject. */
+  .itin-cand-overlay {
+    opacity: 1; pointer-events: auto; align-items: flex-end;
+    padding-bottom: 10px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(0,0,0,0.34));
+  }
+  .itin-cand-imgbtn { width: 2.75rem; height: 2.75rem; }
   .itin-choose-empty { font-size: 0.875rem; padding: 10px 2px; }
 }
 
