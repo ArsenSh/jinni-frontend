@@ -40,12 +40,14 @@
       </template>
       <template v-else>
       <div class="itin-choose-head"><span>{{ L.chooseHotel }}</span></div>
-      <div class="itin-choose-list">
+      <div class="itin-choose-scroller">
+      <div class="itin-choose-list" @scroll.passive="onChooserScroll($event, 'hotel')">
         <!-- div (not <button>) because the card hosts inner More/photo buttons —
              nested buttons are invalid HTML. Details opens the same info-modal
              the place cards use (view-place → showPlaceInfo), so the user can
              see photos / rating / business info before committing to a hotel. -->
-        <div v-for="h in hotelChoices" :key="h.placeId || h.name" class="itin-cand itin-cand--hotel"
+        <div v-for="(h, ci) in hotelChoices" :key="h.placeId || h.name" class="itin-cand itin-cand--hotel"
+             :class="{ 'is-focus': (chooserIx.hotel || 0) === ci }"
              role="button" tabindex="0" @click="selectHotel(h)" @keyup.enter="selectHotel(h)">
           <div v-if="imgUrl(h)" class="itin-cand-imgwrap">
             <img class="itin-cand-img" :src="imgUrl(h)" alt="" loading="lazy" @error="$event.target.parentElement.style.display='none'"/>
@@ -70,6 +72,15 @@
             </span>
           </div>
         </div>
+      </div>
+      <!-- Page dots: candidates are capped at 6, the one count where iOS-style
+           dots beat a scrollbar. Active dot widens into a gold pill, so it reads
+           as position AND progress. Tapping one centres that card. -->
+      <div v-if="hotelChoices.length > 1" class="itin-choose-dots">
+        <button v-for="(d, di) in hotelChoices.length" :key="di" type="button" class="itin-choose-dot"
+                :class="{ 'is-on': (chooserIx.hotel || 0) === di }"
+                :aria-label="`${di + 1} / ${hotelChoices.length}`" @click.stop="goToCand($event, di)"></button>
+      </div>
       </div>
       <div class="itin-day-actions">
         <button class="itin-btn itin-btn--small" @click="selectHotel(null)">{{ L.skipHotel }}</button>
@@ -319,10 +330,12 @@
                 <div v-if="candidatesLoading" class="itin-choose-loading">
                   <span v-for="n in 3" :key="n" class="itin-cand itin-cand--sk shimmer"></span>
                 </div>
-                <div v-else-if="candidates.length" class="itin-choose-list">
+                <div class="itin-choose-scroller" v-else-if="candidates.length">
+                <div class="itin-choose-list" @scroll.passive="onChooserScroll($event, 'replace')">
                   <!-- div (not <button>) — hosts inner More/photo buttons; nested
                        buttons are invalid HTML. Same pattern as the hotel chooser. -->
-                  <div v-for="c in candidates" :key="c.id || c.placeId || c.name" class="itin-cand itin-cand--rich"
+                  <div v-for="(c, ci) in candidates" :key="c.id || c.placeId || c.name" class="itin-cand itin-cand--rich"
+                       :class="{ 'is-focus': (chooserIx.replace || 0) === ci }"
                        role="button" tabindex="0" @click="pickCandidate(c)" @keyup.enter="pickCandidate(c)">
                     <div v-if="imgUrl(c)" class="itin-cand-imgwrap">
                       <img class="itin-cand-img" :src="imgUrl(c)" alt="" loading="lazy" @error="$event.target.parentElement.style.display='none'"/>
@@ -347,6 +360,15 @@
                       </span>
                     </div>
                   </div>
+                </div>
+                <!-- Page dots: candidates are capped at 6, the one count where iOS-style
+                     dots beat a scrollbar. Active dot widens into a gold pill, so it reads
+                     as position AND progress. Tapping one centres that card. -->
+                <div v-if="candidates.length > 1" class="itin-choose-dots">
+                  <button v-for="(d, di) in candidates.length" :key="di" type="button" class="itin-choose-dot"
+                          :class="{ 'is-on': (chooserIx.replace || 0) === di }"
+                          :aria-label="`${di + 1} / ${candidates.length}`" @click.stop="goToCand($event, di)"></button>
+                </div>
                 </div>
                 <div v-else class="itin-choose-empty">{{ L.noCandidates }}</div>
               </div>
@@ -396,10 +418,12 @@
           <div v-if="candidatesLoading" class="itin-choose-loading">
             <span v-for="n in 3" :key="n" class="itin-cand itin-cand--sk shimmer"></span>
           </div>
-          <div v-else-if="candidates.length" class="itin-choose-list">
+          <div class="itin-choose-scroller" v-else-if="candidates.length">
+          <div class="itin-choose-list" @scroll.passive="onChooserScroll($event, 'add')">
             <!-- div (not <button>) — hosts inner More/photo buttons; nested
                  buttons are invalid HTML. Same pattern as the hotel chooser. -->
-            <div v-for="c in candidates" :key="c.id || c.placeId || c.name" class="itin-cand itin-cand--rich"
+            <div v-for="(c, ci) in candidates" :key="c.id || c.placeId || c.name" class="itin-cand itin-cand--rich"
+                 :class="{ 'is-focus': (chooserIx.add || 0) === ci }"
                  role="button" tabindex="0" @click="pickCandidate(c)" @keyup.enter="pickCandidate(c)">
               <div v-if="imgUrl(c)" class="itin-cand-imgwrap">
                 <img class="itin-cand-img" :src="imgUrl(c)" alt="" loading="lazy" @error="$event.target.parentElement.style.display='none'"/>
@@ -424,6 +448,15 @@
                 </span>
               </div>
             </div>
+          </div>
+          <!-- Page dots: candidates are capped at 6, the one count where iOS-style
+               dots beat a scrollbar. Active dot widens into a gold pill, so it reads
+               as position AND progress. Tapping one centres that card. -->
+          <div v-if="candidates.length > 1" class="itin-choose-dots">
+            <button v-for="(d, di) in candidates.length" :key="di" type="button" class="itin-choose-dot"
+                    :class="{ 'is-on': (chooserIx.add || 0) === di }"
+                    :aria-label="`${di + 1} / ${candidates.length}`" @click.stop="goToCand($event, di)"></button>
+          </div>
           </div>
           <div v-else class="itin-choose-empty">{{ addFor === '__saved' ? L.noSavedNearby : L.noCandidates }}</div>
         </div>
@@ -538,6 +571,9 @@ export default {
       replaceFor: null,          // slot being replaced
       addFor: null,              // category being added
       candidates: [],
+      // Index of the card nearest the chooser row's centre, per chooser —
+      // drives the page dots and the mobile focus dimming.
+      chooserIx: { hotel: 0, replace: 0, add: 0 },
       candidatesLoading: false,
       candAbort: null,
       addOpen: false,
@@ -1324,7 +1360,30 @@ export default {
 
     /* ── replace / add: reuse the EXISTING quick-action-stream ── */
     openReplace(slot) { this.addFor = null; this.replaceFor = slot; this.fetchCandidates(slot.category); },
-    closeReplace() { this.replaceFor = null; this.candidates = []; this.candAbort?.abort(); },
+    /* Chooser row: which card is centred. Cheap (<=6 children) and only writes
+       state when the index actually changes, so a scroll does not re-render per
+       frame. offsetLeft is measured against the scroller, which is the list's
+       offsetParent here, so scrollLeft and offsetLeft share an origin. */
+    onChooserScroll(e, key) {
+      const list = e.currentTarget;
+      const mid = list.scrollLeft + list.clientWidth / 2;
+      let best = 0, bestD = Infinity;
+      for (let i = 0; i < list.children.length; i++) {
+        const c = list.children[i];
+        const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      if (this.chooserIx[key] !== best) this.chooserIx[key] = best;
+    },
+    /* Centre card i. scrollTo on the list, NOT scrollIntoView — the latter can
+       also scroll the page vertically to reach the row. */
+    goToCand(e, i) {
+      const list = e.currentTarget.closest('.itin-choose-scroller')?.querySelector('.itin-choose-list');
+      const card = list?.children?.[i];
+      if (!card) return;
+      list.scrollTo({ left: card.offsetLeft - (list.clientWidth - card.offsetWidth) / 2, behavior: 'smooth' });
+    },
+    closeReplace() { this.replaceFor = null; this.candidates = []; this.chooserIx.replace = 0; this.candAbort?.abort(); },
     // Shopping asks "what are you shopping for?" first (like the chat clarifier);
     // every other category searches straight away.
     onAddCategory(category) {
@@ -1336,7 +1395,7 @@ export default {
       this.addFor = category;
       this.fetchCandidates(category, subType);
     },
-    closeAdd() { this.addFor = null; this.shopSubOpen = false; this.candidates = []; this.candAbort?.abort(); },
+    closeAdd() { this.addFor = null; this.shopSubOpen = false; this.candidates = []; this.chooserIx.add = 0; this.candAbort?.abort(); },
 
     /* ── "From saved": the user's own saved places, geofenced to this trip
        server-side and returned rec-shaped, so the rich candidate cards and
@@ -1348,6 +1407,7 @@ export default {
     },
     async fetchSavedCandidates() {
       this.candidates = [];
+      this.chooserIx.replace = 0; this.chooserIx.add = 0;
       this.candidatesLoading = true;
       this.candAbort?.abort();
       this.candAbort = new AbortController();
@@ -1370,6 +1430,7 @@ export default {
 
     async fetchCandidates(category, subType = null) {
       this.candidates = [];
+      this.chooserIx.replace = 0; this.chooserIx.add = 0;
       this.candidatesLoading = true;
       this.candAbort?.abort();
       this.candAbort = new AbortController();
@@ -1879,9 +1940,29 @@ export default {
 }
 .itin-choose-head { display: flex; align-items: center; justify-content: space-between;
   font-size: 0.875rem; font-weight: 700; color: var(--it-heading); margin-bottom: 11px; }
-.itin-choose-list, .itin-choose-loading { display: flex; gap: 11px; overflow-x: auto; padding-bottom: 2px; }
+/* Snap is `proximity` here and `mandatory` on mobile: desktop shows 2-3 cards
+   at once, where forcing a centre fights the user, but on a phone one card IS
+   the page. The native scrollbar is hidden because the dots below replace it. */
+.itin-choose-list, .itin-choose-loading { display: flex; gap: 11px; overflow-x: auto; padding-bottom: 2px; scroll-behavior: smooth; }
+.itin-choose-list { position: relative; scroll-snap-type: x proximity; scrollbar-width: none; }
+.itin-choose-list::-webkit-scrollbar { display: none; }
+/* Dots — active one widens into a gold pill rather than just brightening, so it
+   carries position and progress at once. ::before gives each a ~24px hit area
+   without inflating the 6px visual. */
+.itin-choose-dots { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 11px; }
+.itin-choose-dot {
+  position: relative; width: 6px; height: 6px; padding: 0; border: none; border-radius: 99px;
+  cursor: pointer; background: var(--it-muted); opacity: 0.4;
+  transition: width 0.28s ease, opacity 0.28s ease, background 0.28s ease;
+}
+.itin-choose-dot::before { content: ''; position: absolute; inset: -9px -5px; }
+.itin-choose-dot.is-on { width: 18px; opacity: 1; }
+.itin.day-mode .itin-choose-dot.is-on { background: #d39510; }
+.itin.night-mode .itin-choose-dot.is-on { background: #D4AF37; }
+@media (prefers-reduced-motion: reduce) { .itin-choose-dot { transition: none; } .itin-choose-list { scroll-behavior: auto; } }
 .itin-cand {
   flex: none; width: 150px; border: none; border-radius: 14px; padding: 0; overflow: hidden;
+  scroll-snap-align: center;
   cursor: pointer; text-align: left; color: var(--it-biz);
   background: var(--it-glass); box-shadow: var(--it-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -1957,6 +2038,12 @@ export default {
      2.375rem == 42.75px at the default root, so the photo button already
      clears the touch target without an override. */
   .itin-cand-imgbtn { width: 2.375rem; height: 2.375rem; }
+  /* One card is the page here, so snapping is mandatory and the cards you are
+     not on dim. Light, not motion — the photo being decided on is the only one
+     lit, and nothing moves or scales. */
+  .itin-choose-list { scroll-snap-type: x mandatory; }
+  .itin-cand { opacity: 0.55; }
+  .itin-cand.is-focus { opacity: 1; }
   .itin-choose-empty { font-size: 0.875rem; padding: 10px 2px; }
 }
 
