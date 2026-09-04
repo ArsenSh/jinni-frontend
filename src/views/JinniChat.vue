@@ -8190,8 +8190,30 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    a cast shadow lifting it off the parchment.
 
    The backdrop-filter stays but is mostly saturate: blur is near-pointless here,
-   while saturating the parchment behind a translucent fill genuinely warms it. */
-.genie-chat-container.day-mode .message-bubble.user .content{background:linear-gradient(to bottom,rgba(255,255,255,0.46) 0%,rgba(255,255,255,0.07) 40%,rgba(255,255,255,0) 62%),linear-gradient(135deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0.04) 48%,rgba(223,190,140,0.40) 100%),rgba(249,229,200,0.80);backdrop-filter:blur(3px) saturate(190%);-webkit-backdrop-filter:blur(3px) saturate(190%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),inset 0 0 0 1px rgba(255,255,255,0.42),inset 0 -12px 18px -14px rgba(150,100,35,0.40),0 8px 20px -8px rgba(139,69,19,0.18),0 1px 3px rgba(139,69,19,0.07);color:#3c2a1e}
+   while saturating the parchment behind a translucent fill genuinely warms it.
+
+   Re-cut 2026-09-04 to the iOS material ("too bright, the colors are not
+   matching" -> "something iphone usually uses, some glacier like").
+
+   The earlier version was wrong twice. Too bright: the sheen and the diagonal
+   each started near half-white, so stacked they hit ~0.75 white at the top-left
+   and bleached the sand. Colours clashing: the diagonal ended on
+   rgb(223,190,140), a browner tan than the fill, so the bubble drifted HUE from
+   top to bottom rather than just value.
+
+   Both came from the same mistake — dramatising the INSIDE. Apple's glass is
+   nearly flat inside; its character is at the edges. So the internal gradient is
+   now a single 0.14 veil, and the work moved to:
+     - a 0.5px hairline rim, brightest along the top edge where light lands
+     - a hairline of warm shade on the bottom edge, for thickness
+     - a wide, soft, low-opacity drop shadow, the way iOS floats a panel
+     - blur 24px + saturate 180%: vibrancy is the other half of the material,
+       and while the blur does little over a flat gradient it costs nothing and
+       is correct the moment a card or image scrolls behind the bubble
+   Fill alpha dropped to 0.70 so this is a VEIL over the parchment rather than a
+   sand-coloured block — that translucency is what reads as Apple glass, and it
+   lowers contrast against the page rather than raising it. */
+.genie-chat-container.day-mode .message-bubble.user .content{background:linear-gradient(to bottom,rgba(255,255,255,0.14) 0%,rgba(255,255,255,0) 55%),rgba(250,232,206,0.70);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.9),inset 0 0 0 0.5px rgba(255,255,255,0.45),inset 0 -0.5px 0 rgba(150,105,45,0.10),0 7px 20px -6px rgba(139,69,19,0.11),0 1px 3px rgba(139,69,19,0.05);color:#3c2a1e}
 .genie-chat-container.day-mode .text-action-btn.info-btn{background:rgba(255,255,255,0.3);color:white;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.6)}
 .genie-chat-container.day-mode .text-action-btn.info-btn:hover{background:rgba(255,255,255,0.4);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.9)}
 .genie-chat-container.day-mode .text-action-btn.ask-btn{background:linear-gradient(45deg,rgba(212,175,55,0.5),rgba(255,140,0,0.5));color:white;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.35)}
