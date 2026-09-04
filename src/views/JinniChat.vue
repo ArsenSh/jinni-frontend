@@ -8715,7 +8715,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Card footer row shares the tapback capsule (founder 2026-09-05: "you have
    not implemented in all locations, rec cards also have that") — tighter than
    the message row since it lives inside the card's own chrome. */
-.rec-footer-actions{display:flex;align-items:center;gap:3px;width:max-content;padding:3px 6px;border-radius:999px;overflow:hidden;isolation:isolate;backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);opacity:0;transition:opacity 0.2s ease}
+.rec-footer-actions{display:flex;align-items:center;gap:6px;width:max-content;opacity:0;transition:opacity 0.2s ease}
 /* Rest-hidden like before the capsule (founder 2026-09-05): revealed by
    hovering anywhere on the card's wrapper (card + footer share it), by the
    touch-active press on mobile, and held open while a thumb is active. */
@@ -8740,24 +8740,22 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    "not speaking" next to the glass cards): one pill of the same material as
    every other control here — translucent fill, hairline rim, even shadow —
    with the icons resting inside it. Hover feedback is light only, no motion. */
-/* overflow:hidden is load-bearing: Safari paints backdrop-filter SQUARE unless
-   the element clips itself, which is why the capsule read as "not round enough"
-   (founder 2026-09-05) despite the 999px radius. */
-.message-feedback{display:flex;align-items:center;gap:3px;opacity:0;margin-top:10px;width:max-content;padding:5px 8px;border-radius:999px;overflow:hidden;isolation:isolate;backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);transition:opacity 0.2s ease}
-/* Glacier surface, shared by both capsules — the day-bubble recipe at pill
-   scale: top sheen so the face is never flat, specular hairline where light
-   lands, full rim, a whisper of warm shade at the bottom edge for thickness,
-   and an even zero-offset float. */
-.day-mode .message-feedback,.day-mode .rec-footer-actions{background:linear-gradient(to bottom,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0.12) 55%,rgba(255,255,255,0.04) 100%),rgba(255,252,245,0.45);box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.95),inset 0 0 0 1px rgba(255,255,255,0.5),inset 0 -0.5px 0 rgba(150,105,45,0.08),0 0 12px -2px rgba(139,69,19,0.14)}
-.night-mode .message-feedback,.night-mode .rec-footer-actions{background:linear-gradient(to bottom,rgba(255,255,255,0.12) 0%,rgba(255,255,255,0.02) 60%),rgba(139,92,246,0.10);box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.3),inset 0 0 0 0.8px rgba(255,255,255,0.14),0 0 12px -2px rgba(0,0,0,0.4)}
-/* Hover inside a capsule: not a flat white disc — a faintly tinted fill with a
-   soft zero-offset glow in the mode's accent, so the icon appears to LIGHT UP
-   rather than get a background. Active keeps a quiet tinted fill so the chosen
-   thumb stays visibly held. */
+/* Third form (founder 2026-09-05): not naked icons, not a capsule — BLOCK
+   chips, the ItineraryView .itin-icon recipe verbatim. The capsule's own
+   surface + outer glow clashed with the recommendation card chrome; the itin
+   chips never do, because each button carries its own quiet glass and there is
+   no outer shadow at all. The row itself is now just a transparent flex box. */
+.message-feedback{display:flex;align-items:center;gap:6px;opacity:0;margin-top:10px;width:max-content;transition:opacity 0.2s ease}
+/* Chip surface — .itin-icon's exact values, so chat and itinerary feedback are
+   one family. Blur is per-chip; no outer shadow anywhere. */
+.message-feedback .feedback-btn,.rec-footer-actions .feedback-btn{border-radius:9px;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+.day-mode .message-feedback .feedback-btn,.day-mode .rec-footer-actions .feedback-btn{background:rgba(255,255,255,0.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6);color:rgba(92,74,66,0.85)}
+.night-mode .message-feedback .feedback-btn,.night-mode .rec-footer-actions .feedback-btn{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1);color:#94a3b8}
+/* Hover = the itin chip's lighten, ring unchanged, nothing radiates. */
 .day-mode .message-feedback .feedback-btn:hover,
-.day-mode .rec-footer-actions .feedback-btn:hover{background:rgba(255,255,255,0.75);box-shadow:0 0 9px rgba(160,82,45,0.3),inset 0 0 0 1px rgba(255,255,255,0.9)}
+.day-mode .rec-footer-actions .feedback-btn:hover{background:rgba(255,255,255,0.75);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6)}
 .night-mode .message-feedback .feedback-btn:hover,
-.night-mode .rec-footer-actions .feedback-btn:hover{background:rgba(192,132,252,0.13);box-shadow:0 0 9px rgba(192,132,252,0.35),inset 0 0 0 0.8px rgba(192,132,252,0.28)}
+.night-mode .rec-footer-actions .feedback-btn:hover{background:rgba(255,255,255,0.13);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
 .day-mode .message-feedback .feedback-btn.active,
 .day-mode .rec-footer-actions .feedback-btn.active{background:rgba(160,82,45,0.10)}
 .night-mode .message-feedback .feedback-btn.active,
