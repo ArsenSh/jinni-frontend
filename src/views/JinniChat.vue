@@ -8708,7 +8708,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .rec-card-bottom{display:flex;align-items:center;min-height:15px;position:relative}
 .rec-card-bottom .partner-label{position:absolute;left:0;right:0;justify-content:center;pointer-events:none}
 .rec-card-footer{display:flex;align-items:center;background:transparent;flex-shrink:0;margin-left:auto;position:relative;z-index:1}
-.rec-footer-actions{display:flex;align-items:center;gap:2px}
+/* Card footer row shares the tapback capsule (founder 2026-09-05: "you have
+   not implemented in all locations, rec cards also have that") — tighter than
+   the message row since it lives inside the card's own chrome. */
+.rec-footer-actions{display:flex;align-items:center;gap:3px;width:max-content;padding:3px 6px;border-radius:999px;backdrop-filter:blur(8px) saturate(160%);-webkit-backdrop-filter:blur(8px) saturate(160%)}
+.day-mode .rec-footer-actions{background:rgba(255,253,248,0.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6),0 0 8px -2px rgba(139,69,19,0.08)}
+.night-mode .rec-footer-actions{background:rgba(255,255,255,0.05);box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.1)}
 .feedback-btn{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;background:transparent;cursor:pointer;border-radius:50%;color:var(--text-muted,#999);padding:0;flex-shrink:0}
 /* Rest color per palette — the #999 fallback is a neutral gray that belongs to
    neither mode and sat cold on the parchment. Warm brown / blue-gray instead. */
@@ -8727,11 +8732,21 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    "not speaking" next to the glass cards): one pill of the same material as
    every other control here — translucent fill, hairline rim, even shadow —
    with the icons resting inside it. Hover feedback is light only, no motion. */
-.message-feedback{display:flex;align-items:center;gap:2px;opacity:0;margin-top:10px;width:max-content;padding:3px 6px;border-radius:999px;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);transition:opacity 0.2s ease}
+.message-feedback{display:flex;align-items:center;gap:3px;opacity:0;margin-top:10px;width:max-content;padding:5px 8px;border-radius:999px;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);transition:opacity 0.2s ease}
 .day-mode .message-feedback{background:rgba(255,253,248,0.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7),0 0 10px -2px rgba(139,69,19,0.1)}
 .night-mode .message-feedback{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.12)}
-.day-mode .message-feedback .feedback-btn:hover{background:rgba(255,255,255,0.7)}
-.night-mode .message-feedback .feedback-btn:hover{background:rgba(255,255,255,0.12)}
+/* Hover inside a capsule: not a flat white disc — a faintly tinted fill with a
+   soft zero-offset glow in the mode's accent, so the icon appears to LIGHT UP
+   rather than get a background. Active keeps a quiet tinted fill so the chosen
+   thumb stays visibly held. */
+.day-mode .message-feedback .feedback-btn:hover,
+.day-mode .rec-footer-actions .feedback-btn:hover{background:rgba(255,255,255,0.75);box-shadow:0 0 9px rgba(160,82,45,0.3),inset 0 0 0 1px rgba(255,255,255,0.9)}
+.night-mode .message-feedback .feedback-btn:hover,
+.night-mode .rec-footer-actions .feedback-btn:hover{background:rgba(192,132,252,0.13);box-shadow:0 0 9px rgba(192,132,252,0.35),inset 0 0 0 0.8px rgba(192,132,252,0.28)}
+.day-mode .message-feedback .feedback-btn.active,
+.day-mode .rec-footer-actions .feedback-btn.active{background:rgba(160,82,45,0.10)}
+.night-mode .message-feedback .feedback-btn.active,
+.night-mode .rec-footer-actions .feedback-btn.active{background:rgba(192,132,252,0.12)}
 .message-bubble.ai:hover .message-feedback,.message-feedback:has(.feedback-btn.active){opacity:1}
 .user-message-feedback{justify-content:flex-end;margin-top:4px}
 .message-bubble.user:hover .user-message-feedback,.user-message-feedback:has(.feedback-btn.active),.message-bubble.user.touched .user-message-feedback{opacity:1}
