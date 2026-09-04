@@ -1051,7 +1051,7 @@
       "location_help": "When enabled, Jinni will use your device GPS to show nearby places. When disabled, recommendations will be based on your selected travel destination."
     },
     "danger": {
-      "title": "Common Traps",
+      "title": "Danger Zone",
       "delete_chats": {
         "label": "Delete All Chats",
         "description_before": "Permanently ",
