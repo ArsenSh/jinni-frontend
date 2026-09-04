@@ -8756,6 +8756,25 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .day-mode .rec-footer-actions .feedback-btn:hover{background:rgba(255,255,255,0.75);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6)}
 .night-mode .message-feedback .feedback-btn:hover,
 .night-mode .rec-footer-actions .feedback-btn:hover{background:rgba(255,255,255,0.13);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
+
+/* Partner-tier chips (founder 2026-09-05: "have you considered business
+   colors?") — the ItineraryView tier values verbatim, keyed on the card's
+   card-glow wrapper: verified green, spotlight blue, signature gold, tinting
+   the chip's fill and ring, not just the icon. The pre-existing tier rules
+   that colour the icon on hover/active sit at higher specificity and still
+   apply on top. */
+.day-mode .card-glow--verified .rec-footer-actions .feedback-btn{color:#22c556ea;background:rgba(34,197,94,0.10);box-shadow:inset 0 0 0 1px rgba(34,197,94,0.20)}
+.day-mode .card-glow--verified .rec-footer-actions .feedback-btn:hover{background:rgba(34,197,94,0.20);box-shadow:inset 0 0 0 1px rgba(34,197,94,0.20)}
+.night-mode .card-glow--verified .rec-footer-actions .feedback-btn{color:#22c556b1;background:rgba(34,197,94,0.08);box-shadow:inset 0 0 0 0.7px rgba(34,197,94,0.14)}
+.night-mode .card-glow--verified .rec-footer-actions .feedback-btn:hover{background:rgba(34,197,94,0.16);box-shadow:inset 0 0 0 0.7px rgba(34,197,94,0.14)}
+.day-mode .card-glow--spotlight .rec-footer-actions .feedback-btn{color:#3b9fdda2;background:rgba(59,158,221,0.10);box-shadow:inset 0 0 0 1px rgba(59,158,221,0.20)}
+.day-mode .card-glow--spotlight .rec-footer-actions .feedback-btn:hover{background:rgba(59,158,221,0.20);box-shadow:inset 0 0 0 1px rgba(59,158,221,0.20)}
+.night-mode .card-glow--spotlight .rec-footer-actions .feedback-btn{color:#3b9fdda2;background:rgba(59,158,221,0.08);box-shadow:inset 0 0 0 0.7px rgba(59,158,221,0.14)}
+.night-mode .card-glow--spotlight .rec-footer-actions .feedback-btn:hover{background:rgba(59,158,221,0.16);box-shadow:inset 0 0 0 0.7px rgba(59,158,221,0.14)}
+.day-mode .card-glow--signature .rec-footer-actions .feedback-btn{color:#d39510;background:rgba(212,175,55,0.10);box-shadow:inset 0 0 0 1px rgba(212,175,55,0.20)}
+.day-mode .card-glow--signature .rec-footer-actions .feedback-btn:hover{background:rgba(212,175,55,0.20);box-shadow:inset 0 0 0 1px rgba(212,175,55,0.20)}
+.night-mode .card-glow--signature .rec-footer-actions .feedback-btn{color:#ffbf0085;background:rgba(212,175,55,0.08);box-shadow:inset 0 0 0 0.7px rgba(212,175,55,0.14)}
+.night-mode .card-glow--signature .rec-footer-actions .feedback-btn:hover{background:rgba(212,175,55,0.16);box-shadow:inset 0 0 0 0.7px rgba(212,175,55,0.14)}
 .day-mode .message-feedback .feedback-btn.active,
 .day-mode .rec-footer-actions .feedback-btn.active{background:rgba(160,82,45,0.10)}
 .night-mode .message-feedback .feedback-btn.active,
