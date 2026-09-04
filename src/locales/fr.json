@@ -291,7 +291,7 @@
   },
   "auth": {
     "title": "Jinni",
-    "subtitle_login": "Bon retour",
+    "subtitle_login": "Ravi de vous revoir !",
     "subtitle_register": "Commencez votre voyage magique",
     "sign_in": "Se connecter",
     "sign_up": "S'inscrire",
@@ -306,7 +306,7 @@
     "terms_link": "Conditions d'utilisation",
     "privacy_link": "Politique de confidentialité",
     "forgot_password": "Mot de passe oublié ?",
-    "welcome_back": "Bon retour",
+    "welcome_back": "Ravi de vous revoir !",
     "account_created": "Compte créé avec succès",
     "name_error": "Le nom doit contenir au moins 2 caractères",
     "email_error": "Veuillez entrer une adresse e-mail valide",
@@ -351,7 +351,7 @@
     "all_fields_required": "Tous les champs sont requis",
     "passwords_dont_match": "Les mots de passe ne correspondent pas",
     "email_required": "L'adresse e-mail est requise",
-    "setup_password_subtitle": "Créez un mot de passe pour votre compte professionnel",
+    "setup_password_subtitle": "Créez un mot de passe pour votre compte",
     "setup_new_password": "Nouveau mot de passe",
     "setup_confirm_password": "Confirmer le mot de passe",
     "setup_submit": "Définir le mot de passe et se connecter",
@@ -767,7 +767,7 @@
       "g3": "Ton génie connaît cette ville — mets-moi à l'épreuve."
     },
     "input": {
-      "placeholder": "Envoyer un message",
+      "placeholder": "Écrivez à Jinni",
       "placeholder_cooldown": "Vous avez atteint votre limite. Réessayez à {time}",
       "placeholder_mobile_cooldown": "Limite atteinte. Réessayez à {time}",
       "mode_nearby": "À proximité",
@@ -794,12 +794,10 @@
       "restaurants": "Restaurants",
       "hotels": "Hôtels",
       "hidden_gems": "Trésors cachés",
-      "historical": "Historique",
+      "historical": "Sites historiques",
       "events": "Événements locaux",
-      "attractions": "Attractions",
       "activities": "Activités",
-      "transportation": "Transport",
-      "itinerary": "Itinéraire"
+      "itinerary": "Plan de voyage"
     },
     "recommendations": {
       "recommended": "Recommandé",
@@ -808,16 +806,11 @@
       "ask_ai": "Demander",
       "view_more": "Voir plus de {type}",
       "more_recommendations": "Plus de recommandations",
-      "loading_more": "Chargement de plus de {type}...",
-      "no_more": "C'est tout pour le moment ! Essayez une autre recherche."
+      "loading_more": "Chargement de plus de {type}..."
     },
     "messages": {
       "connection_error": "J'ai du mal à me connecter à la magie en ce moment. Veuillez réessayer !",
-      "jinni_mistakes": "Jinni peut faire des erreurs. Vérifiez les informations importantes.",
-      "regenerate": "Régénérer",
-      "copy": "Copier",
-      "copied": "Copié !",
-      "edit": "Modifier"
+      "jinni_mistakes": "Jinni peut faire des erreurs. Vérifiez les informations importantes."
     },
     "session": {
       "warning": {
@@ -839,8 +832,7 @@
         },
         "suggestion": "Nous vous recommandons de commencer une nouvelle discussion pour des réponses plus rapides et plus précises.",
         "start_new": "Commencer une nouvelle discussion",
-        "go_back": "Retour",
-        "button": "Commencer une nouvelle discussion"
+        "go_back": "Retour"
       }
     },
     "errors": {
@@ -851,14 +843,16 @@
       "open_settings": "Ouvrir les paramètres",
       "load_more_failed": "Désolé, je n'ai pas pu charger plus de recommandations pour le moment !",
       "no_recommendations": "Aucune recommandation trouvée. Essayez de reformuler votre question !",
-      "recommendations_failed": "Something went wrong while getting recommendations!"
+      "recommendations_failed": "Une erreur s'est produite lors de la récupération des recommandations !"
     },
     "limit_suggestions": {
       "restaurants": "Je vous ai montré pas mal d'options de restaurants ! Pour des recommandations plus précises, essayez de me demander quelque chose comme :\n• \"Montre-moi des restaurants avec terrasse\"\n• \"Trouve des restaurants végétariens à moins de 15 000 AMD\"\n• \"J'ai besoin de restaurants près de la Place de la République\"\n• \"Montre-moi des restaurants arméniens traditionnels\"\nQuel type de restaurant recherchez-vous précisément ?",
       "hotels": "Je vous ai proposé plusieurs options d'hôtels ! Pour trouver exactement ce dont vous avez besoin, essayez d'être plus précis :\n• \"Montre-moi des hôtels économiques à moins de 50 000 AMD\"\n• \"Trouve des hôtels de luxe avec spa\"\n• \"J'ai besoin d'hôtels près de l'aéroport\"\n• \"Montre-moi des hôtels boutique dans le vieux Erevan\"\nQuels sont vos besoins spécifiques en matière d'hébergement ?",
       "historical": "J'ai partagé de nombreux sites historiques ! Pour des suggestions plus ciblées, essayez :\n• \"Montre-moi des églises médiévales\"\n• \"Trouve des sites archéologiques en dehors d'Erevan\"\n• \"Je veux des monuments de l'ère soviétique\"\n• \"Montre-moi des forteresses anciennes\"\nQuelle période historique vous intéresse précisément ?",
       "hidden_gems": "J'ai révélé pas mal de trésors cachés ! Pour en découvrir davantage, essayez de demander :\n• \"Montre-moi des trésors cachés pour la photographie\"\n• \"Trouve des endroits secrets que les locaux adorent\"\n• \"Je veux des lieux naturels insolites\"\n• \"Montre-moi des trésors cachés pour couples\"\nQuel type d'expérience cachée recherchez-vous ?",
-      "events": "J'ai suggéré de nombreux événements et activités ! Pour des options plus ciblées :\n• \"Montre-moi des divertissements en soirée\"\n• \"Trouve des événements culturels ce week-end\"\n• \"Je veux des activités en plein air\"\n• \"Montre-moi des événements adaptés aux familles\"\nQuel type d'activité vous intéresse précisément ?"
+      "events": "J'ai suggéré de nombreux événements et activités ! Pour des options plus ciblées :\n• \"Montre-moi des divertissements en soirée\"\n• \"Trouve des événements culturels ce week-end\"\n• \"Je veux des activités en plein air\"\n• \"Montre-moi des événements adaptés aux familles\"\nQuel type d'activité vous intéresse précisément ?",
+      "photo_spots": "Je vous ai montré pas mal de spots photo ! Pour des clichés plus précis, essayez de demander :\n• \"Montre-moi des points de vue au coucher du soleil\"\n• \"Trouve des spots photo avec vue sur la ville\"\n• \"Je veux des endroits calmes sans la foule\"\n• \"Montre-moi des rues colorées pour les photos\"\nQuel type de cliché cherchez-vous ?",
+      "shopping": "Je vous ai montré pas mal d'adresses shopping ! Pour des trouvailles plus précises, essayez de demander :\n• \"Montre-moi des boutiques de vêtements vintage\"\n• \"Trouve des ateliers de céramique artisanale\"\n• \"Je veux un marché aux puces le week-end\"\n• \"Montre-moi des boutiques ouvertes tard\"\nQue cherchez-vous exactement ?"
     },
     "view_more": {
       "hint_first": "Besoin de plus d'options ?",
@@ -1001,11 +995,6 @@
     "style": "Style",
     "location": "Emplacement",
     "edit_preferences": "Modifier les préférences",
-    "save": "Enregistrer",
-    "cancel": "Annuler",
-    "saving": "Enregistrement...",
-    "save_success": "Profil enregistré avec succès",
-    "save_error": "Échec de l'enregistrement du profil",
     "plan": {
       "label": "Formule",
       "free": "Gratuite",
@@ -1089,9 +1078,7 @@
       "turn_on": "L'activation du GPS effacera votre destination actuelle. Continuer ?"
     },
     "reset": "Réinitialiser aux valeurs par défaut",
-    "saved": "Enregistré",
-    "reset_confirm": "Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?",
-    "reset_success": "Paramètres réinitialisés avec succès"
+    "saved": "Enregistré"
   },
   "place_info": {
     "loading": "Chargement des détails...",
@@ -1104,14 +1091,8 @@
     "address": "Adresse",
     "get_directions": "Obtenir l'itinéraire",
     "search_online": "Rechercher en ligne",
-    "show_more_days": "Plus",
+    "show_more_days": "+ {count} autres jours",
     "show_less": "Moins",
-    "close": "Fermer",
-    "error": "Impossible de charger les informations sur ce lieu",
-    "open_now": "Ouvert maintenant",
-    "closed_now": "Fermé",
-    "distance": "Distance",
-    "price_level": "Niveau de prix",
     "highlights": "Points forts"
   },
   "explore": {
@@ -1189,7 +1170,7 @@
     "arrived": "Vous êtes arrivé",
     "done": "Terminé",
     "uturn": "Faites demi-tour",
-    "wrong_way": "Faites demi-tour",
+    "wrong_way": "Mauvaise direction",
     "wrong_way_hint": "Vous vous éloignez de l'itinéraire",
     "directions": "Itinéraire",
     "transit": "Transports",
