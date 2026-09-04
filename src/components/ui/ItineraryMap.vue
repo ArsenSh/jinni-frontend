@@ -199,11 +199,24 @@ const PMTILES_URL = (typeof import.meta !== 'undefined' && import.meta.env && im
 // One pmtiles layer per theme. Night flavor chosen against JinniChat's night
 // chrome (deep purple-navy #0a0118→#1a0b2e→#16213e, violet accents): protomaps
 // 'dark' sits naturally under it. Founder wants it deeper? — change to 'black'.
+
+// Map-LABEL language (founder 2026-09-05): follow the language the user chose
+// in Settings, but ONLY on the map — protomaps renders labels client-side from
+// the basemap's multilingual names, so this changes tile text and nothing else.
+// Falls back to the local name where a translation doesn't exist, and to 'en'
+// when the stored setting is missing or exotic.
+function mapLang() {
+  try {
+    const l = String(JSON.parse(localStorage.getItem('jinni_settings') || '{}').language || '').slice(0, 2);
+    if (['en','ru','hy','fr','zh','ar','es','de','it','el'].includes(l)) return l;
+  } catch (e) { /* settings must never break the map */ }
+  return 'en';
+}
 function pmLayer(theme) {
   return window.protomapsL.leafletLayer({
     url: PMTILES_URL,
     flavor: theme === 'night-mode' ? 'dark' : 'light',
-    lang: 'en',
+    lang: mapLang(),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   });
 }
@@ -1976,10 +1989,10 @@ export default {
 .itin-map-card-route--cta:hover { background: var(--rm-glass-hover); }
 .itin-map-card-route--cta:active { transform: scale(0.96); }
 .itin-map.night-mode .itin-map-card-route--cta {
-  background: rgba(255,255,255,0.05);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+  background: rgba(165,192,255,0.08);
+  box-shadow: inset 0 0 0 0.7px rgba(165,192,255,0.18);
 }
-.itin-map.night-mode .itin-map-card-route--cta:hover { background: rgba(255,255,255,0.1); }
+.itin-map.night-mode .itin-map-card-route--cta:hover { background: rgba(165,192,255,0.15); }
 .itin-map-card-spinner {
   width: 12px; height: 12px; border-radius: 50%;
   border: 2px solid var(--rm-ctrl-ring); border-top-color: var(--rm-ctrl-text);
@@ -2112,7 +2125,7 @@ export default {
 .itin-map :deep(.itin-map-popup .leaflet-popup-content) { margin: 0; width: 300px !important; }
 /* Themed close button — real SVG X, masked to the theme text colour. */
 .itin-map :deep(.itin-map-popup .leaflet-popup-close-button) {
-  top: 8px; right: 8px; width: 26px; height: 26px; padding: 0;
+  top: 8px; right: 8px; width: 32px; height: 32px; padding: 0;
   border-radius: 50%; background: var(--rm-ctrl-bg);
   font-size: 0; color: transparent !important;
   box-shadow: 0 0 8px rgba(0,0,0,0.3); z-index: 5;
@@ -2121,10 +2134,12 @@ export default {
 .itin-map :deep(.itin-map-popup .leaflet-popup-close-button)::before {
   content: ""; position: absolute; inset: 0;
   background-color: var(--rm-ctrl-text);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='3.1' stroke-linecap='round'/%3E%3C/svg%3E") center / 15px 15px no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='3.1' stroke-linecap='round'/%3E%3C/svg%3E") center / 15px 15px no-repeat;
 }
 .itin-map :deep(.itin-map-popup .leaflet-popup-close-button:hover) { background: var(--rm-hover); }
+/* The X takes the theme accent on hover — light feedback, no motion. */
+.itin-map :deep(.itin-map-popup .leaflet-popup-close-button:hover)::before { background-color: var(--rm-text); }
 
 :deep(.itin-pop-img) { width: 100%; height: 120px; background-size: cover; background-position: center; }
 :deep(.itin-pop-body) { padding: 12px 14px 14px; }

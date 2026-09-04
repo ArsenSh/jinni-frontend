@@ -225,11 +225,24 @@ const PMTILES_URL = (typeof import.meta !== 'undefined' && import.meta.env && im
 // One pmtiles layer per theme. Night flavor chosen against JinniChat's night
 // chrome (deep purple-navy #0a0118→#1a0b2e→#16213e, violet accents): protomaps
 // 'dark' sits naturally under it. Founder wants it deeper? — change to 'black'.
+
+// Map-LABEL language (founder 2026-09-05): follow the language the user chose
+// in Settings, but ONLY on the map — protomaps renders labels client-side from
+// the basemap's multilingual names, so this changes tile text and nothing else.
+// Falls back to the local name where a translation doesn't exist, and to 'en'
+// when the stored setting is missing or exotic.
+function mapLang() {
+  try {
+    const l = String(JSON.parse(localStorage.getItem('jinni_settings') || '{}').language || '').slice(0, 2);
+    if (['en','ru','hy','fr','zh','ar','es','de','it','el'].includes(l)) return l;
+  } catch (e) { /* settings must never break the map */ }
+  return 'en';
+}
 function pmLayer(theme) {
   return window.protomapsL.leafletLayer({
     url: PMTILES_URL,
     flavor: theme === 'night-mode' ? 'dark' : 'light',
-    lang: 'en',
+    lang: mapLang(),
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   });
 }
@@ -1441,6 +1454,12 @@ export default {
     popupHtml(rec, lat, lng) {
       const name = this.esc(rec.name || this.placeFallbackLabel);
       const cat = this.esc(rec.category || rec.type || '');
+      // Details row (founder 2026-09-05: the body "only shows directions
+      // button... it lost" its details) — rating and address, straight from
+      // the rec's own data, rendered only when actually present.
+      const addr = this.esc(rec.address || rec.formatted_address || rec.vicinity || '');
+      const rnum = Number(rec.rating);
+      const rating = Number.isFinite(rnum) && rnum > 0 ? rnum.toFixed(1) : '';
       const img = resolveImg(rec.image);
       const safe = img ? String(img).replace(/'/g, '%27') : '';
       // Contact actions — only rendered when the rec actually carries the data.
@@ -1480,6 +1499,7 @@ export default {
           <div class="rec-pop-body${tier ? ' rec-pop-body--' + tier : ''}"${bodyStyle}>
             <div class="rec-pop-name">${name}</div>
             ${cat ? `<div class="rec-pop-cat">${cat}</div>` : ''}
+            ${rating || addr ? `<div class="rec-pop-meta">${rating ? `<span class="rec-pop-rating">★ ${rating}</span>` : ''}${addr ? `<span class="rec-pop-addr">${addr}</span>` : ''}</div>` : ''}
             ${tierLbl}
             <div class="rec-pop-actions">${actions}</div>
             ${dirMenu}
@@ -2102,10 +2122,10 @@ export default {
    solid rather than glacier). Day mode is untouched. */
 .rec-map.night-mode .rec-map-card-name { color: var(--rm-ctrl-text); }
 .rec-map.night-mode .rec-map-card-route--cta {
-  background: rgba(255,255,255,0.05);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+  background: rgba(165,192,255,0.08);
+  box-shadow: inset 0 0 0 0.7px rgba(165,192,255,0.18);
 }
-.rec-map.night-mode .rec-map-card-route--cta:hover { background: rgba(255,255,255,0.1); }
+.rec-map.night-mode .rec-map-card-route--cta:hover { background: rgba(165,192,255,0.15); }
 .rec-map-card-spinner {
   width: 12px; height: 12px; border-radius: 50%;
   border: 2px solid var(--rm-ctrl-ring); border-top-color: var(--rm-ctrl-text);
@@ -2195,7 +2215,7 @@ export default {
    won't optically center — hide it and paint a real SVG X (masked so it still
    takes the theme color). */
 .rec-map :deep(.rec-map-popup .leaflet-popup-close-button) {
-  top: 8px; right: 8px; width: 26px; height: 26px; padding: 0;
+  top: 8px; right: 8px; width: 32px; height: 32px; padding: 0;
   border-radius: 50%; background: var(--rm-ctrl-bg);
   font-size: 0; color: transparent !important;
   box-shadow: 0 0 8px rgba(0,0,0,0.3); z-index: 5;
@@ -2204,13 +2224,18 @@ export default {
 .rec-map :deep(.rec-map-popup .leaflet-popup-close-button)::before {
   content: ""; position: absolute; inset: 0;
   background-color: var(--rm-ctrl-text);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='3.1' stroke-linecap='round'/%3E%3C/svg%3E") center / 15px 15px no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='3.1' stroke-linecap='round'/%3E%3C/svg%3E") center / 15px 15px no-repeat;
 }
 .rec-map :deep(.rec-map-popup .leaflet-popup-close-button:hover) { background: var(--rm-hover); }
+/* The X takes the theme accent on hover — light feedback, no motion. */
+.rec-map :deep(.rec-map-popup .leaflet-popup-close-button:hover)::before { background-color: var(--rm-text); }
 :deep(.rec-pop-img) { width: 100%; height: 150px; background-size: cover; background-position: center; }
 :deep(.rec-pop-body) { padding: 12px 14px 14px; }
 :deep(.rec-pop-name) { font-weight: 700; font-size: 0.9375rem; line-height: 1.25; margin-bottom: 2px; color: var(--rm-biz-text); }
+:deep(.rec-pop-meta) { display: flex; align-items: baseline; gap: 8px; font-size: 0.75rem; color: var(--rm-muted); margin-top: 2px; line-height: 1.35; }
+:deep(.rec-pop-rating) { font-weight: 700; color: var(--rm-biz-text); flex-shrink: 0; }
+:deep(.rec-pop-addr) { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 :deep(.rec-pop-cat) { font-size: 0.75rem; color: var(--rm-muted); margin-bottom: 11px; }
 .rec-map.day-mode :deep(.rec-pop-cat) { color: #5a4a42; }
 /* Tier label inside the popup — mirrors JinniChat's partner-label colours */
