@@ -8710,6 +8710,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .rec-card-footer{display:flex;align-items:center;background:transparent;flex-shrink:0;margin-left:auto;position:relative;z-index:1}
 .rec-footer-actions{display:flex;align-items:center;gap:2px}
 .feedback-btn{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;background:transparent;cursor:pointer;border-radius:50%;color:var(--text-muted,#999);padding:0;flex-shrink:0}
+/* Rest color per palette — the #999 fallback is a neutral gray that belongs to
+   neither mode and sat cold on the parchment. Warm brown / blue-gray instead. */
+.day-mode .feedback-btn{color:rgba(92,74,66,0.62)}
+.night-mode .feedback-btn{color:rgba(174,184,199,0.7)}
 .day-mode .feedback-btn:hover{color:#A0522D}
 .day-mode .feedback-btn.active{color:#A0522D}
 .day-mode .feedback-btn.active svg{fill:#A0522D;stroke:#A0522D}
@@ -8719,7 +8723,15 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .feedback-btn:active{transform:scale(0.85)}
 .rec-footer-btn{width:28px;height:28px}
 /* ── Like / Dislike below AI message bubble ──────────────────────────── */
-.message-feedback{display:flex;align-items:center;gap:2px;opacity:0; margin-top: 10px}
+/* The row is an iOS-tapback-style capsule (founder 2026-09-05: bare icons were
+   "not speaking" next to the glass cards): one pill of the same material as
+   every other control here — translucent fill, hairline rim, even shadow —
+   with the icons resting inside it. Hover feedback is light only, no motion. */
+.message-feedback{display:flex;align-items:center;gap:2px;opacity:0;margin-top:10px;width:max-content;padding:3px 6px;border-radius:999px;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);transition:opacity 0.2s ease}
+.day-mode .message-feedback{background:rgba(255,253,248,0.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7),0 0 10px -2px rgba(139,69,19,0.1)}
+.night-mode .message-feedback{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.12)}
+.day-mode .message-feedback .feedback-btn:hover{background:rgba(255,255,255,0.7)}
+.night-mode .message-feedback .feedback-btn:hover{background:rgba(255,255,255,0.12)}
 .message-bubble.ai:hover .message-feedback,.message-feedback:has(.feedback-btn.active){opacity:1}
 .user-message-feedback{justify-content:flex-end;margin-top:4px}
 .message-bubble.user:hover .user-message-feedback,.user-message-feedback:has(.feedback-btn.active),.message-bubble.user.touched .user-message-feedback{opacity:1}
