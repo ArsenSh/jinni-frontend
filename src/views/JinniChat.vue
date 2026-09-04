@@ -8711,9 +8711,13 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Card footer row shares the tapback capsule (founder 2026-09-05: "you have
    not implemented in all locations, rec cards also have that") — tighter than
    the message row since it lives inside the card's own chrome. */
-.rec-footer-actions{display:flex;align-items:center;gap:3px;width:max-content;padding:3px 6px;border-radius:999px;backdrop-filter:blur(8px) saturate(160%);-webkit-backdrop-filter:blur(8px) saturate(160%)}
-.day-mode .rec-footer-actions{background:rgba(255,253,248,0.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.6),0 0 8px -2px rgba(139,69,19,0.08)}
-.night-mode .rec-footer-actions{background:rgba(255,255,255,0.05);box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.1)}
+.rec-footer-actions{display:flex;align-items:center;gap:3px;width:max-content;padding:3px 6px;border-radius:999px;overflow:hidden;isolation:isolate;backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);opacity:0;transition:opacity 0.2s ease}
+/* Rest-hidden like before the capsule (founder 2026-09-05): revealed by
+   hovering anywhere on the card's wrapper (card + footer share it), by the
+   touch-active press on mobile, and held open while a thumb is active. */
+.rec-card-wrapper:hover .rec-footer-actions,
+.rec-card-wrapper:has(.recommendation-card.touch-active) .rec-footer-actions,
+.rec-footer-actions:has(.feedback-btn.active){opacity:1}
 .feedback-btn{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border:none;background:transparent;cursor:pointer;border-radius:50%;color:var(--text-muted,#999);padding:0;flex-shrink:0}
 /* Rest color per palette — the #999 fallback is a neutral gray that belongs to
    neither mode and sat cold on the parchment. Warm brown / blue-gray instead. */
@@ -8732,9 +8736,16 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    "not speaking" next to the glass cards): one pill of the same material as
    every other control here — translucent fill, hairline rim, even shadow —
    with the icons resting inside it. Hover feedback is light only, no motion. */
-.message-feedback{display:flex;align-items:center;gap:3px;opacity:0;margin-top:10px;width:max-content;padding:5px 8px;border-radius:999px;backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);transition:opacity 0.2s ease}
-.day-mode .message-feedback{background:rgba(255,253,248,0.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7),0 0 10px -2px rgba(139,69,19,0.1)}
-.night-mode .message-feedback{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.8px rgba(255,255,255,0.12)}
+/* overflow:hidden is load-bearing: Safari paints backdrop-filter SQUARE unless
+   the element clips itself, which is why the capsule read as "not round enough"
+   (founder 2026-09-05) despite the 999px radius. */
+.message-feedback{display:flex;align-items:center;gap:3px;opacity:0;margin-top:10px;width:max-content;padding:5px 8px;border-radius:999px;overflow:hidden;isolation:isolate;backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);transition:opacity 0.2s ease}
+/* Glacier surface, shared by both capsules — the day-bubble recipe at pill
+   scale: top sheen so the face is never flat, specular hairline where light
+   lands, full rim, a whisper of warm shade at the bottom edge for thickness,
+   and an even zero-offset float. */
+.day-mode .message-feedback,.day-mode .rec-footer-actions{background:linear-gradient(to bottom,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0.12) 55%,rgba(255,255,255,0.04) 100%),rgba(255,252,245,0.45);box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.95),inset 0 0 0 1px rgba(255,255,255,0.5),inset 0 -0.5px 0 rgba(150,105,45,0.08),0 0 12px -2px rgba(139,69,19,0.14)}
+.night-mode .message-feedback,.night-mode .rec-footer-actions{background:linear-gradient(to bottom,rgba(255,255,255,0.12) 0%,rgba(255,255,255,0.02) 60%),rgba(139,92,246,0.10);box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.3),inset 0 0 0 0.8px rgba(255,255,255,0.14),0 0 12px -2px rgba(0,0,0,0.4)}
 /* Hover inside a capsule: not a flat white disc — a faintly tinted fill with a
    soft zero-offset glow in the mode's accent, so the icon appears to LIGHT UP
    rather than get a background. Active keeps a quiet tinted fill so the chosen
