@@ -8151,7 +8151,23 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .genie-chat-container.day-mode .message-bubble.ai .content>div[style*="color: red"]{color:#8B0000}
 .genie-chat-container.day-mode .text :deep(hr){border-top:1px solid #A0522D}
 .genie-chat-container.day-mode .text :deep(blockquote){border-left-color:rgba(0,0,0,0.2);background:rgba(0,0,0,0.03)}
-.genie-chat-container.day-mode .message-bubble.user .content{background:rgb(249,229,200);backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%);box-shadow:inset 0 0 0 1px rgb(249,229,200);color:#3c2a1e}
+/* User bubble, day. Same sand tone as before — rgb(249,229,200) — but now
+   actually glass, on the .text-action-btn.info-btn recipe (founder 2026-09-04:
+   "something like more button in recommendation card, simply having the color
+   tone it has currently").
+
+   What was wrong: the fill was opaque rgb(), so the backdrop-filter had nothing
+   to see through and rendered no glass at all while still costing a compositing
+   layer; and the inset ring was painted in rgb(249,229,200) — the SAME colour as
+   the fill — so the border was mathematically present and visually absent. That
+   is the missing edge.
+
+   Now: the sand carries alpha so the parchment reads through it and the blur has
+   something to work on, the rim is white like every other glass surface here
+   (.chat-input-container uses rgba(255,255,255,0.7)), and a soft warm-brown drop
+   lifts the bubble off the page. Perceived colour is unchanged — 0.82 sand over
+   #f5edda parchment lands within a shade of the old opaque value. */
+.genie-chat-container.day-mode .message-bubble.user .content{background:rgba(249,229,200,0.82);backdrop-filter:blur(10px) saturate(170%);-webkit-backdrop-filter:blur(10px) saturate(170%);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.75),0 2px 10px rgba(139,69,19,0.07);color:#3c2a1e}
 .genie-chat-container.day-mode .text-action-btn.info-btn{background:rgba(255,255,255,0.3);color:white;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.6)}
 .genie-chat-container.day-mode .text-action-btn.info-btn:hover{background:rgba(255,255,255,0.4);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.9)}
 .genie-chat-container.day-mode .text-action-btn.ask-btn{background:linear-gradient(45deg,rgba(212,175,55,0.5),rgba(255,140,0,0.5));color:white;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.35)}
