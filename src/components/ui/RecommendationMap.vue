@@ -1721,21 +1721,29 @@ export default {
   --rm-glass: rgba(255,255,255,0.5); --rm-glass-hover: rgba(255,255,255,0.75);
   --rm-glass-ring: inset 0 0 0 1px rgba(255,255,255,0.6)
 }
+/* Night chrome retuned 2026-09-05 (founder: "very bright white borders...
+   the color is not speaking with map"). The night TILES are blue
+   (hue-rotate 192deg), but everything floating over them wore the PAGE's
+   purple with white rims — the glint alone was a 1px white line at 0.28 on
+   dark purple, which is the bright border complaint. Over-map chrome (ctrl,
+   popup, glass) now leans into the tiles' blue-navy with faint COOL
+   hairlines, and the glass ring drops 1.5px -> 0.7px. The bar keeps the
+   page's violet on purpose: it sits on the page, not on the map. */
 .rec-map.night-mode {
   --rm-surface: rgba(255,255,255,0.06); --rm-border: none; --rm-text: #c084fc; --rm-muted: #9ca3af;
   /* Business/card content text — matches JinniChat's recommendation-card text (night) */
   --rm-biz-text: #94a3b8;
-  --rm-hover: rgba(139,92,246,0.16); --rm-ctrl-bg: rgba(22,15,44,0.55); --rm-ctrl-text: #e2e8f0;
-  --svg-color: #c084fc; --rm-rim: inset 0 0 0 0.7px rgba(255,255,255,0.1); --rm-popup-bg: rgba(30,20,56,0.85);
-  --rm-ctrl-ring: rgba(255,255,255,0.2); --rm-ctrl-glint: rgba(255,255,255,0.28);
+  --rm-hover: rgba(139,92,246,0.16); --rm-ctrl-bg: rgba(17,25,52,0.62); --rm-ctrl-text: #e2e8f0;
+  --svg-color: #c084fc; --rm-rim: inset 0 0 0 0.7px rgba(255,255,255,0.1); --rm-popup-bg: rgba(17,25,52,0.9);
+  --rm-ctrl-ring: rgba(165,192,255,0.15); --rm-ctrl-glint: rgba(185,208,255,0.16);
   /* white-lift hover to match JinniChat's "view more" button (not a color tint) */
   --rm-bar-hover: rgba(255,255,255,0.14);
   /* control hover stays a solid-ish dark purple so the light icon doesn't vanish
      against the (light) night-mode map tiles */
-  --rm-ctrl-hover: rgba(76,52,140,0.82);
+  --rm-ctrl-hover: rgba(40,58,108,0.86);
   /* "glacier" frosted-white buttons — same recipe as JinniChat's view-more btn */
-  --rm-glass: rgba(255,255,255,0.08); --rm-glass-hover: rgba(255,255,255,0.14);
-  --rm-glass-ring: inset 0 0 0 1.5px rgba(255,255,255,0.1)
+  --rm-glass: rgba(165,192,255,0.10); --rm-glass-hover: rgba(165,192,255,0.17);
+  --rm-glass-ring: inset 0 0 0 0.7px rgba(165,192,255,0.16)
 }
 /* Bar */
 .rec-map-bar { display: flex; align-items: center; transition: background 0.18s ease; }
@@ -1783,7 +1791,7 @@ export default {
   width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
   border: none; border-radius: 12px; cursor: pointer;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: background 0.18s ease, transform 0.15s ease;
 }
@@ -1799,7 +1807,7 @@ export default {
   width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
   border: none; border-radius: 12px; cursor: pointer;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: background 0.18s ease, transform 0.15s ease, opacity 0.18s ease;
 }
@@ -1818,7 +1826,7 @@ export default {
   width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
   border: none; border-radius: 12px; cursor: pointer;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: background 0.18s ease, transform 0.15s ease, opacity 0.18s ease;
 }
@@ -1837,7 +1845,7 @@ export default {
   padding: 10px 14px; border-radius: 12px;
   font-size: 0.8125rem; font-weight: 600; line-height: 1.35; text-align: center;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.22), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 16px rgba(0,0,0,0.22), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 /* Tier filter — single button + chooser, top-left (sized like the control chips) */
@@ -1863,7 +1871,7 @@ export default {
   height: 44px; padding: 0 14px; border: none; border-radius: 12px; cursor: pointer;
   font-size: 0.8125rem; font-weight: 700; line-height: 1; white-space: nowrap;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: background 0.18s ease, transform 0.12s ease;
 }
@@ -1918,7 +1926,7 @@ export default {
   padding: 8px 8px 8px 13px; border-radius: 13px;
   font-size: 0.8125rem; font-weight: 700; line-height: 1; white-space: nowrap;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 .rec-map-routeinfo > svg { color: #4285F4; flex-shrink: 0; }
@@ -1941,13 +1949,13 @@ export default {
   display: flex; align-items: center; gap: 11px;
   padding: 9px 15px 9px 11px; border-radius: 16px;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 .rec-map-maneuver-ic { flex: 0 0 auto; display: flex; }
 /* Wrong-way variant — amber so it reads as "act now: turn around". */
 .rec-map-maneuver--warn {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1.5px rgba(245,158,11,0.55), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1.5px rgba(245,158,11,0.55), inset 0 1px 0 var(--rm-ctrl-glint);
 }
 .rec-map-maneuver--warn .rec-map-maneuver-ic { color: #f59e0b; }
 .rec-map-maneuver--warn .rec-map-maneuver-dist { color: #f59e0b; }
@@ -1970,7 +1978,7 @@ export default {
   display: flex; align-items: center; gap: 11px;
   padding: 10px 10px 10px 13px; border-radius: 16px;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 .rec-map-arrive-ic { flex: 0 0 auto; display: flex; }
@@ -2200,7 +2208,7 @@ export default {
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6 L18 18 M18 6 L6 18' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 13px 13px no-repeat;
 }
 .rec-map :deep(.rec-map-popup .leaflet-popup-close-button:hover) { background: var(--rm-hover); }
-:deep(.rec-pop-img) { width: 100%; height: 120px; background-size: cover; background-position: center; }
+:deep(.rec-pop-img) { width: 100%; height: 150px; background-size: cover; background-position: center; }
 :deep(.rec-pop-body) { padding: 12px 14px 14px; }
 :deep(.rec-pop-name) { font-weight: 700; font-size: 0.9375rem; line-height: 1.25; margin-bottom: 2px; color: var(--rm-biz-text); }
 :deep(.rec-pop-cat) { font-size: 0.75rem; color: var(--rm-muted); margin-bottom: 11px; }
@@ -2248,12 +2256,12 @@ export default {
 }
 .rec-map.night-mode :deep(.rec-pop-btn),
 .rec-map.night-mode :deep(.rec-pop-dir) {
-  background: rgba(255,255,255,0.06); color: var(--rm-biz-text);
-  box-shadow: inset 0 0 0 0.8px rgba(255,255,255,0.1);
+  background: rgba(165,192,255,0.09); color: var(--rm-biz-text);
+  box-shadow: inset 0 0 0 0.7px rgba(165,192,255,0.15);
 }
 .rec-map.night-mode :deep(.rec-pop-btn:hover),
 .rec-map.night-mode :deep(.rec-pop-dir:hover) {
-  background: rgba(255,255,255,0.14);
+  background: rgba(165,192,255,0.18);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
 }
 

@@ -1672,16 +1672,24 @@ export default {
   --rm-glass: rgba(255,255,255,0.5); --rm-glass-hover: rgba(255,255,255,0.75);
   --rm-glass-ring: inset 0 0 0 1px rgba(255,255,255,0.6);
 }
+/* Night chrome retuned 2026-09-05 (founder: "very bright white borders...
+   the color is not speaking with map"). The night TILES are blue
+   (hue-rotate 192deg), but everything floating over them wore the PAGE's
+   purple with white rims — the glint alone was a 1px white line at 0.28 on
+   dark purple, which is the bright border complaint. Over-map chrome (ctrl,
+   popup, glass) now leans into the tiles' blue-navy with faint COOL
+   hairlines, and the glass ring drops 1.5px -> 0.7px. The bar keeps the
+   page's violet on purpose: it sits on the page, not on the map. */
 .itin-map.night-mode {
   --rm-text: #c084fc; --rm-muted: #9ca3af; --rm-biz-text: #94a3b8;
   --rm-surface: rgba(255,255,255,0.06); --rm-bar-hover: rgba(255,255,255,0.14); --svg-color: #c084fc;
   --rm-hover: rgba(139,92,246,0.16);
-  --rm-ctrl-bg: rgba(22,15,44,0.55); --rm-ctrl-text: #e2e8f0;
-  --rm-ctrl-ring: rgba(255,255,255,0.2); --rm-ctrl-glint: rgba(255,255,255,0.28);
-  --rm-ctrl-hover: rgba(76,52,140,0.82);
-  --rm-popup-bg: rgba(30,20,56,0.85); --rm-rim: inset 0 0 0 0.7px rgba(255,255,255,0.1); --rm-border: none;
-  --rm-glass: rgba(255,255,255,0.08); --rm-glass-hover: rgba(255,255,255,0.14);
-  --rm-glass-ring: inset 0 0 0 1.5px rgba(255,255,255,0.1);
+  --rm-ctrl-bg: rgba(17,25,52,0.62); --rm-ctrl-text: #e2e8f0;
+  --rm-ctrl-ring: rgba(165,192,255,0.15); --rm-ctrl-glint: rgba(185,208,255,0.16);
+  --rm-ctrl-hover: rgba(40,58,108,0.86);
+  --rm-popup-bg: rgba(17,25,52,0.9); --rm-rim: inset 0 0 0 0.7px rgba(255,255,255,0.1); --rm-border: none;
+  --rm-glass: rgba(165,192,255,0.10); --rm-glass-hover: rgba(165,192,255,0.17);
+  --rm-glass-ring: inset 0 0 0 0.7px rgba(165,192,255,0.16);
 }
 
 .itin-map {
@@ -1740,7 +1748,7 @@ export default {
   width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
   border: none; border-radius: 12px; cursor: pointer;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: background 0.18s ease, transform 0.15s ease;
 }
@@ -1762,7 +1770,7 @@ export default {
   width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
   border: none; border-radius: 12px; cursor: pointer;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: background 0.18s ease, transform 0.15s ease, opacity 0.18s ease;
 }
@@ -1783,7 +1791,7 @@ export default {
   width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
   border: none; border-radius: 12px; cursor: pointer;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
   transition: background 0.18s ease, transform 0.15s ease, opacity 0.18s ease;
 }
@@ -1803,7 +1811,7 @@ export default {
   padding: 10px 14px; border-radius: 12px;
   font-size: 0.8125rem; font-weight: 600; line-height: 1.35; text-align: center;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.22), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 16px rgba(0,0,0,0.22), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 
@@ -1817,13 +1825,13 @@ export default {
   display: flex; align-items: center; gap: 11px;
   padding: 9px 15px 9px 11px; border-radius: 16px;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 .itin-map-maneuver-ic { flex: 0 0 auto; display: flex; }
 .itin-map-maneuver-ic :deep(svg) { display: block; }
 .itin-map-maneuver--warn {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1.5px rgba(245,158,11,0.55), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1.5px rgba(245,158,11,0.55), inset 0 1px 0 var(--rm-ctrl-glint);
 }
 .itin-map-maneuver--warn .itin-map-maneuver-ic { color: #f59e0b; }
 .itin-map-maneuver--warn .itin-map-maneuver-dist { color: #f59e0b; }
@@ -1845,7 +1853,7 @@ export default {
   display: flex; align-items: center; gap: 11px;
   padding: 10px 10px 10px 13px; border-radius: 16px;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 .itin-map-arrive-ic { flex: 0 0 auto; display: flex; }
@@ -1866,7 +1874,7 @@ export default {
   padding: 8px 8px 8px 13px; border-radius: 13px;
   font-size: 0.8125rem; font-weight: 700; line-height: 1; white-space: nowrap;
   color: var(--rm-ctrl-text); background: var(--rm-ctrl-bg);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
+  box-shadow: 0 0 8px rgba(0,0,0,0.16), inset 0 0 0 1px var(--rm-ctrl-ring), inset 0 1px 0 var(--rm-ctrl-glint);
   backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
 }
 .itin-map-routeinfo > svg { color: var(--rm-ctrl-text); flex-shrink: 0; opacity: 0.85; }
