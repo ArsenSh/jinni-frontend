@@ -8167,7 +8167,31 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    (.chat-input-container uses rgba(255,255,255,0.7)), and a soft warm-brown drop
    lifts the bubble off the page. Perceived colour is unchanged — 0.82 sand over
    #f5edda parchment lands within a shade of the old opaque value. */
-.genie-chat-container.day-mode .message-bubble.user .content{background:rgba(249,229,200,0.82);backdrop-filter:blur(10px) saturate(170%);-webkit-backdrop-filter:blur(10px) saturate(170%);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.75),0 2px 10px rgba(139,69,19,0.07);color:#3c2a1e}
+/* User bubble, day — glass built from LIGHT, not from blur.
+
+   Why the blur approach failed (founder 2026-09-04: "it is looking not glacier
+   like, it is same just having white borders"): backdrop-filter blurs what is
+   BEHIND an element, and behind this bubble there is nothing. .chat-messages is
+   transparent, so the bubble sits straight on the day container's smooth
+   linear-gradient — and blurring a smooth gradient returns the same smooth
+   gradient. The composer reads as glass because messages scroll under it; the
+   More pill reads as glass because it sits on a photo. This bubble has no
+   detail to refract, so no amount of blur can ever make it glassy.
+
+   So the glass is drawn instead, as three stacked background layers modelling a
+   slab lit from above — no pseudo-element, because backgrounds always paint
+   below the text whereas an ::after would wash it out:
+     1. top sheen   — light pooling on the upper surface, gone by 62%
+     2. diagonal    — bright top-left falling to a deeper sand bottom-right, so
+                      the face is never a flat colour, which is the giveaway
+     3. tinted base — the original rgb(249,229,200), now carrying alpha
+   Then the box-shadow does the edges: a bright specular catch on the top rim, a
+   softer full rim, an inner bottom shade that reads as the slab's thickness, and
+   a cast shadow lifting it off the parchment.
+
+   The backdrop-filter stays but is mostly saturate: blur is near-pointless here,
+   while saturating the parchment behind a translucent fill genuinely warms it. */
+.genie-chat-container.day-mode .message-bubble.user .content{background:linear-gradient(to bottom,rgba(255,255,255,0.46) 0%,rgba(255,255,255,0.07) 40%,rgba(255,255,255,0) 62%),linear-gradient(135deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0.04) 48%,rgba(223,190,140,0.40) 100%),rgba(249,229,200,0.80);backdrop-filter:blur(3px) saturate(190%);-webkit-backdrop-filter:blur(3px) saturate(190%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),inset 0 0 0 1px rgba(255,255,255,0.42),inset 0 -12px 18px -14px rgba(150,100,35,0.40),0 8px 20px -8px rgba(139,69,19,0.18),0 1px 3px rgba(139,69,19,0.07);color:#3c2a1e}
 .genie-chat-container.day-mode .text-action-btn.info-btn{background:rgba(255,255,255,0.3);color:white;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.6)}
 .genie-chat-container.day-mode .text-action-btn.info-btn:hover{background:rgba(255,255,255,0.4);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.9)}
 .genie-chat-container.day-mode .text-action-btn.ask-btn{background:linear-gradient(45deg,rgba(212,175,55,0.5),rgba(255,140,0,0.5));color:white;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.35)}
