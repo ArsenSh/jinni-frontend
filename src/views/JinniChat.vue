@@ -8206,14 +8206,17 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    now a single 0.14 veil, and the work moved to:
      - a 0.5px hairline rim, brightest along the top edge where light lands
      - a hairline of warm shade on the bottom edge, for thickness
-     - a wide, soft, low-opacity drop shadow, the way iOS floats a panel
+     - a wide, soft, low-opacity drop shadow with NO offset. Arsen prefers a
+       shadow even on every side over one pooling below or to the right
+       (2026-09-04), so it is `0 0 18px -2px`, not `0 7px 20px -6px`. The
+       negative spread keeps it from blooming now that nothing is directional.
      - blur 24px + saturate 180%: vibrancy is the other half of the material,
        and while the blur does little over a flat gradient it costs nothing and
        is correct the moment a card or image scrolls behind the bubble
    Fill alpha dropped to 0.70 so this is a VEIL over the parchment rather than a
    sand-coloured block — that translucency is what reads as Apple glass, and it
    lowers contrast against the page rather than raising it. */
-.genie-chat-container.day-mode .message-bubble.user .content{background:linear-gradient(to bottom,rgba(255,255,255,0.14) 0%,rgba(255,255,255,0) 55%),rgba(250,232,206,0.70);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.9),inset 0 0 0 0.5px rgba(255,255,255,0.45),inset 0 -0.5px 0 rgba(150,105,45,0.10),0 7px 20px -6px rgba(139,69,19,0.11),0 1px 3px rgba(139,69,19,0.05);color:#3c2a1e}
+.genie-chat-container.day-mode .message-bubble.user .content{background:linear-gradient(to bottom,rgba(255,255,255,0.14) 0%,rgba(255,255,255,0) 55%),rgba(250,232,206,0.70);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.9),inset 0 0 0 0.5px rgba(255,255,255,0.45),inset 0 -0.5px 0 rgba(150,105,45,0.10),0 0 18px -2px rgba(139,69,19,0.12),0 0 4px rgba(139,69,19,0.05);color:#3c2a1e}
 .genie-chat-container.day-mode .text-action-btn.info-btn{background:rgba(255,255,255,0.3);color:white;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.6)}
 .genie-chat-container.day-mode .text-action-btn.info-btn:hover{background:rgba(255,255,255,0.4);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.9)}
 .genie-chat-container.day-mode .text-action-btn.ask-btn{background:linear-gradient(45deg,rgba(212,175,55,0.5),rgba(255,140,0,0.5));color:white;box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.35)}
