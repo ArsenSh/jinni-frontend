@@ -2502,6 +2502,11 @@ export default {
       { value: 'photo_spots', label: 'Photo spots' }, { value: 'hidden_gems', label: 'Hidden gems' },
       { value: 'shopping', label: 'Shops' },
       { value: 'activities', label: 'Activities' },
+      // Cache rows whose category the AI decided at save time (attractions,
+      // legacy tags, or none) — they live in PlaceCache but match no
+      // moderated category above, so they were invisible here (founder catch
+      // 2026-09-05). The backend maps 'other' to exactly those rows.
+      { value: 'other', label: 'Other (AI-decided)' },
       // Not a PlaceCache category either: switches the table to the EventSource
       // registry — the pages the hunt reads for events instead of paying for a
       // web search. Scoped server-side to this validator's own country/city.
