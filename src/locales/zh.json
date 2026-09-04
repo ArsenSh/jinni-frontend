@@ -259,7 +259,7 @@
   },
   "landing": {
     "hero": {
-      "title": "精灵会带你去哪里？",
+      "title": "Jinni 会带你去哪里？",
       "subtitle": "解锁你从未知道存在的目的地",
       "cta": "许个愿望 ✨"
     },
@@ -267,7 +267,7 @@
       "title": "三个愿望，无限可能",
       "ai": {
         "title": "为你量身定制",
-        "description": "精灵解码你的气质和喜好，发现你会立即喜欢的地方"
+        "description": "Jinni 解码你的气质和喜好，发现你会立即喜欢的地方"
       },
       "gems": {
         "title": "发掘隐藏的宝藏",
@@ -275,14 +275,14 @@
       },
       "business": {
         "title": "思维速度的规划",
-        "description": "一键即可获得即时灵感。或深入探索。精灵映射你的梦想方式——流畅、激情、自由"
+        "description": "一键即可获得即时灵感。或深入探索。Jinni 映射你的梦想方式——流畅、激情、自由"
       }
     },
     "footer": {
       "privacy": "隐私政策",
       "terms": "服务条款",
       "contact": "联系我们",
-      "copyright": "© 2026 精灵。版权所有。"
+      "copyright": "© 2026 Jinni。版权所有。"
     },
     "mode_switch": {
       "explore": "探索",
@@ -290,7 +290,7 @@
     }
   },
   "auth": {
-    "title": "精灵",
+    "title": "Jinni",
     "subtitle_login": "欢迎回来！",
     "subtitle_register": "开启你的魔法之旅",
     "sign_in": "登录",
@@ -351,7 +351,7 @@
     "all_fields_required": "所有字段均为必填项",
     "passwords_dont_match": "密码不匹配",
     "email_required": "电子邮箱为必填项",
-    "setup_password_subtitle": "为您的企业账户创建密码",
+    "setup_password_subtitle": "为您的账户创建密码",
     "setup_new_password": "新密码",
     "setup_confirm_password": "确认密码",
     "setup_submit": "设置密码并登录",
@@ -459,10 +459,10 @@
     "tagline": "您非凡旅程的智能伴侣",
     "privacy_policy": "隐私政策",
     "terms_of_service": "服务条款",
-    "copyright": "© 2026 精灵AI。版权所有。",
+    "copyright": "© 2026 Jinni AI。版权所有。",
     "modal": {
-      "title": "感谢您的联系！",
-      "message": "您的消息已成功发送。我们会尽快回复您。",
+      "title": "消息发送成功！",
+      "message": "感谢您联系 Jinni。我们的团队会尽快通过 {email} 回复您。",
       "button": "继续探索"
     },
     "fill_required": "请填写所有必填字段。",
@@ -480,12 +480,6 @@
     "address": "地址：",
     "loading_map": "正在加载地图...",
     "unsaved_changes": "您有未保存的更改。您想离开吗？",
-    "no_results": "未找到结果",
-    "select_city": "选择城市",
-    "or_search": "或搜索目的地",
-    "popular_destinations": "热门目的地",
-    "nearby_cities": "附近城市",
-    "clear": "清除",
     "my_location_btn": "使用我的当前位置",
     "gps_denied_banner": "GPS 已被禁止。您仍可通过点击地图或搜索来选择任意位置。要启用 GPS：设置 → 隐私与安全性 → 定位服务 → Safari → 「使用应用期间」。",
     "gps_denied_alert": "位置访问已被禁止。请前往 设置 → 隐私与安全性 → 定位服务 → Safari，并选择「使用应用期间」。",
@@ -773,7 +767,7 @@
       "g3": "你的精灵懂这座城——考考我。"
     },
     "input": {
-      "placeholder": "询问精灵任何事...",
+      "placeholder": "给 Jinni 发消息",
       "placeholder_cooldown": "您已达到限制。请在 {time} 重试",
       "placeholder_mobile_cooldown": "已达限制。请在 {time} 重试",
       "mode_nearby": "附近",
@@ -807,7 +801,7 @@
     },
     "recommendations": {
       "recommended": "推荐",
-      "more_recommendations": "More recommendations:",
+      "more_recommendations": "更多推荐：",
       "results_count": "({count} 个结果)",
       "view_more": "查看更多 {type}",
       "loading_more": "正在查找更多 {type}...",
@@ -856,7 +850,9 @@
       "hotels": "我已经提供了几个酒店选项！要准确找到您需要的，请尝试更具体：\n• \"显示50,000 AMD以下的经济型酒店\"\n• \"查找带水疗设施的豪华酒店\"\n• \"我需要机场附近的酒店\"\n• \"显示老埃里温的精品酒店\"\n您的具体住宿需求是什么？",
       "historical": "我已经分享了许多历史遗址！为了获得更有针对性的建议，请尝试：\n• \"显示中世纪教堂\"\n• \"查找埃里温以外的考古遗址\"\n• \"我想要苏联时代的纪念碑\"\n• \"显示古代堡垒\"\n您对哪个具体历史时期感兴趣？",
       "hidden_gems": "我已经揭示了相当多的隐藏宝藏！要发现更多，请尝试询问：\n• \"显示适合摄影的隐藏宝藏\"\n• \"查找当地人喜爱的秘密景点\"\n• \"我想要另类的自然景点\"\n• \"显示适合情侣的隐藏宝藏\"\n您在寻找什么样的隐藏体验？",
-      "events": "我已经建议了许多活动和事件！为了获得更有针对性的选项：\n• \"显示晚间娱乐\"\n• \"查找本周末的文化活动\"\n• \"我想要户外活动\"\n• \"显示适合家庭的活动\"\n您对什么具体类型的活动感兴趣？"
+      "events": "我已经建议了许多活动和事件！为了获得更有针对性的选项：\n• \"显示晚间娱乐\"\n• \"查找本周末的文化活动\"\n• \"我想要户外活动\"\n• \"显示适合家庭的活动\"\n您对什么具体类型的活动感兴趣？",
+      "photo_spots": "我已经展示了不少拍照地点！想要更具体的镜头，可以试试问：\n• \"给我看日落观景点\"\n• \"找能拍城市天际线的拍照地点\"\n• \"我想要人少安静的地方\"\n• \"给我看适合拍照的彩色街道\"\n您想拍什么样的照片？",
+      "shopping": "我已经展示了不少购物地点！想找更具体的，可以试试问：\n• \"给我看复古服装店\"\n• \"找手工陶瓷店\"\n• \"我想逛周末跳蚤市场\"\n• \"给我看营业到很晚的商店\"\n您具体想找什么？"
     },
     "view_more": {
       "hint_first": "需要更多选项？",
@@ -948,7 +944,7 @@
       "skip_hotel": "跳过并生成",
       "day": "天",
       "days": "天",
-      "day_cap": "第",
+      "day_cap": "Day",
       "start": "生成行程",
       "planning": "正在规划您的行程...",
       "finding_hotels": "正在为您寻找酒店...",
@@ -1040,9 +1036,9 @@
     },
     "search": {
       "title": "搜索半径",
-      "description": "控制精灵在每种模式下搜索推荐的距离",
+      "description": "控制 Jinni 在每种模式下搜索推荐的距离",
       "nearby_mode": "附近模式",
-      "discovery_mode": "发现模式",
+      "discovery_mode": "探索模式",
       "nearby_value": "{km} 公里",
       "discovery_value": "{km} 公里",
       "close": "近",
@@ -1050,12 +1046,12 @@
     },
     "privacy": {
       "title": "隐私",
-      "description": "控制精灵如何使用您的位置数据",
+      "description": "控制 Jinni 如何使用您的位置数据",
       "use_location": "使用我的当前位置",
-      "location_help": "启用时，精灵将使用您的设备GPS显示附近的地方。禁用时，推荐将基于您选择的旅行目的地。"
+      "location_help": "启用时，Jinni 将使用您的设备GPS显示附近的地方。禁用时，推荐将基于您选择的旅行目的地。"
     },
     "danger": {
-      "title": "常见陷阱",
+      "title": "危险操作",
       "delete_chats": {
         "label": "删除所有聊天",
         "description_before": "永久",
@@ -1174,7 +1170,7 @@
     "arrived": "您已到达",
     "done": "完成",
     "uturn": "请掉头",
-    "wrong_way": "请掉头",
+    "wrong_way": "方向错误",
     "wrong_way_hint": "您正在偏离路线",
     "directions": "路线",
     "transit": "公共交通",
@@ -1202,7 +1198,7 @@
     "hero": {
       "title": "当游客寻找时，你就在那里",
       "subtitle": "Jinni 将旅行者与经过验证的商家精准匹配",
-      "cta": "添加您的业务 ✨"
+      "cta": "添加您的商家 ✨"
     },
     "features": {
       "title": "您的展示方式"
@@ -1228,7 +1224,7 @@
         "price": "$49",
         "priceSuffix": "/月",
         "heading": "掌控您的区域",
-        "description": "在探索和附近模式下排名靠前。突出展示、社交链接、隐藏宝石类别及完整数据分析。",
+        "description": "在探索和附近模式下排名靠前。突出展示、社交链接、隐藏宝藏类别及完整数据分析。",
         "cta": "选择 Signature"
       }
     }
@@ -1245,7 +1241,7 @@
     "schedule": "日程",
     "event": {
       "weekly": "每周",
-      "every": "{day}",
+      "every": "每{day}",
       "all_day": "全天",
       "starting": "从 {date} 开始"
     },
