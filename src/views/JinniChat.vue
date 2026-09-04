@@ -6222,11 +6222,11 @@ export default {
         const titles = { 
           'restaurants': this.nearbyMode ? this.t('chat.session_titles.nearby_restaurants') : this.t('chat.session_titles.restaurant_recommendations'),
           'hotels': this.nearbyMode ? this.t('chat.session_titles.nearby_hotels') : this.t('chat.session_titles.hotel_suggestions'),
-          'hidden_gems': this.t('chat.session_titles.hidden_gems'),
-          'historical': this.t('chat.session_titles.historical'),
-          'events': this.t('chat.session_titles.events'),
-          'photo_spots': this.t('chat.session_titles.photo_spots'),
-          'shopping': this.t('chat.session_titles.shopping'),
+          'hidden_gems': this.nearbyMode ? this.t('chat.session_titles.nearby_hidden_gems') : this.t('chat.session_titles.hidden_gems'),
+          'historical': this.nearbyMode ? this.t('chat.session_titles.nearby_historical') : this.t('chat.session_titles.historical'),
+          'events': this.nearbyMode ? this.t('chat.session_titles.nearby_events') : this.t('chat.session_titles.events'),
+          'photo_spots': this.nearbyMode ? this.t('chat.session_titles.nearby_photo_spots') : this.t('chat.session_titles.photo_spots'),
+          'shopping': this.nearbyMode ? this.t('chat.session_titles.nearby_shopping') : this.t('chat.session_titles.shopping'),
           'activities': this.nearbyMode ? this.t('chat.session_titles.nearby_activities') : this.t('chat.session_titles.activities')
         };
         await this.setSessionTitle(titles[actionId] || 'Quick Search');
