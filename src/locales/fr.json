@@ -875,7 +875,8 @@
       "hidden_gems": "Découverte de trésors cachés",
       "historical": "Lieux historiques",
       "events": "Événements et activités locaux",
-      "activities": "Activités"
+      "activities": "Découverte d’activités",
+      "nearby_activities": "Activités à proximité"
     },
     "ai_prompts": {
       "restaurant": "Parlez-moi de {name} - gamme de prix, plats principaux et comment réserver",

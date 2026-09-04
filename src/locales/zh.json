@@ -873,7 +873,8 @@
       "hidden_gems": "隐藏宝藏发现",
       "historical": "历史遗址",
       "events": "当地活动",
-      "activities": "娱乐活动"
+      "activities": "娱乐活动探索",
+      "nearby_activities": "附近的娱乐活动"
     },
     "ai_prompts": {
       "restaurant": "告诉我关于 {name} - 价格范围、主要菜品和如何预订",

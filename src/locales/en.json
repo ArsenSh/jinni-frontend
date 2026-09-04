@@ -869,7 +869,8 @@
       "events": "Local Events & Activities",
       "photo_spots": "Photo Spots",
       "shopping": "Shopping",
-      "activities": "Activities"
+      "activities": "Activity Discovery",
+      "nearby_activities": "Nearby Activities"
     },
     "ai_prompts": {
       "restaurant": "Tell me about {name} - price range, key dishes, and how to make reservations",

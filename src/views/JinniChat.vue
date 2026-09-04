@@ -6227,7 +6227,7 @@ export default {
           'events': this.t('chat.session_titles.events'),
           'photo_spots': this.t('chat.session_titles.photo_spots'),
           'shopping': this.t('chat.session_titles.shopping'),
-          'activities': this.t('chat.session_titles.activities')
+          'activities': this.nearbyMode ? this.t('chat.session_titles.nearby_activities') : this.t('chat.session_titles.activities')
         };
         await this.setSessionTitle(titles[actionId] || 'Quick Search');
       }  
