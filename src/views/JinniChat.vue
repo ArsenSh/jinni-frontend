@@ -8705,7 +8705,11 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .saved-panel.day .image-request-btn.loading{background:rgba(255,255,255,0.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7)}
 
 /* ── Rec card footer (like / dislike / share) ────────────────────────── */
-.rec-card-bottom{display:flex;align-items:center;min-height:15px;position:relative}
+/* 7px of air below the card: the footer row used to be bare icons and could
+   sit flush invisibly, but the capsule has a body and was touching the card
+   (founder 2026-09-05). Moves the partner label and Check-listing link down
+   with it, which they needed too. */
+.rec-card-bottom{display:flex;align-items:center;min-height:15px;position:relative;margin-top:7px}
 .rec-card-bottom .partner-label{position:absolute;left:0;right:0;justify-content:center;pointer-events:none}
 .rec-card-footer{display:flex;align-items:center;background:transparent;flex-shrink:0;margin-left:auto;position:relative;z-index:1}
 /* Card footer row shares the tapback capsule (founder 2026-09-05: "you have
