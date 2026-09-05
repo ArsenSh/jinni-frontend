@@ -94,6 +94,20 @@ const routes = [
         meta: { requiresAuth: true, requiresStaff: true, title: 'Validation — Admin' }
     },
     {
+        // Jinni Shot Spots (Stage 1) — self-contained feature; deleting these
+        // two entries + the Shot* view files + shotSensors.js removes it fully.
+        path: '/shots',
+        name: 'ShotSpots',
+        component: () => import('@/views/ShotSpotsView.vue'),
+        meta: { requiresAuth: true, title: 'Shot Spots — Jinni' }
+    },
+    {
+        path: '/shots/capture',
+        name: 'ShotCapture',
+        component: () => import('@/views/ShotCaptureView.vue'),
+        meta: { requiresAuth: true, requiresStaff: true, title: 'Capture — Jinni' }
+    },
+    {
         path: '/business/dashboard',
         name: 'BusinessDashboard',
         component: () => import('@/views/BusinessDashboard.vue'),
