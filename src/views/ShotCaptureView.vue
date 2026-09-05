@@ -17,6 +17,7 @@
           <input type="file" accept="image/jpeg,image/png,image/webp,image/heic" @change="onImportPicked" hidden />
         </label>
         <button class="sc-btn" @click="startScout">📍 Scout</button>
+        <button class="sc-btn" @click="openLeads">⛏ Leads</button>
       </div>
     </header>
 
@@ -40,6 +41,7 @@
         </div>
         <div class="sc-row-actions">
           <span class="sc-status" :class="'sc-status--' + s.status">{{ s.status }}</span>
+          <button v-if="s.recreationCount" class="sc-btn sc-btn--sm" @click="openRecs(s)">📸 {{ s.recreationCount }} got it</button>
           <button class="sc-btn sc-btn--sm" @click="togglePublish(s)">{{ s.status === 'active' ? 'Unpublish' : 'Publish' }}</button>
           <button class="sc-btn sc-btn--sm" @click="editSpot(s)">Edit</button>
           <button class="sc-btn sc-btn--sm sc-btn--danger" @click="removeSpot(s)">Delete</button>
@@ -71,7 +73,7 @@
     </div>
 
     <!-- ── FORM ─────────────────────────────────────────────────────────── -->
-    <div v-else class="sc-form">
+    <div v-else-if="view === 'form'" class="sc-form">
       <img v-if="shot.dataUrl" :src="shot.dataUrl" class="sc-preview" alt="" />
       <img v-else-if="editingId && editingHasPhoto" :src="apiBase + '/api/shotspots/' + editingId + '/photo'" class="sc-preview" alt="" />
       <p class="sc-meta" v-if="shot.dataUrl">
@@ -127,6 +129,78 @@
         <button v-if="canPublish" class="sc-btn sc-btn--gold" :disabled="saving" @click="submit('active')">{{ saving ? 'Saving…' : 'Save & publish' }}</button>
       </div>
     </div>
+
+    <!-- ── RECREATIONS (Stage 2 moderation) ─────────────────────────────── -->
+    <div v-else-if="view === 'recs'" class="sc-list">
+      <h2 class="sc-sub">Recreations — {{ recSpot ? recSpot.title : '' }}</h2>
+      <p class="sc-meta">Traveler photos are private until you promote one. "Make hero" replaces the public photo (source shown as traveler); your camera point and instructions stay as they are.</p>
+      <p v-if="error" class="sc-error">{{ error }}</p>
+      <p v-if="recsLoading" class="sc-muted">Loading…</p>
+      <p v-else-if="!recs.length" class="sc-muted">None yet.</p>
+      <div v-for="r in recs" :key="r.id" class="sc-row">
+        <img v-if="r.photoUrl" :src="r.photoUrl" alt="" />
+        <div v-else class="sc-noimg">{{ r.hasPhoto ? '⏳' : '✔️' }}</div>
+        <div class="sc-row-main">
+          <strong>{{ new Date(r.createdAt).toLocaleString() }}</strong>
+          <span class="sc-meta">
+            {{ r.distanceM == null ? '?' : r.distanceM + 'm' }} from spot
+            · GPS ±{{ r.accuracyMeters == null ? '?' : Math.round(r.accuracyMeters) }}m
+            · {{ r.heading == null ? 'no heading' : Math.round(r.heading) + '°' }}
+          </span>
+          <span v-if="r.promotedAt" class="sc-status sc-status--active">current hero</span>
+        </div>
+        <div class="sc-row-actions">
+          <button v-if="r.hasPhoto && !r.promotedAt" class="sc-btn sc-btn--sm sc-btn--gold" @click="promoteRec(r)">Make hero</button>
+          <button class="sc-btn sc-btn--sm sc-btn--danger" @click="deleteRec(r)">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LEADS (Stage 3 miner — evidence, never the face) ─────────────── -->
+    <div v-else-if="view === 'leads'" class="sc-form">
+      <h2 class="sc-sub">Leads — where photographers already stand</h2>
+      <p class="sc-meta">Coordinates and counts only (OSM viewpoints + Commons camera positions). Images are never imported — a lead becomes a spot only after you scout and shoot it.</p>
+      <div class="sc-two">
+        <label>Center (lat, lng) <input v-model.trim="leadCoords" placeholder="40.17925, 44.51262" /></label>
+        <label>Radius
+          <select v-model.number="leadRadius">
+            <option :value="1">1 km</option><option :value="3">3 km</option>
+            <option :value="5">5 km</option><option :value="10">10 km</option>
+          </select>
+        </label>
+      </div>
+      <div class="sc-photoacts">
+        <button class="sc-btn sc-btn--sm" :disabled="!gps" @click="useMyLocation">📍 Use my location</button>
+        <button class="sc-btn sc-btn--sm sc-btn--gold" :disabled="leadsLoading" @click="findLeads">{{ leadsLoading ? 'Searching…' : 'Find leads' }}</button>
+      </div>
+      <p v-if="error" class="sc-error">{{ error }}</p>
+      <template v-if="leads">
+        <p class="sc-meta">Commons: {{ leads.sources.commons }} · OSM viewpoints: {{ leads.sources.osm }}</p>
+        <div v-for="(c, i) in leads.clusters" :key="'c' + i" class="sc-row">
+          <div class="sc-noimg">📷</div>
+          <div class="sc-row-main">
+            <strong>{{ c.photographers }} photographers stood here</strong>
+            <span class="sc-meta">{{ (c.distanceM / 1000).toFixed(1) }} km · {{ c.sampleTitles.join(' · ') }}</span>
+          </div>
+          <div class="sc-row-actions">
+            <a class="sc-btn sc-btn--sm" :href="'https://maps.google.com/?q=' + c.lat + ',' + c.lng" target="_blank" rel="noopener">Map</a>
+            <button class="sc-btn sc-btn--sm sc-btn--gold" @click="scoutLead(c.lat, c.lng, '')">Scout</button>
+          </div>
+        </div>
+        <div v-for="(vp, i) in leads.viewpoints" :key="'v' + i" class="sc-row">
+          <div class="sc-noimg">🏔</div>
+          <div class="sc-row-main">
+            <strong>{{ vp.name }}</strong>
+            <span class="sc-meta">viewpoint · {{ (vp.distanceM / 1000).toFixed(1) }} km</span>
+          </div>
+          <div class="sc-row-actions">
+            <a class="sc-btn sc-btn--sm" :href="'https://maps.google.com/?q=' + vp.lat + ',' + vp.lng" target="_blank" rel="noopener">Map</a>
+            <button class="sc-btn sc-btn--sm sc-btn--gold" @click="scoutLead(vp.lat, vp.lng, vp.name)">Scout</button>
+          </div>
+        </div>
+        <p v-if="!leads.clusters.length && !leads.viewpoints.length" class="sc-muted">Nothing found in this radius.</p>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -160,6 +234,8 @@ export default {
       form: emptyForm(),
       editingId: null, editingHasPhoto: false,
       scouting: false, scoutCoords: '', importError: '',
+      recSpot: null, recs: [], recsLoading: false, _recBlobUrls: [],
+      leadCoords: '', leadRadius: 3, leads: null, leadsLoading: false,
       bestTimes: ['sunrise', 'morning', 'midday', 'afternoon', 'sunset', 'blue_hour', 'night', 'any'],
       _stream: null, _gpsWatch: null, _stopCompass: null,
     };
@@ -172,7 +248,7 @@ export default {
     },
   },
   mounted() { this.loadSpots(); },
-  beforeUnmount() { this.stopSensors(); },
+  beforeUnmount() { this.stopSensors(); this.freeRecBlobs(); },
   methods: {
     async loadSpots() {
       this.loading = true; this.error = '';
@@ -399,8 +475,62 @@ export default {
         if (r.ok) this.loadSpots();
       } catch (e) { /* ignore; list shows truth */ }
     },
+    // ── Stage 2 moderation ──
+    async openRecs(s) {
+      this.recSpot = s; this.view = 'recs'; this.recsLoading = true;
+      this.freeRecBlobs(); this.recs = []; this.error = '';
+      try {
+        const r = await fetch(`${API}/shotspots/staff/${s.id}/recreations`, { headers: authHeaders() });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed to load');
+        this.recs = (d.recreations || []).map(x => ({ ...x, photoUrl: '' }));
+        // photo endpoint needs the auth header, so <img src> can't load it —
+        // fetch each as a blob (first 30 with photos).
+        for (const rec of this.recs.filter(x => x.hasPhoto).slice(0, 30)) {
+          try {
+            const pr = await fetch(`${API}/shotspots/staff/recreations/${rec.id}/photo`, { headers: authHeaders() });
+            if (pr.ok) { const u = URL.createObjectURL(await pr.blob()); rec.photoUrl = u; this._recBlobUrls.push(u); }
+          } catch (e) { /* row shows without thumb */ }
+        }
+      } catch (e) { this.error = e.message; }
+      this.recsLoading = false;
+    },
+    freeRecBlobs() { (this._recBlobUrls || []).forEach(u => URL.revokeObjectURL(u)); this._recBlobUrls = []; },
+    async promoteRec(r) {
+      if (!window.confirm('Make this traveler photo the public hero for this spot?')) return;
+      const resp = await fetch(`${API}/shotspots/staff/recreations/${r.id}/promote`, { method: 'POST', headers: authHeaders() });
+      if (resp.ok) { this.openRecs(this.recSpot); this.loadSpots(); }
+      else { const d = await resp.json().catch(() => ({})); this.error = d.error || 'Promote failed'; }
+    },
+    async deleteRec(r) {
+      if (!window.confirm('Delete this recreation?')) return;
+      const resp = await fetch(`${API}/shotspots/staff/recreations/${r.id}`, { method: 'DELETE', headers: authHeaders() });
+      if (resp.ok) this.openRecs(this.recSpot);
+    },
+    // ── Stage 3 leads ──
+    openLeads() { this.view = 'leads'; this.error = ''; this.leads = null; this.startGps(); },
+    useMyLocation() { if (this.gps) this.leadCoords = `${this.gps.lat.toFixed(5)}, ${this.gps.lng.toFixed(5)}`; },
+    async findLeads() {
+      this.error = '';
+      const m = this.leadCoords.match(/(-?\d{1,3}(?:\.\d+)?)[,\s]+(-?\d{1,3}(?:\.\d+)?)/);
+      if (!m) { this.error = 'Coordinates must look like: 40.17925, 44.51262'; return; }
+      this.leadsLoading = true; this.leads = null;
+      try {
+        const r = await fetch(`${API}/shotspots/staff/mine?lat=${m[1]}&lng=${m[2]}&radiusKm=${this.leadRadius}`, { headers: authHeaders() });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Search failed');
+        this.leads = d;
+      } catch (e) { this.error = e.message; }
+      this.leadsLoading = false;
+    },
+    scoutLead(lat, lng, name) {
+      this.startScout();
+      this.scoutCoords = `${lat}, ${lng}`;
+      if (name && name !== 'Unnamed viewpoint') this.form.title = name;
+    },
     backToList() {
       this.stopSensors();
+      this.freeRecBlobs(); this.recSpot = null; this.leads = null;
       this.view = 'list'; this.editingId = null; this.editingHasPhoto = false;
       this.scouting = false; this.scoutCoords = ''; this.error = '';
       this.resetShot();
@@ -448,6 +578,7 @@ export default {
 .sc-newgroup { display: flex; gap: 8px; }
 .sc-noimg { width: 72px; height: 72px; border-radius: 10px; background: rgba(165,192,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex: none; }
 .sc-photoacts { display: flex; gap: 10px; flex-wrap: wrap; }
+.sc-sub { font-size: 1rem; margin: 0; font-weight: 600; }
 /* form */
 .sc-form { display: flex; flex-direction: column; gap: 10px; max-width: 560px; margin: 0 auto; }
 .sc-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 14px; background: #000; }

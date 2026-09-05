@@ -43,7 +43,8 @@
         <template v-if="!guiding">
           <img :src="apiBase + spot.photo.url" :alt="spot.title" class="sh-hero" />
           <h2>{{ spot.title }}</h2>
-          <p class="sh-muted sh-cred">{{ $t('shotspots.photo_staff') }}</p>
+          <p class="sh-muted sh-cred">{{ $t(spot.photo.source === 'traveler' ? 'shotspots.photo_traveler' : 'shotspots.photo_staff') }}</p>
+          <p v-if="spot.recreationCount" class="sh-count">📸 {{ $t('shotspots.got_count', { n: spot.recreationCount }) }}</p>
           <div class="sh-facts">
             <p v-if="spot.access && spot.access.nearestPlace"><span>{{ $t('shotspots.nearest') }}</span>{{ spot.access.nearestPlace }}<template v-if="spot.access.walkMinutes != null"> · {{ $t('shotspots.walk_min', { n: spot.access.walkMinutes }) }}</template></p>
             <p><span>{{ $t('shotspots.best_time') }}</span>{{ $t('shotspots.best.' + ((spot.shooting && spot.shooting.bestTime) || 'any')) }}<template v-if="spot.shooting && spot.shooting.season"> · {{ spot.shooting.season }}</template></p>
@@ -75,6 +76,7 @@
             <p class="sh-frame">
               {{ spot.camera.orientation === 'landscape' ? $t('shotspots.hold_landscape') : $t('shotspots.hold_portrait') }}<template v-if="pitchHint"> · {{ pitchHint }}</template>
             </p>
+            <button class="sh-btn sh-btn--gold sh-got" @click="startRecreate">📸 {{ $t('shotspots.got_shot_btn') }}</button>
           </div>
 
           <p v-if="gpsWeak" class="sh-honest">{{ $t('shotspots.gps_weak', { m: gpsWeak }) }}</p>
@@ -84,6 +86,39 @@
             <button class="sh-btn" @click="stopGuide">{{ $t('shotspots.back') }}</button>
           </div>
         </template>
+      </div>
+
+      <!-- Stage 2: recreate overlay — hero photo as a translucent ghost over
+           the live camera; sensors are snapshotted at the traveler's shutter. -->
+      <div v-if="recreating" class="sh-rec">
+        <template v-if="recStage === 'camera'">
+          <video ref="recVideo" autoplay playsinline muted></video>
+          <img v-if="ghostOn" class="sh-ghost" :src="apiBase + spot.photo.url" alt="" />
+          <div class="sh-rec-top">
+            <button class="sh-btn sh-btn--sm2" @click="ghostOn = !ghostOn">{{ $t('shotspots.ghost') }}</button>
+            <button class="sh-btn sh-btn--sm2" @click="stopRecreate">{{ $t('shotspots.rec_cancel') }}</button>
+          </div>
+          <button class="sh-rec-shutter" @click="recShot" aria-label="shutter"></button>
+        </template>
+        <template v-else-if="recStage === 'preview'">
+          <img class="sh-rec-preview" :src="recPhoto.dataUrl" alt="" />
+          <div class="sh-rec-row">
+            <button class="sh-btn" @click="startRecreate">{{ $t('shotspots.rec_retake') }}</button>
+            <button class="sh-btn sh-btn--gold" :disabled="submitting" @click="submitRecreation(true)">{{ $t('shotspots.rec_submit') }}</button>
+          </div>
+        </template>
+        <template v-else-if="recStage === 'blocked'">
+          <p class="sh-honest">{{ $t('shotspots.rec_camera_blocked') }}</p>
+          <div class="sh-rec-row">
+            <button class="sh-btn" @click="stopRecreate">{{ $t('shotspots.rec_cancel') }}</button>
+            <button class="sh-btn sh-btn--gold" :disabled="submitting" @click="submitRecreation(false)">{{ $t('shotspots.rec_no_photo') }}</button>
+          </div>
+        </template>
+        <template v-else-if="recStage === 'done'">
+          <p class="sh-phase">{{ $t('shotspots.rec_thanks', { n: submittedCount }) }}</p>
+          <button class="sh-btn sh-btn--gold" @click="stopRecreate">{{ $t('shotspots.back') }}</button>
+        </template>
+        <p v-if="recError" class="sh-honest">{{ recError }}</p>
       </div>
     </div>
   </div>
@@ -102,8 +137,10 @@ export default {
       apiBase: API_BASE,
       spots: [], loading: true, cityFilter: '',
       spot: null, guiding: false,
-      me: null, deviceHeading: null, compassAsk: false,
-      _gpsWatch: null, _stopCompass: null,
+      me: null, deviceHeading: null, lastPitch: null, compassAsk: false,
+      recreating: false, recStage: 'camera', recPhoto: null, recError: '',
+      submitting: false, submittedCount: 0, ghostOn: true,
+      _gpsWatch: null, _stopCompass: null, _recStream: null,
     };
   },
   computed: {
@@ -160,7 +197,7 @@ export default {
     } catch (e) { /* empty state shows */ }
     this.loading = false;
   },
-  beforeUnmount() { this.stopSensors(); },
+  beforeUnmount() { this.stopRecStream(); this.stopSensors(); },
   methods: {
     openSpot(s) { this.spot = s; },
     closeSpot() { this.stopGuide(); this.spot = null; },
@@ -178,15 +215,67 @@ export default {
         );
       }
       if (compassNeedsPermission()) this.compassAsk = true;
-      else this._stopCompass = startCompass(({ heading }) => { if (heading != null) this.deviceHeading = heading; });
+      else this._stopCompass = startCompass(({ heading, pitch }) => { if (heading != null) this.deviceHeading = heading; if (pitch != null) this.lastPitch = pitch; });
     },
     async enableCompass() {
       if (await requestCompassPermission()) {
         this.compassAsk = false;
-        this._stopCompass = startCompass(({ heading }) => { if (heading != null) this.deviceHeading = heading; });
+        this._stopCompass = startCompass(({ heading, pitch }) => { if (heading != null) this.deviceHeading = heading; if (pitch != null) this.lastPitch = pitch; });
       } else { this.compassAsk = false; } // cardinal-text fallback takes over
     },
-    stopGuide() { this.guiding = false; this.stopSensors(); },
+    stopGuide() { this.stopRecreate(); this.guiding = false; this.stopSensors(); },
+    // ── Stage 2: recreate flow ──
+    async startRecreate() {
+      this.recreating = true; this.recStage = 'camera'; this.recError = ''; this.recPhoto = null;
+      try {
+        this._recStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1920 } }, audio: false,
+        });
+        await this.$nextTick();
+        if (this.$refs.recVideo) this.$refs.recVideo.srcObject = this._recStream;
+      } catch (e) { this.recStage = 'blocked'; } // GPS already proved presence
+    },
+    recShot() {
+      const v = this.$refs.recVideo;
+      if (!v || !v.videoWidth) return;
+      const MAX = 1600, scale = Math.min(1, MAX / Math.max(v.videoWidth, v.videoHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(v.videoWidth * scale); c.height = Math.round(v.videoHeight * scale);
+      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+      this.recPhoto = { dataUrl: c.toDataURL('image/jpeg', 0.85), width: c.width, height: c.height };
+      this.stopRecStream();
+      this.recStage = 'preview';
+    },
+    stopRecStream() { if (this._recStream) { this._recStream.getTracks().forEach(t => t.stop()); this._recStream = null; } },
+    stopRecreate() { this.stopRecStream(); this.recreating = false; this.recPhoto = null; this.recError = ''; },
+    async submitRecreation(withPhoto) {
+      if (!this.me) { this.recError = this.$t('shotspots.rec_far'); return; }
+      this.submitting = true; this.recError = '';
+      try {
+        const body = {
+          lat: this.me.lat, lng: this.me.lng, accuracyMeters: this.me.accuracy,
+          heading: this.deviceHeading, pitch: this.lastPitch,
+        };
+        if (withPhoto && this.recPhoto) {
+          body.photoData = this.recPhoto.dataUrl;
+          body.photoWidth = this.recPhoto.width; body.photoHeight = this.recPhoto.height;
+        }
+        const r = await fetch(`${API}/shotspots/${this.spot.id}/recreations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token') || ''}`,
+          },
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error === 'too_far' ? this.$t('shotspots.rec_far') : (d.error || 'failed'));
+        this.submittedCount = d.count || 1;
+        this.spot.recreationCount = this.submittedCount;
+        this.recStage = 'done';
+      } catch (e) { this.recError = e.message; }
+      this.submitting = false;
+    },
     stopSensors() {
       if (this._gpsWatch != null) { navigator.geolocation.clearWatch(this._gpsWatch); this._gpsWatch = null; }
       if (this._stopCompass) { this._stopCompass(); this._stopCompass = null; }
@@ -239,4 +328,16 @@ export default {
 .sh-dist { font-size: 1.6rem; font-weight: 600; margin: 4px 0 0; }
 .sh-frame { color: #cfd7ee; font-size: 0.9rem; margin: 6px 0 0; text-align: center; }
 .sh-honest { background: rgba(212,175,55,0.10); border: 1px solid rgba(212,175,55,0.3); color: #f3dfae; border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; margin: 10px 0 0; text-align: center; }
+.sh-count { color: #f3dfae; font-size: 0.85rem; margin: 0 0 10px; }
+.sh-got { width: 100%; margin-top: 10px; flex: none; }
+/* recreate overlay */
+.sh-rec { position: fixed; inset: 0; background: #05070f; z-index: 70; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box; }
+.sh-rec video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.sh-ghost { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0.32; pointer-events: none; }
+.sh-rec-top { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; z-index: 2; }
+.sh-btn--sm2 { flex: none; padding: 7px 14px; font-size: 0.85rem; background: rgba(13,18,38,0.72); }
+.sh-rec-shutter { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); width: 68px; height: 68px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.92); background: rgba(255,255,255,0.25); cursor: pointer; z-index: 2; }
+.sh-rec-preview { max-width: 100%; max-height: 68vh; border-radius: 14px; position: relative; z-index: 1; }
+.sh-rec-row { display: flex; gap: 10px; margin-top: 14px; position: relative; z-index: 1; width: 100%; max-width: 420px; }
+.sh-rec .sh-honest, .sh-rec .sh-phase { position: relative; z-index: 2; }
 </style>
