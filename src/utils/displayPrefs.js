@@ -59,7 +59,20 @@ export function applyDisplayPrefs(settings = null) {
     // icon-beside-text controls want per-font sub-pixel nudges (SVGs cannot
     // take a font — they are drawings, so the correction is positional).
     document.documentElement.setAttribute('data-font-style', s.fontStyle || 'standard');
-    const stack = FONT_STACKS[s.fontStyle || 'standard'] || '';
+    let stack = FONT_STACKS[s.fontStyle || 'standard'] || '';
+    // Armenian-first UI (founder 2026-09-05): with the app language set to
+    // Armenian, Noto Sans Armenian LEADS the default stack instead of trailing
+    // it. Armenian glyphs were reaching Noto through fallback anyway; what this
+    // changes is the LATIN inside Armenian UI — "Jinni", digits, "GPS" — which
+    // now render in Noto's matching Latin rather than Segoe/Tahoma, so every
+    // mixed line is one typeface. Applies only to Standard; a chosen style
+    // (Classic/Elegant/Warm/Journal) already pairs its own Armenian face and
+    // the founder confirmed Elegant reads right. Noto Sans Armenian is also
+    // the honest answer to "which font is good for Armenian apps" among fonts
+    // we can host today — GHEA Grapalat/Mardoto would need self-hosted files.
+    if (!stack && String(s.language || '').slice(0, 2) === 'hy') {
+      stack = "'Noto Sans Armenian', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    }
     if (stack) document.documentElement.style.setProperty('--app-font', stack);
     else document.documentElement.style.removeProperty('--app-font');
   } catch (e) { /* display prefs must never break a page */ }

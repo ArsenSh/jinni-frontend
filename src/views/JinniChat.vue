@@ -3740,6 +3740,9 @@ export default {
       this.userSettings.language = langCode;
       this.locale = langCode;
       localStorage.setItem('jinni_language', langCode);
+      // The Armenian-first font stack keys off the language (displayPrefs),
+      // so switching language must re-apply prefs, not just retranslate.
+      this.applyDisplayPrefs();
       this.saveSettings();
       this.showLanguageDropdown = false;
     },
