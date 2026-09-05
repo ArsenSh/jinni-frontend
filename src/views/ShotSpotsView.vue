@@ -22,11 +22,17 @@
     </div>
 
     <p v-if="loading" class="sh-muted">{{ $t('shotspots.loading') }}</p>
-    <p v-else-if="!filtered.length" class="sh-muted">{{ $t('shotspots.empty') }}</p>
+    <div v-else-if="!filtered.length" class="sh-empty">
+      <span class="sh-empty-spark">✨</span>
+      <p>{{ $t('shotspots.empty') }}</p>
+    </div>
 
     <div class="sh-grid">
       <button v-for="s in filtered" :key="s.id" class="sh-card" @click="openSpot(s)">
-        <div class="sh-imgwrap"><img :src="apiBase + s.photo.url" :alt="s.title" loading="lazy" /></div>
+        <div class="sh-imgwrap">
+          <img :src="apiBase + s.photo.url" :alt="s.title" loading="lazy" />
+          <span v-if="s.aiFound" class="sh-ai">✨ Jinni</span>
+        </div>
         <div class="sh-card-body">
           <strong>{{ s.title }}</strong>
           <span class="sh-muted">{{ s.access && s.access.nearestPlace ? s.access.nearestPlace : s.city }}</span>
@@ -43,7 +49,9 @@
         <template v-if="!guiding">
           <img :src="apiBase + spot.photo.url" :alt="spot.title" class="sh-hero" />
           <h2>{{ spot.title }}</h2>
-          <p class="sh-muted sh-cred">{{ $t(spot.photo.source === 'traveler' ? 'shotspots.photo_traveler' : 'shotspots.photo_staff') }}</p>
+          <p class="sh-cred" :class="spot.aiFound ? 'sh-cred--ai' : 'sh-muted'">
+            {{ spot.aiFound ? $t('shotspots.discovered_by') : $t(spot.photo.source === 'traveler' ? 'shotspots.photo_traveler' : 'shotspots.photo_staff') }}
+          </p>
           <p v-if="spot.recreationCount" class="sh-count">📸 {{ $t('shotspots.got_count', { n: spot.recreationCount }) }}</p>
           <div class="sh-facts">
             <p v-if="spot.access && spot.access.nearestPlace"><span>{{ $t('shotspots.nearest') }}</span>{{ spot.access.nearestPlace }}<template v-if="spot.access.walkMinutes != null"> · {{ $t('shotspots.walk_min', { n: spot.access.walkMinutes }) }}</template></p>
@@ -286,19 +294,39 @@ export default {
 </script>
 
 <style scoped>
-.shots { min-height: 100vh; background: linear-gradient(180deg, #0d1226 0%, #111934 100%); color: #e8ecf8; font-family: var(--app-font, 'Segoe UI', sans-serif); padding: 18px 16px 40px; box-sizing: border-box; }
+.shots { min-height: 100vh; background: linear-gradient(180deg, #0d1226 0%, #111934 55%, #131a3a 100%); color: #e8ecf8; font-family: var(--app-font, 'Segoe UI', sans-serif); padding: 18px 16px 40px; box-sizing: border-box; position: relative; }
+/* genie starfield — pure CSS, two layers, second one breathes */
+.shots::before, .shots::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1px 1px at 22% 28%, rgba(190,210,255,0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 68% 12%, rgba(190,210,255,0.7) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 84% 46%, rgba(220,232,255,0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 40% 68%, rgba(190,210,255,0.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 10% 84%, rgba(190,210,255,0.7) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 55% 91%, rgba(243,223,174,0.7) 50%, transparent 51%);
+  background-size: 340px 340px; opacity: 0.45; }
+.shots::after {
+  background-image:
+    radial-gradient(1px 1px at 12% 52%, rgba(243,223,174,0.9) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 76% 74%, rgba(201,163,245,0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 48% 22%, rgba(220,232,255,0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 92% 88%, rgba(243,223,174,0.8) 50%, transparent 51%);
+  background-size: 420px 420px; opacity: 0.2; animation: sh-twinkle 7s ease-in-out infinite alternate; }
+@keyframes sh-twinkle { from { opacity: 0.12; } to { opacity: 0.5; } }
+.shots > * { position: relative; z-index: 1; }
 .sh-head { display: flex; gap: 14px; align-items: flex-start; max-width: 860px; margin: 0 auto 14px; }
 .sh-back { background: rgba(165,192,255,0.10); border: 1px solid rgba(165,192,255,0.22); color: #e8ecf8; border-radius: 10px; width: 38px; height: 38px; font-size: 1.1rem; cursor: pointer; flex: none; }
-.sh-head h1 { margin: 0; font-size: 1.35rem; background: linear-gradient(105deg, #f3dfae 10%, #c9a3f5 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.sh-head h1 { margin: 0; font-size: 1.55rem; letter-spacing: 0.015em; background: linear-gradient(105deg, #f3dfae 10%, #e9c46a 45%, #c9a3f5 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 24px rgba(212,175,55,0.25); }
 .sh-sub { margin: 2px 0 0; color: #93a0c4; font-size: 0.85rem; }
 .sh-muted { color: #93a0c4; font-size: 0.9rem; text-align: center; }
 .sh-cities { display: flex; gap: 8px; flex-wrap: wrap; max-width: 860px; margin: 0 auto 16px; }
 .sh-chip { background: rgba(165,192,255,0.10); border: 1px solid rgba(165,192,255,0.18); color: #aebadd; border-radius: 999px; padding: 6px 14px; font-size: 0.85rem; cursor: pointer; }
 .sh-chip--on { background: rgba(212,175,55,0.16); border-color: rgba(212,175,55,0.45); color: #f3dfae; }
 .sh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; max-width: 860px; margin: 0 auto; }
-.sh-card { text-align: left; background: rgba(17,25,52,0.62); border: 1px solid rgba(165,192,255,0.15); border-radius: 16px; overflow: hidden; cursor: pointer; padding: 0; color: inherit; font-family: inherit; box-shadow: 0 0 16px rgba(0,0,0,0.25); }
-.sh-card:hover { background: rgba(24,34,68,0.72); }
-.sh-imgwrap { aspect-ratio: 3 / 2; overflow: hidden; }
+.sh-card { text-align: left; background: rgba(17,25,52,0.62); border: 1px solid rgba(212,175,55,0.22); border-radius: 16px; overflow: hidden; cursor: pointer; padding: 0; color: inherit; font-family: inherit; box-shadow: 0 0 18px -2px rgba(212,175,55,0.12), 0 0 16px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.10); }
+.sh-card:hover { background: rgba(24,34,68,0.72); border-color: rgba(212,175,55,0.45); box-shadow: 0 0 22px -2px rgba(212,175,55,0.22), 0 0 16px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.14); }
+.sh-imgwrap { aspect-ratio: 3 / 2; overflow: hidden; position: relative; }
+.sh-ai { position: absolute; top: 8px; left: 8px; background: rgba(13,18,38,0.72); backdrop-filter: blur(6px); border: 1px solid rgba(212,175,55,0.4); color: #f3dfae; border-radius: 999px; padding: 3px 9px; font-size: 0.7rem; }
 .sh-imgwrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .sh-card-body { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; }
 .sh-card-body strong { font-size: 0.98rem; }
@@ -306,12 +334,16 @@ export default {
 .sh-time { color: #f3dfae; font-size: 0.75rem; }
 /* detail sheet */
 .sh-detail { position: fixed; inset: 0; background: rgba(6,9,20,0.7); backdrop-filter: blur(6px); display: flex; align-items: flex-end; justify-content: center; z-index: 60; }
-.sh-sheet { position: relative; background: #111934; border: 1px solid rgba(165,192,255,0.16); border-bottom: none; border-radius: 20px 20px 0 0; width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; padding: 18px 18px 28px; box-sizing: border-box; }
+.sh-sheet { position: relative; background: #111934; border: 1px solid rgba(212,175,55,0.28); border-bottom: none; border-radius: 20px 20px 0 0; width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; padding: 18px 18px 28px; box-sizing: border-box; box-shadow: 0 0 28px -4px rgba(212,175,55,0.18); }
 @media (min-width: 640px) { .sh-detail { align-items: center; } .sh-sheet { border-radius: 20px; border-bottom: 1px solid rgba(165,192,255,0.16); } }
 .sh-close { position: absolute; top: 12px; right: 12px; z-index: 2; background: rgba(17,25,52,0.8); border: 1px solid rgba(165,192,255,0.22); color: #e8ecf8; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
 .sh-hero { width: 100%; max-height: 46vh; object-fit: contain; border-radius: 14px; background: #000; }
 .sh-sheet h2 { margin: 12px 0 2px; font-size: 1.15rem; }
 .sh-cred { text-align: left; font-size: 0.75rem; margin: 0 0 10px; }
+.sh-cred--ai { color: #f3dfae; }
+.sh-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 48px 20px; color: #93a0c4; text-align: center; }
+.sh-empty-spark { font-size: 2rem; filter: drop-shadow(0 0 12px rgba(243,223,174,0.6)); animation: sh-twinkle 3s ease-in-out infinite alternate; }
+.sh-empty p { margin: 0; font-size: 0.95rem; max-width: 340px; }
 .sh-facts p { margin: 0 0 9px; font-size: 0.9rem; line-height: 1.45; color: #cfd7ee; }
 .sh-facts span { display: block; color: #7d8ab2; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1px; }
 .sh-actions { display: flex; gap: 10px; margin-top: 14px; }

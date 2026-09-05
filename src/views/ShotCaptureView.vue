@@ -41,6 +41,7 @@
         </div>
         <div class="sc-row-actions">
           <span class="sc-status" :class="'sc-status--' + s.status">{{ s.status }}</span>
+          <span v-if="s.aiFound" class="sc-status sc-status--ai" title="Found by Jinni — verify on site">🤖 Jinni</span>
           <button v-if="s.recreationCount" class="sc-btn sc-btn--sm" @click="openRecs(s)">📸 {{ s.recreationCount }} got it</button>
           <button class="sc-btn sc-btn--sm" @click="togglePublish(s)">{{ s.status === 'active' ? 'Unpublish' : 'Publish' }}</button>
           <button class="sc-btn sc-btn--sm" @click="editSpot(s)">Edit</button>
@@ -90,6 +91,7 @@
       </div>
       <p v-if="importError" class="sc-error">{{ importError }}</p>
 
+      <p v-if="editingEvidence" class="sc-evidence">🤖 Jinni's evidence: {{ editingEvidence }}</p>
       <label v-if="scouting">Coordinates * — paste from Google Maps (right-click the spot → first menu line)
         <input v-model.trim="scoutCoords" placeholder="40.17925, 44.51262" />
       </label>
@@ -173,6 +175,16 @@
         <button class="sc-btn sc-btn--sm" :disabled="!gps" @click="useMyLocation">📍 Use my location</button>
         <button class="sc-btn sc-btn--sm sc-btn--gold" :disabled="leadsLoading" @click="findLeads">{{ leadsLoading ? 'Searching…' : 'Find leads' }}</button>
       </div>
+      <div class="sc-hunt">
+        <div class="sc-two">
+          <label>City (for Jinni's candidates) <input v-model.trim="huntCity" maxlength="80" placeholder="Yerevan" /></label>
+          <label>Country <input v-model.trim="huntCountry" maxlength="80" placeholder="Armenia" /></label>
+        </div>
+        <button class="sc-btn sc-btn--gold" :disabled="hunting || !huntCity" @click="letJinniHunt">
+          {{ hunting ? 'Jinni is hunting…' : '✨ Let Jinni hunt — it creates the candidates itself' }}
+        </button>
+        <p v-if="huntMsg" class="sc-muted">{{ huntMsg }}</p>
+      </div>
       <p v-if="error" class="sc-error">{{ error }}</p>
       <template v-if="leads">
         <p class="sc-meta">Commons: {{ leads.sources.commons }} · OSM viewpoints: {{ leads.sources.osm }}</p>
@@ -236,6 +248,7 @@ export default {
       scouting: false, scoutCoords: '', importError: '',
       recSpot: null, recs: [], recsLoading: false, _recBlobUrls: [],
       leadCoords: '', leadRadius: 3, leads: null, leadsLoading: false,
+      huntCity: '', huntCountry: '', hunting: false, huntMsg: '', editingEvidence: '',
       bestTimes: ['sunrise', 'morning', 'midday', 'afternoon', 'sunset', 'blue_hour', 'night', 'any'],
       _stream: null, _gpsWatch: null, _stopCompass: null,
     };
@@ -440,6 +453,7 @@ export default {
     },
     editSpot(s) {
       this.editingId = s.id;
+      this.editingEvidence = (s.aiFound && s.evidence && s.evidence[0] && s.evidence[0].note) || '';
       this.editingHasPhoto = !!(s.photo && s.photo.url);
       this.scouting = !this.editingHasPhoto;
       this.scoutCoords = this.scouting ? `${s.camera.lat}, ${s.camera.lng}` : '';
@@ -523,6 +537,23 @@ export default {
       } catch (e) { this.error = e.message; }
       this.leadsLoading = false;
     },
+    async letJinniHunt() {
+      this.error = ''; this.huntMsg = '';
+      const m = this.leadCoords.match(/(-?\d{1,3}(?:\.\d+)?)[,\s]+(-?\d{1,3}(?:\.\d+)?)/);
+      if (!m) { this.error = 'Set the center coordinates first (or 📍 Use my location)'; return; }
+      this.hunting = true;
+      try {
+        const r = await fetch(`${API}/shotspots/staff/hunt`, {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ lat: +m[1], lng: +m[2], radiusKm: this.leadRadius, city: this.huntCity, country: this.huntCountry }),
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Hunt failed');
+        this.huntMsg = `Jinni created ${d.created} candidate${d.created === 1 ? '' : 's'} (from ${d.considered} pieces of evidence) — they're in your list as 🤖 drafts. Verify on site, shoot, publish.`;
+        this.loadSpots();
+      } catch (e) { this.error = e.message; }
+      this.hunting = false;
+    },
     scoutLead(lat, lng, name) {
       this.startScout();
       this.scoutCoords = `${lat}, ${lng}`;
@@ -531,7 +562,7 @@ export default {
     backToList() {
       this.stopSensors();
       this.freeRecBlobs(); this.recSpot = null; this.leads = null;
-      this.view = 'list'; this.editingId = null; this.editingHasPhoto = false;
+      this.view = 'list'; this.editingId = null; this.editingHasPhoto = false; this.editingEvidence = '';
       this.scouting = false; this.scoutCoords = ''; this.error = '';
       this.resetShot();
     },
@@ -579,6 +610,9 @@ export default {
 .sc-noimg { width: 72px; height: 72px; border-radius: 10px; background: rgba(165,192,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex: none; }
 .sc-photoacts { display: flex; gap: 10px; flex-wrap: wrap; }
 .sc-sub { font-size: 1rem; margin: 0; font-weight: 600; }
+.sc-status--ai { background: rgba(201,163,245,0.14); color: #d9c2f7; }
+.sc-hunt { display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; padding: 12px; }
+.sc-evidence { background: rgba(201,163,245,0.08); border: 1px solid rgba(201,163,245,0.25); border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; color: #d9c2f7; margin: 0; }
 /* form */
 .sc-form { display: flex; flex-direction: column; gap: 10px; max-width: 560px; margin: 0 auto; }
 .sc-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 14px; background: #000; }
