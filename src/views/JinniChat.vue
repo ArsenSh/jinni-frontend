@@ -7072,7 +7072,7 @@ export default {
 .current-selection .flag{font-size:1.125rem;flex-shrink:0}
 .selector-dropdown-inline{width:100%;border-radius:8px;overflow:hidden;margin-top:8px;max-height:280px;display:flex;flex-direction:column;border:1px solid}
 .dropdown-search{padding:10px 12px;border:none;border-bottom:1px solid;font-size:0.875rem;font-family:inherit;outline:none;flex-shrink:0}
-.dropdown-list{overflow-y:auto;max-height:240px;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}
+.dropdown-list{overflow-y:auto;max-height:280px;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}
 .dropdown-list::-webkit-scrollbar{display:none;width:0 !important;height:0 !important}
 .dropdown-item{display:flex;align-items:center;padding:10px 12px;cursor:pointer;transition:all 0.2s ease;gap:10px}
 .dropdown-item .flag{font-size:1.125rem;flex-shrink:0}
