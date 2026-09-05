@@ -91,7 +91,8 @@ export default {
       { code: 'fr', flag: '🇫🇷', title: 'Français' },
       { code: 'ru', flag: '🇷🇺', title: 'Русский' },
       { code: 'zh', flag: '🇨🇳', title: '中文' },
-      { code: 'ar', flag: '🇸🇦', title: 'العربية' }
+      { code: 'ar', flag: '🇸🇦', title: 'العربية' },
+      { code: 'hy', flag: '🇦🇲', title: 'Հայերեն' }
     ])
     const currentLanguageFlag = computed(() => {return languageOptions.value.find(l => l.code === selectedLanguage.value)?.flag || '🌐'})
     const currentLanguageTitle = computed(() => {return languageOptions.value.find(l => l.code === selectedLanguage.value)?.title || 'Select Language'})

@@ -1960,7 +1960,8 @@ export default {
         { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
         { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
         { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
-        { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' }
+        { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+        { code: 'hy', name: 'Armenian', nativeName: 'Հայերեն', flag: '🇦🇲' }
       ],
       dangerConfirm: {deleteChats: { step: 0 }, deleteAccount: { step: 0, typedValue: '' }},
       // Saved Places
