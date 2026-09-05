@@ -11,16 +11,24 @@
     <header class="sc-head">
       <h1>Shot Spots — Capture</h1>
       <button v-if="view !== 'list'" class="sc-btn" @click="backToList">✕ Close</button>
-      <button v-else class="sc-btn sc-btn--gold" @click="startCapture">📸 New capture</button>
+      <div v-else class="sc-newgroup">
+        <button class="sc-btn sc-btn--gold" @click="startCapture">📸 Capture</button>
+        <label class="sc-btn sc-file">🖼 Import
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/heic" @change="onImportPicked" hidden />
+        </label>
+        <button class="sc-btn" @click="startScout">📍 Scout</button>
+      </div>
     </header>
 
     <!-- ── LIST ─────────────────────────────────────────────────────────── -->
     <div v-if="view === 'list'" class="sc-list">
+      <p v-if="importError" class="sc-error">{{ importError }}</p>
       <p v-if="loading" class="sc-muted">Loading…</p>
       <p v-else-if="error" class="sc-error">{{ error }}</p>
       <p v-else-if="!spots.length" class="sc-muted">No shot spots yet. Go somewhere beautiful and tap “New capture”.</p>
       <div v-for="s in spots" :key="s.id" class="sc-row">
-        <img :src="apiBase + s.photo.url" alt="" loading="lazy" />
+        <img v-if="s.photo.url" :src="apiBase + s.photo.url" alt="" loading="lazy" />
+        <div v-else class="sc-noimg" title="Scouted — no photo yet">📍</div>
         <div class="sc-row-main">
           <strong>{{ s.title }}</strong>
           <span class="sc-muted">{{ s.city }}<template v-if="s.access && s.access.nearestPlace"> · {{ s.access.nearestPlace }}</template></span>
@@ -65,15 +73,24 @@
     <!-- ── FORM ─────────────────────────────────────────────────────────── -->
     <div v-else class="sc-form">
       <img v-if="shot.dataUrl" :src="shot.dataUrl" class="sc-preview" alt="" />
-      <img v-else-if="editingId" :src="apiBase + '/api/shotspots/' + editingId + '/photo'" class="sc-preview" alt="" />
+      <img v-else-if="editingId && editingHasPhoto" :src="apiBase + '/api/shotspots/' + editingId + '/photo'" class="sc-preview" alt="" />
       <p class="sc-meta" v-if="shot.dataUrl">
         Recorded: {{ shot.lat && shot.lat.toFixed ? shot.lat.toFixed(5) : shot.lat }}, {{ shot.lng && shot.lng.toFixed ? shot.lng.toFixed(5) : shot.lng }}
         ±{{ shot.accuracy == null ? '?' : Math.round(shot.accuracy) }}m ·
         {{ shot.heading == null ? 'no heading' : Math.round(shot.heading) + '°' }} ·
         {{ shot.orientation }}
       </p>
-      <button v-if="shot.dataUrl" class="sc-btn sc-btn--sm" @click="startCapture">↺ Retake</button>
+      <div class="sc-photoacts">
+        <button class="sc-btn sc-btn--sm" @click="startCapture">📸 {{ canPublish ? 'Retake on site' : 'Capture on site' }}</button>
+        <label class="sc-btn sc-btn--sm sc-file">🖼 Import photo
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/heic" @change="onImportPicked" hidden />
+        </label>
+      </div>
+      <p v-if="importError" class="sc-error">{{ importError }}</p>
 
+      <label v-if="scouting">Coordinates * — paste from Google Maps (right-click the spot → first menu line)
+        <input v-model.trim="scoutCoords" placeholder="40.17925, 44.51262" />
+      </label>
       <label>Title * <input v-model.trim="form.title" maxlength="120" placeholder="Cascade symmetry from the fountain steps" /></label>
       <div class="sc-two">
         <label>City * <input v-model.trim="form.city" maxlength="80" placeholder="Yerevan" /></label>
@@ -104,9 +121,10 @@
       </div>
 
       <p v-if="error" class="sc-error">{{ error }}</p>
+      <p v-if="!canPublish" class="sc-muted">Scout draft — travelers see it only after a real photo is captured or imported.</p>
       <div class="sc-actions">
-        <button class="sc-btn" :disabled="saving" @click="submit('draft')">Save draft</button>
-        <button class="sc-btn sc-btn--gold" :disabled="saving" @click="submit('active')">{{ saving ? 'Saving…' : 'Save & publish' }}</button>
+        <button class="sc-btn" :disabled="saving" @click="submit('draft')">{{ saving ? 'Saving…' : 'Save draft' }}</button>
+        <button v-if="canPublish" class="sc-btn sc-btn--gold" :disabled="saving" @click="submit('active')">{{ saving ? 'Saving…' : 'Save & publish' }}</button>
       </div>
     </div>
   </div>
@@ -114,6 +132,7 @@
 
 <script>
 import { startCompass, compassNeedsPermission, requestCompassPermission } from '@/utils/shotSensors';
+import { parseExifGps } from '@/utils/exifGps';
 
 const API = import.meta.env.VITE_API_URL || '/api';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
@@ -139,12 +158,14 @@ export default {
       // the captured instant
       shot: { dataUrl: '', width: 0, height: 0, lat: null, lng: null, accuracy: null, heading: null, pitch: null, orientation: 'portrait' },
       form: emptyForm(),
-      editingId: null,
+      editingId: null, editingHasPhoto: false,
+      scouting: false, scoutCoords: '', importError: '',
       bestTimes: ['sunrise', 'morning', 'midday', 'afternoon', 'sunset', 'blue_hour', 'night', 'any'],
       _stream: null, _gpsWatch: null, _stopCompass: null,
     };
   },
   computed: {
+    canPublish() { return !!this.shot.dataUrl || this.editingHasPhoto; },
     accessPointLabel() {
       const p = this.form.accessPoint;
       return p ? `Access point set (${p.lat.toFixed(5)}, ${p.lng.toFixed(5)})` : 'Not set — navigation will aim at the camera spot itself';
@@ -188,9 +209,50 @@ export default {
       if (this._stopCompass) { this._stopCompass(); this._stopCompass = null; }
     },
 
+    resetShot() {
+      this.shot = { dataUrl: '', width: 0, height: 0, lat: null, lng: null, accuracy: null, heading: null, pitch: null, orientation: 'portrait' };
+    },
+    // ── scout flow (desk pinning: coordinates now, photo later) ──
+    startScout() {
+      this.editingId = null; this.editingHasPhoto = false;
+      this.form = emptyForm(); this.resetShot();
+      this.scouting = true; this.scoutCoords = ''; this.importError = ''; this.error = '';
+      this.view = 'form';
+    },
+    // ── gallery import (EXIF: recorded GPS/heading or rejection — never a guess) ──
+    async onImportPicked(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      ev.target.value = '';
+      if (!file) return;
+      this.importError = '';
+      let gps = null;
+      try { gps = parseExifGps(await file.arrayBuffer()); } catch (e) { /* no GPS */ }
+      if (!gps) {
+        this.importError = 'No location data in this photo — internet photos and screenshots are rejected. '
+          + 'Note: iPhone Safari often strips location from picked photos; import from a computer or Android, or use Capture on site.';
+        return;
+      }
+      const fromList = this.view === 'list';
+      const url = URL.createObjectURL(file);
+      const im = new Image();
+      im.onload = () => {
+        const img = this.frameToJpeg(im, im.naturalWidth, im.naturalHeight);
+        URL.revokeObjectURL(url);
+        this.shot = {
+          ...img, lat: gps.lat, lng: gps.lng, accuracy: gps.accuracyM,
+          heading: gps.headingDeg, pitch: null,
+          orientation: img.width >= img.height ? 'landscape' : 'portrait',
+        };
+        if (fromList) { this.editingId = null; this.editingHasPhoto = false; this.form = emptyForm(); }
+        this.scouting = false;
+        this.view = 'form';
+      };
+      im.onerror = () => { URL.revokeObjectURL(url); this.importError = 'Could not read this image file.'; };
+      im.src = url;
+    },
     // ── capture flow ──
     async startCapture() {
-      this.view = 'camera'; this.cameraError = ''; this.error = '';
+      this.view = 'camera'; this.cameraError = ''; this.error = ''; this.importError = '';
       if (!this.editingId) { this.form = emptyForm(); }
       this.startGps();
       if (compassNeedsPermission()) this.compassAsk = true; else this.startCompassNow();
@@ -225,6 +287,7 @@ export default {
       const s = this.snapshotSensors();
       const img = this.frameToJpeg(v, v.videoWidth, v.videoHeight);
       this.shot = { ...img, ...s, orientation: img.width >= img.height ? 'landscape' : 'portrait' };
+      this.scouting = false; // real on-site coords now beat any desk pin
       if (this._stream) { this._stream.getTracks().forEach(t => t.stop()); this._stream = null; }
       this.view = 'form';
     },
@@ -240,6 +303,7 @@ export default {
         const img = this.frameToJpeg(im, im.naturalWidth, im.naturalHeight);
         URL.revokeObjectURL(url);
         this.shot = { ...img, ...s, heading: null, pitch: null, orientation: img.width >= img.height ? 'landscape' : 'portrait' };
+        this.scouting = false;
         this.view = 'form';
       };
       im.src = url;
@@ -267,14 +331,24 @@ export default {
         };
         body.photoData = this.shot.dataUrl;
         body.photoWidth = this.shot.width; body.photoHeight = this.shot.height;
+      } else if (this._scoutCam) {
+        // Desk pin: a human chose the point deliberately; sensors stay null.
+        body.camera = { lat: this._scoutCam.lat, lng: this._scoutCam.lng, accuracyMeters: null, heading: null, pitch: null, orientation: 'portrait' };
       }
       return body;
     },
     async submit(status) {
-      this.error = '';
+      this.error = ''; this._scoutCam = null;
       if (!this.form.title) { this.error = 'Title is required'; return; }
       if (!this.form.city) { this.error = 'City is required'; return; }
-      if (!this.editingId && !this.shot.dataUrl) { this.error = 'Photo is required'; return; }
+      if (this.scouting && !this.shot.dataUrl) {
+        const m = this.scoutCoords.match(/(-?\d{1,3}(?:\.\d+)?)[,\s]+(-?\d{1,3}(?:\.\d+)?)/);
+        const lat = m && parseFloat(m[1]), lng = m && parseFloat(m[2]);
+        if (!m || Math.abs(lat) > 90 || Math.abs(lng) > 180) { this.error = 'Coordinates must look like: 40.17925, 44.51262'; return; }
+        this._scoutCam = { lat, lng };
+      }
+      if (!this.editingId && !this.shot.dataUrl && !this._scoutCam) { this.error = 'Photo is required (or use Scout to pin coordinates first)'; return; }
+      if (status === 'active' && !this.canPublish) { this.error = 'A spot needs a real photo before publishing'; return; }
       this.saving = true;
       try {
         const url = this.editingId ? `${API}/shotspots/staff/${this.editingId}` : `${API}/shotspots/staff`;
@@ -290,7 +364,11 @@ export default {
     },
     editSpot(s) {
       this.editingId = s.id;
-      this.shot = { dataUrl: '', width: 0, height: 0, lat: null, lng: null, accuracy: null, heading: null, pitch: null, orientation: 'portrait' };
+      this.editingHasPhoto = !!(s.photo && s.photo.url);
+      this.scouting = !this.editingHasPhoto;
+      this.scoutCoords = this.scouting ? `${s.camera.lat}, ${s.camera.lng}` : '';
+      this.importError = '';
+      this.resetShot();
       this.form = {
         title: s.title, city: s.city, country: s.country || '',
         subjectName: (s.subject && s.subject.name) || '',
@@ -323,8 +401,9 @@ export default {
     },
     backToList() {
       this.stopSensors();
-      this.view = 'list'; this.editingId = null; this.error = '';
-      this.shot = { dataUrl: '', width: 0, height: 0, lat: null, lng: null, accuracy: null, heading: null, pitch: null, orientation: 'portrait' };
+      this.view = 'list'; this.editingId = null; this.editingHasPhoto = false;
+      this.scouting = false; this.scoutCoords = ''; this.error = '';
+      this.resetShot();
     },
   },
 };
@@ -366,6 +445,9 @@ export default {
 .sc-cam-hint { text-align: center; margin-top: 8px; }
 .sc-cam-error { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .sc-file { display: inline-block; }
+.sc-newgroup { display: flex; gap: 8px; }
+.sc-noimg { width: 72px; height: 72px; border-radius: 10px; background: rgba(165,192,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex: none; }
+.sc-photoacts { display: flex; gap: 10px; flex-wrap: wrap; }
 /* form */
 .sc-form { display: flex; flex-direction: column; gap: 10px; max-width: 560px; margin: 0 auto; }
 .sc-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 14px; background: #000; }
