@@ -783,7 +783,7 @@
       "events": "Տեղական միջոցառումներ",
       "photo_spots": "Ֆոտո վայրեր",
       "shopping": "Գնումներ",
-      "activities": "Գործունեություն",
+      "activities": "Ժամանց",
       "itinerary": "Երթուղի"
     },
     "shopping": {
@@ -874,8 +874,8 @@
       "nearby_photo_spots": "Մոտակա ֆոտո վայրեր",
       "shopping": "Գնումներ",
       "nearby_shopping": "Մոտակա խանութներ",
-      "activities": "Զբաղմունքների բացահայտում",
-      "nearby_activities": "Մոտակա զբաղմունքներ"
+      "activities": "Ժամանցի բացահայտում",
+      "nearby_activities": "Մոտակա ժամանց"
     },
     "ai_prompts": {
       "restaurant": "Պատմեք {name}-ի մասին - գների միջակայք, հիմնական ուտեստներ և ինչպես ամրագրել սեղան",
@@ -1113,7 +1113,7 @@
       "photo_spots": "Ֆոտո վայրեր",
       "hidden_gems": "Գաղտնի վայրեր",
       "shopping": "Խանութներ",
-      "activities": "Զբաղմունքներ"
+      "activities": "Ժամանց"
     },
     "photos": "Լուսանկարներ",
     "search_ph": "Ո՞ւր. քաղաք, մարզ, երկիր…",
@@ -1260,7 +1260,7 @@
         "viewpoint": "Դիտակետ",
         "shopping": "Գնումներ",
         "nature": "Բնություն",
-        "activities": "Զբաղմունք"
+        "activities": "Ժամանց"
       }
     },
     "approximate_path": "Մոտավոր երթուղի"
