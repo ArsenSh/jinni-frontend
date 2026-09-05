@@ -1136,6 +1136,7 @@
               <FilterDropdown v-if="aiEvCountries.length > 1" :options="aiEvCountryOpts" v-model="aiEvCountry" />
               <div class="seg-group">
                 <button class="seg-btn" :class="{ 'seg-btn--active': aiEvNoImage }" @click="aiEvNoImage = !aiEvNoImage" title="Show only events with no poster / venue photo">No image</button>
+                <button class="seg-btn" :class="{ 'seg-btn--active': aiEvPast }" @click="aiEvPast = !aiEvPast; fetchAiEvents()" title="Past events stay a week for moderation (Hide blocks the annual re-listing), then auto-delete">Past</button>
               </div>
             </template>
           </div>
@@ -6946,12 +6947,15 @@ export default {
     const aiEvCountries = computed(() => [...new Set(aiEvents.value.map(aiEvCountryOf).filter(Boolean))].sort())
     const aiEvCountryOpts = computed(() => [{ value: '', label: 'All countries' }, ...aiEvCountries.value.map(c => ({ value: c, label: c }))])
     const aiEvNoImage = ref(false)
+    // Grace-week rows (event over, TTL not yet fired) are hidden by default —
+    // listed, they read as "auto-delete is broken" (founder 2026-09-05).
+    const aiEvPast = ref(false)
     const aiEventsFiltered = computed(() => aiEvents.value
       .filter(e => !aiEvCountry.value || aiEvCountryOf(e) === aiEvCountry.value)
       .filter(e => !aiEvNoImage.value || !aiEvImage(e)))
     const fetchAiEvents = async () => {
       aiEvLoading.value = true
-      try { const res = await staffFetch(`/ai-events?status=${aiEvStatus.value}`); aiEvents.value = res.data || [] }
+      try { const res = await staffFetch(`/ai-events?status=${aiEvStatus.value}${aiEvPast.value ? '&past=1' : ''}`); aiEvents.value = res.data || [] }
       catch (e) { showToast(e.message, 'error') } finally { aiEvLoading.value = false }
     }
     const aiEvApprove = async (ev) => {
@@ -7497,7 +7501,7 @@ export default {
       srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
       loadAdminSources, saveAdminSource, toggleAdminSource, deleteAdminSource, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
       destTypeFilter, bizTypeFilter, categoryFilterOpts, bizCategoryFilterOpts,
-      placesView, aiEvents, aiEvStatus, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
+      placesView, aiEvents, aiEvStatus, aiEvPast, aiEvLoading, aiEvCountry, aiEvCountries, aiEvStatusOpts, aiEvCountryOpts, aiEvNoImage, aiEventsFiltered, aiEvModal, aiEvForm, aiEvSaving, openAiEvInfo, startAiEvEdit, saveAiEvEdit, aiEvModalAction, fetchAiEvents, aiEvApprove, aiEvSetStatus, aiEvDismiss, aiEvImage,
       placeEditForm, placeEditSaving, startPlaceEdit, savePlaceEdit, placeEditCategories, placeEditInterests, togglePlaceEditTag, toggleCacheTag, placeInfoGeo,
       staffCreateMarketingOnly, staffAssignMarketingOnly, onMarketingPermToggle,
       businesses, bizLoading, bizPage, bizTotalPages, bizSearch, bizLocationSearch, bizPartnerFilter, bizStatusFilter, bizSummary,
