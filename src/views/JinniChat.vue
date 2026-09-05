@@ -4949,7 +4949,14 @@ export default {
                     this.showShoppingClarifier = false;
                     this.itineraryDraft = {
                       daysCount: data.prefill?.daysCount || 3,
-                      hotelName: '', pickHotel: false, hotelBreakfast: false, tripBudgetTotal: null, people: 2,
+                      // Hotel + breakfast the chat message already stated ride
+                      // in prefilled — the hotel step opens pre-typed (its
+                      // breakfast chips show for a non-empty name), so the
+                      // user confirms with one Start tap instead of retyping.
+                      hotelName: data.prefill?.hotelName || '',
+                      pickHotel: false,
+                      hotelBreakfast: data.prefill?.hotelBreakfast === true,
+                      tripBudgetTotal: null, people: 2,
                     };
                     this.abortHotelPrefetch();
                     // Destination named in chat ("… in Paris") — carried into
