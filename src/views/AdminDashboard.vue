@@ -1986,6 +1986,69 @@
           </div>
           <p v-if="covData && !covData.rows.length" class="empty-state">No cached places carry a city yet — coverage appears as the cache warms.</p>
           <p v-if="!covData" class="empty-state">Loading coverage…</p>
+
+          <!-- ── MAP COVERAGE ── the map is coverage too: a country whose tiles
+               we do not hold draws a blank map, so Jinni is effectively not
+               there. Staff pick countries; the server rebuilds one archive. -->
+          <div class="loc-section-label" style="margin-top: 18px">Map coverage — the countries whose map tiles live on our own server</div>
+          <div class="card" style="padding: 18px 20px">
+            <div class="card-head" style="padding: 0 0 10px">
+              <h2>Offline map tiles</h2>
+              <span class="card-sub">Maps are drawn from one archive on our server, not from Google. A country that is not in it shows a blank map · pick countries, check the size, then rebuild</span>
+            </div>
+
+            <p v-if="!mapT" class="empty-state">Loading map coverage…</p>
+            <p v-else-if="!mapT.enabled" class="empty-state">No tile storage on this server yet — mount a volume and set <strong>TILES_DIR</strong> (e.g. <code>/app/tiles</code>), then reload this page.</p>
+
+            <template v-else>
+              <p class="cov-meta">
+                Archive: <strong>{{ mapT.archive.exists ? mapBytes(mapT.archive.bytes) : 'none yet' }}</strong>
+                <template v-if="mapT.archive.exists"> · built {{ mapWhen(mapT.archive.updatedAt) }}</template>
+                · zoom 0–{{ mapT.maxzoom }}
+                <template v-if="mapT.disk.freeBytes"> · {{ mapBytes(mapT.disk.freeBytes) }} free on disk</template>
+              </p>
+
+              <p v-if="mapBlind.length" class="cov-meta map-warn">
+                Jinni has places in {{ mapBlind.length }} {{ mapBlind.length === 1 ? 'country' : 'countries' }} with no map — {{ mapBlindNames }} — so maps there come up blank.
+                <button class="map-link" @click="mapSelectBlind">Add them to the selection</button>
+              </p>
+
+              <div class="provider-row" style="align-items: center; gap: 10px">
+                <input class="limit-input" style="max-width: 220px" v-model="mapSearch" placeholder="Find a country…" />
+                <span class="card-sub">{{ mapSelected.length }} selected{{ mapChanged ? ' · not built yet' : '' }}</span>
+              </div>
+
+              <div class="map-grid">
+                <label v-for="c in mapCountries" :key="c.code" class="map-country" :class="{ on: mapSelected.includes(c.code), blind: c.places && !mapSelected.includes(c.code) }">
+                  <input type="checkbox" :value="c.code" v-model="mapSelected" />
+                  <span class="map-name">{{ c.name }}</span>
+                  <span class="map-count">{{ c.places ? fmt(c.places) + ' places' : '' }}</span>
+                </label>
+              </div>
+              <p v-if="!mapCountries.length" class="empty-state">No country matches “{{ mapSearch }}”.</p>
+
+              <div class="provider-actions" style="margin-top: 14px">
+                <button class="action-btn" @click="mapEstimate" :disabled="mapBusy || !mapSelected.length">{{ mapEstimating ? 'Measuring…' : 'Check size first' }}</button>
+                <button class="action-btn btn-accent" @click="mapBuild" :disabled="mapBusy || !mapChanged">
+                  {{ mapRunning ? 'Building…' : (mapSelected.length ? 'Download to server' : 'Remove the map') }}
+                </button>
+              </div>
+
+              <p v-if="mapEst" class="cov-meta">
+                {{ mapEst.countries.join(', ') }} would take <strong>{{ mapEst.bytes ? mapBytes(mapEst.bytes) : 'an unknown amount of' }}</strong> disk<template v-if="mapEst.transferBytes"> and download {{ mapBytes(mapEst.transferBytes) }}</template><template v-if="mapEst.tiles"> · {{ fmt(mapEst.tiles) }} tiles</template>.
+              </p>
+
+              <template v-if="mapJob">
+                <div class="loc-section-label" style="margin-top: 14px">
+                  {{ mapJob.state === 'running' ? 'Building the map…' : (mapJob.state === 'failed' ? 'The build failed' : 'Last build') }}
+                  <template v-if="mapJob.codes.length"> — {{ mapJob.codes.join(', ') }}</template>
+                </div>
+                <div class="map-bar" v-if="mapJob.state === 'running'"><span :style="{ width: (mapJob.percent || 0) + '%' }"></span></div>
+                <p v-if="mapJob.error" class="cov-meta map-warn">{{ mapJob.error }}</p>
+                <pre class="map-log" v-if="mapJob.log && mapJob.log.length">{{ mapJob.log.slice(-8).join('\n') }}</pre>
+              </template>
+            </template>
+          </div>
         </section>
 
         <!-- ── PRICES ── -->
@@ -4124,7 +4187,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 // Same component the chat uses — the transcript viewer restores an itinerary
@@ -6803,6 +6866,7 @@ export default {
       hideChartTip()   // a stuck tooltip must never survive a tab switch
       if (tab === 'limits' && !limitsData.value) fetchLimits()
       if (tab === 'coverage' && !covData.value) fetchCoverage()
+      if (tab === 'coverage' && !mapT.value) fetchMapTiles()
       if (tab === 'event-sources' && !srcLoaded.value) loadAdminSources()
       if (tab === 'places' && !aiEvents.value.length) fetchAiEvents()
       if (tab === 'places' && !places.value.length) fetchPlaces()
@@ -7087,6 +7151,102 @@ export default {
       } catch (e) { showToast(e.message, 'error') }
       finally { covSaving.value = false }
     }
+    // ── Map coverage ─────────────────────────────────────────────────────────
+    // One archive holds every country we can draw. The selection below IS the
+    // archive: rebuilding replaces it, so unticking a country is how it gets
+    // deleted. Sizes shown are the extraction tool's own numbers.
+    const mapT = ref(null)
+    const mapSelected = ref([])
+    const mapSearch = ref('')
+    const mapEst = ref(null)
+    const mapEstimating = ref(false)
+    const mapJob = ref(null)
+    let mapPoll = null
+
+    const mapRunning = computed(() => mapJob.value?.state === 'running')
+    const mapBusy = computed(() => mapEstimating.value || mapRunning.value)
+    // Nothing to build until the selection differs from what is installed —
+    // rebuilding an identical archive would cost bandwidth for no change.
+    const mapChanged = computed(() => {
+      const now = [...(mapT.value?.installed || [])].sort().join(',')
+      return now !== [...mapSelected.value].sort().join(',')
+    })
+    const mapBlind = computed(() => mapT.value?.blind || [])
+    const mapBlindNames = computed(() => {
+      const byCode = Object.fromEntries((mapT.value?.catalog || []).map(c => [c.code, c.name]))
+      const names = mapBlind.value.map(c => byCode[c] || c)
+      return names.length > 4 ? names.slice(0, 4).join(', ') + ` and ${names.length - 4} more` : names.join(', ')
+    })
+    // Countries Jinni already has places in float to the top: those are the
+    // ones whose blank maps travelers actually hit.
+    const mapCountries = computed(() => {
+      const q = mapSearch.value.trim().toLowerCase()
+      return (mapT.value?.catalog || [])
+        .filter(c => !q || c.name.toLowerCase().includes(q) || c.code.toLowerCase() === q)
+        .sort((a, b) => (b.places || 0) - (a.places || 0) || a.name.localeCompare(b.name))
+        .slice(0, q ? 400 : 60)
+    })
+
+    const mapBytes = (n) => {
+      if (!Number.isFinite(n)) return 'unknown'
+      if (n >= 1e9) return (n / 1e9).toFixed(n >= 1e10 ? 0 : 1) + ' GB'
+      if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e8 ? 0 : 1) + ' MB'
+      return Math.round(n / 1e3) + ' kB'
+    }
+    const mapWhen = (d) => (d ? new Date(d).toLocaleString() : 'never')
+    const mapSelectBlind = () => {
+      mapSelected.value = [...new Set([...mapSelected.value, ...mapBlind.value])]
+    }
+
+    const fetchMapTiles = async () => {
+      try {
+        const res = await apiFetch('/map-tiles')
+        if (!res.success) return
+        mapT.value = res.data
+        mapJob.value = res.data.job
+        // Only adopt the server's list when staff have not started editing —
+        // a poll must never silently undo a selection being made.
+        if (!mapChanged.value || !mapSelected.value.length) mapSelected.value = [...res.data.installed]
+        if (res.data.job?.state === 'running') mapWatchJob()
+      } catch (e) { console.warn('map tiles fetch failed:', e.message) }
+    }
+
+    const mapWatchJob = () => {
+      if (mapPoll) return
+      mapPoll = setInterval(async () => {
+        try {
+          const res = await apiFetch('/map-tiles/job')
+          mapJob.value = res.data
+          if (res.data && res.data.state !== 'running') {
+            clearInterval(mapPoll); mapPoll = null
+            showToast(res.data.state === 'done' ? 'Map updated' : `Map build failed: ${res.data.error}`,
+              res.data.state === 'done' ? 'success' : 'error')
+            await fetchMapTiles()
+          }
+        } catch { clearInterval(mapPoll); mapPoll = null }
+      }, 2000)
+    }
+
+    const mapEstimate = async () => {
+      mapEstimating.value = true
+      mapEst.value = null
+      try {
+        const res = await apiFetch('/map-tiles/estimate', { method: 'POST', body: JSON.stringify({ codes: mapSelected.value }) })
+        if (res.success) mapEst.value = res.data
+      } catch (e) { showToast(e.message, 'error') }
+      finally { mapEstimating.value = false }
+    }
+
+    const mapBuild = async () => {
+      if (!mapSelected.value.length && !confirm('Remove the map archive? Every map in the app goes blank until one is built again.')) return
+      try {
+        const res = await apiFetch('/map-tiles/build', { method: 'POST', body: JSON.stringify({ codes: mapSelected.value }) })
+        if (res.success) { mapJob.value = res.data; mapEst.value = null; mapWatchJob() }
+      } catch (e) { showToast(e.message, 'error') }
+    }
+
+    onBeforeUnmount(() => { if (mapPoll) clearInterval(mapPoll) })
+
     const covReparsing = ref(false)
     const covRefreshing = ref(false)
     // Bypasses the server's 10-minute coverage-table cache — counts reflect
@@ -7497,6 +7657,8 @@ export default {
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
       covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState,
+      mapT, mapSelected, mapSearch, mapEst, mapEstimating, mapJob, mapRunning, mapBusy, mapChanged,
+      mapBlind, mapBlindNames, mapCountries, mapBytes, mapWhen, mapSelectBlind, mapEstimate, mapBuild,
       adminSources, filteredSources, srcSearch, discForm, discBusy, discResult, discWhy, runDiscover, addDiscovered, srcLoaded, srcSaving, srcError, srcForm,
       srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
       loadAdminSources, saveAdminSource, toggleAdminSource, deleteAdminSource, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
@@ -9664,6 +9826,28 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .cov-targets { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 8px; }
 .cov-target { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
 .cov-target .limit-input { width: 64px; max-width: 64px; text-align: center; }
+/* Map coverage — country picker. Selection is shown with colour only: no
+   movement on hover anywhere in this dashboard (Arsen). */
+.map-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; margin-top: 10px; max-height: 320px; overflow-y: auto; padding-right: 4px; }
+.map-country { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12.5px; cursor: pointer; border: 1px solid transparent; }
+.map-country input { accent-color: #8b5cf6; cursor: pointer; }
+.map-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.map-count { font-size: 10.5px; opacity: 0.55; font-family: 'DM Mono', monospace; }
+.admin-shell.night-mode .map-country { background: rgba(255,255,255,0.03); }
+.admin-shell.day-mode .map-country { background: rgba(0,0,0,0.03); }
+.admin-shell.night-mode .map-country:hover { background: rgba(139,92,246,0.10); }
+.admin-shell.day-mode .map-country:hover { background: rgba(212,175,55,0.10); }
+.admin-shell.night-mode .map-country.on { background: rgba(139,92,246,0.16); border-color: rgba(139,92,246,0.45); }
+.admin-shell.day-mode .map-country.on { background: rgba(212,175,55,0.16); border-color: rgba(212,175,55,0.5); }
+/* Jinni has places here but no map — the blank-map case, flagged in place. */
+.map-country.blind { border-color: rgba(239,138,68,0.5); }
+.map-warn { color: #e8894a; opacity: 0.95; }
+.map-link { background: none; border: none; padding: 0 0 0 6px; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
+.map-bar { height: 6px; border-radius: 3px; overflow: hidden; margin-top: 8px; background: rgba(128,128,128,0.18); }
+.map-bar span { display: block; height: 100%; background: linear-gradient(90deg, #D4AF37, #a78bfa); transition: width 0.4s ease; }
+.map-log { margin-top: 8px; padding: 8px 10px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 10.5px; line-height: 1.5; opacity: 0.75; white-space: pre-wrap; word-break: break-word; max-height: 150px; overflow-y: auto; }
+.admin-shell.night-mode .map-log { background: rgba(255,255,255,0.04); }
+.admin-shell.day-mode .map-log { background: rgba(0,0,0,0.04); }
 .cov-table-card { padding: 10px 12px; }
 .cov-scroll { overflow-x: auto; }
 .cov-table { border-collapse: collapse; width: 100%; min-width: 780px; }
