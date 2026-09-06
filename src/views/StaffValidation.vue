@@ -77,11 +77,6 @@
             <span class="count-pill-num">{{ fmt(destSummary.totalClicks || 0) }}</span>
           </span>
         </div>
-        <!-- Entry point to the Shot Spots capture tool (staff feature,
-             /shots/capture) — same pill language so the header stays quiet. -->
-        <button class="count-pill" title="Capture and manage Shot Spots" @click="$router.push('/shots/capture')">
-          <span class="count-pill-label">📸 Shot Spots</span>
-        </button>
       </div>
     </header>
 
