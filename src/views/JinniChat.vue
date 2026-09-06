@@ -8625,6 +8625,10 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Uniform card height in the saved panel: short cards bump up to a shared baseline, taller ones still grow */
 /* width:100% stops broken-image cards from shrinking to their text width (image normally defines card width) */
 .saved-rec-list .rec-card-wrapper{width:100%}
+/* Saved cards match the ordinary in-chat card image (16:9, 190px desktop —
+   settled sizes): outside .recommendation-grid they fell to the 140px base. */
+.saved-rec-list .rec-image{height:auto;aspect-ratio:16 / 9}
+@media (min-width:769px){.saved-rec-list .rec-image{height:190px}}
 .saved-rec-list .recommendation-card{min-height:230px;width:100%}
 .saved-rec-list .rec-details{flex:1;display:flex;flex-direction:column}
 .saved-rec-list .rec-metadata{margin-top:auto}
