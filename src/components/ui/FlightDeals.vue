@@ -22,14 +22,14 @@
           <span class="fd-city">{{ d.name }}</span>
           <span class="fd-price">{{ $t('flightdeals.from') }} {{ fmtPrice(d.price) }}</span>
           <span class="fd-meta">
-            {{ fmtDate(d.departureAt) }}<template v-if="d.transfers === 0"> · {{ $t('flightdeals.direct') }}</template>
+            {{ fmtDate(d.departureAt) }}<template v-if="d.airlineName"> · {{ d.airlineName }}</template><template v-if="d.transfers === 0"> · {{ $t('flightdeals.direct') }}</template>
           </span>
         </button>
         <div v-if="expanded === d.destination" class="fd-week">
           <p v-if="weekLoading" class="fd-meta">…</p>
           <template v-else-if="week.length">
             <a v-for="w in week" :key="w.date" class="fd-day" :href="w.bookUrl" target="_blank" rel="noopener">
-              <span>{{ fmtDate(w.date) }}</span><strong>{{ fmtPrice(w.price) }}</strong>
+              <span>{{ fmtDate(w.date) }}<template v-if="w.airlineName"> · {{ w.airlineName }}</template></span><strong>{{ fmtPrice(w.price) }}</strong>
             </a>
           </template>
           <a class="fd-book" :href="d.bookUrl" target="_blank" rel="noopener">{{ $t('flightdeals.book') }} →</a>
