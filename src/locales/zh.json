@@ -1264,5 +1264,13 @@
       }
     },
     "approximate_path": "大致路线"
+  },
+  "flightdeals": {
+    "title": "本周去哪儿逃离一下？",
+    "budget_ph": "你的预算…",
+    "from": "低至",
+    "direct": "直飞",
+    "book": "查看航班",
+    "caveat": "从埃里温出发的近期票价 — 最终价格以预订时为准。"
   }
 }

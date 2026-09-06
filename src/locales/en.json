@@ -1264,5 +1264,13 @@
       }
     },
     "approximate_path": "Approximate path"
+  },
+  "flightdeals": {
+    "title": "Where to escape this week?",
+    "budget_ph": "Your budget…",
+    "from": "from",
+    "direct": "direct",
+    "book": "See flights",
+    "caveat": "Recently seen fares from Yerevan — the final price is confirmed at booking."
   }
 }

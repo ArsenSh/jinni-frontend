@@ -79,6 +79,10 @@
       </div>
     </div>
 
+    <!-- Flight deals strip (self-contained feature — components/ui/FlightDeals.vue;
+         renders nothing unless the backend has Travelpayouts credentials) -->
+    <FlightDeals v-if="!loading" :night="theme === 'night-mode'" />
+
     <!-- ═══ Not explored yet ═══ -->
     <div v-else-if="!hasAny" class="ex-empty">
       <div class="ex-empty-icon">✨</div>
@@ -293,6 +297,7 @@
 
 <script>
 import { isNightTime } from '../utils/timeUtils';
+import FlightDeals from '../components/ui/FlightDeals.vue';
 
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || '';
 
@@ -303,6 +308,7 @@ const CAT_LABELS = {
 };
 
 export default {
+  components: { FlightDeals },
   name: 'ExploreView',
   data() {
     return {

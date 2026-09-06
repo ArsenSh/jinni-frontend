@@ -1264,5 +1264,13 @@
       }
     },
     "approximate_path": "Trajet approximatif"
+  },
+  "flightdeals": {
+    "title": "Où s'évader cette semaine ?",
+    "budget_ph": "Votre budget…",
+    "from": "dès",
+    "direct": "direct",
+    "book": "Voir les vols",
+    "caveat": "Tarifs récemment relevés depuis Erevan — le prix final est confirmé à la réservation."
   }
 }
