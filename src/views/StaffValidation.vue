@@ -2103,6 +2103,9 @@
             <strong>{{ c.title }}</strong>
             <span class="shots-sub">{{ c.city }} · {{ c.camera.lat.toFixed(5) }}, {{ c.camera.lng.toFixed(5) }}</span>
             <span v-if="c.evidence && c.evidence[0]" class="shots-evidence">{{ c.evidence[0].note }}</span>
+            <span v-if="evidencePhotos(c).length" class="shots-evlinks">
+              <a v-for="(e, i) in evidencePhotos(c)" :key="i" :href="e.url" target="_blank" rel="noopener" :title="e.note">📷 photo {{ i + 1 }} ↗</a>
+            </span>
           </div>
           <div class="shots-row-actions">
             <a class="ghost-btn" :href="'https://maps.google.com/?q=' + c.camera.lat + ',' + c.camera.lng" target="_blank" rel="noopener">Map</a>
@@ -2419,6 +2422,9 @@ export default {
       } catch (err) { huntError.value = err.response?.data?.error || 'Hunt failed' }
       hunting.value = false
     }
+    // Sample evidence photos live on Commons' own site — desk pre-filter only,
+    // never imported into the app (founder invariant).
+    const evidencePhotos = (c) => (c.evidence || []).filter(e => e.kind === 'sample_photo' && e.url)
     const dropCandidate = async (c) => {
       if (!window.confirm(`Drop Jinni's candidate "${c.title}"?`)) return
       try {
@@ -4282,7 +4288,7 @@ export default {
 
     return {
       huntCoords, huntRadius, huntCity, huntCountry, hunting, huntMsg, huntError,
-      shotCandidates, shotLoading, runJinniHunt, dropCandidate,
+      shotCandidates, shotLoading, runJinniHunt, dropCandidate, evidencePhotos,
       theme, toggleTheme, statusList, tierList,
       status, tier, cityInput, page, total, totalPages, businesses, counts, listLoading,
       setStatus, setTier, onCityInput, changePage, loadList,
@@ -4756,6 +4762,9 @@ export default {
 .shots-row-main{display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--text)}
 .shots-sub{color:var(--text-mute);font-size:12px}
 .shots-evidence{color:var(--text-faint);font-size:12px;font-style:italic}
+.shots-evlinks{display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+.shots-evlinks a{color:var(--accent);font-size:12px;text-decoration:none}
+.shots-evlinks a:hover{text-decoration:underline}
 .shots-row-actions{display:flex;gap:8px;flex-shrink:0;align-items:center}
 .shots-row-actions a{text-decoration:none}
 .shots-del{color:var(--bad)}
