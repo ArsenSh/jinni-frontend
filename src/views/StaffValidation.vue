@@ -40,10 +40,10 @@
       <div class="page-header-left">
         <h1 class="page-title">
           <span class="page-title-mark">//</span>
-          {{ activeTab === 'destinations' ? 'Destinations' : activeTab === 'explore' ? 'Explore' : activeTab === 'shots' ? 'Shot Spots' : 'Validation' }}<span v-if="userName" class="page-title-user"> — {{ userName }}</span>
+          {{ activeTab === 'destinations' ? 'Destinations' : activeTab === 'explore' ? 'Explore' : 'Validation' }}<span v-if="userName" class="page-title-user"> — {{ userName }}</span>
         </h1>
         <p class="page-subtitle">
-          {{ activeTab === 'destinations' ? 'Manage destinations in your scope' : activeTab === 'explore' ? 'Moderate Explore-page places in your scope' : activeTab === 'shots' ? 'Jinni hunts the spots — you verify on location' : 'Review and verify business applications' }}
+          {{ activeTab === 'destinations' ? 'Manage destinations in your scope' : activeTab === 'explore' ? 'Moderate Explore-page places in your scope' : 'Review and verify business applications' }}
         </p>
       </div>
       <div class="page-header-right">
@@ -2071,51 +2071,6 @@
       </div>
     </transition>
 
-    <!-- ════════════════════════════════════════════════════════════════
-         SHOT SPOTS TAB — Jinni hunts, staff verify (founder 2026-09-06)
-         ════════════════════════════════════════════════════════════════ -->
-    <template v-if="activeTab === 'shots'">
-      <section class="shots-tab">
-        <div class="shots-hunt-card">
-          <h2 class="shots-h">✨ Let Jinni hunt</h2>
-          <p class="shots-p">Give Jinni a center point and a city — it mines where photographers actually stand (geotagged photo clusters + mapped viewpoints) and creates the candidate spots itself. Your job is only to verify: go there, shoot, publish. Candidates can never go public without a real photo.</p>
-          <div class="shots-form">
-            <input v-model.trim="huntCoords" placeholder="Center: 40.17925, 44.51262" class="shots-coords" />
-            <select v-model.number="huntRadius">
-              <option :value="1">1 km</option><option :value="3">3 km</option>
-              <option :value="5">5 km</option><option :value="10">10 km</option>
-            </select>
-            <input v-model.trim="huntCity" maxlength="80" placeholder="City *" />
-            <input v-model.trim="huntCountry" maxlength="80" placeholder="Country" />
-            <button class="action-btn" :disabled="hunting || !huntCity" @click="runJinniHunt">{{ hunting ? 'Jinni is hunting…' : '✨ Hunt' }}</button>
-          </div>
-          <p v-if="huntMsg" class="shots-msg">{{ huntMsg }}</p>
-          <p v-if="huntError" class="shots-err">{{ huntError }}</p>
-        </div>
-
-        <header class="section-head">
-          <h2>🤖 Jinni's candidates — waiting for verification ({{ shotCandidates.length }})</h2>
-        </header>
-        <p v-if="shotLoading" class="shots-p">Loading…</p>
-        <p v-else-if="!shotCandidates.length" class="shots-p">No open candidates. Run a hunt above — published and in-progress spots live in the capture tool (📸 pill, top right).</p>
-        <div v-for="c in shotCandidates" :key="c.id" class="shots-row">
-          <div class="shots-row-main">
-            <strong>{{ c.title }}</strong>
-            <span class="shots-sub">{{ c.city }} · {{ c.camera.lat.toFixed(5) }}, {{ c.camera.lng.toFixed(5) }}</span>
-            <span v-if="c.evidence && c.evidence[0]" class="shots-evidence">{{ c.evidence[0].note }}</span>
-            <span v-if="evidencePhotos(c).length" class="shots-evlinks">
-              <a v-for="(e, i) in evidencePhotos(c)" :key="i" :href="e.url" target="_blank" rel="noopener" :title="e.note">📷 photo {{ i + 1 }} ↗</a>
-            </span>
-          </div>
-          <div class="shots-row-actions">
-            <a class="ghost-btn" :href="'https://maps.google.com/?q=' + c.camera.lat + ',' + c.camera.lng" target="_blank" rel="noopener">Map</a>
-            <button class="action-btn" @click="$router.push('/shots/capture')">Verify & shoot</button>
-            <button class="ghost-btn shots-del" @click="dropCandidate(c)">Drop</button>
-          </div>
-        </div>
-      </section>
-    </template>
-
     <!-- ── Logout confirm modal ─────────────────────────────────────── -->
     <transition name="fade">
       <div v-if="confirmLogout" class="modal-overlay" @click.self="confirmLogout = false">
@@ -2395,46 +2350,7 @@ export default {
     // Default to validation if the user has it; otherwise destinations.
     // (A staff member with manageDestinations only would land directly on
     // their working surface.) Admin sees both.
-    // ── Shot Spots tab (Jinni hunts, staff verify — founder 2026-09-06) ──
-    const huntCoords = ref(''); const huntRadius = ref(5)
-    const huntCity = ref(''); const huntCountry = ref('')
-    const hunting = ref(false); const huntMsg = ref(''); const huntError = ref('')
-    const shotCandidates = ref([]); const shotLoading = ref(false)
-    const loadShotCandidates = async () => {
-      shotLoading.value = true
-      try {
-        const { data } = await axios.get(`${API_URL}/shotspots/staff/list`, { headers: authHeader() })
-        shotCandidates.value = (data.spots || []).filter(s => s.aiFound && s.status === 'draft' && !(s.photo && s.photo.hasPhoto))
-      } catch (err) { showToast('Failed to load Jinni candidates', 'error') }
-      shotLoading.value = false
-    }
-    const runJinniHunt = async () => {
-      huntError.value = ''; huntMsg.value = ''
-      const m = huntCoords.value.match(/(-?\d{1,3}(?:\.\d+)?)[,\s]+(-?\d{1,3}(?:\.\d+)?)/)
-      if (!m) { huntError.value = 'Center must look like: 40.17925, 44.51262'; return }
-      hunting.value = true
-      try {
-        const { data } = await axios.post(`${API_URL}/shotspots/staff/hunt`,
-          { lat: +m[1], lng: +m[2], radiusKm: huntRadius.value, city: huntCity.value, country: huntCountry.value },
-          { headers: authHeader() })
-        huntMsg.value = `Jinni created ${data.created} candidate${data.created === 1 ? '' : 's'} from ${data.considered} pieces of evidence (sources — photos: ${data.sources.commons}, viewpoints: ${data.sources.osm}).`
-        loadShotCandidates()
-      } catch (err) { huntError.value = err.response?.data?.error || 'Hunt failed' }
-      hunting.value = false
-    }
-    // Sample evidence photos live on Commons' own site — desk pre-filter only,
-    // never imported into the app (founder invariant).
-    const evidencePhotos = (c) => (c.evidence || []).filter(e => e.kind === 'sample_photo' && e.url)
-    const dropCandidate = async (c) => {
-      if (!window.confirm(`Drop Jinni's candidate "${c.title}"?`)) return
-      try {
-        await axios.delete(`${API_URL}/shotspots/staff/${c.id}`, { headers: authHeader() })
-        loadShotCandidates()
-      } catch (err) { showToast('Failed to drop candidate', 'error') }
-    }
-
     const activeTab = ref('validation')
-    watch(activeTab, (tab) => { if (tab === 'shots' && !shotCandidates.value.length) loadShotCandidates() })
     const visibleTabs = computed(() => {
       const tabs = []
       if (myPermissions.value.validateBusinesses) {
@@ -2446,9 +2362,6 @@ export default {
       if (myPermissions.value.moderateExplore) {
         tabs.push({ key: 'explore', label: 'Explore', count: expTotal.value || null })
       }
-      // Shot Spots: every staff member may hunt/verify (same gate as the
-      // capture tool), so the tab is unconditional.
-      tabs.push({ key: 'shots', label: 'Shot Spots', count: shotCandidates.value.length || null })
       return tabs
     })
     // Once permissions load, land on the first tab the user is allowed to see.
@@ -2457,7 +2370,6 @@ export default {
     watch(myPermissions, (p) => {
       const order = [['validation', 'validateBusinesses'], ['destinations', 'manageDestinations'], ['explore', 'moderateExplore']]
       const allowed = order.filter(([, perm]) => p[perm]).map(([tab]) => tab)
-      allowed.push('shots') // always allowed
       if (allowed.length && !allowed.includes(activeTab.value)) activeTab.value = allowed[0]
     }, { immediate: false })
 
@@ -4287,8 +4199,6 @@ export default {
     onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
     return {
-      huntCoords, huntRadius, huntCity, huntCountry, hunting, huntMsg, huntError,
-      shotCandidates, shotLoading, runJinniHunt, dropCandidate, evidencePhotos,
       theme, toggleTheme, statusList, tierList,
       status, tier, cityInput, page, total, totalPages, businesses, counts, listLoading,
       setStatus, setTier, onCityInput, changePage, loadList,
@@ -4749,26 +4659,6 @@ export default {
    gradient gimmicks; matches the page's terminal-ish aesthetic.
    ───────────────────────────────────────────────────────────────── */
 .tab-strip{display:flex;gap:4px;padding:4px;background:var(--bg-elev);border-radius:12px;margin-bottom:16px;width:fit-content;max-width:100%;overflow-x:auto}
-.shots-tab{display:flex;flex-direction:column;gap:14px;max-width:980px;margin:0 auto;width:100%}
-.shots-hunt-card{border:1px solid rgba(212,175,55,0.4);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg-elev)}
-.shots-h{margin:0;font-size:15px;color:var(--text)}
-.shots-p{margin:0;color:var(--text-mute);font-size:13px;line-height:1.5}
-.shots-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.shots-form input,.shots-form select{background:var(--bg-elev-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:13px}
-.shots-coords{min-width:220px}
-.shots-msg{margin:0;font-size:13px;color:var(--good)}
-.shots-err{margin:0;font-size:13px;color:var(--bad)}
-.shots-row{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1px solid var(--line-soft);border-radius:10px;padding:10px 14px;background:var(--bg-elev)}
-.shots-row-main{display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--text)}
-.shots-sub{color:var(--text-mute);font-size:12px}
-.shots-evidence{color:var(--text-faint);font-size:12px;font-style:italic}
-.shots-evlinks{display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
-.shots-evlinks a{color:var(--accent);font-size:12px;text-decoration:none}
-.shots-evlinks a:hover{text-decoration:underline}
-.shots-row-actions{display:flex;gap:8px;flex-shrink:0;align-items:center}
-.shots-row-actions a{text-decoration:none}
-.shots-del{color:var(--bad)}
-@media (max-width:640px){.shots-row{flex-direction:column;align-items:stretch}.shots-row-actions{justify-content:flex-end}}
 .tab-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:8px;background:transparent;border:none;color:var(--text-mute);font-family:inherit;font-size:13.5px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.18s ease}
 .tab-btn:hover{background:var(--bg-elev-2);color:var(--text)}
 .tab-btn.active{background:var(--accent);color:#fff}
