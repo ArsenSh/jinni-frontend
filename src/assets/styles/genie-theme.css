@@ -24,7 +24,13 @@ body {
        the face the OS picked had no real one. Hence "some characters bolder
        than others" (Arsen 2026-08-24). Latin and Cyrillic are unaffected:
        they still resolve in the families ahead of this one. */
-    font-family: var(--app-font, 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif);
+    /* 'Noto Sans Armenian' must sit BEFORE Tahoma: macOS ships Tahoma WITH
+       Armenian glyphs, so trailing Noto was never reached there — Armenian
+       rendered in two-weight Tahoma (500 titles fell to thin 400, bolds
+       jumped to harsh 700; founder report 2026-09-06). Google serves Noto
+       subsetted by unicode-range, so on Windows Segoe UI still handles
+       everything natively and non-Armenian text elsewhere is unaffected. */
+    font-family: var(--app-font, 'Segoe UI', 'Noto Sans Armenian', Tahoma, Geneva, Verdana, sans-serif);
     /* Never fake a weight. With the real family loaded above there is nothing
        to fake; if it ever fails to load, a genuinely lighter weight reads
        better than a smeared one. */
