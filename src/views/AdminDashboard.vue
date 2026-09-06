@@ -2017,16 +2017,29 @@
                 <button class="map-link" @click="mapSelectBlind">Add them to the selection</button>
               </p>
 
+              <div class="loc-section-label" style="margin-top: 14px">
+                On the server now:
+                <template v-if="mapT.unmanaged">unknown — built before this panel</template>
+                <template v-else-if="!mapT.installed.length">nothing</template>
+                <template v-else>{{ mapInstalledNames }}</template>
+              </div>
+
               <div class="provider-row" style="align-items: center; gap: 10px">
                 <input class="limit-input" style="max-width: 220px" v-model="mapSearch" placeholder="Find a country…" />
-                <span class="card-sub">{{ mapSelected.length }} selected{{ mapChanged ? ' · not built yet' : '' }}</span>
+                <span class="card-sub" v-if="!mapPending.add.length && !mapPending.remove.length">Tick to add · untick to remove · then apply</span>
+                <span class="card-sub map-pending" v-else>
+                  <template v-if="mapPending.add.length">Adding {{ mapPending.add.join(', ') }}</template>
+                  <template v-if="mapPending.add.length && mapPending.remove.length"> · </template>
+                  <template v-if="mapPending.remove.length">Removing {{ mapPending.remove.join(', ') }}</template>
+                </span>
               </div>
 
               <div class="map-grid">
-                <label v-for="c in mapCountries" :key="c.code" class="map-country" :class="{ on: mapSelected.includes(c.code), blind: c.places && !mapSelected.includes(c.code) }">
+                <label v-for="c in mapCountries" :key="c.code" class="map-country" :class="mapRowClass(c)">
                   <input type="checkbox" :value="c.code" v-model="mapSelected" />
                   <span class="map-name">{{ c.name }}</span>
-                  <span class="map-count">{{ c.places ? fmt(c.places) + ' places' : '' }}</span>
+                  <span class="map-state">{{ mapRowState(c) }}</span>
+                  <span class="map-count">{{ c.places ? fmt(c.places) : '' }}</span>
                 </label>
               </div>
               <p v-if="!mapCountries.length" class="empty-state">No country matches “{{ mapSearch }}”.</p>
@@ -2034,8 +2047,9 @@
               <div class="provider-actions" style="margin-top: 14px">
                 <button class="action-btn" @click="mapEstimate" :disabled="mapBusy || !mapSelected.length">{{ mapEstimating ? 'Measuring…' : 'Check size first' }}</button>
                 <button class="action-btn btn-accent" @click="mapBuild" :disabled="mapBusy || !mapChanged">
-                  {{ mapRunning ? 'Building…' : (mapSelected.length ? 'Download to server' : 'Remove the map') }}
+                  {{ mapRunning ? 'Building…' : mapApplyLabel }}
                 </button>
+                <button class="action-btn" v-if="mapChanged && !mapBusy" @click="mapSelected = [...mapT.installed]">Cancel changes</button>
               </div>
 
               <p v-if="mapEst" class="cov-meta">
@@ -7183,12 +7197,61 @@ export default {
     })
     // Countries Jinni already has places in float to the top: those are the
     // ones whose blank maps travelers actually hit.
+    // Countries already on the server come FIRST, then the ones Jinni has
+    // places in: those are the maps travelers actually hit.
     const mapCountries = computed(() => {
       const q = mapSearch.value.trim().toLowerCase()
+      const installed = new Set(mapT.value?.installed || [])
       return (mapT.value?.catalog || [])
         .filter(c => !q || c.name.toLowerCase().includes(q) || c.code.toLowerCase() === q)
-        .sort((a, b) => (b.places || 0) - (a.places || 0) || a.name.localeCompare(b.name))
+        .sort((a, b) => (installed.has(b.code) - installed.has(a.code))
+          || (b.places || 0) - (a.places || 0)
+          || a.name.localeCompare(b.name))
         .slice(0, q ? 400 : 60)
+    })
+
+    const mapNameOf = (code) => (mapT.value?.catalog || []).find(c => c.code === code)?.name || code
+    const mapInstalledNames = computed(() => (mapT.value?.installed || []).map(mapNameOf).join(', '))
+
+    // What THIS rebuild would change — the difference between the ticks and
+    // what is actually on the server. Shown before it is applied, because one
+    // archive means a rebuild replaces everything (Armenia's map was deleted
+    // by a build for Italy, live 2026-09-06).
+    const mapPending = computed(() => {
+      const installed = mapT.value?.installed || []
+      return {
+        add: mapSelected.value.filter(c => !installed.includes(c)).map(mapNameOf),
+        remove: installed.filter(c => !mapSelected.value.includes(c)).map(mapNameOf),
+      }
+    })
+
+    // Every row says what it IS and what is about to happen to it — a bare
+    // tick could not tell "already downloaded" from "just picked".
+    const mapRowState = (c) => {
+      const installed = (mapT.value?.installed || []).includes(c.code)
+      const picked = mapSelected.value.includes(c.code)
+      if (installed && picked) return 'on server'
+      if (installed && !picked) return 'will be removed'
+      if (!installed && picked) return 'will be added'
+      return c.places ? 'no map' : ''
+    }
+    const mapRowClass = (c) => {
+      const installed = (mapT.value?.installed || []).includes(c.code)
+      const picked = mapSelected.value.includes(c.code)
+      return {
+        on: installed && picked,
+        adding: !installed && picked,
+        removing: installed && !picked,
+        blind: !installed && !picked && !!c.places,
+      }
+    }
+    const mapApplyLabel = computed(() => {
+      const { add, remove } = mapPending.value
+      if (!add.length && !remove.length) return 'Nothing to apply'
+      if (!mapSelected.value.length) return 'Remove the map entirely'
+      if (add.length && remove.length) return `Apply — add ${add.length}, remove ${remove.length}`
+      if (add.length) return `Download ${add.length === 1 ? add[0] : add.length + ' countries'}`
+      return `Remove ${remove.length === 1 ? remove[0] : remove.length + ' countries'}`
     })
 
     const mapBytes = (n) => {
@@ -7672,6 +7735,7 @@ export default {
       covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState,
       mapT, mapSelected, mapSearch, mapEst, mapEstimating, mapJob, mapRunning, mapBusy, mapChanged,
       mapBlind, mapBlindNames, mapCountries, mapBytes, mapWhen, mapSelectBlind, mapEstimate, mapBuild,
+      mapInstalledNames, mapPending, mapRowState, mapRowClass, mapApplyLabel,
       adminSources, filteredSources, srcSearch, discForm, discBusy, discResult, discWhy, runDiscover, addDiscovered, srcLoaded, srcSaving, srcError, srcForm,
       srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
       loadAdminSources, saveAdminSource, toggleAdminSource, deleteAdminSource, covCellClass, cycleCov, covOverrideOf, covCountries, covOpen, toggleCovCountry, covReparsing, reparseRegions, covRefreshing, refreshCoverage, covMarketMode, setMarket,
@@ -9845,7 +9909,7 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .map-country { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; font-size: 12.5px; cursor: pointer; border: 1px solid transparent; }
 .map-country input { accent-color: #8b5cf6; cursor: pointer; }
 .map-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.map-count { font-size: 10.5px; opacity: 0.55; font-family: 'DM Mono', monospace; }
+.map-count { font-size: 10.5px; opacity: 0.5; font-family: 'DM Mono', monospace; min-width: 34px; text-align: right; }
 .admin-shell.night-mode .map-country { background: rgba(255,255,255,0.03); }
 .admin-shell.day-mode .map-country { background: rgba(0,0,0,0.03); }
 .admin-shell.night-mode .map-country:hover { background: rgba(139,92,246,0.10); }
@@ -9854,6 +9918,17 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .admin-shell.day-mode .map-country.on { background: rgba(212,175,55,0.16); border-color: rgba(212,175,55,0.5); }
 /* Jinni has places here but no map — the blank-map case, flagged in place. */
 .map-country.blind { border-color: rgba(239,138,68,0.5); }
+/* Pending changes read at a glance: green is arriving, red is going away. */
+.admin-shell.night-mode .map-country.adding { background: rgba(52,199,120,0.16); border-color: rgba(52,199,120,0.5); }
+.admin-shell.day-mode .map-country.adding { background: rgba(40,167,95,0.14); border-color: rgba(40,167,95,0.5); }
+.admin-shell.night-mode .map-country.removing { background: rgba(232,84,84,0.16); border-color: rgba(232,84,84,0.5); }
+.admin-shell.day-mode .map-country.removing { background: rgba(214,68,68,0.13); border-color: rgba(214,68,68,0.5); }
+.map-country.removing .map-name { text-decoration: line-through; opacity: 0.75; }
+.map-state { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.4px; opacity: 0.75; white-space: nowrap; }
+.map-country.on .map-state { color: #34c778; opacity: 0.9; }
+.map-country.adding .map-state { color: #34c778; }
+.map-country.removing .map-state { color: #e85454; }
+.map-pending { font-weight: 600; }
 .map-warn { color: #e8894a; opacity: 0.95; }
 .map-link { background: none; border: none; padding: 0 0 0 6px; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
 .map-bar { height: 6px; border-radius: 3px; overflow: hidden; margin-top: 8px; background: rgba(128,128,128,0.18); }
