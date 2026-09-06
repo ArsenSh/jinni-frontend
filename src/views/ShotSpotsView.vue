@@ -29,10 +29,7 @@
 
     <div class="sh-grid">
       <button v-for="s in filtered" :key="s.id" class="sh-card" @click="openSpot(s)">
-        <div class="sh-imgwrap">
-          <img :src="apiBase + s.photo.url" :alt="s.title" loading="lazy" />
-          <span v-if="s.aiFound" class="sh-ai">✨ Jinni</span>
-        </div>
+        <div class="sh-imgwrap"><img :src="apiBase + s.photo.url" :alt="s.title" loading="lazy" /></div>
         <div class="sh-card-body">
           <strong>{{ s.title }}</strong>
           <span class="sh-muted">{{ s.access && s.access.nearestPlace ? s.access.nearestPlace : s.city }}</span>
@@ -49,9 +46,7 @@
         <template v-if="!guiding">
           <img :src="apiBase + spot.photo.url" :alt="spot.title" class="sh-hero" />
           <h2>{{ spot.title }}</h2>
-          <p class="sh-cred" :class="spot.aiFound ? 'sh-cred--ai' : 'sh-muted'">
-            {{ spot.aiFound ? $t('shotspots.discovered_by') : $t(spot.photo.source === 'traveler' ? 'shotspots.photo_traveler' : 'shotspots.photo_staff') }}
-          </p>
+          <p class="sh-muted sh-cred">{{ $t(spot.photo.source === 'traveler' ? 'shotspots.photo_traveler' : 'shotspots.photo_staff') }}</p>
           <p v-if="spot.recreationCount" class="sh-count">📸 {{ $t('shotspots.got_count', { n: spot.recreationCount }) }}</p>
           <div class="sh-facts">
             <p v-if="spot.access && spot.access.nearestPlace"><span>{{ $t('shotspots.nearest') }}</span>{{ spot.access.nearestPlace }}<template v-if="spot.access.walkMinutes != null"> · {{ $t('shotspots.walk_min', { n: spot.access.walkMinutes }) }}</template></p>
@@ -326,7 +321,6 @@ export default {
 .sh-card { text-align: left; background: rgba(17,25,52,0.62); border: 1px solid rgba(212,175,55,0.22); border-radius: 16px; overflow: hidden; cursor: pointer; padding: 0; color: inherit; font-family: inherit; box-shadow: 0 0 18px -2px rgba(212,175,55,0.12), 0 0 16px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.10); }
 .sh-card:hover { background: rgba(24,34,68,0.72); border-color: rgba(212,175,55,0.45); box-shadow: 0 0 22px -2px rgba(212,175,55,0.22), 0 0 16px rgba(0,0,0,0.25), inset 0 0.5px 0 rgba(255,255,255,0.14); }
 .sh-imgwrap { aspect-ratio: 3 / 2; overflow: hidden; position: relative; }
-.sh-ai { position: absolute; top: 8px; left: 8px; background: rgba(13,18,38,0.72); backdrop-filter: blur(6px); border: 1px solid rgba(212,175,55,0.4); color: #f3dfae; border-radius: 999px; padding: 3px 9px; font-size: 0.7rem; }
 .sh-imgwrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .sh-card-body { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; }
 .sh-card-body strong { font-size: 0.98rem; }
@@ -340,7 +334,6 @@ export default {
 .sh-hero { width: 100%; max-height: 46vh; object-fit: contain; border-radius: 14px; background: #000; }
 .sh-sheet h2 { margin: 12px 0 2px; font-size: 1.15rem; }
 .sh-cred { text-align: left; font-size: 0.75rem; margin: 0 0 10px; }
-.sh-cred--ai { color: #f3dfae; }
 .sh-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 48px 20px; color: #93a0c4; text-align: center; }
 .sh-empty-spark { font-size: 2rem; filter: drop-shadow(0 0 12px rgba(243,223,174,0.6)); animation: sh-twinkle 3s ease-in-out infinite alternate; }
 .sh-empty p { margin: 0; font-size: 0.95rem; max-width: 340px; }

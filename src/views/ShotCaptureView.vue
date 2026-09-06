@@ -40,7 +40,6 @@
         </div>
         <div class="sc-row-actions">
           <span class="sc-status" :class="'sc-status--' + s.status">{{ s.status }}</span>
-          <span v-if="s.aiFound" class="sc-status sc-status--ai" title="Found by Jinni — verify on site">🤖 Jinni</span>
           <button v-if="s.recreationCount" class="sc-btn sc-btn--sm" @click="openRecs(s)">📸 {{ s.recreationCount }} got it</button>
           <button class="sc-btn sc-btn--sm" @click="togglePublish(s)">{{ s.status === 'active' ? 'Unpublish' : 'Publish' }}</button>
           <button class="sc-btn sc-btn--sm" @click="editSpot(s)">Edit</button>
@@ -90,7 +89,6 @@
       </div>
       <p v-if="importError" class="sc-error">{{ importError }}</p>
 
-      <p v-if="editingEvidence" class="sc-evidence">🤖 Jinni's evidence: {{ editingEvidence }}</p>
       <label v-if="scouting">Coordinates * — paste from Google Maps (right-click the spot → first menu line)
         <input v-model.trim="scoutCoords" placeholder="40.17925, 44.51262" />
       </label>
@@ -191,7 +189,6 @@ export default {
       editingId: null, editingHasPhoto: false,
       scouting: false, scoutCoords: '', importError: '',
       recSpot: null, recs: [], recsLoading: false, _recBlobUrls: [],
-      editingEvidence: '',
       bestTimes: ['sunrise', 'morning', 'midday', 'afternoon', 'sunset', 'blue_hour', 'night', 'any'],
       _stream: null, _gpsWatch: null, _stopCompass: null,
     };
@@ -396,7 +393,6 @@ export default {
     },
     editSpot(s) {
       this.editingId = s.id;
-      this.editingEvidence = (s.aiFound && s.evidence && s.evidence[0] && s.evidence[0].note) || '';
       this.editingHasPhoto = !!(s.photo && s.photo.url);
       this.scouting = !this.editingHasPhoto;
       this.scoutCoords = this.scouting ? `${s.camera.lat}, ${s.camera.lng}` : '';
@@ -467,7 +463,7 @@ export default {
     backToList() {
       this.stopSensors();
       this.freeRecBlobs(); this.recSpot = null;
-      this.view = 'list'; this.editingId = null; this.editingHasPhoto = false; this.editingEvidence = '';
+      this.view = 'list'; this.editingId = null; this.editingHasPhoto = false;
       this.scouting = false; this.scoutCoords = ''; this.error = '';
       this.resetShot();
     },
@@ -515,8 +511,6 @@ export default {
 .sc-noimg { width: 72px; height: 72px; border-radius: 10px; background: rgba(165,192,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex: none; }
 .sc-photoacts { display: flex; gap: 10px; flex-wrap: wrap; }
 .sc-sub { font-size: 1rem; margin: 0; font-weight: 600; }
-.sc-status--ai { background: rgba(201,163,245,0.14); color: #d9c2f7; }
-.sc-evidence { background: rgba(201,163,245,0.08); border: 1px solid rgba(201,163,245,0.25); border-radius: 10px; padding: 8px 12px; font-size: 0.82rem; color: #d9c2f7; margin: 0; }
 /* form */
 .sc-form { display: flex; flex-direction: column; gap: 10px; max-width: 560px; margin: 0 auto; }
 .sc-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 14px; background: #000; }
