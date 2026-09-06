@@ -2008,6 +2008,10 @@
                 <template v-if="mapT.disk.freeBytes"> · {{ mapBytes(mapT.disk.freeBytes) }} free on disk</template>
               </p>
 
+              <p v-if="mapT.unmanaged" class="cov-meta map-warn">
+                This archive was built before this panel existed, so its contents are unknown — nothing is ticked below even though the map works today. Rebuilding REPLACES it, so tick every country you want to keep, not only the new one.
+              </p>
+
               <p v-if="mapBlind.length" class="cov-meta map-warn">
                 Jinni has places in {{ mapBlind.length }} {{ mapBlind.length === 1 ? 'country' : 'countries' }} with no map — {{ mapBlindNames }} — so maps there come up blank.
                 <button class="map-link" @click="mapSelectBlind">Add them to the selection</button>
@@ -7238,6 +7242,15 @@ export default {
     }
 
     const mapBuild = async () => {
+      // One archive, so a rebuild REPLACES it. Dropping a country from the
+      // selection deletes its map — live 2026-09-06, a build for Italy took
+      // Armenia's map out with no error visible anywhere.
+      const byCode = Object.fromEntries((mapT.value?.catalog || []).map(c => [c.code, c]))
+      const dropped = (mapT.value?.installed || []).filter(c => !mapSelected.value.includes(c))
+      if (dropped.length && mapSelected.value.length) {
+        const names = dropped.map(c => byCode[c]?.name || c).join(', ')
+        if (!confirm(`Rebuilding will REMOVE the map for ${names}. Maps there go blank. Continue?`)) return
+      }
       if (!mapSelected.value.length && !confirm('Remove the map archive? Every map in the app goes blank until one is built again.')) return
       try {
         const res = await apiFetch('/map-tiles/build', { method: 'POST', body: JSON.stringify({ codes: mapSelected.value }) })
