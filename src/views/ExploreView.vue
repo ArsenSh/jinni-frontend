@@ -34,7 +34,8 @@
         <!-- Preferences round-trip: onboarding returns here (returnTo), and the
              feed refetches on mount — section order follows the new interests. -->
         <button class="ex-pref" @click="goPreferences">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          <!-- same glyph as JinniChat's profile-menu Preferences item -->
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 9 4-18 3 9h4"/></svg>
           {{ t('explore.preferences') || 'Preferences' }}
         </button>
       </div>
@@ -773,9 +774,15 @@ export default {
 .ex-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
   padding: 26px 18px 4px; max-width: 1200px; margin: 0 auto; }
 .ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 11px 26px; border-radius: 999px; border: none; cursor: pointer;
-  font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #fff; background: var(--ex-active-grad);
-  box-shadow: var(--ex-active-ring), 0 0 5px #0000002e, var(--ex-active-shadow); transition: filter .18s, transform .15s; }
-.ex-back:hover { filter: brightness(1.06); }
+  /* Quiet accent glass (founder 2026-09-07: the gradient CTA was too bright
+     in both modes) — same family as .ex-pref, one notch more present. */
+  font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #A0522D; background: rgba(255,255,255,0.55);
+  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.35), 0 0 10px -2px rgba(212,175,55,0.35);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s, box-shadow .18s, transform .15s; }
+.explore.night-mode .ex-back { color: #d9c2f7; background: rgba(255,255,255,0.07);
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.4), 0 0 10px -2px rgba(139,92,246,0.4); }
+.ex-back:hover { background: rgba(240,221,170,0.6); }
+.explore.night-mode .ex-back:hover { background: rgba(139,92,246,0.18); }
 .ex-back:active { transform: scale(0.98); }
 .ex-head-cta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .ex-pref { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
