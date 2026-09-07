@@ -252,16 +252,16 @@ export default {
           const tileUrl = this.currentTheme === 'night-mode' ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
           L.tileLayer(tileUrl, {attribution: '',subdomains: 'abcd',maxZoom: 19,detectRetina: true, noWrap: true}).addTo(this.map);
         }        
-        // Crafted SVG pin (founder 2026-09-07: the CSS shape read neither
-        // elegant nor realistic): classic teardrop silhouette, vertical
-        // gradient shading, soft top highlight, jewel core — gold in day,
-        // violet in night. Colors resolved at creation; the theme is fixed
-        // for the page's lifetime.
+        // "Dot & halo" pin (founder's pick, 2026-09-07, from the pin-fitting
+        // artifact): jewel dot in a thin glass ring, needle to the exact
+        // coordinate. Colors resolved at creation; theme is fixed per visit.
         const night = this.currentTheme === 'night-mode';
-        const g1 = night ? '#cdb0ff' : '#f5e3a9';
-        const g2 = night ? '#6d3fd6' : '#b8742c';
-        const rim = night ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.7)';
-        const coreRim = night ? 'rgba(109,63,214,0.55)' : 'rgba(160,82,45,0.45)';
+        const jewel1 = night ? '#cdb0ff' : '#f0d98c';
+        const jewel2 = night ? '#6d3fd6' : '#b8742c';
+        const needle = night ? '#8b5cf6' : '#b8742c';
+        const halo   = night ? 'rgba(23,20,46,0.4)' : 'rgba(255,251,240,0.35)';
+        const haloRim = night ? 'rgba(185,208,255,0.5)' : 'rgba(255,255,255,0.8)';
+        const jewelRim = night ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.85)';
         const customIcon = L.divIcon({
           className: 'custom-marker',
           html: `
@@ -269,24 +269,21 @@ export default {
               <div class="marker-pin">
                 <svg width="44" height="54" viewBox="0 0 44 54" aria-hidden="true">
                   <defs>
-                    <linearGradient id="jinniPinG" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stop-color="${g1}"/><stop offset="1" stop-color="${g2}"/>
-                    </linearGradient>
-                    <radialGradient id="jinniPinHi" cx="0.34" cy="0.24" r="0.55">
-                      <stop offset="0" stop-color="rgba(255,255,255,0.75)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
+                    <radialGradient id="jinniJewel" cx="0.35" cy="0.3" r="0.8">
+                      <stop offset="0" stop-color="${jewel1}"/><stop offset="1" stop-color="${jewel2}"/>
                     </radialGradient>
                   </defs>
-                  <path d="M22 2C12.6 2 5 9.6 5 19c0 11.6 14.3 28.3 16.1 30.4a1.2 1.2 0 0 0 1.8 0C24.7 47.3 39 30.6 39 19 39 9.6 31.4 2 22 2z" fill="url(#jinniPinG)" stroke="${rim}" stroke-width="1.2"/>
-                  <path d="M22 2C12.6 2 5 9.6 5 19c0 11.6 14.3 28.3 16.1 30.4a1.2 1.2 0 0 0 1.8 0C24.7 47.3 39 30.6 39 19 39 9.6 31.4 2 22 2z" fill="url(#jinniPinHi)"/>
-                  <circle cx="22" cy="19" r="6.6" fill="rgba(255,253,247,0.96)" stroke="${coreRim}" stroke-width="1.4"/>
+                  <path d="M22 30v21" stroke="${needle}" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="22" cy="17" r="13" fill="${halo}" stroke="${haloRim}" stroke-width="1.4"/>
+                  <circle cx="22" cy="17" r="7" fill="url(#jinniJewel)" stroke="${jewelRim}" stroke-width="1.6"/>
                 </svg>
               </div>
               <div class="marker-shadow"></div>
               <div class="marker-pulse"></div>
             </div>
           `,
-          iconSize: [50, 60],
-          iconAnchor: [25, 57]
+          iconSize: [44, 54],
+          iconAnchor: [22, 52]
         });
         this.marker = L.marker([this.selectedCoords.lat, this.selectedCoords.lng], { icon: customIcon, draggable: true, autoPan: true }).addTo(this.map);
         this.marker.on('dragend', (e) => {
