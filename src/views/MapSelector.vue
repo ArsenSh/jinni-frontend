@@ -613,9 +613,10 @@ export default {
 .map-selector-page.day-mode .leaflet-control-zoom a:first-child{box-shadow:inset 0 -1px 0 rgba(0,0,0,0.08)!important}
 .map-selector-page.day-mode .leaflet-control-zoom a:hover{background:rgba(240,221,170,0.95)!important}
 
-/* Night map chrome — same navy/violet family as RecommendationMap (founder
-   2026-09-07): quiet glass, hairline ring, no bright white rims. */
-.map-selector-page.night-mode .leaflet-control-zoom a{background:rgba(17,25,52,0.62)!important;color:#e8ecf8!important;box-shadow:inset 0 0 0 0.7px rgba(165,192,255,0.16)!important}
+/* Night zoom chrome — exact RecommendationMap night recipe: navy glass,
+   violet-tinged ring + glint, deep hover, no bright white rims. */
+.map-selector-page.night-mode .leaflet-control-zoom{border:none!important;border-radius:12px!important;overflow:hidden;background:rgba(17,25,52,0.62)!important;box-shadow:0 2px 8px rgba(0,0,0,0.14),inset 0 0 0 1px rgba(165,192,255,0.15),inset 0 1px 0 rgba(185,208,255,0.16)!important;backdrop-filter:blur(22px) saturate(180%)!important;-webkit-backdrop-filter:blur(22px) saturate(180%)!important}
+.map-selector-page.night-mode .leaflet-control-zoom a{border:none!important;background:transparent!important;color:#e2e8f0!important;font-weight:700!important;transition:background 0.18s ease!important}
+.map-selector-page.night-mode .leaflet-control-zoom a:first-child{box-shadow:inset 0 -1px 0 rgba(165,192,255,0.15)!important}
 .map-selector-page.night-mode .leaflet-control-zoom a:hover{background:rgba(40,58,108,0.86)!important}
-.map-selector-page.night-mode .leaflet-control-zoom{box-shadow:0 0 16px rgba(0,0,0,0.35)!important}
 </style>
