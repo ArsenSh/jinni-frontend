@@ -144,13 +144,13 @@
                 </svg>
                 <svg v-else width="24" height="90" viewBox="0 0 24 90" fill="rgba(255,255,255,0.34)" stroke="none"><path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
               </button>
-              <!-- Photos / info — revealed on hover (always visible on touch) -->
+              <!-- More + photos — JinniChat rec-card pattern (founder
+                   2026-09-07): centred "More" text pill, 40px photo roundel
+                   bottom-right; revealed on hover, always visible on touch -->
               <div class="ex-card-acts ex-card-acts--bottom" @click.stop>
-                <button class="ex-act" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
-                </button>
-                <button class="ex-act" :title="t('place_info.more_info') || 'More info'" @click="openInfo(p, c)">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <button class="ex-act-more" @click="openInfo(p, c)">{{ t('chat.recommendations.more') || 'More' }}</button>
+                <button class="ex-act ex-act--photo" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
                 </button>
               </div>
             </div>
@@ -861,7 +861,23 @@ export default {
   color: #fff; background: rgba(15,18,30,0.62); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 0 8px rgba(0,0,0,0.28);
   backdrop-filter: blur(8px) saturate(160%); -webkit-backdrop-filter: blur(8px) saturate(160%); transition: background .2s, box-shadow .2s; }
 .ex-act:hover { background: rgba(15,18,30,0.8); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.95), 0 0 8px rgba(0,0,0,0.28); }
-.ex-card-acts--bottom { top: auto; bottom: 10px; }
+.ex-card-acts--bottom { top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; }
+.ex-card-acts--bottom > * { pointer-events: auto; }
+/* "More" — JinniChat's text-action-btn/info-btn recipe, centred on the image
+   (a text-shadow stands in for the chat's dark hover overlay) */
+.ex-act-more { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  padding: 9px 16px; border: none; border-radius: 25px; cursor: pointer; min-width: 80px; text-align: center;
+  font-family: inherit; font-size: 0.8rem; line-height: 1.1; font-weight: 500; color: #fff;
+  background: rgba(255,255,255,0.3); box-shadow: inset 0 0 0 0.6px rgba(255,255,255,0.6);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  backdrop-filter: blur(2px) saturate(160%); -webkit-backdrop-filter: blur(2px) saturate(160%); transition: background .2s, box-shadow .2s; }
+.ex-act-more:hover { background: rgba(255,255,255,0.42); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.9); }
+/* photo roundel — same glass family, 40px, bottom-right */
+.ex-act--photo { position: absolute; right: 10px; bottom: 10px; width: 40px; height: 40px;
+  background: rgba(255,255,255,0.3); box-shadow: inset 0 0 0 0.6px rgba(255,255,255,0.6);
+  backdrop-filter: blur(2px) saturate(160%); -webkit-backdrop-filter: blur(2px) saturate(160%); }
+.ex-act--photo:hover { background: rgba(255,255,255,0.42); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.9); }
+.ex-act--photo svg { filter: drop-shadow(0 1px 1.5px rgba(0,0,0,0.4)); }
 /* Photos / info stay quiet until the pointer is on the card (touch: always shown) */
 @media (hover: hover) and (pointer: fine) {
   .ex-card-acts--bottom { opacity: 0; transition: opacity .2s ease; }
