@@ -227,6 +227,19 @@ export default {
         const initialZoom = (this.selectedCoords.lat === 20 && this.selectedCoords.lng === 0) ? 2 : 13;
         this.map = L.map(this.$refs.mapContainer, {minZoom: 2, maxZoom: 18, worldCopyJump: false, continuousWorld: false, noWrap: true}).setView([this.selectedCoords.lat, this.selectedCoords.lng], initialZoom);
         this.map.attributionControl.remove();
+        // Paint the zoom control inline (founder 2026-09-07: +/- rendered
+        // white in night mode on device despite the CSS overrides — Leaflet's
+        // stylesheet is injected at runtime and can land after ours; inline
+        // styles are immune to load order).
+        this.$nextTick(() => {
+          const night = this.currentTheme === 'night-mode';
+          const bar = this.$refs.mapContainer && this.$refs.mapContainer.querySelector('.leaflet-control-zoom');
+          if (!bar) return;
+          bar.style.cssText += `;border:none;border-radius:12px;overflow:hidden;background:${night ? 'rgba(17,25,52,0.62)' : 'rgba(255,255,255,0.72)'};box-shadow:0 2px 8px rgba(0,0,0,0.14), inset 0 0 0 1px ${night ? 'rgba(165,192,255,0.15)' : 'rgba(0,0,0,0.08)'}, inset 0 1px 0 ${night ? 'rgba(185,208,255,0.16)' : 'rgba(255,255,255,0.85)'};backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%)`;
+          bar.querySelectorAll('a').forEach((el, i) => {
+            el.style.cssText += `;border:none;background:transparent;color:${night ? '#e2e8f0' : '#A0522D'};font-weight:700${i === 0 ? `;box-shadow:inset 0 -1px 0 ${night ? 'rgba(165,192,255,0.15)' : 'rgba(0,0,0,0.08)'}` : ''}`;
+          });
+        });
         const PMTILES_URL = import.meta.env.VITE_PMTILES_URL || '';
         if (PMTILES_URL && window.protomapsL && window.protomapsL.leafletLayer) {
           window.protomapsL.leafletLayer({
