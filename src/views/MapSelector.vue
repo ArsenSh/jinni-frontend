@@ -104,6 +104,25 @@
         <p>{{ $t('map_selector.loading_map') }}</p>
       </div>
     </div>
+
+    <!-- Leave-confirm modal — same glacier recipe as JinniChat's modals
+         (founder 2026-09-07), replacing the native browser confirm(). -->
+    <div v-if="showLeaveModal" class="leave-modal-overlay" @click="showLeaveModal = false">
+      <div class="leave-modal" :class="currentTheme" @click.stop>
+        <div class="leave-modal-icon">
+          <svg width="44" height="44" viewBox="0 2 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="8" x2="12" y2="14"/>
+            <circle cx="12" cy="17.5" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+        <h3>{{ $t('map_selector.unsaved_changes') }}</h3>
+        <div class="leave-modal-actions">
+          <button class="leave-modal-btn leave-modal-btn--stay" @click="showLeaveModal = false">{{ $t('map_selector.stay') }}</button>
+          <button class="leave-modal-btn leave-modal-btn--leave" @click="confirmLeave">{{ $t('map_selector.leave') }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -131,6 +150,7 @@ export default {
       isSearching: false,
       isLoading: true,
       hasChanges: false,
+      showLeaveModal: false,
       searchDebounce: null,
       returnTo: '/chat',
       gpsDenied: false
@@ -460,10 +480,11 @@ export default {
       }
     },
     goBack() {
-      if (this.hasChanges) {
-        const confirmLeave = confirm(this.$t('map_selector.unsaved_changes'));
-        if (!confirmLeave) return;
-      }
+      if (this.hasChanges) { this.showLeaveModal = true; return; }
+      this._navigateBack();
+    },
+    confirmLeave() { this.showLeaveModal = false; this._navigateBack(); },
+    _navigateBack() {
       if (this.returnTo === 'onboarding') { this.$router.push({ path: '/onboarding', query: this._onboardingReturnQuery() }) }
       else { this.$router.push(this.returnTo) }
     },
@@ -624,4 +645,25 @@ export default {
 .map-selector-page.night-mode .leaflet-control-zoom a{border:none!important;background:transparent!important;color:#e2e8f0!important;font-weight:700!important;transition:background 0.18s ease!important}
 .map-selector-page.night-mode .leaflet-control-zoom a:first-child{box-shadow:inset 0 -1px 0 rgba(165,192,255,0.15)!important}
 .map-selector-page.night-mode .leaflet-control-zoom a:hover{background:rgba(40,58,108,0.86)!important}
+
+/* Leave-confirm modal — glacier surfaces copied from JinniChat's
+   session-limit modal (day 74% warm glass, night 62% violet-navy glass). */
+.leave-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px}
+.leave-modal{border-radius:16px;max-width:380px;width:100%;padding:24px 24px 20px;text-align:center}
+.leave-modal.day-mode{background:rgba(255,251,245,0.74);color:#3c2a1e;backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);box-shadow:0 0 30px rgba(0,0,0,0.18),inset 0 0 0 1px rgba(255,255,255,0.45)}
+.leave-modal.night-mode{background:rgba(40,30,62,0.62);color:#e2e8f0;backdrop-filter:blur(30px) saturate(190%);-webkit-backdrop-filter:blur(30px) saturate(190%);box-shadow:inset 0 0 0 1px rgba(167,139,250,0.12),0 0 40px rgba(0,0,0,0.4)}
+.leave-modal-icon{width:72px;height:72px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff}
+.leave-modal.day-mode .leave-modal-icon{background:linear-gradient(135deg,rgba(212,175,55,0.85),rgba(255,140,0,0.85));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3)}
+.leave-modal.night-mode .leave-modal-icon{background:linear-gradient(135deg,rgba(139,92,246,0.7),rgba(168,85,247,0.7));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18)}
+.leave-modal h3{margin:0 0 18px;font-size:1.05rem;font-weight:600;line-height:1.45}
+.leave-modal.day-mode h3{color:#B7791F;font-weight:700}
+.leave-modal.night-mode h3{background:linear-gradient(135deg,#8b5cf6,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700}
+.leave-modal-actions{display:flex;gap:10px}
+.leave-modal-btn{flex:1;padding:11px 14px;border-radius:12px;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:background 0.18s ease,box-shadow 0.18s ease}
+.leave-modal.day-mode .leave-modal-btn--stay{background:linear-gradient(135deg,rgba(212,175,55,0.9),rgba(227,194,94,0.9));color:#fff;box-shadow:0 0 12px -2px rgba(212,175,55,0.5),inset 0 0 0 1px rgba(255,255,255,0.3)}
+.leave-modal.day-mode .leave-modal-btn--leave{background:rgba(255,255,255,0.5);color:#5d4037;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.25)}
+.leave-modal.day-mode .leave-modal-btn--leave:hover{background:rgba(240,221,170,0.6)}
+.leave-modal.night-mode .leave-modal-btn--stay{background:linear-gradient(135deg,rgba(139,92,246,0.85),rgba(168,85,247,0.85));color:#fff;box-shadow:0 0 12px -2px rgba(139,92,246,0.5),inset 0 0 0 1px rgba(255,255,255,0.18)}
+.leave-modal.night-mode .leave-modal-btn--leave{background:rgba(255,255,255,0.07);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25)}
+.leave-modal.night-mode .leave-modal-btn--leave:hover{background:rgba(139,92,246,0.16)}
 </style>

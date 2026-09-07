@@ -481,6 +481,8 @@
     "address": "Adresse :",
     "loading_map": "Chargement de la carte...",
     "unsaved_changes": "Vous avez des modifications non enregistrées. Voulez-vous quitter ?",
+    "stay": "Rester",
+    "leave": "Quitter",
     "my_location_btn": "Utiliser ma position actuelle",
     "gps_denied_banner": "Le GPS est bloqué. Vous pouvez quand même choisir un lieu en appuyant sur la carte ou en faisant une recherche. Pour activer le GPS : Réglages → Confidentialité et sécurité → Services de localisation → Safari → « Lors de l'utilisation ».",
     "gps_denied_alert": "L'accès à la localisation est bloqué. Allez dans Réglages → Confidentialité et sécurité → Services de localisation → Safari et choisissez « Lors de l'utilisation ».",

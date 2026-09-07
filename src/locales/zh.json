@@ -481,6 +481,8 @@
     "address": "地址：",
     "loading_map": "正在加载地图...",
     "unsaved_changes": "您有未保存的更改。您想离开吗？",
+    "stay": "留下",
+    "leave": "离开",
     "my_location_btn": "使用我的当前位置",
     "gps_denied_banner": "GPS 已被禁止。您仍可通过点击地图或搜索来选择任意位置。要启用 GPS：设置 → 隐私与安全性 → 定位服务 → Safari → 「使用应用期间」。",
     "gps_denied_alert": "位置访问已被禁止。请前往 设置 → 隐私与安全性 → 定位服务 → Safari，并选择「使用应用期间」。",

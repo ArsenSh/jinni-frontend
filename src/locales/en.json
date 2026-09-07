@@ -481,6 +481,8 @@
     "address": "Address:",
     "loading_map": "Loading map...",
     "unsaved_changes": "You have unsaved changes. Do you want to leave?",
+    "stay": "Stay",
+    "leave": "Leave",
     "my_location_btn": "Use my current location",
     "gps_denied_banner": "GPS access is blocked. You can still pick any location by tapping the map or searching above. To enable GPS, go to Settings → Privacy & Security → Location Services → Safari → set to \"While Using\".",
     "gps_denied_alert": "Location access is blocked. Go to Settings → Privacy & Security → Location Services → Safari and set it to \"While Using\".",
