@@ -144,7 +144,7 @@
           <div class="preference-section active">
             <div class="card">
               <div class="section-header">
-                <h3>{{ locationMode === 'destination' && preferences.destination.city ? `${preferences.destination.city}, ${preferences.destination.countryName}` : $t('onboarding.location_title') }}</h3>
+                <h3>{{ locationMode === 'destination' && preferences.destination.city ? `${preferences.destination.city}, ${preferences.destination.countryName}` : (locationMode === 'gps' && gpsCity ? `📍 ${gpsCity}` : $t('onboarding.location_title')) }}</h3>
                 <p class="section-description">{{ $t('onboarding.location_desc') }}</p>
               </div>
               <div v-if="marketNotice" class="market-notice" :class="{ 'market-notice--blocked': marketBlocked }">{{ marketNotice }}</div>
@@ -171,11 +171,11 @@
                   type="button" 
                   @click="activateLocationMode('gps')" 
                   class="mode-btn" 
-                  :class="{ 'active': locationMode === 'gps', 'disabled': !hasLocationPermission }"
+                  :class="{ 'active': locationMode === 'gps', 'disabled': !hasLocationPermission, 'mode-btn--flash': gpsFlash }"
                   :disabled="!hasLocationPermission"
                   :title="locationDenied ? $t('onboarding.location_denied_btn_title') : (!hasLocationPermission ? $t('onboarding.location_permission_required') : '')"
                 >
-                  <span>{{ $t('onboarding.use_current_location') }}</span>
+                  <span>{{ locationMode === 'gps' ? '✓ ' : '' }}{{ $t('onboarding.use_current_location') }}<template v-if="gpsDetecting">…</template></span>
                 </button>
                 <button
                   v-if="isDesktop"
@@ -184,7 +184,7 @@
                   :class="{ 'active': locationMode === 'destination' }"
                   class="mode-btn destination-btn"
                 >
-                  <span>{{ $t('onboarding.choose_destination') }}</span>
+                  <span>{{ locationMode === 'destination' ? '✓ ' : '' }}{{ $t('onboarding.choose_destination') }}</span>
                 </button>
                 <button
                   v-else
@@ -193,9 +193,12 @@
                   :class="{ 'active': locationMode === 'destination' }"
                   class="mode-btn destination-btn"
                 >
-                  <span>{{ $t('onboarding.select_on_map') }}</span>
+                  <span>{{ locationMode === 'destination' ? '✓ ' : '' }}{{ $t('onboarding.select_on_map') }}</span>
                 </button>
               </div>
+              <transition name="fade">
+                <p v-if="gpsFlash && locationMode === 'gps'" class="gps-confirm">✓ {{ gpsCity ? `${$t('onboarding.gps_confirmed')} · ${gpsCity}` : $t('onboarding.gps_confirmed') }}</p>
+              </transition>
               <transition name="expand">
                 <div v-if="locationMode === 'destination' && isDesktop" class="destination-selection" :key="locationMode">
                   <div v-if="isDesktop" class="desktop-location-section">
@@ -445,6 +448,9 @@ export default {
       countrySearch: '',
       citySearch: '',
       locationMode: 'gps',
+      gpsCity: '',
+      gpsDetecting: false,
+      gpsFlash: false,
       permissionGranted: false,
       locationDenied: false
     }
@@ -708,9 +714,40 @@ export default {
       if (charCode > 31 && (charCode < 48 || charCode > 57)) { event.preventDefault() }
     },
     handleGPSToggle() { this.activateLocationMode(this.preferences.useGPS ? 'gps' : 'destination') },
+    // Detect + show the user's CITY the moment GPS mode is chosen — proof the
+    // button worked (mirrors how destination mode shows its chosen city).
+    // Nominatim, same source MapSelector already uses; failures stay silent
+    // (the ✓ state still answers the tap).
+    refreshGpsCity(flash = true) {
+      if (!this.hasLocationPermission || this.gpsDetecting || !navigator.geolocation) return;
+      this._gpsWantFlash = flash;
+      this.gpsDetecting = true;
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const lang = (this.$i18n && this.$i18n.locale) || 'en';
+          const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=${lang}`);
+          const d = await r.json();
+          const a = (d && d.address) || {};
+          this.gpsCity = a.city || a.town || a.village || a.municipality || a.state || '';
+        } catch (e) { /* keep whatever we had */ }
+        this.gpsDetecting = false;
+        if (this._gpsWantFlash) this.flashGpsConfirm();
+      }, () => { this.gpsDetecting = false; if (this._gpsWantFlash) this.flashGpsConfirm(); }, { timeout: 8000, maximumAge: 300000 });
+    },
+    flashGpsConfirm() {
+      this.gpsFlash = false;
+      clearTimeout(this._gpsFlashTimer);
+      requestAnimationFrame(() => { this.gpsFlash = true; });
+      this._gpsFlashTimer = setTimeout(() => { this.gpsFlash = false; }, 1800);
+    },
     activateLocationMode(mode) {
+      // Tapping the ALREADY-active GPS button used to do nothing visible —
+      // users tapped it endlessly (founder 2026-09-07). Now every tap
+      // answers: re-detect the city, pulse the button, flash a confirm line.
+      if (mode === 'gps' && this.locationMode === 'gps') { this.refreshGpsCity(); return; }
       this.locationMode = mode;
       if (mode === 'gps') {
+        this.refreshGpsCity();
         this.preferences.useGPS = true;
         this.preferences.destination = {city: '', country: '', countryName: '', coordinates: { lat: 0, lng: 0 }};
         this.closeCountryDropdown();
@@ -889,6 +926,9 @@ export default {
   },
   mounted() {
     this.checkScreenSize();
+    // Arriving in GPS mode: show the detected city immediately (silent — no
+    // confirm flash), so the state is self-evident before any tap.
+    this.$nextTick(() => { if (this.locationMode === 'gps' && this.hasLocationPermission) this.refreshGpsCity(false); });
     /* Named + stored so beforeUnmount can remove it — previously this listener
        leaked and kept firing on other pages (including /map-selector). */
     this._outsideClickHandler = (event) => {
@@ -1129,4 +1169,12 @@ export default {
 .night-mode ::-webkit-scrollbar-track{background:rgba(139,92,246,0.12);border-radius:8px}
 .night-mode ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#8b5cf6,#a855f7);border-radius:8px;border:2px solid transparent;background-clip:padding-box}
 .night-mode ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#7c3aed,#9333ea);background-clip:padding-box}
+
+/* GPS-tap acknowledgment (founder 2026-09-07): light/color only, no motion */
+.gps-confirm{margin:8px 2px 0;font-size:0.82rem;color:#1e7d4a;opacity:0.9}
+.night-mode .gps-confirm,[data-theme="night"] .gps-confirm{color:#9fe8bb}
+.mode-btn--flash{animation:gps-glow 1.2s ease-out}
+@keyframes gps-glow{0%{box-shadow:0 0 0 0 rgba(212,175,55,0.55)}100%{box-shadow:0 0 14px 6px rgba(212,175,55,0)}}
+.fade-enter-active,.fade-leave-active{transition:opacity 0.3s ease}
+.fade-enter-from,.fade-leave-to{opacity:0}
 </style>

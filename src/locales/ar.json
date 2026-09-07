@@ -385,6 +385,7 @@
     "location_permission_grant": "السماح",
     "location_desc": "اختر موقعك الحالي أو يمكنك اختيار وجهة",
     "use_current_location": "موقعي",
+    "gps_confirmed": "يتم استخدام موقعك",
     "choose_destination": "اختر الوجهة",
     "select_destination": "اختر الوجهة على الخريطة",
     "country": "البلد",

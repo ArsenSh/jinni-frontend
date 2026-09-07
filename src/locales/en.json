@@ -385,6 +385,7 @@
     "location_permission_grant": "Permit",
     "location_desc": "Select your current location or you can choose destination",
     "use_current_location": "My Location",
+    "gps_confirmed": "Using your location",
     "choose_destination": "Choose Destination",
     "select_destination": "Select Destination on Map",
     "country": "Country",

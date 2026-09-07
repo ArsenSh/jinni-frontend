@@ -385,6 +385,7 @@
     "location_permission_grant": "授权",
     "location_desc": "选择您的当前位置，或选择目的地",
     "use_current_location": "我的位置",
+    "gps_confirmed": "正在使用你的位置",
     "choose_destination": "选择目的地",
     "select_destination": "在地图上选择目的地",
     "country": "国家",

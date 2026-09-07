@@ -207,8 +207,18 @@ export default {
         const initialZoom = (this.selectedCoords.lat === 20 && this.selectedCoords.lng === 0) ? 2 : 13;
         this.map = L.map(this.$refs.mapContainer, {minZoom: 2, maxZoom: 18, worldCopyJump: false, continuousWorld: false, noWrap: true}).setView([this.selectedCoords.lat, this.selectedCoords.lng], initialZoom);
         this.map.attributionControl.remove();
-        const tileUrl = this.currentTheme === 'night-mode' ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-        L.tileLayer(tileUrl, {attribution: '',subdomains: 'abcd',maxZoom: 19,detectRetina: true, noWrap: true}).addTo(this.map);        
+        const PMTILES_URL = import.meta.env.VITE_PMTILES_URL || '';
+        if (PMTILES_URL && window.protomapsL && window.protomapsL.leafletLayer) {
+          window.protomapsL.leafletLayer({
+            url: PMTILES_URL,
+            flavor: this.currentTheme === 'night-mode' ? 'dark' : 'light',
+            lang: this.mapLang(),
+            attribution: '',
+          }).addTo(this.map);
+        } else {
+          const tileUrl = this.currentTheme === 'night-mode' ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+          L.tileLayer(tileUrl, {attribution: '',subdomains: 'abcd',maxZoom: 19,detectRetina: true, noWrap: true}).addTo(this.map);
+        }        
         const customIcon = L.divIcon({
           className: 'custom-marker',
           html: `
@@ -275,18 +285,45 @@ export default {
       }
     },
     async loadLeaflet() {
-      if (window.L) return window.L;
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.onload = () => resolve(window.L);
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
+      // Same stack as RecommendationMap (founder 2026-09-07: "change to that
+      // recommendation map"): Leaflet + protomaps-leaflet rendering OUR
+      // self-hosted .pmtiles — no third-party tile service, night flavor
+      // matches the chat maps. Falls back to CARTO raster when the env var
+      // is unset (dev without tiles).
+      const PMTILES_URL = import.meta.env.VITE_PMTILES_URL || '';
+      if (window.L && (!PMTILES_URL || window.protomapsL)) return window.L;
+      if (!window.L) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      if (PMTILES_URL && !window.protomapsL) {
+        await new Promise((resolve) => {
+          const pm = document.createElement('script');
+          pm.src = 'https://unpkg.com/protomaps-leaflet@5/dist/protomaps-leaflet.js';
+          pm.onload = resolve;
+          pm.onerror = resolve; // CARTO fallback below still works
+          document.head.appendChild(pm);
+        });
+      }
+      return window.L;
+    },
+    // Map-label language follows the Settings language (same whitelist as
+    // RecommendationMap.mapLang) — protomaps renders labels client-side.
+    mapLang() {
+      try {
+        const l = String(JSON.parse(localStorage.getItem('jinni_settings') || '{}').language || '').slice(0, 2);
+        if (['en','ru','hy','fr','zh','ar','es','de','it','el'].includes(l)) return l;
+      } catch (e) { /* settings must never break the map */ }
+      return 'en';
     },
     updateLocation(lat, lng) {
       this.selectedCoords = { lat, lng };
@@ -568,4 +605,10 @@ export default {
 @keyframes pulse{0%{transform:translate(-50%,-50%) scale(0.8);opacity:1}100%{transform:translate(-50%,-50%) scale(1.5);opacity:0}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:768px){.map-header{padding:10px 14px}.my-location-btn{width:32px;height:32px}.map-header h1{font-size:15px}.back-btn,.confirm-btn{padding:0 10px;font-size:12px;min-height:32px}.back-btn svg,.confirm-btn svg{width:16px;height:16px}.search-container{padding:12px 16px}.panel-content{padding:16px}.info-value{font-size:13px}}
+
+/* Night map chrome — same navy/violet family as RecommendationMap (founder
+   2026-09-07): quiet glass, hairline ring, no bright white rims. */
+.map-selector-page.night-mode .leaflet-control-zoom a{background:rgba(17,25,52,0.62)!important;color:#e8ecf8!important;box-shadow:inset 0 0 0 0.7px rgba(165,192,255,0.16)!important}
+.map-selector-page.night-mode .leaflet-control-zoom a:hover{background:rgba(40,58,108,0.86)!important}
+.map-selector-page.night-mode .leaflet-control-zoom{box-shadow:0 0 16px rgba(0,0,0,0.35)!important}
 </style>

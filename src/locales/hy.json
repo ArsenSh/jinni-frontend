@@ -385,6 +385,7 @@
     "location_permission_grant": "Թույլատրել",
     "location_desc": "Օգնեք մեզ գտնել մոտակա տեսարժան վայրերը և փորձառությունները",
     "use_current_location": "Օգտագործել ընթացիկ տեղակայությունը",
+    "gps_confirmed": "Օգտագործում ենք ձեր դիրքը",
     "choose_destination": "Ընտրել ուղղությունը",
     "select_destination": "Ընտրել ուղղությունը քարտեզի վրա",
     "country": "Երկիր",

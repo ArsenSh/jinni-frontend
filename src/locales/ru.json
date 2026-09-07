@@ -385,6 +385,7 @@
     "location_permission_grant": "Разрешить",
     "location_desc": "Выберите текущую локацию или выберите пункт назначения",
     "use_current_location": "Моя локация",
+    "gps_confirmed": "Используем вашу геолокацию",
     "choose_destination": "Выбрать пункт назначения",
     "select_destination": "Выбрать пункт назначения на карте",
     "country": "Страна",
