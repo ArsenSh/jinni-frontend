@@ -913,20 +913,20 @@ export default {
 .ex-rail-wrap { position: relative; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-wrap { padding: 0 48px; } }
 /* Same glass recipe as the chat cards' "More" button. */
-/* Rail paddles (founder 2026-09-07: "more 2027 like") — tall frosted
-   blades at the rail edges, visionOS-style: deep blur, hairline accent
-   ring + top glint, accent chevron, light-only hover. */
-.ex-rail-btn { position: absolute; top: 102px; z-index: 5; width: 32px; height: 72px; border-radius: 18px; cursor: pointer;
+/* Rail squircles (founder's pick C, 2026-09-07 fitting): 42px rounded
+   squares in the app's 14px corner vocabulary — strongest glass of the
+   set, accent chevron, glow-only hover. */
+.ex-rail-btn { position: absolute; top: 117px; z-index: 5; width: 42px; height: 42px; border-radius: 14px; cursor: pointer;
   display: none; place-items: center; border: none; transition: background .18s, box-shadow .18s;
   backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); }
-.day-mode .ex-rail-btn { background: rgba(255,251,240,0.6); color: #A0522D;
-  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.26), inset 0 1px 0 rgba(255,255,255,0.85), 0 0 14px -2px rgba(212,175,55,0.35); }
-.day-mode .ex-rail-btn:hover { background: rgba(240,221,170,0.72);
-  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.42), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 16px -2px rgba(212,175,55,0.5); }
-.night-mode .ex-rail-btn { background: rgba(17,25,52,0.58); color: #c9b3f5;
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.32), inset 0 1px 0 rgba(185,208,255,0.2), 0 0 14px -2px rgba(139,92,246,0.4); }
-.night-mode .ex-rail-btn:hover { background: rgba(139,92,246,0.22);
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.5), inset 0 1px 0 rgba(185,208,255,0.24), 0 0 16px -2px rgba(139,92,246,0.55); }
+.day-mode .ex-rail-btn { background: rgba(255,251,240,0.78); color: #A0522D;
+  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.3), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 12px -2px rgba(212,175,55,0.4); }
+.day-mode .ex-rail-btn:hover { background: rgba(240,221,170,0.85);
+  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.45), inset 0 1px 0 rgba(255,255,255,0.95), 0 0 16px -2px rgba(212,175,55,0.55); }
+.night-mode .ex-rail-btn { background: rgba(17,25,52,0.78); color: #c9b3f5;
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.38), inset 0 1px 0 rgba(185,208,255,0.22), 0 0 12px -2px rgba(139,92,246,0.45); }
+.night-mode .ex-rail-btn:hover { background: rgba(139,92,246,0.26);
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.55), inset 0 1px 0 rgba(185,208,255,0.26), 0 0 16px -2px rgba(139,92,246,0.6); }
 .ex-rail-btn--prev { left: 6px; }
 .ex-rail-btn--next { right: 6px; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
