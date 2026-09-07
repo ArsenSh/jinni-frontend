@@ -155,6 +155,14 @@
             <span class="ex-rail-thumb" :style="railBar[c] ? { width: railBar[c].w, left: railBar[c].x } : {}"></span>
           </div>
         </div>
+        <!-- iPhone-style position dots (founder 2026-09-07) — mobile only;
+             desktop keeps the arrows + slim thumb. Same pattern as the
+             itinerary chooser dots. -->
+        <div v-if="(categories[c] || []).length > 1 && categories[c].length <= 24" class="ex-dots">
+          <button v-for="(d, di) in categories[c].length" :key="di" type="button" class="ex-dot"
+                  :class="{ 'is-on': (railIx[c] || 0) === di }"
+                  :aria-label="`${di + 1} / ${categories[c].length}`" @click.stop="goToRailCard(c, di)"></button>
+        </div>
       </section>
     </template>
 
@@ -314,6 +322,7 @@ export default {
       catEls: {},
       railEls: {},
       chipEls: {},
+      railIx: {},
       railBar: {},          // per-category scroll indicator state { w, x, on }
       _railTimers: {},
       theme: 'night-mode',
@@ -489,6 +498,15 @@ export default {
     onRailScroll(c, e) {
       const el = e.target;
       if (!el || el.scrollWidth <= el.clientWidth) return;
+      // Nearest-centre card index for the dots (itinerary-chooser pattern).
+      const mid = el.scrollLeft + el.clientWidth / 2;
+      let best = 0, bestD = Infinity;
+      for (let i = 0; i < el.children.length; i++) {
+        const ch = el.children[i];
+        const d = Math.abs(ch.offsetLeft + ch.offsetWidth / 2 - mid);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      if (this.railIx[c] !== best) this.railIx = { ...this.railIx, [c]: best };
       const w = Math.max((el.clientWidth / el.scrollWidth) * 100, 8);
       const x = (el.scrollLeft / el.scrollWidth) * 100;
       this.railBar = { ...this.railBar, [c]: { w: w + '%', x: x + '%', on: true } };
@@ -496,6 +514,12 @@ export default {
       this._railTimers[c] = setTimeout(() => {
         if (this.railBar[c]) this.railBar = { ...this.railBar, [c]: { ...this.railBar[c], on: false } };
       }, 1000);
+    },
+    goToRailCard(c, i) {
+      const el = this.railEls[c];
+      const ch = el && el.children[i];
+      if (!el || !ch) return;
+      el.scrollTo({ left: Math.max(0, ch.offsetLeft - (el.clientWidth - ch.offsetWidth) / 2), behavior: 'smooth' });
     },
     // Desktop rail paging — one "page" of cards per click.
     scrollRail(c, dir) {
@@ -774,10 +798,12 @@ export default {
 /* Card actions — the chat's glacier glass (text-action-btn.info-btn recipe):
    translucent white glass with a hairline inset ring, on the image. */
 .ex-card-acts { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
-.ex-act { width: 31px; height: 31px; border-radius: 999px; border: none; cursor: pointer; display: grid; place-items: center;
-  color: #fff; background: rgba(255,255,255,0.3); box-shadow: inset 0 0 0 0.6px rgba(255,255,255,0.6);
-  backdrop-filter: blur(2px) saturate(160%); -webkit-backdrop-filter: blur(2px) saturate(160%); transition: background .2s, box-shadow .2s; }
-.ex-act:hover { background: rgba(255,255,255,0.42); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.9); }
+.ex-act { width: 34px; height: 34px; border-radius: 999px; border: none; cursor: pointer; display: grid; place-items: center;
+  /* Dark glass (founder 2026-09-07: buttons were invisible on bright photos):
+     a scrim-toned fill reads on ANY image, white glyph, crisp hairline. */
+  color: #fff; background: rgba(15,18,30,0.62); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 0 8px rgba(0,0,0,0.28);
+  backdrop-filter: blur(8px) saturate(160%); -webkit-backdrop-filter: blur(8px) saturate(160%); transition: background .2s, box-shadow .2s; }
+.ex-act:hover { background: rgba(15,18,30,0.8); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.95), 0 0 8px rgba(0,0,0,0.28); }
 .ex-card-acts--bottom { top: auto; bottom: 10px; }
 /* Photos / info stay quiet until the pointer is on the card (touch: always shown) */
 @media (hover: hover) and (pointer: fine) {
@@ -1011,4 +1037,14 @@ export default {
   .ex-gallery-nav--prev { left: 10px; }
   .ex-gallery-nav--next { right: 10px; }
 }
+
+/* Rail position dots — iPhone-home pattern, mobile only */
+.ex-dots { display: none; align-items: center; justify-content: center; gap: 6px; margin: 10px 0 2px; }
+@media (max-width: 768px) { .ex-dots { display: flex; } }
+.ex-dot { position: relative; width: 6px; height: 6px; padding: 0; border: none; border-radius: 99px; cursor: pointer;
+  background: #b09679; opacity: 0.45; transition: width 0.28s ease, opacity 0.28s ease, background 0.28s ease; }
+.ex-dot::before { content: ''; position: absolute; inset: -9px -5px; }
+.ex-dot.is-on { width: 18px; opacity: 1; background: #D4AF37; }
+.explore.night-mode .ex-dot { background: rgba(226,232,240,0.55); }
+.explore.night-mode .ex-dot.is-on { background: #c084fc; }
 </style>
