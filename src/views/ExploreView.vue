@@ -176,6 +176,29 @@
                   :aria-label="`${di} / ${dotCount(c)}`" @click.stop="goToDot(c, di - 1)"></button>
         </div>
       </section>
+
+      <!-- Footer (founder 2026-09-07): close the loop — sign-off in Jinni's
+           voice, hand back to the genie, tiny legal row. -->
+      <footer class="ex-footer">
+        <div class="ex-footer-divider" aria-hidden="true">
+          <span class="ex-fd-line"></span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
+          <span class="ex-fd-line"></span>
+        </div>
+        <p class="ex-footer-line">{{ t('explore.footer_line') || 'Jinni keeps discovering — this page grows as you explore' }}</p>
+        <p class="ex-footer-ask">{{ t('explore.footer_ask') || "Didn't find what you were looking for?" }}</p>
+        <button class="ex-footer-cta" @click="goChat">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          {{ t('explore.ask_chat') || 'Ask Jinni' }}
+        </button>
+        <div class="ex-footer-links">
+          <router-link to="/contact">{{ t('chat.profile.contact_us') || 'Contact' }}</router-link>
+          <span>·</span>
+          <router-link to="/terms">{{ t('explore.terms') || 'Terms' }}</router-link>
+          <span>·</span>
+          <router-link to="/privacy">{{ t('explore.privacy') || 'Privacy' }}</router-link>
+        </div>
+      </footer>
     </template>
 
     <!-- ═══ Fullscreen gallery ═══ -->
@@ -1156,4 +1179,23 @@ export default {
 .explore.night-mode .ex-pref-chip--style { color: #d9c2f7; background: rgba(139,92,246,0.16); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.45); }
 .ex-pref-chip--interest { background: rgba(255,255,255,0.5); color: #7a5c3e; box-shadow: inset 0 0 0 1px rgba(160,82,45,0.22); }
 .explore.night-mode .ex-pref-chip--interest { background: rgba(255,255,255,0.06); color: #cdc3ea; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.25); }
+
+/* Footer — quiet sign-off, genie hand-back, muted legal row */
+.ex-footer { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 18px 44px; text-align: center; }
+.ex-footer-divider { display: flex; align-items: center; gap: 12px; width: min(340px, 70%); color: #b8862c; opacity: 0.8; margin-bottom: 8px; }
+.explore.night-mode .ex-footer-divider { color: #c084fc; }
+.ex-fd-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, currentColor); opacity: 0.4; }
+.ex-fd-line:last-child { background: linear-gradient(90deg, currentColor, transparent); }
+.ex-footer-line { margin: 0; font-size: 0.86rem; color: var(--ex-text); opacity: 0.75; max-width: 46ch; }
+.ex-footer-ask { margin: 8px 0 0; font-size: 0.92rem; font-weight: 600; color: var(--ex-text); }
+.ex-footer-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; padding: 11px 26px; border-radius: 999px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 0.92rem; font-weight: 700; color: #A0522D; background: rgba(255,255,255,0.55);
+  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.35), 0 0 10px -2px rgba(212,175,55,0.35);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
+.ex-footer-cta:hover { background: rgba(240,221,170,0.6); }
+.explore.night-mode .ex-footer-cta { color: #d9c2f7; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.4), 0 0 10px -2px rgba(139,92,246,0.4); }
+.explore.night-mode .ex-footer-cta:hover { background: rgba(139,92,246,0.18); }
+.ex-footer-links { display: flex; gap: 10px; margin-top: 16px; font-size: 0.76rem; opacity: 0.55; }
+.ex-footer-links a { color: inherit; text-decoration: none; }
+.ex-footer-links a:hover { text-decoration: underline; }
 </style>

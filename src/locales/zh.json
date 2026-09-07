@@ -1100,6 +1100,10 @@
   },
   "explore": {
     "based_on": "根据你的偏好精选",
+    "footer_line": "Jinni 一直在探索 — 这个页面会随你的旅程成长",
+    "footer_ask": "没找到想要的？",
+    "terms": "条款",
+    "privacy": "隐私",
     "title": "Jinni 的探索",
     "intro": "以下是 Jinni 目前在这里发现的地点，列表仍在不断丰富。",
     "preferences": "偏好设置",

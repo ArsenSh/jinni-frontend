@@ -1100,6 +1100,10 @@
   },
   "explore": {
     "based_on": "Sélectionné selon vos préférences",
+    "footer_line": "Jinni continue de découvrir — cette page grandit avec vos voyages",
+    "footer_ask": "Vous n'avez pas trouvé ?",
+    "terms": "Conditions",
+    "privacy": "Confidentialité",
     "title": "Découvertes de Jinni",
     "intro": "Les lieux que Jinni a découverts ici jusqu'à présent — la liste s'enrichit en continu.",
     "preferences": "Préférences",
