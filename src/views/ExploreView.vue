@@ -16,11 +16,12 @@
       <!-- The onboarding choices, visible (founder 2026-09-07): the page is
            personalized — say so. Location mode + style + interests as chips. -->
       <div v-if="prefChips.length" class="ex-pref-row">
-        <span class="ex-pref-lead">{{ t('explore.based_on') || 'Curated to your taste' }}</span>
-        <span v-for="(ch, i) in prefChips" :key="i" class="ex-pref-chip">
-          <svg v-if="ch.icon === 'gps'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-          <svg v-else-if="ch.icon === 'pin'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          {{ ch.label }}
+        <span class="ex-pref-lead">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
+          {{ t('explore.based_on') || 'Curated to your taste' }}
+        </span>
+        <span v-for="(ch, i) in prefChips" :key="i" class="ex-pref-chip" :class="'ex-pref-chip--' + ch.kind">
+          <span class="ex-pref-ic" v-html="prefIcon(ch.icon)"></span>{{ ch.label }}
         </span>
       </div>
       <!-- No back arrow: "Meet Jinni" is an invitation, not a return trip.
@@ -314,6 +315,26 @@ import { isNightTime } from '../utils/timeUtils';
 
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || '';
 
+// Mini glyphs for the preference chips — stroke icons in the app's icon
+// voice, keyed by the same ids onboarding stores (style + interest keys).
+const PREF_SVG = (inner) => `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+const PREF_ICONS = {
+  gps: PREF_SVG('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'),
+  pin: PREF_SVG('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
+  luxury: PREF_SVG('<path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20M12 3L8 9l4 12 4-12-4-6"/>'),
+  budget: PREF_SVG('<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>'),
+  family: PREF_SVG('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'),
+  romantic: PREF_SVG('<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'),
+  nature: PREF_SVG('<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>'),
+  adventure: PREF_SVG('<path d="M8 3l4 8 5-5 5 15H2L8 3z"/>'),
+  cultural: PREF_SVG('<path d="M3 22h18M6 18v-7M10 18v-7M14 18v-7M18 18v-7M12 2L2 9h20L12 2z"/>'),
+  history: PREF_SVG('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'),
+  art: PREF_SVG('<path d="M12 22a10 10 0 1 1 10-10c0 1.66-1.34 3-3 3h-2a2 2 0 0 0-2 2c0 .5.2.95.5 1.3.3.35.5.8.5 1.3a2.4 2.4 0 0 1-2.4 2.4z"/><circle cx="7.5" cy="10.5" r="0.8"/><circle cx="12" cy="7.5" r="0.8"/><circle cx="16.5" cy="10.5" r="0.8"/>'),
+  food_drink: PREF_SVG('<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>'),
+  nightlife: PREF_SVG('<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'),
+  relaxation: PREF_SVG('<path d="M3 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>'),
+};
+
 const CAT_LABELS = {
   restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical sites',
   events: 'Events', photo_spots: 'Photo spots', hidden_gems: 'Hidden gems', shopping: 'Shops',
@@ -358,12 +379,12 @@ export default {
         const u = JSON.parse(localStorage.getItem('user') || '{}');
         const p = u.preferences || {};
         const chips = [];
-        if (p.useGPS) chips.push({ icon: 'gps', label: this.t('onboarding.use_current_location') || 'My location' });
-        else if (p.destination && p.destination.city) chips.push({ icon: 'pin', label: p.destination.city });
-        if (p.travelStyle) { const s = this.t(`onboarding.styles.${p.travelStyle}`); if (s) chips.push({ label: s }); }
+        if (p.useGPS) chips.push({ kind: 'loc', icon: 'gps', label: this.t('onboarding.use_current_location') || 'My location' });
+        else if (p.destination && p.destination.city) chips.push({ kind: 'loc', icon: 'pin', label: p.destination.city });
+        if (p.travelStyle) { const s = this.t(`onboarding.styles.${p.travelStyle}`); if (s) chips.push({ kind: 'style', icon: p.travelStyle, label: s }); }
         (Array.isArray(p.interests) ? p.interests : []).slice(0, 5).forEach((k) => {
           const l = this.t(`onboarding.interests.${k}`);
-          if (l) chips.push({ label: l });
+          if (l) chips.push({ kind: 'interest', icon: k, label: l });
         });
         return chips;
       } catch (e) { return []; }
@@ -543,6 +564,7 @@ export default {
         if (this.railBar[c]) this.railBar = { ...this.railBar, [c]: { ...this.railBar[c], on: false } };
       }, 1000);
     },
+    prefIcon(name) { return PREF_ICONS[name] || ''; },
     goToRailCard(c, i) {
       const el = this.railEls[c];
       const ch = el && el.children[i];
@@ -1076,11 +1098,19 @@ export default {
 .explore.night-mode .ex-dot { background: rgba(226,232,240,0.55); }
 .explore.night-mode .ex-dot.is-on { background: #c084fc; }
 
-/* Preference chips under the intro — quiet glass, theme accents */
-.ex-pref-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 10px auto 0; max-width: 720px; padding: 0 16px; }
-.ex-pref-lead { font-size: 0.78rem; opacity: 0.65; margin-right: 2px; }
-.ex-pref-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.76rem; padding: 4px 10px; border-radius: 999px;
-  background: rgba(255,255,255,0.5); color: #7a5c3e; box-shadow: inset 0 0 0 1px rgba(160,82,45,0.22); }
-.explore.night-mode .ex-pref-chip { background: rgba(255,255,255,0.06); color: #cdc3ea; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.25); }
-.explore.night-mode .ex-pref-lead { color: #a8a0c4; }
+/* Preference chips — three families so location / style / interests read
+   apart at a glance: location = accent-filled anchor, style = tinted accent
+   outline, interests = quiet glass with per-interest glyphs. */
+.ex-pref-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px; margin: 12px auto 0; max-width: 720px; padding: 0 16px; }
+.ex-pref-lead { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; opacity: 0.7; margin-right: 3px; color: #A0522D; }
+.explore.night-mode .ex-pref-lead { color: #c084fc; opacity: 0.85; }
+.ex-pref-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; padding: 5px 11px; border-radius: 999px; }
+.ex-pref-ic { display: inline-flex; }
+.ex-pref-ic svg { display: block; }
+.ex-pref-chip--loc { color: #fff; background: linear-gradient(135deg, rgba(212,175,55,0.92), rgba(184,116,44,0.92)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35), 0 0 10px -2px rgba(212,175,55,0.5); font-weight: 600; }
+.explore.night-mode .ex-pref-chip--loc { background: linear-gradient(135deg, rgba(139,92,246,0.9), rgba(168,85,247,0.9)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.22), 0 0 10px -2px rgba(139,92,246,0.55); }
+.ex-pref-chip--style { color: #8b5e1a; background: rgba(212,175,55,0.14); box-shadow: inset 0 0 0 1px rgba(184,116,44,0.4); font-weight: 600; }
+.explore.night-mode .ex-pref-chip--style { color: #d9c2f7; background: rgba(139,92,246,0.16); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.45); }
+.ex-pref-chip--interest { background: rgba(255,255,255,0.5); color: #7a5c3e; box-shadow: inset 0 0 0 1px rgba(160,82,45,0.22); }
+.explore.night-mode .ex-pref-chip--interest { background: rgba(255,255,255,0.06); color: #cdc3ea; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.25); }
 </style>
