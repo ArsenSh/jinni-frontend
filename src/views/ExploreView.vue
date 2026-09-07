@@ -170,10 +170,10 @@
         <!-- iPhone-style position dots (founder 2026-09-07) — mobile only;
              desktop keeps the arrows + slim thumb. Same pattern as the
              itinerary chooser dots. -->
-        <div v-if="(categories[c] || []).length > 1 && categories[c].length <= 24" class="ex-dots">
-          <button v-for="(d, di) in categories[c].length" :key="di" type="button" class="ex-dot"
-                  :class="{ 'is-on': (railIx[c] || 0) === di }"
-                  :aria-label="`${di + 1} / ${categories[c].length}`" @click.stop="goToRailCard(c, di)"></button>
+        <div v-if="(categories[c] || []).length > 1" class="ex-dots">
+          <button v-for="di in dotCount(c)" :key="di" type="button" class="ex-dot"
+                  :class="{ 'is-on': activeDot(c) === di - 1 }"
+                  :aria-label="`${di} / ${dotCount(c)}`" @click.stop="goToDot(c, di - 1)"></button>
         </div>
       </section>
     </template>
@@ -566,6 +566,17 @@ export default {
       }, 1000);
     },
     prefIcon(name) { return PREF_ICONS[name] || ''; },
+    // Long rails compress into 12 proportional page-dots (30 dots would wrap);
+    // short rails keep one dot per card.
+    dotCount(c) { const n = (this.categories[c] || []).length; return n <= 14 ? n : 12; },
+    activeDot(c) {
+      const n = (this.categories[c] || []).length, d = this.dotCount(c), ix = this.railIx[c] || 0;
+      return d === n ? ix : Math.round(ix / Math.max(1, n - 1) * (d - 1));
+    },
+    goToDot(c, di) {
+      const n = (this.categories[c] || []).length, d = this.dotCount(c);
+      this.goToRailCard(c, d === n ? di : Math.round(di / Math.max(1, d - 1) * (n - 1)));
+    },
     goToRailCard(c, i) {
       const el = this.railEls[c];
       const ch = el && el.children[i];
@@ -916,17 +927,17 @@ export default {
 /* Rail squircles (founder's pick C, 2026-09-07 fitting): 42px rounded
    squares in the app's 14px corner vocabulary — strongest glass of the
    set, accent chevron, glow-only hover. */
-.ex-rail-btn { position: absolute; top: 117px; z-index: 5; width: 42px; height: 42px; border-radius: 14px; cursor: pointer;
+.ex-rail-btn { position: absolute; top: 131px; z-index: 5; width: 42px; height: 42px; border-radius: 14px; cursor: pointer;
   display: none; place-items: center; border: none; transition: background .18s, box-shadow .18s;
   backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); }
 .day-mode .ex-rail-btn { background: rgba(255,251,240,0.78); color: #A0522D;
-  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.3), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 12px -2px rgba(212,175,55,0.4); }
+  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.3), inset 0 1px 0 rgba(255,255,255,0.9); }
 .day-mode .ex-rail-btn:hover { background: rgba(240,221,170,0.85);
-  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.45), inset 0 1px 0 rgba(255,255,255,0.95), 0 0 16px -2px rgba(212,175,55,0.55); }
+  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.45), inset 0 1px 0 rgba(255,255,255,0.95); }
 .night-mode .ex-rail-btn { background: rgba(17,25,52,0.78); color: #c9b3f5;
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.38), inset 0 1px 0 rgba(185,208,255,0.22), 0 0 12px -2px rgba(139,92,246,0.45); }
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.38), inset 0 1px 0 rgba(185,208,255,0.22); }
 .night-mode .ex-rail-btn:hover { background: rgba(139,92,246,0.26);
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.55), inset 0 1px 0 rgba(185,208,255,0.26), 0 0 16px -2px rgba(139,92,246,0.6); }
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.55), inset 0 1px 0 rgba(185,208,255,0.26); }
 .ex-rail-btn--prev { left: 6px; }
 .ex-rail-btn--next { right: 6px; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
@@ -1114,7 +1125,7 @@ export default {
   .ex-rail { gap: 11px; padding: 2px 14px 14px; scroll-padding-left: 14px;
     -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
     mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
-  .ex-card { width: 46vw; }
+  .ex-card { width: 70vw; }
   .ex-gallery-nav { width: 42px; height: 42px; }
   .ex-gallery-nav--prev { left: 10px; }
   .ex-gallery-nav--next { right: 10px; }
