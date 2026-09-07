@@ -4355,9 +4355,11 @@ export default {
       // NOTE: '|' is excluded from every URL class — newlines are still the
       // |||NL||| marker at this stage, and letting '|' into a URL swallowed
       // the marker into the href (rendered as a literal <br> inside the link).
-      formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)|]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-      formatted = formatted.replace(/\[(https?:\/\/[^\s\]|]+)\]/g, '<a href="$1" target="_blank">$1</a>');
-      formatted = formatted.replace(/(?<!href="|">|<code>)(https?:\/\/[^\s<>"()|]+)(?!<\/a>|<\/code>)/g, (match) => { return `<a href="${match}" target="_blank">${match}</a>` });
+      // rel: target="_blank" alone lets the opened page reach back through
+      // window.opener. Every anchor we emit carries it.
+      formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)|]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+      formatted = formatted.replace(/\[(https?:\/\/[^\s\]|]+)\]/g, '<a class="raw-url" href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+      formatted = formatted.replace(/(?<!href="|">|<code>)(https?:\/\/[^\s<>"()|]+)(?!<\/a>|<\/code>)/g, (match) => { return `<a class="raw-url" href="${match}" target="_blank" rel="noopener noreferrer">${match}</a>` });
       formatted = formatted.replace(/\|\|\|NL\|\|\|/g, '<br>');
       formatted = formatted.replace(/(<br>){3,}/g, '<br><br>');
       return formatted;
@@ -8902,6 +8904,23 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    the pointer cursor. */
 .text :deep(.place-search) { border-bottom: 1px dotted currentColor; cursor: pointer; text-underline-offset: 3px; transition: opacity 0.15s ease; }
 .text :deep(.place-search:hover) { opacity: 0.65; }
+/* Links inside a reply — an airline name opening that fare's booking page,
+   a source page. Same restraint as .place-search: the text keeps its own
+   colour and nothing moves on hover (Arsen), so a link reads as part of the
+   sentence rather than as a pasted blue URL. The hairline underline says it
+   is tappable; the ↗ says it leaves the app. */
+.text :deep(a) {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 38%, transparent);
+  padding-bottom: 1px;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+.text :deep(a)::after { content: '↗'; font-size: 0.72em; opacity: 0.5; margin-left: 2px; vertical-align: 1px; }
+.text :deep(a:hover) { opacity: 0.8; border-bottom-color: #D4AF37; }
+.night-mode .text :deep(a:hover) { border-bottom-color: #a78bfa; }
+/* A bare URL is already its own label — no arrow doubling up on it. */
+.text :deep(a.raw-url)::after { content: none; }
 
 /* Chat→map "See route" CTA (transport answers with a routable card) —
    light/color feedback only on hover, never movement (founder rule). */
