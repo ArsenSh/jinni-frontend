@@ -504,7 +504,10 @@ export default {
 .confirm-btn:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none!important}
 .search-container{position:relative;padding:16px 20px;z-index:999;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%)}
 .search-wrapper{position:relative;display:flex;align-items:center}
-.search-icon{position:absolute;left:14px;pointer-events:none}
+/* z-index lifts the icon ABOVE the input: the input's backdrop-filter makes
+   it a stacking layer that paints over the earlier icon — day's translucent
+   fill let it ghost through, night's blur swallowed it entirely. */
+.search-icon{position:absolute;left:14px;pointer-events:none;z-index:2}
 .search-input{width:100%;padding:12px 40px 12px 44px;border-radius:12px;border:none;font-size:16px;font-family:inherit;transition:all 0.2s ease;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .clear-btn{position:absolute;right:10px;padding:6px;border:none;background:transparent;cursor:pointer;border-radius:8px;display:flex;align-items:center;transition:all 0.2s ease}
 .search-results{position:absolute;top:70px;left:20px;right:20px;max-height:300px;overflow-y:auto;border-radius:14px;z-index:1000;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}
