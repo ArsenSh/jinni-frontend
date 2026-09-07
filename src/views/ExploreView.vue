@@ -895,15 +895,22 @@ export default {
 .ex-rail-wrap { position: relative; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-wrap { padding: 0 48px; } }
 /* Same glass recipe as the chat cards' "More" button. */
-.ex-rail-btn { position: absolute; top: 118px; z-index: 5; width: 40px; height: 40px; border-radius: 999px; cursor: pointer;
-  display: none; place-items: center; border: none; transition: background .18s;
-  backdrop-filter: blur(4px) saturate(160%); -webkit-backdrop-filter: blur(4px) saturate(160%); }
-.night-mode .ex-rail-btn { background: rgba(255,255,255,0.3); color: #e2e8f0; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
-.night-mode .ex-rail-btn:hover { background: rgba(255,255,255,0.35); }
-.day-mode .ex-rail-btn { background: rgba(255,255,255,0.55); color: var(--ex-text); box-shadow: inset 0 0 0 0.7px #ffffffe6, 0 0 4px #0000001a; }
-.day-mode .ex-rail-btn:hover { background: rgba(255,255,255,0.7); }
-.ex-rail-btn--prev { left: 0; }
-.ex-rail-btn--next { right: 0; }
+/* Rail paddles (founder 2026-09-07: "more 2027 like") — tall frosted
+   blades at the rail edges, visionOS-style: deep blur, hairline accent
+   ring + top glint, accent chevron, light-only hover. */
+.ex-rail-btn { position: absolute; top: 102px; z-index: 5; width: 32px; height: 72px; border-radius: 18px; cursor: pointer;
+  display: none; place-items: center; border: none; transition: background .18s, box-shadow .18s;
+  backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); }
+.day-mode .ex-rail-btn { background: rgba(255,251,240,0.6); color: #A0522D;
+  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.26), inset 0 1px 0 rgba(255,255,255,0.85), 0 0 14px -2px rgba(212,175,55,0.35); }
+.day-mode .ex-rail-btn:hover { background: rgba(240,221,170,0.72);
+  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.42), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 16px -2px rgba(212,175,55,0.5); }
+.night-mode .ex-rail-btn { background: rgba(17,25,52,0.58); color: #c9b3f5;
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.32), inset 0 1px 0 rgba(185,208,255,0.2), 0 0 14px -2px rgba(139,92,246,0.4); }
+.night-mode .ex-rail-btn:hover { background: rgba(139,92,246,0.22);
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.5), inset 0 1px 0 rgba(185,208,255,0.24), 0 0 16px -2px rgba(139,92,246,0.55); }
+.ex-rail-btn--prev { left: 6px; }
+.ex-rail-btn--next { right: 6px; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
 
 /* Slim scroll indicator — appears only while scrolling, fades out after */
