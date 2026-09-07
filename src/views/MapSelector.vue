@@ -78,25 +78,20 @@
     <div ref="mapContainer" class="map-container">
       <!-- map will be rendered here -->
     </div>
-    <div class="location-panel">
-        <div class="panel-content">
-            <div class="location-info">
-            <div class="info-row">
-                <span class="info-label">{{ $t('map_selector.selected') }}</span>
-                <span class="info-value">{{ locationName || $t('map_selector.click_to_select') }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">{{ $t('map_selector.coordinates') }}</span>
-                <span class="info-value coords">
-                {{ selectedCoords.lat?.toFixed(6) || '0.000000' }}, {{ selectedCoords.lng?.toFixed(6) || '0.000000' }}
-                </span>
-            </div>
-            <div v-if="address" class="info-row">
-                <span class="info-label">{{ $t('map_selector.address') }}</span>
-                <span class="info-value address-text">{{ address }}</span>
-            </div>
-            </div>
-        </div>
+    <!-- Location capsule (founder 2026-09-07): the three-row panel collapsed
+         into a one-line floating pill; tap flips it open for address +
+         coordinates; brightness flash acknowledges each new pick. -->
+    <div class="location-capsule" :class="[currentTheme, { flash: capsuleFlash }]" @click="capsuleOpen = !capsuleOpen">
+      <div class="capsule-line">
+        <svg class="capsule-pin" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span class="capsule-name">{{ locationName || $t('map_selector.click_to_select') }}</span>
+        <span v-if="address" class="capsule-addr">{{ address }}</span>
+        <svg class="capsule-chev" :class="{ up: !capsuleOpen }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div v-if="capsuleOpen" class="capsule-detail" @click.stop>
+        <div class="cap-row"><span class="cap-label">{{ $t('map_selector.address') }}</span><span class="cap-value">{{ address || '—' }}</span></div>
+        <div class="cap-row"><span class="cap-label">{{ $t('map_selector.coordinates') }}</span><span class="cap-value cap-coords">{{ selectedCoords.lat?.toFixed(6) || '0.000000' }}, {{ selectedCoords.lng?.toFixed(6) || '0.000000' }}</span></div>
+      </div>
     </div>
     <div v-if="isLoading" class="loading-overlay">
       <div class="loading-content">
@@ -151,6 +146,8 @@ export default {
       isLoading: true,
       hasChanges: false,
       showLeaveModal: false,
+      capsuleOpen: false,
+      capsuleFlash: false,
       searchDebounce: null,
       returnTo: '/chat',
       gpsDenied: false
@@ -383,6 +380,11 @@ export default {
       if (this.marker) { this.marker.setLatLng([lat, lng]) }
       if (this.map) { this.map.panTo([lat, lng]) }
       this.reverseGeocode(lat, lng);
+      // acknowledge the pick (light-only)
+      this.capsuleFlash = false;
+      clearTimeout(this._capsuleTimer);
+      requestAnimationFrame(() => { this.capsuleFlash = true; });
+      this._capsuleTimer = setTimeout(() => { this.capsuleFlash = false; }, 1000);
     },
     async reverseGeocode(lat, lng) {
       try {
@@ -693,4 +695,25 @@ export default {
 .leave-modal.night-mode .leave-modal-btn--stay{background:linear-gradient(135deg,rgba(139,92,246,0.85),rgba(168,85,247,0.85));color:#fff;box-shadow:0 0 12px -2px rgba(139,92,246,0.5),inset 0 0 0 1px rgba(255,255,255,0.18)}
 .leave-modal.night-mode .leave-modal-btn--leave{background:rgba(255,255,255,0.07);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25)}
 .leave-modal.night-mode .leave-modal-btn--leave:hover{background:rgba(139,92,246,0.16)}
+
+/* Location capsule — glacier pill floating over the map (replaces the
+   three-row panel; same glass recipes as the zoom controls). */
+.location-capsule{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:999;max-width:min(560px,calc(100% - 28px));border-radius:22px;padding:11px 16px;cursor:pointer;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);transition:background .25s ease}
+.location-capsule.day-mode{background:rgba(255,251,245,0.74);color:#3c2a1e;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.25),inset 0 1px 0 rgba(255,255,255,0.8),0 0 18px -2px rgba(0,0,0,0.28)}
+.location-capsule.night-mode{background:rgba(17,25,52,0.68);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.3),inset 0 1px 0 rgba(185,208,255,0.18),0 0 18px -2px rgba(0,0,0,0.5)}
+.location-capsule.flash{animation:capsule-flash 0.9s ease-out}
+@keyframes capsule-flash{0%{filter:brightness(1.3) saturate(1.25)}100%{filter:none}}
+.capsule-line{display:flex;align-items:center;gap:8px;min-width:0}
+.capsule-pin{flex:none;color:#A0522D}
+.location-capsule.night-mode .capsule-pin{color:#c084fc}
+.capsule-name{font-weight:600;font-size:0.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none;max-width:48%}
+.capsule-addr{font-size:0.8rem;opacity:0.68;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.capsule-chev{flex:none;opacity:0.6;transition:transform .25s ease}
+.capsule-chev.up{transform:rotate(180deg)}
+.capsule-detail{margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:7px;cursor:default;border-top:1px solid rgba(160,82,45,0.18)}
+.location-capsule.night-mode .capsule-detail{border-top-color:rgba(167,139,250,0.22)}
+.cap-row{display:flex;justify-content:space-between;gap:14px;font-size:0.82rem}
+.cap-label{opacity:0.6;flex:none}
+.cap-value{text-align:right;word-break:break-word}
+.cap-coords{font-variant-numeric:tabular-nums}
 </style>
