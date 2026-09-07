@@ -606,6 +606,13 @@ export default {
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:768px){.map-header{padding:10px 14px}.my-location-btn{width:32px;height:32px}.map-header h1{font-size:15px}.back-btn,.confirm-btn{padding:0 10px;font-size:12px;min-height:32px}.back-btn svg,.confirm-btn svg{width:16px;height:16px}.search-container{padding:12px 16px}.panel-content{padding:16px}.info-value{font-size:13px}}
 
+/* Day zoom chrome — exact RecommendationMap day recipe (founder 2026-09-07):
+   warm glass, sienna glyphs, parchment hover. */
+.map-selector-page.day-mode .leaflet-control-zoom{border:none!important;border-radius:12px!important;overflow:hidden;background:rgba(255,255,255,0.72)!important;box-shadow:0 2px 8px rgba(0,0,0,0.14),inset 0 0 0 1px rgba(0,0,0,0.08),inset 0 1px 0 rgba(255,255,255,0.85)!important;backdrop-filter:blur(22px) saturate(180%)!important;-webkit-backdrop-filter:blur(22px) saturate(180%)!important}
+.map-selector-page.day-mode .leaflet-control-zoom a{border:none!important;background:transparent!important;color:#A0522D!important;font-weight:700!important;transition:background 0.18s ease!important}
+.map-selector-page.day-mode .leaflet-control-zoom a:first-child{box-shadow:inset 0 -1px 0 rgba(0,0,0,0.08)!important}
+.map-selector-page.day-mode .leaflet-control-zoom a:hover{background:rgba(240,221,170,0.95)!important}
+
 /* Night map chrome — same navy/violet family as RecommendationMap (founder
    2026-09-07): quiet glass, hairline ring, no bright white rims. */
 .map-selector-page.night-mode .leaflet-control-zoom a{background:rgba(17,25,52,0.62)!important;color:#e8ecf8!important;box-shadow:inset 0 0 0 0.7px rgba(165,192,255,0.16)!important}
