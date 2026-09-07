@@ -1099,6 +1099,7 @@
     "highlights": "亮点"
   },
   "explore": {
+    "based_on": "根据你的偏好精选",
     "title": "Jinni 的探索",
     "intro": "以下是 Jinni 目前在这里发现的地点，列表仍在不断丰富。",
     "preferences": "偏好设置",

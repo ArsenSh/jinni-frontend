@@ -239,19 +239,41 @@ export default {
           const tileUrl = this.currentTheme === 'night-mode' ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
           L.tileLayer(tileUrl, {attribution: '',subdomains: 'abcd',maxZoom: 19,detectRetina: true, noWrap: true}).addTo(this.map);
         }        
+        // Crafted SVG pin (founder 2026-09-07: the CSS shape read neither
+        // elegant nor realistic): classic teardrop silhouette, vertical
+        // gradient shading, soft top highlight, jewel core — gold in day,
+        // violet in night. Colors resolved at creation; the theme is fixed
+        // for the page's lifetime.
+        const night = this.currentTheme === 'night-mode';
+        const g1 = night ? '#cdb0ff' : '#f5e3a9';
+        const g2 = night ? '#6d3fd6' : '#b8742c';
+        const rim = night ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.7)';
+        const coreRim = night ? 'rgba(109,63,214,0.55)' : 'rgba(160,82,45,0.45)';
         const customIcon = L.divIcon({
           className: 'custom-marker',
           html: `
             <div class="marker-container">
               <div class="marker-pin">
-                <div class="marker-pin-head"></div>
+                <svg width="44" height="54" viewBox="0 0 44 54" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="jinniPinG" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="${g1}"/><stop offset="1" stop-color="${g2}"/>
+                    </linearGradient>
+                    <radialGradient id="jinniPinHi" cx="0.34" cy="0.24" r="0.55">
+                      <stop offset="0" stop-color="rgba(255,255,255,0.75)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
+                    </radialGradient>
+                  </defs>
+                  <path d="M22 2C12.6 2 5 9.6 5 19c0 11.6 14.3 28.3 16.1 30.4a1.2 1.2 0 0 0 1.8 0C24.7 47.3 39 30.6 39 19 39 9.6 31.4 2 22 2z" fill="url(#jinniPinG)" stroke="${rim}" stroke-width="1.2"/>
+                  <path d="M22 2C12.6 2 5 9.6 5 19c0 11.6 14.3 28.3 16.1 30.4a1.2 1.2 0 0 0 1.8 0C24.7 47.3 39 30.6 39 19 39 9.6 31.4 2 22 2z" fill="url(#jinniPinHi)"/>
+                  <circle cx="22" cy="19" r="6.6" fill="rgba(255,253,247,0.96)" stroke="${coreRim}" stroke-width="1.4"/>
+                </svg>
               </div>
               <div class="marker-shadow"></div>
               <div class="marker-pulse"></div>
             </div>
           `,
           iconSize: [50, 60],
-          iconAnchor: [25, 60]
+          iconAnchor: [25, 57]
         });
         this.marker = L.marker([this.selectedCoords.lat, this.selectedCoords.lng], { icon: customIcon, draggable: true, autoPan: true }).addTo(this.map);
         this.marker.on('dragend', (e) => {
@@ -557,12 +579,11 @@ export default {
 .leaflet-control-zoom-in,.leaflet-control-zoom-out{position:relative!important;width:36px!important;height:36px!important;line-height:36px!important;text-align:center!important;text-decoration:none!important;color:inherit!important;display:flex!important;align-items:center!important;justify-content:center!important;transition:all 0.2s ease!important;border:none!important}
 .custom-marker{background:transparent!important;border:none!important}
 .marker-container{position:relative;animation:markerDrop 0.5s cubic-bezier(0.34,1.56,0.64,1)}
-.marker-pin{position:relative;width:40px;height:50px;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.3))}
-.marker-pin-head{width:40px!important;height:40px!important;border-radius:50% 50% 50% 0!important;transform:rotate(-45deg)!important;position:absolute!important;top:0!important;left:0!important;transition:box-shadow 0.25s ease,background 0.25s ease!important;border:none!important;backdrop-filter:blur(10px) saturate(170%);-webkit-backdrop-filter:blur(10px) saturate(170%)}
-.marker-pin-head::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(45deg);width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.8)}
+.marker-pin{position:relative;width:44px;height:54px;margin:0 auto}
+.marker-pin svg{display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.28))}
 .marker-shadow{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:24px;height:6px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,0.22) 0%,transparent 70%);animation:shadowPulse 2s ease-in-out infinite}
 .marker-pulse{position:absolute;top:20px;left:20px;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;pointer-events:none}
-.marker-container:hover .marker-pin-head{filter:brightness(1.06)}
+.marker-container:hover .marker-pin svg{filter:drop-shadow(0 3px 6px rgba(0,0,0,0.28)) brightness(1.05)}
 .my-location-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:12px;border:none;cursor:pointer;transition:all 0.2s ease;flex-shrink:0;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .day-mode .my-location-btn{background:rgba(255,255,255,0.5);color:#A0522D;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
 .day-mode .my-location-btn:hover{background:rgba(212,175,55,0.16);box-shadow:0 2px 8px rgba(139,69,19,0.08),inset 0 1px 0 rgba(255,255,255,0.6)}
@@ -592,8 +613,6 @@ export default {
 .day-mode .leaflet-control-zoom a{background:transparent!important;color:#3c2a1e!important}
 .day-mode .leaflet-control-zoom a:hover{background:rgba(212,175,55,0.16)!important}
 .day-mode .leaflet-control-custom{background:rgba(255,255,255,0.6)!important;box-shadow:0 8px 24px rgba(139,69,19,0.12),inset 0 1px 0 rgba(255,255,255,0.6)!important}
-.day-mode .marker-pin-head{background:linear-gradient(160deg,rgba(255,255,255,0.30) 0%,rgba(255,255,255,0.08) 55%),rgba(255,251,240,0.58)!important;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.30),inset 0 1px 0 rgba(255,255,255,0.85),0 0 16px -2px rgba(212,175,55,0.35)!important}
-.day-mode .marker-pin-head::before{background:radial-gradient(circle at 35% 30%,#e9c46a 0%,#c98a3d 55%,#A0522D 100%)}
 .day-mode .marker-pulse{background:radial-gradient(circle,rgba(212,175,55,0.18) 0%,rgba(212,175,55,0) 65%)}
 .night-mode .map-header{background:#0a0118;color:#e2e8f0}
 .night-mode .back-btn{color:#e2e8f0;background:rgba(255,255,255,0.05);box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
@@ -623,8 +642,6 @@ export default {
 .night-mode .leaflet-control-zoom a{background:transparent!important;color:#e2e8f0!important}
 .night-mode .leaflet-control-zoom a:hover{background:rgba(139,92,246,0.18)!important}
 .night-mode .leaflet-control-custom{background:rgba(20,14,40,0.65)!important;box-shadow:0 8px 24px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.08)!important}
-.night-mode .marker-pin-head{background:linear-gradient(160deg,rgba(185,208,255,0.20) 0%,rgba(185,208,255,0.04) 55%),rgba(17,25,52,0.58)!important;box-shadow:inset 0 0 0 1px rgba(165,192,255,0.32),inset 0 1px 0 rgba(185,208,255,0.28),0 0 16px -2px rgba(139,92,246,0.4)!important}
-.night-mode .marker-pin-head::before{background:radial-gradient(circle at 35% 30%,#e2d5ff 0%,#c084fc 55%,#8b5cf6 100%)}
 .night-mode .marker-pulse{background:radial-gradient(circle,rgba(139,92,246,0.18) 0%,rgba(139,92,246,0) 65%)}
 @keyframes markerDrop{0%{transform:translateY(-100px) scale(0.5);opacity:0}60%{transform:translateY(5px) scale(1.1)}100%{transform:translateY(0) scale(1);opacity:1}}
 @keyframes shadowPulse{0%,100%{transform:translateX(-50%) scale(1);opacity:0.3}50%{transform:translateX(-50%) scale(1.2);opacity:0.2}}

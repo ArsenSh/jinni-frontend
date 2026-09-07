@@ -13,6 +13,16 @@
       <p class="ex-sub" v-if="location && (location.city || location.country)">
         {{ [location.city, location.country].filter(Boolean).join(', ') }}
       </p>
+      <!-- The onboarding choices, visible (founder 2026-09-07): the page is
+           personalized — say so. Location mode + style + interests as chips. -->
+      <div v-if="prefChips.length" class="ex-pref-row">
+        <span class="ex-pref-lead">{{ t('explore.based_on') || 'Curated to your taste' }}</span>
+        <span v-for="(ch, i) in prefChips" :key="i" class="ex-pref-chip">
+          <svg v-if="ch.icon === 'gps'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          <svg v-else-if="ch.icon === 'pin'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          {{ ch.label }}
+        </span>
+      </div>
       <!-- No back arrow: "Meet Jinni" is an invitation, not a return trip.
            Sits under the intro as the page's primary CTA, in the brand
            gradient — same treatment as the other conversion buttons. -->
@@ -340,6 +350,24 @@ export default {
     };
   },
   computed: {
+    // Onboarding choices → chips (location mode, travel style, interests).
+    // Read from the stored user profile; every label is resolved through the
+    // same onboarding locale keys the user picked them under.
+    prefChips() {
+      try {
+        const u = JSON.parse(localStorage.getItem('user') || '{}');
+        const p = u.preferences || {};
+        const chips = [];
+        if (p.useGPS) chips.push({ icon: 'gps', label: this.t('onboarding.use_current_location') || 'My location' });
+        else if (p.destination && p.destination.city) chips.push({ icon: 'pin', label: p.destination.city });
+        if (p.travelStyle) { const s = this.t(`onboarding.styles.${p.travelStyle}`); if (s) chips.push({ label: s }); }
+        (Array.isArray(p.interests) ? p.interests : []).slice(0, 5).forEach((k) => {
+          const l = this.t(`onboarding.interests.${k}`);
+          if (l) chips.push({ label: l });
+        });
+        return chips;
+      } catch (e) { return []; }
+    },
     orderedCategories() {
       // Prefer the server's interest-weighted order (user preferences first);
       // fall back to a sensible default. Only categories that have places.
@@ -1047,4 +1075,12 @@ export default {
 .ex-dot.is-on { width: 18px; opacity: 1; background: #D4AF37; }
 .explore.night-mode .ex-dot { background: rgba(226,232,240,0.55); }
 .explore.night-mode .ex-dot.is-on { background: #c084fc; }
+
+/* Preference chips under the intro — quiet glass, theme accents */
+.ex-pref-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 10px auto 0; max-width: 720px; padding: 0 16px; }
+.ex-pref-lead { font-size: 0.78rem; opacity: 0.65; margin-right: 2px; }
+.ex-pref-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.76rem; padding: 4px 10px; border-radius: 999px;
+  background: rgba(255,255,255,0.5); color: #7a5c3e; box-shadow: inset 0 0 0 1px rgba(160,82,45,0.22); }
+.explore.night-mode .ex-pref-chip { background: rgba(255,255,255,0.06); color: #cdc3ea; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.25); }
+.explore.night-mode .ex-pref-lead { color: #a8a0c4; }
 </style>
