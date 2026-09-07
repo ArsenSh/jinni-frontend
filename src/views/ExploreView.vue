@@ -813,7 +813,9 @@ export default {
    instead of floating as a 1200px translucent band over the gradient (the
    "different background" strip), and a hairline grounds it while stuck. */
 .ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 12px 0 0;
-  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); }
+  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); }
 /* Night: lighter tint so the frosted bar doesn't read as a solid band. */
 .explore.night-mode .ex-nav { background: color-mix(in srgb, var(--ex-bg) 60%, transparent); }
 .ex-nav-inner { display: flex; gap: 8px; width: max-content; margin-inline: auto; padding-inline: 18px; }
@@ -837,8 +839,8 @@ export default {
    wrap's side gutters keep the paging arrows clear of the images. */
 .ex-rail { display: flex; gap: 14px; overflow-x: auto; padding: 2px 16px 16px;
   scroll-snap-type: x proximity; scroll-padding-left: 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); }
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8px, #000 calc(100% - 32px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 8px, #000 calc(100% - 32px), transparent 100%); }
 .ex-rail::-webkit-scrollbar { display: none; }
 
 /* TripAdvisor-style borderless tile — rounded image block, plain text below
