@@ -144,7 +144,16 @@
           <div class="preference-section active">
             <div class="card">
               <div class="section-header">
-                <h3>{{ locationMode === 'destination' && preferences.destination.city ? `${preferences.destination.city}, ${preferences.destination.countryName}` : (locationMode === 'gps' && gpsCity ? `📍 ${gpsCity}` : $t('onboarding.location_title')) }}</h3>
+                <h3 v-if="locationMode === 'gps' && gpsCity" class="gps-city-title">
+                  <!-- live-location glyph (same icon family as the maps' locate button) -->
+                  <svg class="gps-title-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                    <circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/>
+                  </svg>
+                  <span>{{ gpsCity }}</span>
+                </h3>
+                <h3 v-else>{{ locationMode === 'destination' && preferences.destination.city ? `${preferences.destination.city}, ${preferences.destination.countryName}` : $t('onboarding.location_title') }}</h3>
                 <p class="section-description">{{ $t('onboarding.location_desc') }}</p>
               </div>
               <div v-if="marketNotice" class="market-notice" :class="{ 'market-notice--blocked': marketBlocked }">{{ marketNotice }}</div>
@@ -1172,6 +1181,9 @@ export default {
 
 /* GPS-tap acknowledgment (founder 2026-09-07): light/color only, no motion */
 .gps-confirm{margin:8px 2px 0;font-size:0.82rem;color:#1e7d4a;opacity:0.9}
+.gps-city-title{display:flex;align-items:center;gap:7px}
+.gps-title-icon{color:#A0522D;flex:none}
+.night-mode .gps-title-icon{color:#c084fc}
 .night-mode .gps-confirm,[data-theme="night"] .gps-confirm{color:#9fe8bb}
 .mode-btn--flash{animation:gps-glow 1.2s ease-out}
 @keyframes gps-glow{0%{box-shadow:0 0 0 0 rgba(212,175,55,0.55)}100%{box-shadow:0 0 14px 6px rgba(212,175,55,0)}}
