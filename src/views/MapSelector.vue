@@ -87,6 +87,7 @@
         <span class="capsule-name">{{ locationName || $t('map_selector.click_to_select') }}</span>
         <span v-if="address" class="capsule-addr">{{ address }}</span>
         <svg class="capsule-chev" :class="{ up: !capsuleOpen }" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <button class="capsule-confirm" :disabled="!hasChanges" @click.stop="confirmSelection">{{ $t('map_selector.confirm') }}</button>
       </div>
       <div v-if="capsuleOpen" class="capsule-detail" @click.stop>
         <div class="cap-row"><span class="cap-label">{{ $t('map_selector.address') }}</span><span class="cap-value">{{ address || '—' }}</span></div>
@@ -716,4 +717,9 @@ export default {
 .cap-label{opacity:0.6;flex:none}
 .cap-value{text-align:right;word-break:break-word}
 .cap-coords{font-variant-numeric:tabular-nums}
+.capsule-confirm{flex:none;margin-left:2px;padding:7px 14px;border:none;border-radius:999px;cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;color:#fff;transition:filter .18s ease}
+.location-capsule.day-mode .capsule-confirm{background:linear-gradient(135deg,rgba(212,175,55,0.95),rgba(184,116,44,0.95));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3),0 0 10px -2px rgba(212,175,55,0.5)}
+.location-capsule.night-mode .capsule-confirm{background:linear-gradient(135deg,rgba(139,92,246,0.9),rgba(168,85,247,0.9));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2),0 0 10px -2px rgba(139,92,246,0.55)}
+.capsule-confirm:hover:not(:disabled){filter:brightness(1.08)}
+.capsule-confirm:disabled{opacity:0.4;cursor:default}
 </style>
