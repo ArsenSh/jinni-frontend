@@ -762,7 +762,7 @@ export default {
 
 /* TripAdvisor-style borderless tile — rounded image block, plain text below
    on the page background. No motion on hover: image brightens slightly. */
-.ex-card { position: relative; flex: none; width: 252px; cursor: pointer; scroll-snap-align: start; }
+.ex-card { position: relative; flex: none; width: 300px; cursor: pointer; scroll-snap-align: start; }
 .ex-card-imgwrap { position: relative; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden; margin-bottom: 9px;
   background: var(--ex-glass-2); box-shadow: var(--ex-ring); }
 .ex-card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
