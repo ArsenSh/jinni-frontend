@@ -537,11 +537,11 @@ export default {
 .custom-marker{background:transparent!important;border:none!important}
 .marker-container{position:relative;animation:markerDrop 0.5s cubic-bezier(0.34,1.56,0.64,1)}
 .marker-pin{position:relative;width:40px;height:50px;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.3))}
-.marker-pin-head{width:40px!important;height:40px!important;border-radius:50% 50% 50% 0!important;transform:rotate(-45deg)!important;position:absolute!important;top:0!important;left:0!important;transition:transform 0.3s ease!important;border:1.5px solid rgba(255,255,255,0.95)!important}
-.marker-pin-head::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(45deg);width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff 0%,#eef0f6 55%,#d6d8e4 100%);box-shadow:0 1px 3px rgba(0,0,0,0.28),inset 0 0 2px rgba(0,0,0,0.12)}
-.marker-shadow{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:30px;height:8px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,0.3) 0%,transparent 70%);animation:shadowPulse 2s ease-in-out infinite}
+.marker-pin-head{width:40px!important;height:40px!important;border-radius:50% 50% 50% 0!important;transform:rotate(-45deg)!important;position:absolute!important;top:0!important;left:0!important;transition:box-shadow 0.25s ease,background 0.25s ease!important;border:none!important;backdrop-filter:blur(10px) saturate(170%);-webkit-backdrop-filter:blur(10px) saturate(170%)}
+.marker-pin-head::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(45deg);width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.8)}
+.marker-shadow{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:24px;height:6px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,0.22) 0%,transparent 70%);animation:shadowPulse 2s ease-in-out infinite}
 .marker-pulse{position:absolute;top:20px;left:20px;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;pointer-events:none}
-.marker-container:hover .marker-pin-head{transform:rotate(-45deg) scale(1.1)!important}
+.marker-container:hover .marker-pin-head{filter:brightness(1.06)}
 .my-location-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:12px;border:none;cursor:pointer;transition:all 0.2s ease;flex-shrink:0;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .day-mode .my-location-btn{background:rgba(255,255,255,0.5);color:#A0522D;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
 .day-mode .my-location-btn:hover{background:rgba(212,175,55,0.16);box-shadow:0 2px 8px rgba(139,69,19,0.08),inset 0 1px 0 rgba(255,255,255,0.6)}
@@ -571,8 +571,9 @@ export default {
 .day-mode .leaflet-control-zoom a{background:transparent!important;color:#3c2a1e!important}
 .day-mode .leaflet-control-zoom a:hover{background:rgba(212,175,55,0.16)!important}
 .day-mode .leaflet-control-custom{background:rgba(255,255,255,0.6)!important;box-shadow:0 8px 24px rgba(139,69,19,0.12),inset 0 1px 0 rgba(255,255,255,0.6)!important}
-.day-mode .marker-pin-head{background:radial-gradient(circle at 34% 26%,rgba(255,255,255,0.95) 0%,rgba(255,255,255,0.35) 30%,rgba(255,255,255,0) 56%),linear-gradient(150deg,#fbf3da 0%,#f3dd95 45%,#e3c25e 100%)!important;box-shadow:inset 0 2px 3px rgba(255,255,255,0.9),inset 0 -6px 10px rgba(190,150,55,0.22),0 0 14px rgba(212,175,55,0.45)!important}
-.day-mode .marker-pulse{background:radial-gradient(circle,rgba(212,175,55,0.4) 0%,rgba(212,175,55,0) 70%)}
+.day-mode .marker-pin-head{background:linear-gradient(160deg,rgba(255,255,255,0.30) 0%,rgba(255,255,255,0.08) 55%),rgba(255,251,240,0.58)!important;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.30),inset 0 1px 0 rgba(255,255,255,0.85),0 0 16px -2px rgba(212,175,55,0.35)!important}
+.day-mode .marker-pin-head::before{background:radial-gradient(circle at 35% 30%,#e9c46a 0%,#c98a3d 55%,#A0522D 100%)}
+.day-mode .marker-pulse{background:radial-gradient(circle,rgba(212,175,55,0.18) 0%,rgba(212,175,55,0) 65%)}
 .night-mode .map-header{background:#0a0118;color:#e2e8f0}
 .night-mode .back-btn{color:#e2e8f0;background:rgba(255,255,255,0.05);box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
 .night-mode .back-btn:hover{background:rgba(139,92,246,0.18);box-shadow:0 0 7px rgba(139,92,246,0.28),inset 0 1px 0 rgba(255,255,255,0.1)}
@@ -601,8 +602,9 @@ export default {
 .night-mode .leaflet-control-zoom a{background:transparent!important;color:#e2e8f0!important}
 .night-mode .leaflet-control-zoom a:hover{background:rgba(139,92,246,0.18)!important}
 .night-mode .leaflet-control-custom{background:rgba(20,14,40,0.65)!important;box-shadow:0 8px 24px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.08)!important}
-.night-mode .marker-pin-head{background:radial-gradient(circle at 34% 26%,rgba(255,255,255,0.9) 0%,rgba(255,255,255,0.3) 30%,rgba(255,255,255,0) 56%),linear-gradient(150deg,#e7e0fb 0%,#c3b2f6 45%,#9b7cf0 100%)!important;box-shadow:inset 0 2px 3px rgba(255,255,255,0.8),inset 0 -6px 10px rgba(70,40,130,0.35),0 0 14px rgba(139,92,246,0.55)!important}
-.night-mode .marker-pulse{background:radial-gradient(circle,rgba(139,92,246,0.4) 0%,rgba(139,92,246,0) 70%)}
+.night-mode .marker-pin-head{background:linear-gradient(160deg,rgba(185,208,255,0.20) 0%,rgba(185,208,255,0.04) 55%),rgba(17,25,52,0.58)!important;box-shadow:inset 0 0 0 1px rgba(165,192,255,0.32),inset 0 1px 0 rgba(185,208,255,0.28),0 0 16px -2px rgba(139,92,246,0.4)!important}
+.night-mode .marker-pin-head::before{background:radial-gradient(circle at 35% 30%,#e2d5ff 0%,#c084fc 55%,#8b5cf6 100%)}
+.night-mode .marker-pulse{background:radial-gradient(circle,rgba(139,92,246,0.18) 0%,rgba(139,92,246,0) 65%)}
 @keyframes markerDrop{0%{transform:translateY(-100px) scale(0.5);opacity:0}60%{transform:translateY(5px) scale(1.1)}100%{transform:translateY(0) scale(1);opacity:1}}
 @keyframes shadowPulse{0%,100%{transform:translateX(-50%) scale(1);opacity:0.3}50%{transform:translateX(-50%) scale(1.2);opacity:0.2}}
 @keyframes pulse{0%{transform:translate(-50%,-50%) scale(0.8);opacity:1}100%{transform:translate(-50%,-50%) scale(1.5);opacity:0}}
