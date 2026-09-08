@@ -48,7 +48,7 @@ export default {
   width: 100%;
 }
 @media (pointer: coarse) {
-  .auth-page { min-height: 145vh; }
+  .auth-page { min-height: 115vh; } /* slim scroll tail — still real range for sky-shift */
 }
 
 /* Below-sky continuation (founder 2026-09-08, Discovery-style): the absolute
@@ -70,7 +70,14 @@ export default {
   overflow: visible;
 }
 @media (pointer: coarse) {
-  .auth-page .auth-modal-overlay { min-height: 145vh; }
+  .auth-page .auth-modal-overlay { min-height: 100svh; } /* first screenful only; the page supplies the tail */
+}
+/* Fit-to-screen entry (founder 2026-09-09): auto cross-axis margins center
+   the card in the first viewport when it fits, top-align it when it's
+   taller — never clipped either way. */
+.auth-page :deep(.auth-card) { margin-top: auto; margin-bottom: auto; }
+@media (pointer: coarse) and (max-width: 480px) {
+  .auth-page :deep(.auth-modal-overlay) { padding: 12px 16px calc(env(safe-area-inset-bottom, 0px) + 20px); }
 }
 /* Day: same sky floor as the page so bounce, bars and background agree. */
 .auth-page.day-mode .auth-modal-overlay.day-mode {
