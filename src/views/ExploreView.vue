@@ -1218,7 +1218,11 @@ export default {
 .ex-footer-links a:hover { text-decoration: underline; }
 
 /* Family hovers (Meet Jinni / Ask Jinni had none after the chip restyle) */
+.ex-back { color: #b8862c; }
+.explore.night-mode .ex-back { color: #e9c46a; }
 .ex-back:hover { background: var(--ex-glass-2); }
+.ex-footer-cta { color: #b8862c; }
+.explore.night-mode .ex-footer-cta { color: #e9c46a; }
 .ex-footer-cta:hover { background: var(--ex-glass-2); }
 
 .ex-back-lamp { width: 19px; height: 19px; object-fit: contain; }
