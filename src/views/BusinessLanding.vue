@@ -303,6 +303,9 @@ export default {
   .footer-links { gap: 0.1rem }
   .footer-links a { font-size: 1rem }
 }
+
+/* Below-sky continuation — DesertSky's ending peach (Discovery-style fix) */
+.business-landing.day-mode{background:#e0a082}
 </style>
 
 <style>

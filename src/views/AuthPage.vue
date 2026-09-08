@@ -1,5 +1,5 @@
 <template>
-  <div class="auth-page">
+  <div class="auth-page" :class="{ 'day-mode': !isNightMode }">
     <AuthModal
         :show="true"
         @close="handleClose"
@@ -40,4 +40,10 @@ export default {
   overflow-y: auto;
   width: 100%;
 }
+
+/* Below-sky continuation (founder 2026-09-08, Discovery-style): the absolute
+   DesertSky covers the first viewport; the page floor carries its ending
+   peach so scroll-past and overscroll stay seamless. Night needs nothing —
+   the html base purple already matches StarrySky. */
+.auth-page.day-mode{background:#e0a082}
 </style>

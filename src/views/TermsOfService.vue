@@ -348,4 +348,7 @@ export default {
   .footer-links{gap:1rem;font-size:0.9rem}
   .copyright{font-size:0.85rem}
 }
+
+/* Below-sky continuation — DesertSky's ending peach (Discovery-style fix) */
+.legal-page.day-mode{background:#e0a082}
 </style>

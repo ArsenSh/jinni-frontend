@@ -380,4 +380,7 @@ export default {
   .footer-tagline{font-size:0.9rem}
   .copyright{font-size:0.85rem}
 }
+
+/* Below-sky continuation — DesertSky's ending peach (Discovery-style fix) */
+.contact-page.day-mode{background:#e0a082}
 </style>
