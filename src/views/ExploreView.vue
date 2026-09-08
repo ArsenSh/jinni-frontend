@@ -28,17 +28,6 @@
           {{ t('explore.preferences') || 'Preferences' }}
         </button>
       </div>
-      <!-- The onboarding choices, visible (founder 2026-09-07): the page is
-           personalized — say so. Location mode + style + interests as chips. -->
-      <div v-if="prefChips.length" class="ex-pref-row">
-        <span class="ex-pref-lead">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
-          {{ t('explore.based_on') || 'Curated to your taste' }}
-        </span>
-        <span v-for="(ch, i) in prefChips" :key="i" class="ex-pref-chip" :class="'ex-pref-chip--' + ch.kind">
-          <span class="ex-pref-ic" v-html="prefIcon(ch.icon)"></span>{{ ch.label }}
-        </span>
-      </div>
     </header>
 
     <!-- ═══ Search — explore any city / region / country (TripAdvisor-style) ═══ -->
@@ -50,6 +39,18 @@
         {{ searchBusy ? '…' : (t('explore.search') || 'Search') }}
       </button>
     </form>
+
+        <!-- The onboarding choices, visible (founder 2026-09-07): the page is
+             personalized — say so. Location mode + style + interests as chips. -->
+        <div v-if="prefChips.length" class="ex-pref-row">
+          <span class="ex-pref-lead">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
+            {{ t('explore.based_on') || 'Curated to your taste' }}
+          </span>
+          <span v-for="(ch, i) in prefChips" :key="i" class="ex-pref-chip" :class="'ex-pref-chip--' + ch.kind">
+            <span class="ex-pref-ic" v-html="prefIcon(ch.icon)"></span>{{ ch.label }}
+          </span>
+        </div>
     <div v-if="override" class="ex-showing">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <strong>{{ override.label }}</strong>
