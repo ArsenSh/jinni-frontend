@@ -248,10 +248,6 @@ export default {
   mounted() {
     this.handleOAuthCallback()
     this.handleSetupCallback()
-    if (this.show) this.lockTouch()
-  },
-  watch: {
-    show(v) { v ? this.lockTouch() : this.unlockTouch() }
   },
   computed: {
     strength() {
@@ -290,42 +286,6 @@ export default {
     }
   },
   methods: {
-    /* iOS scroll lock: when the card fits the screen the overlay has no
-       overflow, Safari ignores overscroll-behavior on it and rubber-bands
-       the DOCUMENT (body cream) on any drag. So while the modal is open we
-       only let touchmove through when a real overflowing scroller between
-       the finger and the overlay will consume it — the JinniChat condition. */
-    lockTouch() {
-      if (this._touchLocked) return
-      this._touchLocked = true
-      this._onTS = (e) => { this._startY = e.touches[0].clientY }
-      this._onTM = (e) => {
-        if (e.touches.length !== 1) return
-        const dy = e.touches[0].clientY - this._startY
-        let el = e.target
-        while (el && el !== document.body) {
-          if (el.scrollHeight > el.clientHeight + 1) {
-            const oy = getComputedStyle(el).overflowY
-            if (oy === 'auto' || oy === 'scroll') {
-              const atTop = el.scrollTop <= 0
-              const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
-              if ((dy > 0 && !atTop) || (dy < 0 && !atBottom)) return
-              e.preventDefault(); return
-            }
-          }
-          el = el.parentElement
-        }
-        e.preventDefault()
-      }
-      document.addEventListener('touchstart', this._onTS, { passive: true })
-      document.addEventListener('touchmove', this._onTM, { passive: false })
-    },
-    unlockTouch() {
-      if (!this._touchLocked) return
-      this._touchLocked = false
-      document.removeEventListener('touchstart', this._onTS, { passive: true })
-      document.removeEventListener('touchmove', this._onTM, { passive: false })
-    },
     // The UI language this visitor is currently browsing in — the one they
     // picked on the landing page. Sent along with signup so the new account
     // starts in that language rather than the server's 'en' default, which
@@ -677,7 +637,6 @@ export default {
   beforeUnmount() {
     this.clearResendTimer()
     this.clearResetTimer()
-    this.unlockTouch()
   }
 }
 </script>

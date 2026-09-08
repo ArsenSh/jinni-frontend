@@ -26,14 +26,14 @@ export default {
 </script>
 
 <style scoped>
-/* FIXED SHELL (founder 2026-09-08): the real UI is AuthModal's fixed
-   overlay with its own inner scroll — like JinniChat. A fixed shell has no
-   body scroll, so iOS has no bounce to color; that's WHY chat always
-   behaves. The cushion/JS/timeline experiments are all gone. */
+/* TALL BACKGROUND (founder 2026-09-08): the card lives in AuthModal's
+   fixed overlay and never moves; the PAGE behind is deliberately taller
+   than the phone screen so the document really scrolls — which puts auth
+   in the same family as Contact/Landing, where the scroll-driven
+   jinni-sky-shift animation (genie-theme.css) colors both bounce edges. */
 .auth-page {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
+  position: relative;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,8 +43,10 @@ export default {
    * App.vue derives the browser-chrome colors from the rendered DOM — an
    * opaque color here would shadow the overlay and mislead that derivation. */
   background: transparent;
-  overflow-y: auto;
   width: 100%;
+}
+@media (pointer: coarse) {
+  .auth-page { min-height: 145vh; }
 }
 
 /* Below-sky continuation (founder 2026-09-08, Discovery-style): the absolute

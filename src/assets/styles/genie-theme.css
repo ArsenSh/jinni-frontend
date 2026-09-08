@@ -70,7 +70,8 @@ body.theme-light {
   body:has(.landing-container.day-mode),
   body:has(.business-landing.day-mode),
   body:has(.contact-page.day-mode),
-  body:has(.legal-page.day-mode) {
+  body:has(.legal-page.day-mode),
+  body:has(.auth-page.day-mode) {
     animation: jinni-sky-shift linear both;
     animation-timeline: scroll(root);
   }
