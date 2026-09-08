@@ -792,7 +792,10 @@ export default {
   --ex-active-shadow: 0 4px 14px rgba(139,92,246,0.35);
   --ex-act-bg: rgba(18,12,34,0.78); --ex-act-bg-hover: rgba(18,12,34,0.95); --ex-act-fg: #ffffff;
   --ex-arrow-bg: #241a3f; --ex-arrow-fg: #e8e0f5; --ex-arrow-line: rgba(167,139,250,0.28);
-  --ex-bg-grad: linear-gradient(180deg, #0a0118 0%, #1a0b2e 40%, #16213e 100%);
+  /* Night gradient returns to the base purple at the bottom (founder
+     2026-09-08): the overscroll canvas shows the LAST stop, and the old
+     navy end read as a foreign color when rubber-banding past the footer. */
+  --ex-bg-grad: linear-gradient(180deg, #0a0118 0%, #1a0b2e 45%, #141031 78%, #0a0118 100%);
   /* Chat's glacier active recipe (settings theme-btn.active, night) */
   --ex-chip-active-bg: rgba(255,255,255,0.16); --ex-chip-active-fg: #d8b4fe;
   --ex-chip-active-shadow: 0 1px 4px rgba(0,0,0,0.28);
