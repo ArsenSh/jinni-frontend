@@ -579,9 +579,7 @@ export default {
 .night-mode.gps-denied-banner,.gps-denied-banner.night-mode{background:rgba(139,92,246,0.14);color:#c084fc;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
 .header-right{display:flex;align-items:center;gap:8px}
 .map-selector-page{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden}
-.map-selector-page.day-mode{background-color:#e8e4da}
-.map-selector-page.night-mode{background-color:#1a2036}
-.map-selector-page.day-mode{background:#f9f5eb}
+.map-selector-page.day-mode{background:#e8e4da}
 .map-selector-page.night-mode{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%)}
 .map-container{flex:1;position:relative;border-radius:0}
 .leaflet-container{font-family:inherit}

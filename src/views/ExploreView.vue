@@ -413,10 +413,13 @@ export default {
         if (p.useGPS) chips.push({ kind: 'loc', icon: 'gps', label: this.t('onboarding.use_current_location') || 'My location' });
         else if (p.destination && p.destination.city) chips.push({ kind: 'loc', icon: 'pin', label: p.destination.city });
         if (p.travelStyle) { const s = this.t(`onboarding.styles.${p.travelStyle}`); if (s) chips.push({ kind: 'style', icon: p.travelStyle, label: s }); }
-        (Array.isArray(p.interests) ? p.interests : []).slice(0, 5).forEach((k) => {
+        const ints = Array.isArray(p.interests) ? p.interests : [];
+        const shown = ints.length > 5 ? ints.slice(0, 4) : ints;
+        shown.forEach((k) => {
           const l = this.t(`onboarding.interests.${k}`);
           if (l) chips.push({ kind: 'interest', icon: k, label: l });
         });
+        if (ints.length > shown.length) chips.push({ kind: 'interest', icon: '', label: `+${ints.length - shown.length}` });
         return chips;
       } catch (e) { return []; }
     },
@@ -839,7 +842,7 @@ export default {
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
 .ex-pref:hover { background: var(--ex-glass-2); }
 /* App icon above the title — same asset the chat header uses. */
-.ex-app-icon { width: 76px; height: 76px; object-fit: contain; margin-bottom: -6px;
+.ex-app-icon { width: 92px; height: 92px; object-fit: contain; margin-bottom: -6px;
   filter: drop-shadow(0 4px 14px rgba(212,175,55,0.28)); }
 .ex-title { margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em;
   color: #D4AF37; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -1196,6 +1199,9 @@ export default {
 .explore.night-mode .ex-pref-chip--style { color: #d9c2f7; }
 .ex-pref-chip--interest { color: #7a5c3e; opacity: 0.85; }
 .explore.night-mode .ex-pref-chip--interest { color: #cdc3ea; opacity: 0.85; }
+/* two-tone: glyphs carry the accent, text stays muted */
+.ex-pref-chip--interest .ex-pref-ic { color: #b8862c; }
+.explore.night-mode .ex-pref-chip--interest .ex-pref-ic { color: #c084fc; }
 
 /* Footer — quiet sign-off, genie hand-back, muted legal row */
 .ex-footer { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 18px 44px; text-align: center; }
