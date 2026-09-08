@@ -144,7 +144,7 @@
                   </defs>
                   <path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                 </svg>
-                <svg v-else width="24" height="90" viewBox="0 0 24 90" fill="rgba(255,255,255,0.34)" stroke="none"><path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <svg v-else width="24" height="90" viewBox="0 0 24 90" fill="currentColor" stroke="none"><path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
               </button>
               <!-- More + photos — JinniChat rec-card pattern (founder
                    2026-09-07): centred "More" text pill, 40px photo roundel
@@ -1232,4 +1232,13 @@ export default {
   .ex-card .ex-card-acts--bottom, .ex-card .ex-save { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
   .ex-card.is-center .ex-card-acts--bottom, .ex-card.is-center .ex-save { opacity: 1; pointer-events: auto; }
 }
+
+/* Card buttons get a tone (founder 2026-09-08: white glass was invisible):
+   gold-tinted glass day, violet night — white glyphs stay. */
+.ex-act-more, .ex-act--photo { background: rgba(184,134,44,0.5) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7) !important; }
+.ex-act-more:hover, .ex-act--photo:hover { background: rgba(184,134,44,0.68) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.95) !important; }
+.explore.night-mode .ex-act-more, .explore.night-mode .ex-act--photo { background: rgba(139,92,246,0.5) !important; }
+.explore.night-mode .ex-act-more:hover, .explore.night-mode .ex-act--photo:hover { background: rgba(139,92,246,0.68) !important; }
+.ex-save { color: rgba(233,196,106,0.85); }
+.explore.night-mode .ex-save { color: rgba(192,132,252,0.85); }
 </style>
