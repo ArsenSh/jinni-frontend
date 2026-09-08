@@ -18,11 +18,7 @@
            gradient — same treatment as the other conversion buttons. -->
       <div class="ex-head-cta">
         <button class="ex-back" @click="goBack">
-          <svg width="16" height="16" viewBox="9 -2 40 44" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M14 26c0 8 5.4 12 12.5 12S39 34 39 26c0-1.5-.3-2.9-.8-4.2L46 17l-6.5 1.6C37 14.6 32.6 12 27 12c-8 0-13 6-13 14z"/>
-            <path d="M22 6h9"/>
-            <path d="M26.5 -1l1 2.8 2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1z" fill="currentColor" stroke="none"/>
-          </svg>
+          <img src="/images/bottle.png?v=3" class="ex-back-lamp" alt=""/>
           {{ t('explore.back_chat') || 'Meet Jinni' }}
         </button>
         <!-- Preferences round-trip: onboarding returns here (returnTo), and the
@@ -122,7 +118,7 @@
           <!-- TripAdvisor-style borderless tile: rounded image with actions on
                it, name + meta as plain text below on the page background. -->
           <div v-for="(p, pi) in categories[c]" :key="c + p.placeId"
-               class="ex-card" :class="p.tier ? 'ex-card--' + p.tier : ''"
+               class="ex-card" :class="[p.tier ? 'ex-card--' + p.tier : '', { 'is-center': (railIx[c] || 0) === pi }]"
                @click="openPlace(p)">
             <div class="ex-card-imgwrap">
               <img v-if="p.image" class="ex-card-img" :src="imgUrl(p.image)" :alt="p.name"
@@ -1221,4 +1217,12 @@ export default {
 /* Family hovers (Meet Jinni / Ask Jinni had none after the chip restyle) */
 .ex-back:hover { background: var(--ex-glass-2); }
 .ex-footer-cta:hover { background: var(--ex-glass-2); }
+
+.ex-back-lamp { width: 19px; height: 19px; object-fit: contain; }
+/* Mobile: actions belong to the SETTLED card only — as a card snaps to
+   center its buttons fade in; neighbors stay clean imagery. */
+@media (max-width: 768px) {
+  .ex-card .ex-card-acts--bottom, .ex-card .ex-save { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+  .ex-card.is-center .ex-card-acts--bottom, .ex-card.is-center .ex-save { opacity: 1; pointer-events: auto; }
+}
 </style>

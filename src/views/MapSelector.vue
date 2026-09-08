@@ -317,13 +317,14 @@ export default {
         const paintZoom = (container) => {
           const set = (el, props) => Object.entries(props).forEach(([k, v]) => el.style.setProperty(k, v, 'important'));
           set(container, {
-            border: 'none', 'border-radius': '12px', overflow: 'hidden',
-            'margin-top': '52px', /* clears the floating My Location button */
-            background: zNight ? 'rgba(17,25,52,0.78)' : 'rgba(255,251,240,0.78)',
+            border: 'none', 'border-radius': '14px', overflow: 'hidden',
+            'margin-top': 'calc(env(safe-area-inset-top, 0px) + 60px)',
+            'margin-right': '4px',
+            background: zNight ? 'rgba(40,30,62,0.5)' : 'rgba(255,251,245,0.6)',
             'box-shadow': zNight
-              ? 'inset 0 0 0 1px rgba(167,139,250,0.38), inset 0 1px 0 rgba(185,208,255,0.22)'
-              : 'inset 0 0 0 1px rgba(160,82,45,0.3), inset 0 1px 0 rgba(255,255,255,0.9)',
-            'backdrop-filter': 'blur(14px) saturate(180%)', '-webkit-backdrop-filter': 'blur(14px) saturate(180%)',
+              ? 'inset 0 0 0 1px rgba(167,139,250,0.25), inset 0 1px 0 rgba(185,208,255,0.15)'
+              : 'inset 0 0 0 1px rgba(160,82,45,0.22), inset 0 1px 0 rgba(255,255,255,0.8)',
+            'backdrop-filter': 'blur(16px) saturate(180%)', '-webkit-backdrop-filter': 'blur(16px) saturate(180%)',
           });
           container.querySelectorAll('a').forEach((el, i) => {
             set(el, { border: 'none', background: 'transparent' });
@@ -732,8 +733,8 @@ export default {
 /* Location capsule — glacier pill floating over the map (replaces the
    three-row panel; same glass recipes as the zoom controls). */
 .location-capsule{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:999;max-width:min(560px,calc(100% - 28px));border-radius:22px;padding:11px 16px;cursor:pointer;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);transition:background .25s ease}
-.location-capsule.day-mode{background:rgba(255,251,245,0.74);color:#3c2a1e;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.25),inset 0 1px 0 rgba(255,255,255,0.8),0 0 18px -2px rgba(0,0,0,0.28)}
-.location-capsule.night-mode{background:rgba(17,25,52,0.68);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.3),inset 0 1px 0 rgba(185,208,255,0.18),0 0 18px -2px rgba(0,0,0,0.5)}
+.location-capsule.day-mode{background:rgba(255,251,245,0.62);color:#3c2a1e;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.22),inset 0 1px 0 rgba(255,255,255,0.8),0 0 18px -2px rgba(0,0,0,0.22)}
+.location-capsule.night-mode{background:rgba(40,30,62,0.5);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25),inset 0 1px 0 rgba(185,208,255,0.15),0 0 18px -2px rgba(0,0,0,0.4)}
 .location-capsule.flash{animation:capsule-flash 0.9s ease-out}
 @keyframes capsule-flash{0%{filter:brightness(1.3) saturate(1.25)}100%{filter:none}}
 .capsule-line{display:flex;align-items:center;gap:8px;min-width:0}
@@ -757,22 +758,22 @@ export default {
 
 /* ── Floating chrome (headerless layout, founder 2026-09-08) ───────────── */
 .float-btn{position:fixed;z-index:1001;width:42px;height:42px;border-radius:14px;border:none;cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:background .18s}
-.map-selector-page.day-mode .float-btn{background:rgba(255,251,240,0.78);color:#A0522D;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.3),inset 0 1px 0 rgba(255,255,255,0.9)}
+.map-selector-page.day-mode .float-btn{background:rgba(255,251,245,0.6);color:#A0522D;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.22),inset 0 1px 0 rgba(255,255,255,0.8)}
 .map-selector-page.day-mode .float-btn:hover{background:rgba(240,221,170,0.85)}
-.map-selector-page.night-mode .float-btn{background:rgba(17,25,52,0.78);color:#c9b3f5;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.38),inset 0 1px 0 rgba(185,208,255,0.22)}
+.map-selector-page.night-mode .float-btn{background:rgba(40,30,62,0.5);color:#c9b3f5;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25),inset 0 1px 0 rgba(185,208,255,0.15)}
 .map-selector-page.night-mode .float-btn:hover{background:rgba(139,92,246,0.26)}
 .float-back{top:calc(env(safe-area-inset-top, 0px) + 14px);left:14px}
 .float-locate{top:calc(env(safe-area-inset-top, 0px) + 14px);right:14px}
 .map-selector-page .search-container{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 14px);left:50%;transform:translateX(-50%);width:min(480px,calc(100vw - 132px));padding:0;z-index:1000;background:transparent!important;box-shadow:none!important;backdrop-filter:none;-webkit-backdrop-filter:none}
-.map-selector-page.day-mode .search-input{background:rgba(255,251,240,0.8);box-shadow:inset 0 0 0 1px rgba(160,82,45,0.3),inset 0 1px 0 rgba(255,255,255,0.9)}
-.map-selector-page.night-mode .search-input{background:rgba(17,25,52,0.8);box-shadow:inset 0 0 0 1px rgba(167,139,250,0.38),inset 0 1px 0 rgba(185,208,255,0.22)}
+.map-selector-page.day-mode .search-input{background:rgba(255,251,245,0.6);box-shadow:inset 0 0 0 1px rgba(160,82,45,0.22),inset 0 1px 0 rgba(255,255,255,0.8)}
+.map-selector-page.night-mode .search-input{background:rgba(40,30,62,0.5);box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25),inset 0 1px 0 rgba(185,208,255,0.15)}
 .map-selector-page .market-notice{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 66px);left:50%;transform:translateX(-50%);z-index:999;max-width:min(480px,calc(100vw - 32px))}
 @media (max-width:520px){.map-selector-page .search-container{width:calc(100vw - 128px)}}
 
 /* Entry hint — glacier chip that introduces the page, then dissolves */
 .map-hint{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);z-index:1002;pointer-events:none;padding:12px 22px;border-radius:999px;font-size:0.95rem;font-weight:600;backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
-.map-selector-page.day-mode .map-hint{background:rgba(255,251,245,0.78);color:#8b5e1a;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.3),inset 0 1px 0 rgba(255,255,255,0.9),0 0 20px -4px rgba(212,175,55,0.5)}
-.map-selector-page.night-mode .map-hint{background:rgba(17,25,52,0.78);color:#d9c2f7;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.4),inset 0 1px 0 rgba(185,208,255,0.22),0 0 20px -4px rgba(139,92,246,0.55)}
+.map-selector-page.day-mode .map-hint{background:rgba(255,251,245,0.62);color:#8b5e1a;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.22),inset 0 1px 0 rgba(255,255,255,0.8),0 0 20px -4px rgba(212,175,55,0.4)}
+.map-selector-page.night-mode .map-hint{background:rgba(40,30,62,0.55);color:#d9c2f7;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25),inset 0 1px 0 rgba(185,208,255,0.15),0 0 20px -4px rgba(139,92,246,0.45)}
 .hint-fade-leave-active{transition:opacity 0.6s ease}
 .hint-fade-leave-to{opacity:0}
 /* Themed leaflet popup ("You are here" was white-on-anything) */
