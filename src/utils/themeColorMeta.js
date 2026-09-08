@@ -14,7 +14,11 @@
 // freshly inserted one — so a changed color REPLACES the node.
 
 const SLOTS = [
-    { media: '(pointer: coarse)', pick: (c) => c.bottom },
+    // 2026-09-09: coarse now carries TOP (was bottom). Old iOS tints its
+    // WHOLE chrome incl. the top strip from this meta (peach floors = dark-
+    // orange tops on the old iPhone); the device that wanted bottom now runs
+    // iOS 26, which ignores theme-color entirely. Old bottom bar reads <html>.
+    { media: '(pointer: coarse)', pick: (c) => c.top },
     { media: '(pointer: fine)', pick: (c) => c.top },
 ];
 
