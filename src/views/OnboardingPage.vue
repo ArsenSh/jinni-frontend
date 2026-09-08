@@ -1137,7 +1137,7 @@ export default {
 @media (max-width:768px){.day-mode .card{background:rgba(255,255,255,0.62);box-shadow:0 2px 10px rgba(139,69,19,0.07),inset 0 1px 0 rgba(255,255,255,0.6)}}
 
 /* ========== NIGHT MODE ========== */
-.night-mode{background:linear-gradient(180deg, #0a0118 0%, #1a0b2e 40%, #16213e 100%);color:#e2e8f0}
+.night-mode{background:linear-gradient(180deg, #0a0118 0%, #1a0b2e 45%, #141031 78%, #0a0118 100%);color:#e2e8f0}
 .night-mode .page-title{color:#e2e8f0}
 .night-mode .subtitle{color:#94a3b8}
 .night-mode .card{background:rgba(139,92,246,0.07);box-shadow:0 0 3px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.10)}

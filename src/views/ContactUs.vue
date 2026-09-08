@@ -278,7 +278,7 @@ export default {
 .dropdown-enter-active,.dropdown-leave-active{transition:opacity 0.18s ease,transform 0.18s ease}
 .dropdown-enter-from,.dropdown-leave-to{opacity:0;transform:translateY(-6px)}
 /* ========== NIGHT MODE ========== */
-.contact-page.night-mode{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%);color:#e2e8f0}
+.contact-page.night-mode{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 45%,#141031 78%,#0a0118 100%);color:#e2e8f0}
 .night-mode .custom-select-trigger{background:rgba(255,255,255,0.06);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
 .night-mode .custom-select-trigger:hover{background:rgba(255,255,255,0.12)}
 .night-mode .custom-options{background:rgba(36,24,69,0.7);box-shadow:0 14px 34px rgba(0,0,0,0.45),inset 0 0 0 1px rgba(255,255,255,0.09)}
