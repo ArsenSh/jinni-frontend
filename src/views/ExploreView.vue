@@ -120,7 +120,7 @@
           <div v-for="(p, pi) in categories[c]" :key="c + p.placeId"
                class="ex-card" :class="[p.tier ? 'ex-card--' + p.tier : '', { 'is-center': (railIx[c] || 0) === pi }]"
                @click="openPlace(p)"
-               @touchstart.passive="cardTouchStart" @touchend.passive="cardTouchEnd" @touchcancel.passive="cardTouchEnd">
+               @touchstart.passive="cardTouchStart" @touchend.passive="cardTouchEnd">
             <div class="ex-card-imgwrap">
               <img v-if="p.image" class="ex-card-img" :src="imgUrl(p.image)" :alt="p.name"
                    :loading="pi < 4 ? 'eager' : 'lazy'" decoding="async"
