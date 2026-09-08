@@ -787,7 +787,7 @@ export default {
   --ex-active-shadow: 0 4px 14px rgba(212,175,55,0.35);
   --ex-act-bg: rgba(255,255,255,0.94); --ex-act-bg-hover: #ffffff; --ex-act-fg: #3c2a1e;
   --ex-arrow-bg: #ffffff; --ex-arrow-fg: #3c2a1e; --ex-arrow-line: rgba(160,82,45,0.22);
-  --ex-bg-grad: linear-gradient(180deg, #f9f5eb 0%, #f5edda 55%, #efe4cf 100%);
+  --ex-bg-grad: linear-gradient(180deg, #f9f5eb 0%, #f5edda 45%, #f3ead8 78%, #f9f5eb 100%);
   /* Chat's glacier active recipe (settings theme-btn.active, day) */
   --ex-chip-active-bg: rgba(255,255,255,0.92); --ex-chip-active-fg: #8a5a1e;
   --ex-chip-active-shadow: 0 1px 4px rgba(120,80,30,0.16);

@@ -959,7 +959,7 @@ export default {
   --header-bg:    transparent;
 }
 .share-page.day-mode {
-  --bg:           linear-gradient(180deg,#f9f5eb 0%,#f5edda 55%,#efe4cf 100%);
+  --bg:           linear-gradient(180deg, #f9f5eb 0%, #f5edda 45%, #f3ead8 78%, #f9f5eb 100%);
   --surface:      #ffffff;
   --surface2:     #f9f5eb;
   --border:       rgba(212,175,55,0.25);
