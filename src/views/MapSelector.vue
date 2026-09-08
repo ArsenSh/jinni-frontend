@@ -642,7 +642,7 @@ export default {
 .day-mode .search-input::placeholder{color:rgba(92,74,66,0.7)}
 .day-mode .search-input:focus{outline:none;background:rgba(255,255,255,0.66);box-shadow:inset 0 1px 0 rgba(255,255,255,0.55)}
 .day-mode .clear-btn:hover{background:rgba(212,175,55,0.15)}
-.day-mode .search-results{background:rgba(255,251,245,0.74);box-shadow:0 0 30px rgba(0,0,0,0.18),inset 0 0 0 1px rgba(255,255,255,0.45)}
+.day-mode .search-results{background:rgba(255,251,245,0.55);box-shadow:0 0 30px rgba(0,0,0,0.15),inset 0 0 0 1px rgba(255,255,255,0.45)}
 .day-mode .search-result-item:hover{background:rgba(212,175,55,0.1)}
 .day-mode .result-name{color:#3c2a1e}
 .day-mode .result-address{color:#5c4a42;opacity:0.85}
@@ -671,7 +671,7 @@ export default {
 .night-mode .search-input::placeholder{color:rgba(226,232,240,0.5)}
 .night-mode .search-input:focus{outline:none;background:rgba(255,255,255,0.1);box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
 .night-mode .clear-btn:hover{background:rgba(139,92,246,0.15)}
-.night-mode .search-results{background:rgba(40,30,62,0.62);box-shadow:inset 0 0 0 1px rgba(167,139,250,0.12),0 0 40px rgba(0,0,0,0.4)}
+.night-mode .search-results{background:rgba(40,30,62,0.45);box-shadow:inset 0 0 0 1px rgba(167,139,250,0.15),0 0 40px rgba(0,0,0,0.35)}
 .night-mode .search-result-item:hover{background:rgba(139,92,246,0.1)}
 .night-mode .result-name{color:#e2e8f0}
 .night-mode .result-address{color:#94a3b8;opacity:0.85}
