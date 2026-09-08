@@ -120,7 +120,7 @@
           <div v-for="(p, pi) in categories[c]" :key="c + p.placeId"
                class="ex-card" :class="[p.tier ? 'ex-card--' + p.tier : '', { 'is-center': (railIx[c] || 0) === pi }]"
                @click="openPlace(p)"
-               @touchstart.passive="cardTouchStart" @touchend.passive="cardTouchEnd">
+               @touchstart.passive="cardTouchStart">
             <div class="ex-card-imgwrap">
               <img v-if="p.image" class="ex-card-img" :src="imgUrl(p.image)" :alt="p.name"
                    :loading="pi < 4 ? 'eager' : 'lazy'" decoding="async"
@@ -191,7 +191,7 @@
         <p class="ex-footer-line">{{ t('explore.footer_line') || 'Jinni keeps discovering — this page grows as you explore' }}</p>
         <p class="ex-footer-ask">{{ t('explore.footer_ask') || "Didn't find what you were looking for?" }}</p>
         <button class="ex-footer-cta" @click="goChat">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <img src="/images/bottle.png?v=3" class="ex-back-lamp" alt=""/>
           <span class="jinni-grad">{{ t('explore.ask_chat') || 'Ask Jinni' }}</span>
         </button>
         <div class="ex-footer-links">
@@ -612,10 +612,14 @@ export default {
     // JinniChat's touch-reveal (its rec cards, ported 2026-09-08): buttons
     // live exactly while a finger is on the card — scroll included — and
     // fade 200ms after release.
-    cardTouchStart(e) { e.currentTarget.classList.add('touch-active'); },
-    cardTouchEnd(e) {
-      const el = e.currentTarget;
-      setTimeout(() => el.classList.remove('touch-active'), 200);
+    cardTouchStart(e) {
+      // Founder 2026-09-08: no fade on finger lift — the reveal persists on
+      // the last-touched card and moves only when another card is touched.
+      if (this._activeCardEl && this._activeCardEl !== e.currentTarget) {
+        this._activeCardEl.classList.remove('touch-active');
+      }
+      this._activeCardEl = e.currentTarget;
+      e.currentTarget.classList.add('touch-active');
     },
     // Long rails compress into 12 proportional page-dots (30 dots would wrap);
     // short rails keep one dot per card.
@@ -894,7 +898,7 @@ export default {
 
 /* Sections + rails */
 .ex-section { max-width: 1200px; margin: 0 auto; padding: 22px 0 2px; scroll-margin-top: 64px; }
-.ex-section-head { display: flex; align-items: baseline; gap: 10px; margin: 0 64px 12px; }
+.ex-section-head { display: flex; align-items: baseline; gap: 10px; margin: 0 64px 20px; }
 .ex-section-title { margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; color: var(--ex-heading); }
 .ex-section-count { font-size: 0.82rem; color: var(--ex-muted); font-variant-numeric: tabular-nums; }
 
