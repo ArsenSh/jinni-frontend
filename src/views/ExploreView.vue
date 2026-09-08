@@ -857,9 +857,7 @@ export default {
    page — chips float as content; frosted glass + hairline appear only once
    real content scrolls underneath. */
 .ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 12px 0 0;
-  scrollbar-width: none; background: transparent; transition: background .25s ease, box-shadow .25s ease;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); }
+  scrollbar-width: none; background: transparent; transition: background .25s ease, box-shadow .25s ease; }
 .ex-nav.is-stuck { background: color-mix(in srgb, var(--ex-bg) 72%, transparent);
   backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
   box-shadow: 0 1px 0 rgba(160,82,45,0.18); }
