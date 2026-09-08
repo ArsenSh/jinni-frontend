@@ -401,7 +401,7 @@
     "lang_title": "Langue préférée",
     "lang_desc": "Sélectionnez les langues qui vous conviennent",
     "get_recommendations": "Rencontrez Jinni",
-    "save_preferences": "Enregistrer les préférences",
+    "save_preferences": "Enregistrer",
     "complete_warning": "Complétez toutes les sections à 100%",
     "budget_validation_error": "Entrez une fourchette de budget valide (min ≤ max)",
     "unexpected_error": "Une erreur inattendue s'est produite. Veuillez réessayer.",

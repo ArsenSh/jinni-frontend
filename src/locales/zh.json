@@ -401,7 +401,7 @@
     "lang_title": "首选语言",
     "lang_desc": "选择您熟悉的语言",
     "get_recommendations": "认识 Jinni",
-    "save_preferences": "保存偏好",
+    "save_preferences": "保存",
     "complete_warning": "将所有部分完成到100%",
     "budget_validation_error": "输入有效的预算范围（最低 ≤ 最高）",
     "unexpected_error": "发生意外错误。请重试。",

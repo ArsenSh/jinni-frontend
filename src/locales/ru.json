@@ -401,7 +401,7 @@
     "lang_title": "Предпочтительный язык",
     "lang_desc": "Выберите языки, которые вам удобны",
     "get_recommendations": "Встречайте Jinni",
-    "save_preferences": "Сохранить предпочтения",
+    "save_preferences": "Сохранить",
     "complete_warning": "Заполните все разделы до 100%",
     "budget_validation_error": "Введите корректный диапазон бюджета (мин ≤ макс)",
     "unexpected_error": "Произошла непредвиденная ошибка. Попробуйте снова.",

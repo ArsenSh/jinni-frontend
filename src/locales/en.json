@@ -401,7 +401,7 @@
     "lang_title": "Preferred Language",
     "lang_desc": "Select languages you're comfortable with",
     "get_recommendations": "Meet Jinni",
-    "save_preferences": "Save Preferences",
+    "save_preferences": "Save",
     "complete_warning": "Complete all sections to 100%",
     "budget_validation_error": "Enter a valid budget range (min ≤ max)",
     "unexpected_error": "An unexpected error occurred. Please try again.",
