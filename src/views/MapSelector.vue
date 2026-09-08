@@ -4,7 +4,7 @@
          floats top-left, search top-middle, locate above the capsule;
          confirm lives in the capsule. The map gets everything else. -->
     <transition name="hint-fade">
-      <div v-if="showHint" class="map-hint">✨ {{ $t('map_selector.pick_hint') }}</div>
+      <div v-if="showHint" class="map-hint">{{ $t('map_selector.pick_hint') }}</div>
     </transition>
     <button @click="goBack" class="float-btn float-back" :title="$t('map_selector.back')">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
