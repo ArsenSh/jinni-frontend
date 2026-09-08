@@ -26,18 +26,20 @@ export default {
 </script>
 
 <style scoped>
-/* TALL BACKGROUND (founder 2026-09-08): the card lives in AuthModal's
-   fixed overlay and never moves; the PAGE behind is deliberately taller
-   than the phone screen so the document really scrolls — which puts auth
-   in the same family as Contact/Landing, where the scroll-driven
-   jinni-sky-shift animation (genie-theme.css) colors both bounce edges. */
+/* CONTACT-US CONSTRUCTION (founder-diagnosed 2026-09-09): the modal's
+   fixed overlay was a SECOND scroll surface — its 96px safe-area bottom
+   padding makes it internally scrollable on phones, so it ate the finger
+   drag and the document (and jinni-sky-shift) never scrolled. Here the
+   overlay is flattened into the page flow (see the override below), so
+   auth scrolls as ONE document, physics identical to ContactUs. On the
+   landing page the modal stays a true fixed overlay. */
 .auth-page {
   position: relative;
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  padding: 20px;
+  padding: 0;
   /* Deliberately TRANSPARENT: AuthModal's fixed full-screen overlay (night
    * radial / day desert gradient) is the page's visible background, and
    * App.vue derives the browser-chrome colors from the rendered DOM — an
@@ -57,5 +59,22 @@ export default {
 /* Night was transparent -> white Safari bars once the page became
    scrollable; paint it the overlay's own edge black-violet. */
 .auth-page:not(.day-mode){background:#05020d}
+
+/* Flatten the overlay into the document flow on this page only.
+   (AuthModal's root carries this component's scope attr, so a plain
+   scoped descendant selector reaches and outweighs its own rule.) */
+.auth-page .auth-modal-overlay {
+  position: static;
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+}
+@media (pointer: coarse) {
+  .auth-page .auth-modal-overlay { min-height: 145vh; }
+}
+/* Day: same sky floor as the page so bounce, bars and background agree. */
+.auth-page.day-mode .auth-modal-overlay.day-mode {
+  background: linear-gradient(180deg,#f9f5eb 0%,#e0a082 30%,#e0a082 100%);
+}
 
 </style>
