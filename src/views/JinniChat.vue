@@ -7939,7 +7939,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    no zoom, ~200px) — height:auto lets aspect-ratio govern over the base 140px.
    Desktop overrides with a fixed 190px (a tuned value; easy to change later). */
 .recommendation-grid .rec-image{height:auto;aspect-ratio:16 / 9}
-@media (min-width:769px){.recommendation-grid .rec-image{height:190px}}
+@media (min-width:769px){.recommendation-grid .rec-image{height:200px}}
 .disabled-cooldown .overlay-actions{opacity:0.5}
 .genie-chat-container.night-mode .input-wrapper textarea.input-disabled::placeholder{color:rgba(226,232,240,0.5);opacity:1}
 .genie-chat-container.day-mode .input-wrapper textarea.input-disabled::placeholder{color:#8B4513;opacity:0.9}
@@ -8619,7 +8619,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Saved cards match the ordinary in-chat card image (16:9, 190px desktop —
    settled sizes): outside .recommendation-grid they fell to the 140px base. */
 .saved-rec-list .rec-image{height:auto;aspect-ratio:16 / 9}
-@media (min-width:769px){.saved-rec-list .rec-image{height:190px}}
+@media (min-width:769px){.saved-rec-list .rec-image{height:200px}}
 .saved-rec-list .recommendation-card{min-height:230px;width:100%}
 .saved-rec-list .rec-details{flex:1;display:flex;flex-direction:column}
 .saved-rec-list .rec-metadata{margin-top:auto}
