@@ -3215,7 +3215,7 @@ export default {
 <style scoped>
 /* ===== LAYOUT ===== */
 .biz-dash { display: flex; height: 100vh; overflow: hidden; }
-.biz-dash.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 40%, #16213e 100%); color: #c4b0ff; }
+.biz-dash.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 45%, #141031 78%, #0a0118 100%); color: #c4b0ff; }
 .biz-dash.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 45%, #f3ead8 78%, #f9f5eb 100%); color: #3c2a1e; }
 
 /* ===== SIDEBAR — mirrors JinniChat exactly ===== */
