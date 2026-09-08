@@ -58,7 +58,7 @@ export default {
 .auth-page.day-mode{background:linear-gradient(180deg,#f9f5eb 0%,#e0a082 30%,#e0a082 100%)}
 /* Night was transparent -> white Safari bars once the page became
    scrollable; paint it the overlay's own edge black-violet. */
-.auth-page:not(.day-mode){background:#05020d}
+.auth-page:not(.day-mode){background:#000} /* = the night radial's edge color: tail and bounce merge seamlessly */
 
 /* Flatten the overlay into the document flow on this page only.
    (AuthModal's root carries this component's scope attr, so a plain
