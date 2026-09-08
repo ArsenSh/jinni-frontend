@@ -45,5 +45,5 @@ export default {
    DesertSky covers the first viewport; the page floor carries its ending
    peach so scroll-past and overscroll stay seamless. Night needs nothing —
    the html base purple already matches StarrySky. */
-.auth-page.day-mode{background:#e0a082}
+.auth-page.day-mode{background:rgba(224,160,130,0.985)}
 </style>

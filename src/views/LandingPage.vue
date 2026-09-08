@@ -271,7 +271,7 @@ export default {
 }
 
 /* Below-sky continuation — DesertSky's ending peach (Discovery-style fix) */
-.landing-container.day-mode{background:#e0a082}
+.landing-container.day-mode{background:rgba(224,160,130,0.985)}
 </style>
 
 <style>
