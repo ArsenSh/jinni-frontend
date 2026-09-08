@@ -239,7 +239,16 @@ export default {
       // <body> backdrop: exposed when the iOS keyboard shifts the visual
       // viewport behind fixed-100vh shells. Carries the page's OWN computed
       // background image verbatim (or none for flat pages) over a solid color.
-      document.body.style.backgroundImage = (paint && paint.image) ? paint.image : 'none';
+      // OLD-iOS GUARD (founder's old-iPhone report 2026-09-09): pre-26 Safari
+      // paints the TOP strip from body's background and TILES a body gradient
+      // beyond the page — the tile above ends with the gradient's BOTTOM
+      // color, so peach-floored day pages (contact/legal) showed a dark-
+      // orange top strip, and chat's slightly different floor tinted its top.
+      // iOS 26 ignores body images for chrome, so gate the gradient copy on
+      // the same engine capability the sky-shift fix needs (scroll timeline);
+      // old engines keep a solid body — the rule device-proven 2026-08-21.
+      const modernChrome = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('animation-timeline: scroll()');
+      document.body.style.backgroundImage = (modernChrome && paint && paint.image) ? paint.image : 'none';
       document.body.style.backgroundColor = top;
       // <meta theme-color> — SPLIT by pointer type (2026-08-22): iPhone
       // Safari's URL bar sits at the BOTTOM (coarse pointer → bottom edge,
