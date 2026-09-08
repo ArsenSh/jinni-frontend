@@ -716,7 +716,7 @@ export default {
 @media(max-width:480px){.auth-modal-overlay{padding:0 0 calc(env(safe-area-inset-bottom, 0px) + 96px)}.auth-card{padding:23px}.close-button{top:12px;right:12px}.verification-input{font-size:1rem;letter-spacing:.15rem;padding:12px 16px}.timer{font-size:.9rem;padding:6px 12px}.verification-info{padding:20px}.back-btn{font-size:.9rem;padding:10px 20px}}
 .back-btn:focus,.resend-btn:focus{outline:2px solid #d4af37;outline-offset:2px}
 .bottle-container{display:flex;justify-content:center;align-items:center;margin-bottom:0}
-.bottle-image{width:160px;height:88px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(212,175,55,.3))}
+.bottle-image{width:190px;height:104px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(212,175,55,.3))}
 .auth-modal-overlay.day-mode{background:linear-gradient(to bottom,#f9f5eb 0%,#f2e3d3 8%,#ecd6c2 16%,#e9ccb3 24%,#ebc4a6 32%,#efbc9b 40%,#f3b692 48%,#f7be98 56%,#f9c8a0 64%,#f5c099 72%,#f0b893 80%,#ebb08d 88%,#e6a888 96%,#e0a082 100%)}
 .auth-modal-overlay.day-mode .auth-card{background:rgba(255,255,255,.95);box-shadow:0 0 40px rgba(139,107,61,.2)}
 .auth-modal-overlay.day-mode .auth-subtitle{color:#5a4a42}
