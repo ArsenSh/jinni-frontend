@@ -287,7 +287,6 @@ export default {
 .night-mode .language-selector button { color: #f5e6c8; box-shadow: 0 0 10px rgba(212,175,55,0.1) }
 .night-mode .language-selector button:hover { background: rgba(212,175,55,0.18); box-shadow: 0 0 15px rgba(212,175,55,0.3) }
 .night-mode .language-selector button.active { background: rgba(212,175,55,0.25); box-shadow: 0 0 18px rgba(212,175,55,0.4) }
-.night-mode .footer { background: rgba(20,10,45,0.45); backdrop-filter: blur(6px); border-top: none }
 .night-mode .footer-links a { color: #FF8C00 }
 .night-mode .footer-copyright { color: rgba(245,230,200,0.6) }
 /* ── Responsive ──────────────────────────────────────────────────────────── */
