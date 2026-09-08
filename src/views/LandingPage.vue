@@ -223,7 +223,7 @@ export default {
 /* ── Day mode ──────────────────────────────────────────────────────────────── */
 .day-mode .hero p, .day-mode .footer-copyright { color: #5a3c2e; text-shadow: 0 0 2px rgba(255,255,255,0.3) }
 .day-mode .magic-subtitle { color: #5a3c2e; text-shadow: 0 0 7px rgba(255,255,255,0.4) }
-.day-mode .feature-card { background: rgba(255,248,240,0.45); backdrop-filter: blur(6px); border-image: linear-gradient(145deg, #d9a770, #c9915f, #b87d4e) 1 }
+.day-mode .feature-card { background: rgba(255,248,240,0.45); backdrop-filter: blur(6px); border-image: linear-gradient(145deg, #d9a770, #c9915f, #b87d4e) 1; box-shadow: 0 0 18px rgba(160,100,30,0.09), 0 0 20px rgba(0,0,0,0.06) }
 .day-mode .feature-card p { color: #5a3c2e }
 .day-mode .feature-card h3 { color: #b87d4e; text-shadow: 0 0 2px rgba(255,255,255,0.3) }
 .day-mode .footer-links a { color: #b87d4e }
