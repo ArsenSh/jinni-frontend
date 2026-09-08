@@ -18,6 +18,11 @@
            gradient — same treatment as the other conversion buttons. -->
       <div class="ex-head-cta">
         <button class="ex-back" @click="goBack">
+          <svg width="16" height="16" viewBox="9 -2 40 44" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 26c0 8 5.4 12 12.5 12S39 34 39 26c0-1.5-.3-2.9-.8-4.2L46 17l-6.5 1.6C37 14.6 32.6 12 27 12c-8 0-13 6-13 14z"/>
+            <path d="M22 6h9"/>
+            <path d="M26.5 -1l1 2.8 2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1z" fill="currentColor" stroke="none"/>
+          </svg>
           {{ t('explore.back_chat') || 'Meet Jinni' }}
         </button>
         <!-- Preferences round-trip: onboarding returns here (returnTo), and the
@@ -151,7 +156,7 @@
               <div class="ex-card-acts ex-card-acts--bottom" @click.stop>
                 <button class="ex-act-more" @click="openInfo(p, c)">{{ t('chat.recommendations.more') || 'More' }}</button>
                 <button class="ex-act ex-act--photo" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
                 </button>
               </div>
             </div>
@@ -969,7 +974,7 @@ export default {
 /* Same family as the page's chip buttons (founder 2026-09-08: the navy/
    violet variant didn't sit right) — neutral glass, page-text chevron. */
 .ex-rail-btn { background: var(--ex-chip); color: var(--ex-text); box-shadow: var(--ex-ring), 0 0 5px #0000001a; }
-.ex-rail-btn:hover { background: var(--ex-hover, var(--ex-chip)); }
+.ex-rail-btn:hover { background: var(--ex-glass-2); }
 .ex-rail-btn--prev { left: 8px; }
 .ex-rail-btn--next { right: 8px; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
@@ -1206,4 +1211,8 @@ export default {
 .ex-footer-links { display: flex; gap: 10px; margin-top: 16px; font-size: 0.76rem; opacity: 0.55; }
 .ex-footer-links a { color: inherit; text-decoration: none; }
 .ex-footer-links a:hover { text-decoration: underline; }
+
+/* Family hovers (Meet Jinni / Ask Jinni had none after the chip restyle) */
+.ex-back:hover { background: var(--ex-glass-2); }
+.ex-footer-cta:hover { background: var(--ex-glass-2); }
 </style>
