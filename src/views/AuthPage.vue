@@ -45,5 +45,5 @@ export default {
    DesertSky covers the first viewport; the page floor carries its ending
    peach so scroll-past and overscroll stay seamless. Night needs nothing —
    the html base purple already matches StarrySky. */
-.auth-page.day-mode{background:linear-gradient(180deg,#f9f5eb 0%,#e0a082 30%,#e0a082 78%,#f9f5eb 100%)}
+.auth-page.day-mode{background:linear-gradient(180deg,#f9f5eb 0%,#e0a082 30%,#e0a082 100%)}
 </style>
