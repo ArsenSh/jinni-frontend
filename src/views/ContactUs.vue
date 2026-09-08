@@ -382,5 +382,5 @@ export default {
 }
 
 /* Below-sky continuation — DesertSky's ending peach (Discovery-style fix) */
-.contact-page.day-mode{background:rgba(224,160,130,0.985)}
+.contact-page.day-mode{background:linear-gradient(180deg,#f9f5eb 0%,#e0a082 30%,#e0a082 100%)}
 </style>
