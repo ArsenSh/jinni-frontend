@@ -26,7 +26,7 @@
         <button class="ex-pref" @click="goPreferences">
           <!-- same glyph as JinniChat's profile-menu Preferences item -->
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 9 4-18 3 9h4"/></svg>
-          {{ t('explore.preferences') || 'Preferences' }}
+          <span class="jinni-grad">{{ t('explore.preferences') || 'Preferences' }}</span>
         </button>
       </div>
     </header>
@@ -790,7 +790,7 @@ export default {
   --ex-search-bg: rgba(255,255,255,0.6);
 }
 .explore.night-mode {
-  --ex-bg: #0a0118; --ex-heading: #c084fc; --ex-text: #d5dce4; --ex-muted: #94a3b8;
+  --ex-bg: #0a0118; --ex-heading: #c084fc; --ex-text: #c8cee2; --ex-muted: #94a3b8;
   --ex-glass: rgba(40,30,62,0.55); --ex-glass-2: rgba(255,255,255,0.10);
   --ex-ring: inset 0 0 0 1px rgba(167,139,250,0.14); --ex-line: rgba(255,255,255,0.10);
   --ex-chip: rgba(40,30,62,0.62); --ex-chip-text: #cbd5e1;
@@ -1254,4 +1254,12 @@ export default {
 
 /* Brand-gradient text — the JinniChat app-name recipe verbatim */
 .jinni-grad{background:linear-gradient(45deg,#D4AF37,#FF8C00);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#FFD700}
+
+/* Toned glyphs/text on card buttons + ribbon outline (founder 2026-09-08):
+   pale gold day / pale violet night instead of pure white. */
+.ex-act-more, .ex-act--photo { color: #ffe9b8 !important; }
+.explore.night-mode .ex-act-more, .explore.night-mode .ex-act--photo { color: #e9dcff !important; }
+.ex-save svg path { stroke: rgba(255,231,176,0.95); stroke-width: 2; }
+.explore.night-mode .ex-save svg path { stroke: rgba(216,180,254,0.95); }
+.ex-pref { color: #D4AF37; }
 </style>
