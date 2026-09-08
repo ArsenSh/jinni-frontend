@@ -187,7 +187,7 @@ export default {
 .static-bottle { width: 150px; height: auto; max-height: 250px; margin: auto; display: block }
 .hero h1 { font-size: 3.5rem; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .hero p { font-size: 1.3rem; margin-bottom: 2rem; color: #e0e0e0 }
-.features { padding: 1rem 2rem 4rem 2rem; position: relative; z-index: 2 }
+.features { padding: 2rem 1rem 4rem 1rem; position: relative; z-index: 2 }
 .features-container { max-width: 1200px; margin: 0 auto }
 .features-heading { text-align: center; margin-bottom: 3rem }
 .features h2 { font-family: 'Cinzel', serif; font-style: normal; font-size: 2.5rem; margin-bottom: 2rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
