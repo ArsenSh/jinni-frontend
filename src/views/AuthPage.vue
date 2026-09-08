@@ -15,6 +15,12 @@ import AuthModal from '@/components/AuthModal.vue'
 export default {
   name: 'AuthPage',
   components: { AuthModal },
+  computed: {
+    // Same source as AuthModal's currentTheme. This was MISSING: undefined
+    // isNightMode meant day-mode was stamped even at night, so the painter
+    // gave Safari's bars day cream ("white") under the dark modal.
+    isNightMode() { return this.$store.getters['settings/effectiveTheme'] === 'dark' }
+  },
   methods: {
     handleClose() { this.$router.push('/') },
     handleLoginSuccess(authData) {

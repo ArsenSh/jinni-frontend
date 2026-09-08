@@ -653,7 +653,7 @@ export default {
  * shadow. The overlay's mobile bottom padding below keeps the SIGN-IN card
  * ending above the bar (bar shows the sandy/night overlay); the taller
  * sign-up form accepts a light bar while the card is beneath it. */
-.auth-container{width:100%;max-width:450px;padding:20px;position:relative;margin:auto}
+.auth-container{width:100%;max-width:450px;padding:5px;position:relative;margin:auto}
 .close-button{position:absolute;top:20px;right:20px;background:0 0;border:none;color:#aaa;font-size:1.8rem;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all .3s ease;z-index:10;border-radius:50%}
 .close-button:hover{color:#d4af37;background:rgba(255,255,255,.1)}
 .auth-card{background:0 0;backdrop-filter:blur(15px);border-radius:20px;padding:30px;width:100%;box-shadow:0 0 40px #000;position:relative;z-index:2;overflow-y:auto;overscroll-behavior:contain}
