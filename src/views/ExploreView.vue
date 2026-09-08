@@ -9,10 +9,10 @@
            list and make a region look thin when it only holds a few finds;
            "so far / keeps growing" says the same thing while making clear
            Jinni is still enriching itself. -->
-      <p class="ex-intro">{{ t('explore.intro') || 'Places Jinni has discovered here so far — the list keeps growing.' }}</p>
       <p class="ex-sub" v-if="location && (location.city || location.country)">
         {{ [location.city, location.country].filter(Boolean).join(', ') }}
       </p>
+      <p class="ex-intro">{{ t('explore.intro') || 'Places Jinni has discovered here so far — the list keeps growing.' }}</p>
       <!-- The onboarding choices, visible (founder 2026-09-07): the page is
            personalized — say so. Location mode + style + interests as chips. -->
       <div v-if="prefChips.length" class="ex-pref-row">
