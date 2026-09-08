@@ -1216,17 +1216,17 @@ export default {
 .explore.night-mode .ex-pref-chip--interest .ex-pref-ic { color: #c084fc; }
 
 /* Footer — quiet sign-off, genie hand-back, muted legal row */
-.ex-footer { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 18px 44px; text-align: center; }
-.ex-footer-divider { display: flex; align-items: center; gap: 12px; width: min(340px, 70%); color: #b8862c; opacity: 0.8; margin-bottom: 8px; }
+.ex-footer { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 34px 18px 44px; text-align: center; }
+.ex-footer-divider { display: flex; align-items: center; gap: 12px; width: min(340px, 70%); color: #b8862c; opacity: 0.8; }
 .explore.night-mode .ex-footer-divider { color: #c084fc; }
 .ex-fd-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, currentColor); opacity: 0.4; }
 .ex-fd-line:last-child { background: linear-gradient(90deg, currentColor, transparent); }
 .ex-footer-line { margin: 0; font-size: 0.86rem; color: var(--ex-text); opacity: 0.75; max-width: 46ch; }
-.ex-footer-ask { margin: 8px 0 0; font-size: 0.92rem; font-weight: 600; color: var(--ex-text); }
-.ex-footer-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
+.ex-footer-ask { margin: 0; font-size: 0.92rem; font-weight: 600; color: var(--ex-text); }
+.ex-footer-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
   font-family: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring), 0 0 5px #0000001a;
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
-.ex-footer-links { display: flex; gap: 10px; margin-top: 16px; font-size: 0.76rem; opacity: 0.55; }
+.ex-footer-links { display: flex; gap: 10px; font-size: 0.76rem; opacity: 0.55; }
 .ex-footer-links a { color: inherit; text-decoration: none; }
 .ex-footer-links a:hover { text-decoration: underline; }
 
