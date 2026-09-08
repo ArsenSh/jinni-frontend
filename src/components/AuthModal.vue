@@ -646,7 +646,7 @@ export default {
 .password-hints { display: flex; gap: 8px; flex-wrap: wrap; padding: 2px 0 0 0; justify-content: center; }
 .password-hints span { font-size: 0.75rem; color: #666; transition: color 0.2s; }
 .password-hints span.met { color: #0c6; }
-.auth-modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,#1a0933 0%,#0f0520 50%,#05020d 80%,#000 100%);display:flex;align-items:flex-start;justify-content:center;z-index:1000;backdrop-filter:blur(5px);overflow-y:auto;padding:40px 20px}
+.auth-modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,#1a0933 0%,#0f0520 50%,#05020d 80%,#000 100%);display:flex;align-items:flex-start;justify-content:center;z-index:1000;backdrop-filter:blur(5px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:40px 20px}
 /* NOTE (2026-08-21): a fixed "bottom fade" shim (the JinniChat pattern) was
  * tried here to keep iOS Safari's glass bottom bar tinted while the white
  * card sits under it — removed at Arsen's call: every variant read as a
@@ -656,7 +656,7 @@ export default {
 .auth-container{width:100%;max-width:450px;padding:20px;position:relative;margin:auto}
 .close-button{position:absolute;top:20px;right:20px;background:0 0;border:none;color:#aaa;font-size:1.8rem;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:all .3s ease;z-index:10;border-radius:50%}
 .close-button:hover{color:#d4af37;background:rgba(255,255,255,.1)}
-.auth-card{background:0 0;backdrop-filter:blur(15px);border-radius:20px;padding:30px;width:100%;box-shadow:0 0 40px #000;position:relative;z-index:2;overflow-y:auto}
+.auth-card{background:0 0;backdrop-filter:blur(15px);border-radius:20px;padding:30px;width:100%;box-shadow:0 0 40px #000;position:relative;z-index:2;overflow-y:auto;overscroll-behavior:contain}
 .auth-card::-webkit-scrollbar{width:5px}
 .auth-card::-webkit-scrollbar-thumb{background:rgba(212,175,55,.5);border-radius:10px}
 .auth-header{text-align:center;margin-bottom:0}
