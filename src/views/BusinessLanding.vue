@@ -198,13 +198,13 @@ export default {
 .language-selector button.active { background: rgba(157,123,255,0.3); box-shadow: 0 0 15px rgba(157,123,255,0.5); animation: pulse 0.5s ease }
 .static-bottle { width: 150px; height: auto; max-height: 250px; margin: auto; display: block }
 /* ── Hero — matches LandingPage hero exactly ──────────────────────────────── */
-.hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2; padding: 2rem }
+.hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
 .hero-content { max-width: 800px; animation: fadeInUp 1s ease-out }
 .magic-title { font-family: 'Cinzel', serif; font-size: 3.5rem; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .magic-subtitle { font-family: 'Cinzel', serif; font-size: 1.3rem; max-width: 700px; margin: 0 auto 2rem; color: #e0e0e0; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 .hero-note { font-family: 'Cinzel', serif; font-size: 0.78rem; opacity: 0.45; margin: 1rem 0 0; color: #e0e0e0 }
 /* ── Features — matches LandingPage features section ─────────────────────── */
-.features { padding: 1rem 2rem 4rem 2rem; position: relative; z-index: 2 }
+.features { padding: 2rem 1rem 4rem 1rem; position: relative; z-index: 2 }
 .features-container { max-width: 1200px; margin: 0 auto }
 .features-heading { font-family: 'Cinzel', serif; text-align: center; margin-bottom: 3rem; font-size: 2.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; position: relative }
