@@ -599,7 +599,8 @@ export default {
 .search-icon{position:absolute;left:14px;pointer-events:none;z-index:2}
 .search-input{width:100%;padding:12px 40px 12px 44px;border-radius:12px;border:none;font-size:16px;font-family:inherit;transition:all 0.2s ease;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .clear-btn{position:absolute;right:10px;padding:6px;border:none;background:transparent;cursor:pointer;border-radius:8px;display:flex;align-items:center;transition:all 0.2s ease}
-.search-results{position:absolute;top:70px;left:20px;right:20px;max-height:300px;overflow-y:auto;border-radius:14px;z-index:1000;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}
+.search-results{position:absolute;top:70px;left:20px;right:20px;max-height:300px;overflow-y:auto;border-radius:14px;z-index:1000;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);scrollbar-width:none;-ms-overflow-style:none}
+.search-results::-webkit-scrollbar{display:none;width:0;height:0}
 .search-result-item{display:flex;align-items:center;gap:11px;padding:12px 16px;cursor:pointer;transition:background 0.2s ease}
 .search-result-item svg{flex-shrink:0}
 .result-info{flex:1;min-width:0}
