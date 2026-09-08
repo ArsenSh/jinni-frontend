@@ -332,9 +332,16 @@ export default {
               : 'inset 0 0 0 1px rgba(160,82,45,0.22), inset 0 1px 0 rgba(255,255,255,0.8)',
             'backdrop-filter': 'blur(16px) saturate(180%)', '-webkit-backdrop-filter': 'blur(16px) saturate(180%)',
           });
+          const hoverBg = zNight ? 'rgba(139,92,246,0.26)' : 'rgba(240,221,170,0.6)';
           container.querySelectorAll('a').forEach((el, i) => {
-            set(el, { border: 'none', background: 'transparent' });
+            // 42px to match the floating My Location button exactly
+            set(el, { border: 'none', background: 'transparent', width: '42px', height: '42px',
+              display: 'flex', 'align-items': 'center', 'justify-content': 'center' });
             if (i === 0) set(el, { 'box-shadow': `inset 0 -1px 0 ${zNight ? 'rgba(167,139,250,0.25)' : 'rgba(160,82,45,0.18)'}` });
+            // hover must be JS: the inline-important transparent background
+            // (needed to beat Leaflet's white) also beats any CSS :hover
+            el.addEventListener('mouseenter', () => el.style.setProperty('background', hoverBg, 'important'));
+            el.addEventListener('mouseleave', () => el.style.setProperty('background', 'transparent', 'important'));
           });
         };
         const ZoomControl = L.Control.extend({
