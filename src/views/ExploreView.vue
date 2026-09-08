@@ -959,14 +959,10 @@ export default {
 .ex-rail-btn { position: absolute; top: 131px; z-index: 5; width: 42px; height: 42px; border-radius: 14px; cursor: pointer;
   display: none; place-items: center; border: none; transition: background .18s, box-shadow .18s;
   backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); }
-.day-mode .ex-rail-btn { background: rgba(255,251,240,0.78); color: #A0522D;
-  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.3), inset 0 1px 0 rgba(255,255,255,0.9); }
-.day-mode .ex-rail-btn:hover { background: rgba(240,221,170,0.85);
-  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.45), inset 0 1px 0 rgba(255,255,255,0.95); }
-.night-mode .ex-rail-btn { background: rgba(17,25,52,0.78); color: #c9b3f5;
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.38), inset 0 1px 0 rgba(185,208,255,0.22); }
-.night-mode .ex-rail-btn:hover { background: rgba(139,92,246,0.26);
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.55), inset 0 1px 0 rgba(185,208,255,0.26); }
+/* Same family as the page's chip buttons (founder 2026-09-08: the navy/
+   violet variant didn't sit right) — neutral glass, page-text chevron. */
+.ex-rail-btn { background: var(--ex-chip); color: var(--ex-text); box-shadow: var(--ex-ring), 0 0 5px #0000001a; }
+.ex-rail-btn:hover { background: var(--ex-hover, var(--ex-chip)); }
 .ex-rail-btn--prev { left: 8px; }
 .ex-rail-btn--next { right: 8px; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
