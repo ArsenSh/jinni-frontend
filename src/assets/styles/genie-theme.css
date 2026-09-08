@@ -68,7 +68,6 @@ body.theme-light {
    scroll-timeline just keep the painter's solid color. */
 @supports (animation-timeline: scroll()) {
   body:has(.landing-container.day-mode),
-  body:has(.auth-page.day-mode),
   body:has(.business-landing.day-mode),
   body:has(.contact-page.day-mode),
   body:has(.legal-page.day-mode) {
@@ -79,15 +78,4 @@ body.theme-light {
 @keyframes jinni-sky-shift {
   from { background-color: #f9f5eb; }
   to   { background-color: #e0a082; }
-}
-
-/* Auth's scroll range is only the ~40px cushion, so tiny resting drift
-   nudged the from-color off pure cream (founder: "not matching 100%").
-   Its own keyframes hold cream through 40% of that little timeline. */
-@supports (animation-timeline: scroll()) {
-  body:has(.auth-page.day-mode) { animation-name: jinni-sky-shift-auth; }
-}
-@keyframes jinni-sky-shift-auth {
-  0%, 40% { background-color: #f9f5eb; }
-  100%    { background-color: #e0a082; }
 }
