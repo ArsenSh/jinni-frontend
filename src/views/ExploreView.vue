@@ -19,7 +19,7 @@
       <div class="ex-head-cta">
         <button class="ex-back" @click="goBack">
           <img src="/images/bottle.png?v=3" class="ex-back-lamp" alt=""/>
-          {{ t('explore.back_chat') || 'Meet Jinni' }}
+          <span class="jinni-grad">{{ t('explore.back_chat') || 'Meet Jinni' }}</span>
         </button>
         <!-- Preferences round-trip: onboarding returns here (returnTo), and the
              feed refetches on mount — section order follows the new interests. -->
@@ -192,7 +192,7 @@
         <p class="ex-footer-ask">{{ t('explore.footer_ask') || "Didn't find what you were looking for?" }}</p>
         <button class="ex-footer-cta" @click="goChat">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          {{ t('explore.ask_chat') || 'Ask Jinni' }}
+          <span class="jinni-grad">{{ t('explore.ask_chat') || 'Ask Jinni' }}</span>
         </button>
         <div class="ex-footer-links">
           <router-link to="/contact">{{ t('chat.profile.contact_us') || 'Contact' }}</router-link>
@@ -1227,11 +1227,9 @@ export default {
 .ex-footer-links a:hover { text-decoration: underline; }
 
 /* Family hovers (Meet Jinni / Ask Jinni had none after the chip restyle) */
-.ex-back { color: #b8862c; }
-.explore.night-mode .ex-back { color: #e9c46a; }
+.ex-back { color: #D4AF37; }
 .ex-back:hover { background: var(--ex-glass-2); }
-.ex-footer-cta { color: #b8862c; }
-.explore.night-mode .ex-footer-cta { color: #e9c46a; }
+.ex-footer-cta { color: #D4AF37; }
 .ex-footer-cta:hover { background: var(--ex-glass-2); }
 
 .ex-back-lamp { width: 19px; height: 19px; object-fit: contain; }
@@ -1253,4 +1251,7 @@ export default {
 .explore.night-mode .ex-act-more:hover, .explore.night-mode .ex-act--photo:hover { background: rgba(139,92,246,0.68) !important; box-shadow: inset 0 0 0 1px rgba(216,180,254,1) !important; }
 .ex-save { color: rgba(233,196,106,0.85); }
 .explore.night-mode .ex-save { color: rgba(192,132,252,0.85); }
+
+/* Brand-gradient text — the JinniChat app-name recipe verbatim */
+.jinni-grad{background:linear-gradient(45deg,#D4AF37,#FF8C00);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#FFD700}
 </style>
