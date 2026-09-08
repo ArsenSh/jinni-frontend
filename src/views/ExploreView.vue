@@ -866,11 +866,11 @@ export default {
    real content scrolls underneath. */
 .ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 12px 0 0;
   scrollbar-width: none; background: transparent; transition: background .25s ease, box-shadow .25s ease; }
-.ex-nav.is-stuck { background: color-mix(in srgb, var(--ex-bg) 72%, transparent);
-  backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
-  box-shadow: 0 1px 0 rgba(160,82,45,0.18); }
-.explore.night-mode .ex-nav.is-stuck { background: color-mix(in srgb, var(--ex-bg) 60%, transparent);
-  box-shadow: 0 1px 0 rgba(167,139,250,0.18); }
+/* Clearer glass when stuck (founder 2026-09-08): more transparent tint,
+   deeper blur doing the separating work — no hairline, no border. */
+.ex-nav.is-stuck { background: color-mix(in srgb, var(--ex-bg) 42%, transparent);
+  backdrop-filter: blur(20px) saturate(170%); -webkit-backdrop-filter: blur(20px) saturate(170%); }
+.explore.night-mode .ex-nav.is-stuck { background: color-mix(in srgb, var(--ex-bg) 34%, transparent); }
 .ex-nav-inner { display: flex; gap: 8px; width: max-content; margin-inline: auto; padding-inline: 18px; }
 .ex-nav::-webkit-scrollbar { display: none; }
 .ex-chip { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: none; cursor: pointer;
