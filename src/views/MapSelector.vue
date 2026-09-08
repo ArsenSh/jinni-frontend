@@ -780,4 +780,13 @@ export default {
 .map-selector-page.night-mode .leaflet-popup-content-wrapper,.map-selector-page.night-mode .leaflet-popup-tip{background:rgba(17,25,52,0.92);color:#e2e8f0;box-shadow:0 0 14px -2px rgba(0,0,0,0.6)}
 .map-selector-page .leaflet-popup-content-wrapper{border-radius:12px;font-weight:600}
 .me-marker{background:transparent!important;border:none!important}
+
+/* Loading window — the JinniChat modal glacier (same surfaces as the
+   leave-modal: warm 74% day / violet-navy 62% night). */
+.map-selector-page.day-mode .loading-overlay{background:rgba(120,90,40,0.06)}
+.map-selector-page.night-mode .loading-overlay{background:rgba(0,0,0,0.22)}
+.map-selector-page.day-mode .loading-content{background:rgba(255,251,245,0.74);color:#8b5e1a;box-shadow:0 0 30px rgba(0,0,0,0.18),inset 0 0 0 1px rgba(255,255,255,0.45)}
+.map-selector-page.night-mode .loading-content{background:rgba(40,30,62,0.62);color:#d9c2f7;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.12),0 0 40px rgba(0,0,0,0.4)}
+.map-selector-page.day-mode .loading-content .spinner{background:conic-gradient(from 0deg,rgba(212,175,55,0.15),#D4AF37)}
+.map-selector-page.night-mode .loading-content .spinner{background:conic-gradient(from 0deg,rgba(139,92,246,0.15),#a78bfa)}
 </style>
