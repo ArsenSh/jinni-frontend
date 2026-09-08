@@ -957,7 +957,7 @@ export default {
 /* Rail paging arrows — TripAdvisor-style solid circles, always visible on
    desktop pointer devices, sitting in the side gutters OFF the images. */
 .ex-rail-wrap { position: relative; }
-@media (hover: hover) and (pointer: fine) { .ex-rail-wrap { padding: 0 48px; } }
+@media (hover: hover) and (pointer: fine) { .ex-rail-wrap { padding: 0 62px; } }
 /* Same glass recipe as the chat cards' "More" button. */
 /* Rail squircles (founder's pick C, 2026-09-07 fitting): 42px rounded
    squares in the app's 14px corner vocabulary — strongest glass of the
@@ -973,8 +973,8 @@ export default {
   box-shadow: inset 0 0 0 1px rgba(167,139,250,0.38), inset 0 1px 0 rgba(185,208,255,0.22); }
 .night-mode .ex-rail-btn:hover { background: rgba(139,92,246,0.26);
   box-shadow: inset 0 0 0 1px rgba(167,139,250,0.55), inset 0 1px 0 rgba(185,208,255,0.26); }
-.ex-rail-btn--prev { left: 6px; }
-.ex-rail-btn--next { right: 6px; }
+.ex-rail-btn--prev { left: 8px; }
+.ex-rail-btn--next { right: 8px; }
 @media (hover: hover) and (pointer: fine) { .ex-rail-btn { display: grid; } }
 
 /* Slim scroll indicator — appears only while scrolling, fades out after */
