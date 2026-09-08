@@ -1132,8 +1132,8 @@ export default {
   .ex-nav-inner { padding-inline: 14px; }
   /* Centered snapping (founder 2026-09-08): each card settles in the middle
      with the neighbors peeking equally on both sides. */
-  .ex-rail { gap: 11px; padding: 2px 11vw 14px; scroll-padding: 0; scroll-snap-type: x mandatory; }
-  .ex-card { width: 78vw; scroll-snap-align: center; }
+  .ex-rail { gap: 11px; padding: 2px 8vw 14px; scroll-padding: 0; scroll-snap-type: x mandatory; }
+  .ex-card { width: 84vw; scroll-snap-align: center; }
   .ex-gallery-nav { width: 42px; height: 42px; }
   .ex-gallery-nav--prev { left: 10px; }
   .ex-gallery-nav--next { right: 10px; }
