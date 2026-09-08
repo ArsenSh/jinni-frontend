@@ -169,12 +169,24 @@ export default {
   },
   mounted() {
     this._hintTimer = setTimeout(() => { this.showHint = false; }, 3200);
+    // Tint the iPhone browser chrome to the MAP, not the app background
+    // (founder 2026-09-08) — restored on leave.
+    const metas = document.querySelectorAll('meta[name="theme-color"]');
+    this._prevThemeColor = metas[0] ? metas[0].getAttribute('content') : null;
+    const mapTint = this.currentTheme === 'night-mode' ? '#1a2036' : '#e8e4da';
+    metas.forEach((m) => m.setAttribute('content', mapTint));
     this.returnTo = this.$route.query.returnTo || '/chat';
     this.loadInitialLocation();
     this.initializeMap();
     this.checkGpsDenied();
   },
-  beforeUnmount() {if (this.map) { this.map.remove() }},
+  beforeUnmount() {
+    if (this.map) { this.map.remove() }
+    clearTimeout(this._hintTimer);
+    if (this._prevThemeColor) {
+      document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute('content', this._prevThemeColor));
+    }
+  },
   watch: {
     // A new pin (map tap, search pick, my-location) re-checks whether Jinni has
     // launched there; the notice is informative only — confirming still works.
