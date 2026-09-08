@@ -1157,8 +1157,10 @@ export default {
   .ex-section-head { margin: 0 14px 10px; }
   .ex-head { padding-left: 14px; padding-right: 14px; }
   .ex-nav-inner { padding-inline: 14px; }
-  .ex-rail { gap: 11px; padding: 2px 14px 14px; scroll-padding-left: 14px; }
-  .ex-card { width: 70vw; }
+  /* Centered snapping (founder 2026-09-08): each card settles in the middle
+     with the neighbors peeking equally on both sides. */
+  .ex-rail { gap: 11px; padding: 2px 15vw 14px; scroll-padding: 0; scroll-snap-type: x mandatory; }
+  .ex-card { width: 70vw; scroll-snap-align: center; }
   .ex-gallery-nav { width: 42px; height: 42px; }
   .ex-gallery-nav--prev { left: 10px; }
   .ex-gallery-nav--next { right: 10px; }
