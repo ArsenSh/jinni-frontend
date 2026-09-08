@@ -322,8 +322,10 @@ export default {
           const set = (el, props) => Object.entries(props).forEach(([k, v]) => el.style.setProperty(k, v, 'important'));
           set(container, {
             border: 'none', 'border-radius': '14px', overflow: 'hidden',
-            'margin-top': 'calc(env(safe-area-inset-top, 0px) + 60px)',
-            'margin-right': '4px',
+            /* leaflet-right anchors at right:0 and the margin IS the offset —
+               14px matches the floating My Location column exactly */
+            'margin-top': 'calc(env(safe-area-inset-top, 0px) + 64px)',
+            'margin-right': '14px',
             background: zNight ? 'rgba(40,30,62,0.5)' : 'rgba(255,251,245,0.6)',
             'box-shadow': zNight
               ? 'inset 0 0 0 1px rgba(167,139,250,0.25), inset 0 1px 0 rgba(185,208,255,0.15)'
