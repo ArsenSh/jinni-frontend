@@ -54,5 +54,8 @@ export default {
    peach so scroll-past and overscroll stay seamless. Night needs nothing —
    the html base purple already matches StarrySky. */
 .auth-page.day-mode{background:linear-gradient(180deg,#f9f5eb 0%,#e0a082 30%,#e0a082 100%)}
+/* Night was transparent -> white Safari bars once the page became
+   scrollable; paint it the overlay's own edge black-violet. */
+.auth-page:not(.day-mode){background:#05020d}
 
 </style>
