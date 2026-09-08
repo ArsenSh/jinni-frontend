@@ -58,7 +58,7 @@
     <div v-else-if="searchMiss" class="ex-showing ex-showing--miss">{{ t('explore.search_none') || "Couldn't find that place." }}</div>
 
     <!-- ═══ Category nav (sticky) ═══ -->
-    <nav v-if="hasAny" class="ex-nav" ref="navEl">
+    <nav v-if="hasAny" class="ex-nav" :class="{ 'is-stuck': navStuck }" ref="navEl">
       <!-- Inner track: width max-content + margin auto centers the chips when
            they fit the viewport and still scrolls cleanly when they overflow
            (justify-content:center would clip the left end instead). -->
@@ -373,6 +373,7 @@ export default {
       categories: {},
       location: null,
       activeCat: null,
+      navStuck: false,
       serverOrder: null,
       catEls: {},
       railEls: {},
@@ -471,9 +472,11 @@ export default {
       else if (this.gallery.open && e.key === 'ArrowLeft') this.galleryStep(-1);
     };
     window.addEventListener('keydown', this._onKey);
+    window.addEventListener('scroll', this.onWinScroll, { passive: true });
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this._onKey);
+    window.removeEventListener('scroll', this.onWinScroll);
     if (this._spy) this._spy.disconnect();
   },
   methods: {
@@ -539,6 +542,10 @@ export default {
       }
     },
     // Highlight the category chip of the section currently in view.
+    onWinScroll() {
+      const el = this.$refs.navEl;
+      this.navStuck = !!el && el.getBoundingClientRect().top <= 0.5 && window.scrollY > 8;
+    },
     setupScrollSpy() {
       if (this._spy) this._spy.disconnect();
       if (typeof IntersectionObserver === 'undefined') return;
@@ -846,12 +853,18 @@ export default {
 /* Full-bleed sticky bar: the frosted background now spans the whole viewport
    instead of floating as a 1200px translucent band over the gradient (the
    "different background" strip), and a hairline grounds it while stuck. */
+/* Materialize-on-stick (founder 2026-09-08): transparent at the top of the
+   page — chips float as content; frosted glass + hairline appear only once
+   real content scrolls underneath. */
 .ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 12px 0 0;
-  scrollbar-width: none; background: color-mix(in srgb, var(--ex-bg) 72%, transparent); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
+  scrollbar-width: none; background: transparent; transition: background .25s ease, box-shadow .25s ease;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); }
-/* Night: lighter tint so the frosted bar doesn't read as a solid band. */
-.explore.night-mode .ex-nav { background: color-mix(in srgb, var(--ex-bg) 60%, transparent); }
+.ex-nav.is-stuck { background: color-mix(in srgb, var(--ex-bg) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: 0 1px 0 rgba(160,82,45,0.18); }
+.explore.night-mode .ex-nav.is-stuck { background: color-mix(in srgb, var(--ex-bg) 60%, transparent);
+  box-shadow: 0 1px 0 rgba(167,139,250,0.18); }
 .ex-nav-inner { display: flex; gap: 8px; width: max-content; margin-inline: auto; padding-inline: 18px; }
 .ex-nav::-webkit-scrollbar { display: none; }
 .ex-chip { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: none; cursor: pointer;
@@ -1167,15 +1180,18 @@ export default {
 .ex-pref-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px; margin: 12px auto 0; max-width: 720px; padding: 0 16px; }
 .ex-pref-lead { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; opacity: 0.7; margin-right: 3px; color: #A0522D; }
 .explore.night-mode .ex-pref-lead { color: #c084fc; opacity: 0.85; }
-.ex-pref-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; padding: 5px 11px; border-radius: 999px; }
+/* Information, not buttons (founder 2026-09-08): plain text with glyphs and
+   dot separators — nothing here is tappable, so nothing wears a pill. */
+.ex-pref-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; }
+.ex-pref-chip + .ex-pref-chip::before { content: '·'; margin-right: 7px; opacity: 0.45; }
 .ex-pref-ic { display: inline-flex; }
 .ex-pref-ic svg { display: block; }
-.ex-pref-chip--loc { color: #fff; background: linear-gradient(135deg, rgba(212,175,55,0.92), rgba(184,116,44,0.92)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35), 0 0 10px -2px rgba(212,175,55,0.5); font-weight: 600; }
-.explore.night-mode .ex-pref-chip--loc { background: linear-gradient(135deg, rgba(139,92,246,0.9), rgba(168,85,247,0.9)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.22), 0 0 10px -2px rgba(139,92,246,0.55); }
-.ex-pref-chip--style { color: #8b5e1a; background: rgba(212,175,55,0.14); box-shadow: inset 0 0 0 1px rgba(184,116,44,0.4); font-weight: 600; }
-.explore.night-mode .ex-pref-chip--style { color: #d9c2f7; background: rgba(139,92,246,0.16); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.45); }
-.ex-pref-chip--interest { background: rgba(255,255,255,0.5); color: #7a5c3e; box-shadow: inset 0 0 0 1px rgba(160,82,45,0.22); }
-.explore.night-mode .ex-pref-chip--interest { background: rgba(255,255,255,0.06); color: #cdc3ea; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.25); }
+.ex-pref-chip--loc { color: #A0522D; font-weight: 600; }
+.explore.night-mode .ex-pref-chip--loc { color: #c084fc; }
+.ex-pref-chip--style { color: #8b5e1a; font-weight: 600; }
+.explore.night-mode .ex-pref-chip--style { color: #d9c2f7; }
+.ex-pref-chip--interest { color: #7a5c3e; opacity: 0.85; }
+.explore.night-mode .ex-pref-chip--interest { color: #cdc3ea; opacity: 0.85; }
 
 /* Footer — quiet sign-off, genie hand-back, muted legal row */
 .ex-footer { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 18px 44px; text-align: center; }
