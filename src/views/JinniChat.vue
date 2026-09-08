@@ -9014,4 +9014,7 @@ html[data-font-style="classic"] .mode-toggle-inline svg,
 html[data-font-style="classic"] .mode-toggle svg,
 html[data-font-style="elegant"] .new-chat-btn svg,
 html[data-font-style="classic"] .new-chat-btn svg{transform:translateY(1px)}
+
+/* Save ribbon: white hairline like the More button (founder 2026-09-08) */
+.rec-image-save-btn svg path{stroke:rgba(255,255,255,0.75);stroke-width:2}
 </style>

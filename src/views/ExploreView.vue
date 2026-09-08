@@ -1205,7 +1205,6 @@ export default {
    pale gold day / pale violet night instead of pure white. */
 .ex-act-more, .ex-act--photo { color: #ffe9b8 !important; }
 .explore.night-mode .ex-act-more, .explore.night-mode .ex-act--photo { color: #e9dcff !important; }
-.ex-save svg path { stroke: rgba(255,231,176,0.95); stroke-width: 2; }
-.explore.night-mode .ex-save svg path { stroke: rgba(216,180,254,0.95); }
+.ex-save svg path { stroke: rgba(255,255,255,0.8); stroke-width: 2; }
 .ex-pref { color: #D4AF37; }
 </style>
