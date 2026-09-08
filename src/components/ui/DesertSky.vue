@@ -33,7 +33,12 @@ export default {
 
 
 <style scoped>
-.desert-sky {position: absolute;top: 0;left: 0;width: 100%;z-index: -1;overflow: hidden;pointer-events: none;isolation: isolate}
+/* FIXED, not absolute (founder 2026-09-08): absolute covered only the
+   first viewport, so day pages that scroll (Landing, BusinessLanding,
+   Auth, Contact, Privacy) ran out of sky and leaked cream below it. Pinned
+   to the viewport the sunset rides the whole scroll, and the overscroll
+   canvas derives the sky's own bottom. */
+.desert-sky {position: fixed;top: 0;left: 0;width: 100%;height: 100vh;height: 100dvh;z-index: -1;overflow: hidden;pointer-events: none;isolation: isolate}
 /* ── Base sky ───────────────────────────────────────────────────────────────── */
 /* Static gradient — zero per-frame cost */
 .sky-base {position: absolute;inset: 0;background: linear-gradient(to bottom,#f9f5eb 0%,#f2e3d3 8%,#ecd6c2 16%,#e9ccb3 24%,#ebc4a6 32%,#efbc9b 40%,#f3b692 48%,#f7be98 56%,#f9c8a0 64%,#f5c099 72%,#f0b893 80%,#ebb08d 88%,#e6a888 96%,#e0a082 100%)}
