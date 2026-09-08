@@ -260,7 +260,6 @@ export default {
 .day-mode .tier-cta--verified  { color: #3a8f3e; border-color: rgba(58,143,62,0.45) }
 .day-mode .tier-cta--spotlight { color: #2a7daa; border-color: rgba(42,125,170,0.45) }
 .day-mode .tier-cta--signature { color: #7a3e1a; border-color: rgba(184,125,78,0.5) }
-.day-mode .footer { 
 .day-mode .footer-links a { color: #b87d4e }
 .day-mode .footer-copyright { color: #5a3c2e }
 .day-mode .language-selector { background: rgba(255,248,240,0.5); border: 1.5px solid rgba(217,167,112,0.35); box-shadow: 0 0 15px rgba(184, 125, 78, 0.1) }

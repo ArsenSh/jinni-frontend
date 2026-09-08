@@ -226,7 +226,6 @@ export default {
 .day-mode .feature-card { background: rgba(255,248,240,0.45); backdrop-filter: blur(6px); border-image: linear-gradient(145deg, #d9a770, #c9915f, #b87d4e) 1 }
 .day-mode .feature-card p { color: #5a3c2e }
 .day-mode .feature-card h3 { color: #b87d4e; text-shadow: 0 0 2px rgba(255,255,255,0.3) }
-.day-mode .footer { 
 .day-mode .footer-links a { color: #b87d4e }
 .day-mode .footer-links a:hover { color: #a06c42; text-shadow: 0 0 10px rgba(184,125,78,0.3) }
 .day-mode .language-selector { background: rgba(255,248,240,0.5); border: 1.5px solid rgba(217,167,112,0.35); box-shadow: 0 4px 15px rgba(184,125,78,0.1) }
