@@ -815,16 +815,11 @@ export default {
 /* Header — centered column */
 .ex-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
   padding: 26px 18px 4px; max-width: 1200px; margin: 0 auto; }
-.ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 11px 26px; border-radius: 999px; border: none; cursor: pointer;
-  /* Quiet accent glass (founder 2026-09-07: the gradient CTA was too bright
-     in both modes) — same family as .ex-pref, one notch more present. */
-  font-family: inherit; font-size: 0.95rem; font-weight: 700; color: #A0522D; background: rgba(255,255,255,0.55);
-  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.35), 0 0 10px -2px rgba(212,175,55,0.35);
-  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s, box-shadow .18s, transform .15s; }
-.explore.night-mode .ex-back { color: #d9c2f7; background: rgba(255,255,255,0.07);
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.4), 0 0 10px -2px rgba(139,92,246,0.4); }
-.ex-back:hover { background: rgba(240,221,170,0.6); }
-.explore.night-mode .ex-back:hover { background: rgba(139,92,246,0.18); }
+/* Same recipe as .ex-pref (founder 2026-09-08: one button family, no
+   special treatment for Meet Jinni). */
+.ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring), 0 0 5px #0000001a;
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
 .ex-back:active { transform: scale(0.98); }
 .ex-head-cta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .ex-pref { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
@@ -1202,13 +1197,9 @@ export default {
 .ex-fd-line:last-child { background: linear-gradient(90deg, currentColor, transparent); }
 .ex-footer-line { margin: 0; font-size: 0.86rem; color: var(--ex-text); opacity: 0.75; max-width: 46ch; }
 .ex-footer-ask { margin: 8px 0 0; font-size: 0.92rem; font-weight: 600; color: var(--ex-text); }
-.ex-footer-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; padding: 11px 26px; border-radius: 999px; border: none; cursor: pointer;
-  font-family: inherit; font-size: 0.92rem; font-weight: 700; color: #A0522D; background: rgba(255,255,255,0.55);
-  box-shadow: inset 0 0 0 1px rgba(160,82,45,0.35), 0 0 10px -2px rgba(212,175,55,0.35);
+.ex-footer-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 2px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 0.88rem; font-weight: 600; color: var(--ex-text); background: var(--ex-chip); box-shadow: var(--ex-ring), 0 0 5px #0000001a;
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background .18s; }
-.ex-footer-cta:hover { background: rgba(240,221,170,0.6); }
-.explore.night-mode .ex-footer-cta { color: #d9c2f7; background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.4), 0 0 10px -2px rgba(139,92,246,0.4); }
-.explore.night-mode .ex-footer-cta:hover { background: rgba(139,92,246,0.18); }
 .ex-footer-links { display: flex; gap: 10px; margin-top: 16px; font-size: 0.76rem; opacity: 0.55; }
 .ex-footer-links a { color: inherit; text-decoration: none; }
 .ex-footer-links a:hover { text-decoration: underline; }
