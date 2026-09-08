@@ -1,26 +1,14 @@
 <template>
   <div class="map-selector-page" :class="currentTheme">
-    <div class="map-header">
-      <button @click="goBack" class="back-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :stroke="currentTheme === 'night-mode' ? '#c084fc' : '#A0522D'" stroke-width="2">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-        {{ $t('map_selector.back') }}
-      </button>
-      <h1>{{ $t('map_selector.title') }}</h1>
-      <div class="header-right">
-        <button @click="confirmSelection" class="confirm-btn" :disabled="!hasChanges">
-          {{ $t('map_selector.confirm') }}
-        </button>
-        <button @click="goToMyLocation" class="my-location-btn" :title="$t('map_selector.my_location_btn')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-            <circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/>
-          </svg>
-        </button>
-      </div>
-    </div>
+    <!-- Floating chrome (founder 2026-09-08): the header is gone — back
+         floats top-left, search top-middle, locate above the capsule;
+         confirm lives in the capsule. The map gets everything else. -->
+    <button @click="goBack" class="float-btn float-back" :title="$t('map_selector.back')">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    <button @click="goToMyLocation" class="float-btn float-locate" :title="$t('map_selector.my_location_btn')">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/></svg>
+    </button>
     <div v-if="marketNotice" class="market-notice" :class="{ 'market-notice--blocked': marketBlocked }">{{ marketNotice }}</div>
     <div class="search-container">
       <div class="search-wrapper">
@@ -722,4 +710,18 @@ export default {
 .location-capsule.night-mode .capsule-confirm{background:linear-gradient(135deg,rgba(139,92,246,0.9),rgba(168,85,247,0.9));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2),0 0 10px -2px rgba(139,92,246,0.55)}
 .capsule-confirm:hover:not(:disabled){filter:brightness(1.08)}
 .capsule-confirm:disabled{opacity:0.4;cursor:default}
+
+/* ── Floating chrome (headerless layout, founder 2026-09-08) ───────────── */
+.float-btn{position:fixed;z-index:1001;width:42px;height:42px;border-radius:14px;border:none;cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:background .18s}
+.map-selector-page.day-mode .float-btn{background:rgba(255,251,240,0.78);color:#A0522D;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.3),inset 0 1px 0 rgba(255,255,255,0.9)}
+.map-selector-page.day-mode .float-btn:hover{background:rgba(240,221,170,0.85)}
+.map-selector-page.night-mode .float-btn{background:rgba(17,25,52,0.78);color:#c9b3f5;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.38),inset 0 1px 0 rgba(185,208,255,0.22)}
+.map-selector-page.night-mode .float-btn:hover{background:rgba(139,92,246,0.26)}
+.float-back{top:calc(env(safe-area-inset-top, 0px) + 14px);left:14px}
+.float-locate{right:14px;bottom:88px}
+.map-selector-page .search-container{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 14px);left:50%;transform:translateX(-50%);width:min(480px,calc(100vw - 132px));padding:0;z-index:1000;background:transparent!important;box-shadow:none!important;backdrop-filter:none;-webkit-backdrop-filter:none}
+.map-selector-page.day-mode .search-input{background:rgba(255,251,240,0.8);box-shadow:inset 0 0 0 1px rgba(160,82,45,0.3),inset 0 1px 0 rgba(255,255,255,0.9)}
+.map-selector-page.night-mode .search-input{background:rgba(17,25,52,0.8);box-shadow:inset 0 0 0 1px rgba(167,139,250,0.38),inset 0 1px 0 rgba(185,208,255,0.22)}
+.map-selector-page .market-notice{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 66px);left:50%;transform:translateX(-50%);z-index:999;max-width:min(480px,calc(100vw - 32px))}
+@media (max-width:520px){.map-selector-page .search-container{width:calc(100vw - 128px)}}
 </style>
