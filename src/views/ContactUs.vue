@@ -216,7 +216,7 @@ export default {
 /* Header */
 .contact-header{display:flex;flex-direction:column;padding:1.5rem 2rem;max-width:1400px;margin:0 auto;width:100%;position:relative;z-index:2;}
 .header-top{width:100%;display:flex;justify-content:center}
-.back-btn{margin-bottom: 30px;display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-size: 0.875rem;font-weight:500;cursor:pointer;transition:all 0.2s ease;background:transparent;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+.back-btn{margin-bottom:30px;display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s ease;background:transparent}
 .header-content{text-align:center;width:100%}
 .page-title{font-size:2rem;font-weight:700;margin-bottom:0.5rem}
 .page-subtitle{font-size:1rem;opacity:0.9;line-height:1.6;max-width:600px;margin:0 auto}
@@ -287,8 +287,8 @@ export default {
 .night-mode .custom-option.active{background:rgba(139,92,246,0.2);color:#c084fc}
 .night-mode .check-icon{stroke:#a855f7}
 .night-mode .chevron{stroke:#c084fc; opacity: 0.8}
-.night-mode .back-btn{color:#c084fc;background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
-.night-mode .back-btn:hover{background:rgba(255,255,255,0.13)}
+.night-mode .back-btn{color:#c084fc;opacity:0.7}
+.night-mode .back-btn:hover{background:rgba(139,92,246,0.1);opacity:1}
 .night-mode .back-btn svg{stroke:#c084fc}
 .night-mode .page-title{color:#e2e8f0}
 .night-mode .page-subtitle{color:#94a3b8}
@@ -324,8 +324,8 @@ export default {
 .day-mode .custom-option.active{background:rgba(212,175,55,0.18);color:#A0522D}
 .day-mode .check-icon{stroke:#A0522D}
 .day-mode .chevron{stroke:#A0522D}
-.day-mode .back-btn{color:#A0522D;background:rgba(255,255,255,0.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.65)}
-.day-mode .back-btn:hover{background:rgba(255,255,255,0.8)}
+.day-mode .back-btn{color:#A0522D;opacity:0.8}
+.day-mode .back-btn:hover{background:rgba(212,175,55,0.1);opacity:1}
 .day-mode .page-title{color:#3c2a1e}
 .day-mode .page-subtitle{color:#5c3f2e}
 .day-mode .section-card{background:rgba(255,255,255,0.55);box-shadow:0 0 3px rgba(120,80,30,0.15),inset 0 0 0 1px rgba(255,255,255,0.65)}
