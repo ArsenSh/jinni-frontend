@@ -660,7 +660,7 @@ export default {
 .auth-card::-webkit-scrollbar{width:5px}
 .auth-card::-webkit-scrollbar-thumb{background:rgba(212,175,55,.5);border-radius:10px}
 .auth-header{text-align:center;margin-bottom:0}
-.auth-title{font-size:2.5rem;font-weight:700;background:linear-gradient(5deg,#d4af37,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0;text-shadow:0 0 15px rgba(212,175,55,.3)}
+.auth-title{margin-top:-18px;font-size:2.5rem;font-weight:700;background:linear-gradient(5deg,#d4af37,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0;text-shadow:0 0 15px rgba(212,175,55,.3)}
 .auth-subtitle{color:#e0e0e0;font-size:1.1rem;margin-bottom:20px}
 .auth-toggle{display:flex;background:rgba(255,255,255,.1);border-radius:50px;padding:3px;margin-bottom:20px}
 .toggle-btn{flex:1;padding:12px 20px;background:0 0;border:none;color:#ccc;font-size:1rem;border-radius:50px;cursor:pointer;transition:all .3s ease}
