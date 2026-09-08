@@ -119,7 +119,8 @@
                it, name + meta as plain text below on the page background. -->
           <div v-for="(p, pi) in categories[c]" :key="c + p.placeId"
                class="ex-card" :class="[p.tier ? 'ex-card--' + p.tier : '', { 'is-center': (railIx[c] || 0) === pi }]"
-               @click="openPlace(p)">
+               @click="openPlace(p)"
+               @touchstart.passive="cardTouchStart" @touchend.passive="cardTouchEnd" @touchcancel.passive="cardTouchEnd">
             <div class="ex-card-imgwrap">
               <img v-if="p.image" class="ex-card-img" :src="imgUrl(p.image)" :alt="p.name"
                    :loading="pi < 4 ? 'eager' : 'lazy'" decoding="async"
@@ -608,6 +609,14 @@ export default {
       }, 1000);
     },
     prefIcon(name) { return PREF_ICONS[name] || ''; },
+    // JinniChat's touch-reveal (its rec cards, ported 2026-09-08): buttons
+    // live exactly while a finger is on the card — scroll included — and
+    // fade 200ms after release.
+    cardTouchStart(e) { e.currentTarget.classList.add('touch-active'); },
+    cardTouchEnd(e) {
+      const el = e.currentTarget;
+      setTimeout(() => el.classList.remove('touch-active'), 200);
+    },
     // Long rails compress into 12 proportional page-dots (30 dots would wrap);
     // short rails keep one dot per card.
     dotCount(c) { const n = (this.categories[c] || []).length; return n <= 14 ? n : 12; },
@@ -1226,11 +1235,12 @@ export default {
 .ex-footer-cta:hover { background: var(--ex-glass-2); }
 
 .ex-back-lamp { width: 19px; height: 19px; object-fit: contain; }
-/* Mobile: actions belong to the SETTLED card only — as a card snaps to
-   center its buttons fade in; neighbors stay clean imagery. */
+/* Mobile: JinniChat's hold-to-reveal — buttons appear while a finger is on
+   the card (scrolling included), fade 200ms after release. */
 @media (max-width: 768px) {
-  .ex-card .ex-card-acts--bottom, .ex-card .ex-save { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
-  .ex-card.is-center .ex-card-acts--bottom, .ex-card.is-center .ex-save { opacity: 1; pointer-events: auto; }
+  .ex-card .ex-card-acts--bottom, .ex-card .ex-save { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+  .ex-card.touch-active .ex-card-acts--bottom, .ex-card.touch-active .ex-save,
+  .ex-card:active .ex-card-acts--bottom, .ex-card:active .ex-save { opacity: 1; pointer-events: auto; }
 }
 
 /* Card buttons get a tone (founder 2026-09-08: white glass was invisible):
