@@ -318,6 +318,27 @@ export default {
         this.map.on('dblclick', (e) => { this.map.setZoomAround(e.latlng, this.map.getZoom() + 1) });
         this.map.zoomControl.remove();
         const currentTheme = this.currentTheme;
+        // The REAL zoom control is this custom one (the default is removed
+        // above) — every previous night-mode fix painted the default's
+        // selector. Theme it here at creation, inline-important, so no
+        // stylesheet (Leaflet's white .leaflet-bar included) can override.
+        const zNight = currentTheme === 'night-mode';
+        const paintZoom = (container) => {
+          const set = (el, props) => Object.entries(props).forEach(([k, v]) => el.style.setProperty(k, v, 'important'));
+          set(container, {
+            border: 'none', 'border-radius': '12px', overflow: 'hidden',
+            'margin-top': '52px', /* clears the floating My Location button */
+            background: zNight ? 'rgba(17,25,52,0.78)' : 'rgba(255,251,240,0.78)',
+            'box-shadow': zNight
+              ? 'inset 0 0 0 1px rgba(167,139,250,0.38), inset 0 1px 0 rgba(185,208,255,0.22)'
+              : 'inset 0 0 0 1px rgba(160,82,45,0.3), inset 0 1px 0 rgba(255,255,255,0.9)',
+            'backdrop-filter': 'blur(14px) saturate(180%)', '-webkit-backdrop-filter': 'blur(14px) saturate(180%)',
+          });
+          container.querySelectorAll('a').forEach((el, i) => {
+            set(el, { border: 'none', background: 'transparent' });
+            if (i === 0) set(el, { 'box-shadow': `inset 0 -1px 0 ${zNight ? 'rgba(167,139,250,0.25)' : 'rgba(160,82,45,0.18)'}` });
+          });
+        };
         const ZoomControl = L.Control.extend({
           onAdd: function(map) {
             const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
@@ -333,7 +354,8 @@ export default {
             zoomOut.href = '#';
             zoomOut.title = 'Zoom out';
             L.DomEvent.on(zoomOut, 'click', L.DomEvent.stop).on(zoomOut, 'click', function() { map.zoomOut() });
-            return container;            
+            paintZoom(container);
+            return container;
           }
         });
         this.map.addControl(new ZoomControl({ position: 'topright' }));
