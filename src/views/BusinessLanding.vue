@@ -243,7 +243,7 @@ export default {
 .mode-switch-btn--active { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); color: #D4AF37; box-shadow: 0 0 14px rgba(212,175,55,0.25); cursor: default }
 .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); box-shadow: 0 0 14px rgba(212,175,55,0.25) }
 /* ── Footer (mirrors LandingPage exactly) ────────────────────────────────── */
-.footer { margin-top: auto; padding: 0.3rem 0.3rem; position: relative; z-index: 2; width: 100%; background: rgba(25,25,35,0.15); backdrop-filter: blur(2px) }
+.footer { margin-top: auto; padding: 0.3rem 0.3rem; position: relative; z-index: 2; width: 100%; }
 .footer-content { max-width: 1200px; margin: 0 auto; text-align: center }
 .footer-links { display: flex; justify-content: center; gap: 2rem }
 .footer-links a { color: #FF8C00; text-decoration: none; font-family: 'Cinzel', serif; font-size: 1.1rem; transition: all 0.3s ease; padding: 0.5rem }
@@ -260,7 +260,7 @@ export default {
 .day-mode .tier-cta--verified  { color: #3a8f3e; border-color: rgba(58,143,62,0.45) }
 .day-mode .tier-cta--spotlight { color: #2a7daa; border-color: rgba(42,125,170,0.45) }
 .day-mode .tier-cta--signature { color: #7a3e1a; border-color: rgba(184,125,78,0.5) }
-.day-mode .footer { background: rgba(255,248,240,0.4); backdrop-filter: blur(4px); border-top: 1px solid rgba(217,167,112,0.2) }
+.day-mode .footer { 
 .day-mode .footer-links a { color: #b87d4e }
 .day-mode .footer-copyright { color: #5a3c2e }
 .day-mode .language-selector { background: rgba(255,248,240,0.5); border: 1.5px solid rgba(217,167,112,0.35); box-shadow: 0 0 15px rgba(184, 125, 78, 0.1) }

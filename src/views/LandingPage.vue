@@ -212,7 +212,7 @@ export default {
 .mode-switch-btn:hover { color: #D4AF37; background: rgba(212,175,55,0.12); box-shadow: 0 0 10px rgba(212,175,55,0.12) }
 .mode-switch-btn--active { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); color: #D4AF37; box-shadow: 0 0 14px rgba(212,175,55,0.25); cursor: default }
 .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); box-shadow: 0 0 14px rgba(212,175,55,0.25) }
-.footer { margin-top: auto; padding: 0.3rem 0.3rem; position: relative; z-index: 2; width: 100%; background: rgba(25,25,35,0.15); backdrop-filter: blur(2px) }
+.footer { margin-top: auto; padding: 0.3rem 0.3rem; position: relative; z-index: 2; width: 100%; }
 .footer-content { max-width: 1200px; margin: 0 auto; text-align: center }
 .footer-links { display: flex; justify-content: center; gap: 2rem }
 .footer-links a { color: #FF8C00; text-decoration: none; font-family: 'Cinzel', serif; font-size: 1.1rem; transition: all 0.3s ease; position: relative; padding: 0.5rem }
@@ -226,7 +226,7 @@ export default {
 .day-mode .feature-card { background: rgba(255,248,240,0.45); backdrop-filter: blur(6px); border-image: linear-gradient(145deg, #d9a770, #c9915f, #b87d4e) 1 }
 .day-mode .feature-card p { color: #5a3c2e }
 .day-mode .feature-card h3 { color: #b87d4e; text-shadow: 0 0 2px rgba(255,255,255,0.3) }
-.day-mode .footer { background: rgba(255,248,240,0.4); backdrop-filter: blur(4px); border-top: 1px solid rgba(217,167,112,0.2) }
+.day-mode .footer { 
 .day-mode .footer-links a { color: #b87d4e }
 .day-mode .footer-links a:hover { color: #a06c42; text-shadow: 0 0 10px rgba(184,125,78,0.3) }
 .day-mode .language-selector { background: rgba(255,248,240,0.5); border: 1.5px solid rgba(217,167,112,0.35); box-shadow: 0 4px 15px rgba(184,125,78,0.1) }
