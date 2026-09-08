@@ -519,7 +519,7 @@ export default {
       if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
       const rail = this.$el && this.$el.querySelector && this.$el.querySelector('.ex-rail');
       if (!rail) return;
-      const g = 14, inner = rail.clientWidth - 32;
+      const g = 14, inner = rail.clientWidth - 28;
       const n = Math.max(1, Math.floor((inner + g) / (280 + g)));
       this.$el.style.setProperty('--ex-n', n);
     },
@@ -610,7 +610,7 @@ export default {
       const rail = this.railEls[c];
       if (!rail) return;
       const card = rail.querySelector('.ex-card');
-      const g = 14, inner = rail.clientWidth - 32;
+      const g = 14, inner = rail.clientWidth - 28;
       const w = card ? card.getBoundingClientRect().width : 300;
       const n = Math.max(1, Math.floor((inner + g) / (w + g)));
       rail.scrollBy({ left: dir * n * (w + g), behavior: 'smooth' });
@@ -876,8 +876,8 @@ export default {
 /* Horizontal rail — snap scrolling, hidden scrollbar. The mask fades cards
    out at both edges ("shadow borders") as they scroll under it, and the
    wrap's side gutters keep the paging arrows clear of the images. */
-.ex-rail { display: flex; gap: 14px; overflow-x: auto; padding: 2px 16px 16px;
-  scroll-snap-type: x proximity; scroll-padding-left: 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+.ex-rail { display: flex; gap: 14px; overflow-x: auto; padding: 2px 14px 16px; /* side pad == gap: card N+1 starts exactly at the edge, no sliver */
+  scroll-snap-type: x proximity; scroll-padding-left: 14px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
   }
 .ex-rail::-webkit-scrollbar { display: none; }
 
