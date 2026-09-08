@@ -446,7 +446,11 @@ export default {
         useGPS: true,
         destination: {city: '', country: '', countryName: '', coordinates: { lat: 0, lng: 0 }}
       },
-      userSettings: { theme: 'auto' },
+      // Theme read SYNCHRONOUSLY so the first render carries the right class —
+      // App.vue's chrome painter tints iPhone Safari's bars from the first
+      // paint and iOS ignores later changes (founder 2026-09-08: bars took
+      // the wrong color here, same as the Discovery page).
+      userSettings: { theme: (() => { try { return JSON.parse(localStorage.getItem('jinni_settings') || '{}').theme || 'auto'; } catch (e) { return 'auto'; } })() },
       countryOptions: [],
       cityOptions: [],
       loadingCities: false,
