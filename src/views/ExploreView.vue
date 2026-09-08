@@ -873,8 +873,7 @@ export default {
    wrap's side gutters keep the paging arrows clear of the images. */
 .ex-rail { display: flex; gap: 14px; overflow-x: auto; padding: 2px 16px 16px;
   scroll-snap-type: x proximity; scroll-padding-left: 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8px, #000 calc(100% - 32px), transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 8px, #000 calc(100% - 32px), transparent 100%); }
+  }
 .ex-rail::-webkit-scrollbar { display: none; }
 
 /* TripAdvisor-style borderless tile — rounded image block, plain text below
@@ -1145,9 +1144,7 @@ export default {
   .ex-section-head { margin: 0 14px 10px; }
   .ex-head { padding-left: 14px; padding-right: 14px; }
   .ex-nav-inner { padding-inline: 14px; }
-  .ex-rail { gap: 11px; padding: 2px 14px 14px; scroll-padding-left: 14px;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
+  .ex-rail { gap: 11px; padding: 2px 14px 14px; scroll-padding-left: 14px; }
   .ex-card { width: 70vw; }
   .ex-gallery-nav { width: 42px; height: 42px; }
   .ex-gallery-nav--prev { left: 10px; }
