@@ -3,6 +3,9 @@
     <!-- Floating chrome (founder 2026-09-08): the header is gone — back
          floats top-left, search top-middle, locate above the capsule;
          confirm lives in the capsule. The map gets everything else. -->
+    <transition name="hint-fade">
+      <div v-if="showHint" class="map-hint">✨ {{ $t('map_selector.pick_hint') }}</div>
+    </transition>
     <button @click="goBack" class="float-btn float-back" :title="$t('map_selector.back')">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
     </button>
@@ -137,6 +140,7 @@ export default {
       showLeaveModal: false,
       capsuleOpen: false,
       capsuleFlash: false,
+      showHint: true,
       searchDebounce: null,
       returnTo: '/chat',
       gpsDenied: false
@@ -164,6 +168,7 @@ export default {
     locationHelpKey() { return locationHelpKey(); }
   },
   mounted() {
+    this._hintTimer = setTimeout(() => { this.showHint = false; }, 3200);
     this.returnTo = this.$route.query.returnTo || '/chat';
     this.loadInitialLocation();
     this.initializeMap();
@@ -221,9 +226,14 @@ export default {
           const night = this.currentTheme === 'night-mode';
           const bar = this.$refs.mapContainer && this.$refs.mapContainer.querySelector('.leaflet-control-zoom');
           if (!bar) return;
-          bar.style.cssText += `;border:none;border-radius:12px;overflow:hidden;background:${night ? 'rgba(17,25,52,0.62)' : 'rgba(255,255,255,0.72)'};box-shadow:0 2px 8px rgba(0,0,0,0.14), inset 0 0 0 1px ${night ? 'rgba(165,192,255,0.15)' : 'rgba(0,0,0,0.08)'}, inset 0 1px 0 ${night ? 'rgba(185,208,255,0.16)' : 'rgba(255,255,255,0.85)'};backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%)`;
+          const set = (el, props) => Object.entries(props).forEach(([k, v]) => el.style.setProperty(k, v, 'important'));
+          set(bar, { border: 'none', 'border-radius': '12px', overflow: 'hidden',
+            background: night ? 'rgba(17,25,52,0.62)' : 'rgba(255,255,255,0.72)',
+            'box-shadow': `0 2px 8px rgba(0,0,0,0.14), inset 0 0 0 1px ${night ? 'rgba(165,192,255,0.15)' : 'rgba(0,0,0,0.08)'}, inset 0 1px 0 ${night ? 'rgba(185,208,255,0.16)' : 'rgba(255,255,255,0.85)'}`,
+            'backdrop-filter': 'blur(22px) saturate(180%)', '-webkit-backdrop-filter': 'blur(22px) saturate(180%)' });
           bar.querySelectorAll('a').forEach((el, i) => {
-            el.style.cssText += `;border:none;background:transparent;color:${night ? '#e2e8f0' : '#A0522D'};font-weight:700${i === 0 ? `;box-shadow:inset 0 -1px 0 ${night ? 'rgba(165,192,255,0.15)' : 'rgba(0,0,0,0.08)'}` : ''}`;
+            set(el, { border: 'none', background: 'transparent', color: night ? '#e2e8f0' : '#A0522D', 'font-weight': '700' });
+            if (i === 0) set(el, { 'box-shadow': `inset 0 -1px 0 ${night ? 'rgba(165,192,255,0.15)' : 'rgba(0,0,0,0.08)'}` });
           });
         });
         const PMTILES_URL = import.meta.env.VITE_PMTILES_URL || '';
@@ -489,7 +499,16 @@ export default {
         this.updateLocation(lat, lng);
         this.map.setView([lat, lng], 13);
         if (this.currentLocationMarker) { this.currentLocationMarker.remove(); }
-        this.currentLocationMarker = this.L.circleMarker([lat, lng], {radius: 10, fillColor: '#4285F4', color: '#fff', weight: 2, fillOpacity: 0.9}).addTo(this.map).bindPopup('You are here').openPopup();
+        // Mini dot-&-halo in the picker pin's own colors (founder 2026-09-08:
+        // the blue circle spoke Google, not Jinni), themed popup via CSS.
+        const nightLoc = this.currentTheme === 'night-mode';
+        const meIcon = this.L.divIcon({
+          className: 'me-marker',
+          html: `<svg width="30" height="30" viewBox="0 0 30 30"><defs><radialGradient id="meJewel" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="${nightLoc ? '#cdb0ff' : '#f0d98c'}"/><stop offset="1" stop-color="${nightLoc ? '#6d3fd6' : '#b8742c'}"/></radialGradient></defs><circle cx="15" cy="15" r="12" fill="${nightLoc ? 'rgba(23,20,46,0.4)' : 'rgba(255,251,240,0.35)'}" stroke="${nightLoc ? 'rgba(185,208,255,0.5)' : 'rgba(255,255,255,0.8)'}" stroke-width="1.4"/><circle cx="15" cy="15" r="6" fill="url(#meJewel)" stroke="${nightLoc ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.85)'}" stroke-width="1.5"/></svg>`,
+          iconSize: [30, 30], iconAnchor: [15, 15],
+        });
+        this.currentLocationMarker = this.L.marker([lat, lng], { icon: meIcon, interactive: true })
+          .addTo(this.map).bindPopup(this.$t('map_selector.you_are_here') || 'You are here', { closeButton: false, offset: [0, -6] }).openPopup();
       } catch (e) {
         /* iOS: Safari location off in Settings fails instantly with NO prompt —
            code 1 (Safari access denied) or code 2 (Location Services off
@@ -555,7 +574,7 @@ export default {
 .search-input{width:100%;padding:12px 40px 12px 44px;border-radius:12px;border:none;font-size:16px;font-family:inherit;transition:all 0.2s ease;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
 .clear-btn{position:absolute;right:10px;padding:6px;border:none;background:transparent;cursor:pointer;border-radius:8px;display:flex;align-items:center;transition:all 0.2s ease}
 .search-results{position:absolute;top:70px;left:20px;right:20px;max-height:300px;overflow-y:auto;border-radius:14px;z-index:1000;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}
-.search-result-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;cursor:pointer;transition:all 0.2s ease}
+.search-result-item{display:flex;align-items:center;gap:11px;padding:12px 16px;cursor:pointer;transition:background 0.2s ease}
 .search-result-item svg{flex-shrink:0}
 .result-info{flex:1;min-width:0}
 .result-name{font-weight:600;font-size:14px;margin-bottom:4px}
@@ -598,7 +617,7 @@ export default {
 .day-mode .search-input::placeholder{color:rgba(92,74,66,0.7)}
 .day-mode .search-input:focus{outline:none;background:rgba(255,255,255,0.66);box-shadow:inset 0 1px 0 rgba(255,255,255,0.55)}
 .day-mode .clear-btn:hover{background:rgba(212,175,55,0.15)}
-.day-mode .search-results{background:rgba(255,255,255,0.72);box-shadow:0 18px 44px rgba(0,0,0,0.14),inset 0 1px 0 rgba(255,255,255,0.6)}
+.day-mode .search-results{background:rgba(255,251,245,0.66);box-shadow:inset 0 0 0 1px rgba(160,82,45,0.25),inset 0 1px 0 rgba(255,255,255,0.8),0 0 24px -4px rgba(0,0,0,0.25)}
 .day-mode .search-result-item:hover{background:rgba(212,175,55,0.1)}
 .day-mode .result-name{color:#3c2a1e}
 .day-mode .result-address{color:#5c4a42;opacity:0.85}
@@ -627,7 +646,7 @@ export default {
 .night-mode .search-input::placeholder{color:rgba(226,232,240,0.5)}
 .night-mode .search-input:focus{outline:none;background:rgba(255,255,255,0.1);box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
 .night-mode .clear-btn:hover{background:rgba(139,92,246,0.15)}
-.night-mode .search-results{background:rgba(26,11,46,0.92);box-shadow:0 20px 50px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.1)}
+.night-mode .search-results{background:rgba(17,25,52,0.62);box-shadow:inset 0 0 0 1px rgba(167,139,250,0.3),inset 0 1px 0 rgba(185,208,255,0.18),0 0 24px -4px rgba(0,0,0,0.5)}
 .night-mode .search-result-item:hover{background:rgba(139,92,246,0.1)}
 .night-mode .result-name{color:#e2e8f0}
 .night-mode .result-address{color:#94a3b8;opacity:0.85}
@@ -718,10 +737,22 @@ export default {
 .map-selector-page.night-mode .float-btn{background:rgba(17,25,52,0.78);color:#c9b3f5;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.38),inset 0 1px 0 rgba(185,208,255,0.22)}
 .map-selector-page.night-mode .float-btn:hover{background:rgba(139,92,246,0.26)}
 .float-back{top:calc(env(safe-area-inset-top, 0px) + 14px);left:14px}
-.float-locate{right:14px;bottom:88px}
+.float-locate{top:calc(env(safe-area-inset-top, 0px) + 14px);right:14px}
 .map-selector-page .search-container{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 14px);left:50%;transform:translateX(-50%);width:min(480px,calc(100vw - 132px));padding:0;z-index:1000;background:transparent!important;box-shadow:none!important;backdrop-filter:none;-webkit-backdrop-filter:none}
 .map-selector-page.day-mode .search-input{background:rgba(255,251,240,0.8);box-shadow:inset 0 0 0 1px rgba(160,82,45,0.3),inset 0 1px 0 rgba(255,255,255,0.9)}
 .map-selector-page.night-mode .search-input{background:rgba(17,25,52,0.8);box-shadow:inset 0 0 0 1px rgba(167,139,250,0.38),inset 0 1px 0 rgba(185,208,255,0.22)}
 .map-selector-page .market-notice{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 66px);left:50%;transform:translateX(-50%);z-index:999;max-width:min(480px,calc(100vw - 32px))}
 @media (max-width:520px){.map-selector-page .search-container{width:calc(100vw - 128px)}}
+
+/* Entry hint — glacier chip that introduces the page, then dissolves */
+.map-hint{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);z-index:1002;pointer-events:none;padding:12px 22px;border-radius:999px;font-size:0.95rem;font-weight:600;backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
+.map-selector-page.day-mode .map-hint{background:rgba(255,251,245,0.78);color:#8b5e1a;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.3),inset 0 1px 0 rgba(255,255,255,0.9),0 0 20px -4px rgba(212,175,55,0.5)}
+.map-selector-page.night-mode .map-hint{background:rgba(17,25,52,0.78);color:#d9c2f7;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.4),inset 0 1px 0 rgba(185,208,255,0.22),0 0 20px -4px rgba(139,92,246,0.55)}
+.hint-fade-leave-active{transition:opacity 0.6s ease}
+.hint-fade-leave-to{opacity:0}
+/* Themed leaflet popup ("You are here" was white-on-anything) */
+.map-selector-page.day-mode .leaflet-popup-content-wrapper,.map-selector-page.day-mode .leaflet-popup-tip{background:rgba(255,251,245,0.9);color:#5d4037;box-shadow:0 0 14px -2px rgba(0,0,0,0.3)}
+.map-selector-page.night-mode .leaflet-popup-content-wrapper,.map-selector-page.night-mode .leaflet-popup-tip{background:rgba(17,25,52,0.92);color:#e2e8f0;box-shadow:0 0 14px -2px rgba(0,0,0,0.6)}
+.map-selector-page .leaflet-popup-content-wrapper{border-radius:12px;font-weight:600}
+.me-marker{background:transparent!important;border:none!important}
 </style>

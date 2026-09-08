@@ -481,6 +481,8 @@
     "address": "地址：",
     "loading_map": "正在加载地图...",
     "unsaved_changes": "您有未保存的更改。您想离开吗？",
+    "pick_hint": "点按地图，选择你的位置",
+    "you_are_here": "你在这里",
     "stay": "留下",
     "leave": "离开",
     "my_location_btn": "使用我的当前位置",

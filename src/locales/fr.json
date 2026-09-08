@@ -481,6 +481,8 @@
     "address": "Adresse :",
     "loading_map": "Chargement de la carte...",
     "unsaved_changes": "Vous avez des modifications non enregistrées. Voulez-vous quitter ?",
+    "pick_hint": "Touchez la carte pour choisir un lieu",
+    "you_are_here": "Vous êtes ici",
     "stay": "Rester",
     "leave": "Quitter",
     "my_location_btn": "Utiliser ma position actuelle",

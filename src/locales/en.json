@@ -481,6 +481,8 @@
     "address": "Address:",
     "loading_map": "Loading map...",
     "unsaved_changes": "You have unsaved changes. Do you want to leave?",
+    "pick_hint": "Tap the map to pick your spot",
+    "you_are_here": "You are here",
     "stay": "Stay",
     "leave": "Leave",
     "my_location_btn": "Use my current location",
