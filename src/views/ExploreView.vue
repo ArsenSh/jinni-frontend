@@ -13,17 +13,6 @@
         {{ [location.city, location.country].filter(Boolean).join(', ') }}
       </p>
       <p class="ex-intro">{{ t('explore.intro') || 'Places Jinni has discovered here so far — the list keeps growing.' }}</p>
-      <!-- The onboarding choices, visible (founder 2026-09-07): the page is
-           personalized — say so. Location mode + style + interests as chips. -->
-      <div v-if="prefChips.length" class="ex-pref-row">
-        <span class="ex-pref-lead">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
-          {{ t('explore.based_on') || 'Curated to your taste' }}
-        </span>
-        <span v-for="(ch, i) in prefChips" :key="i" class="ex-pref-chip" :class="'ex-pref-chip--' + ch.kind">
-          <span class="ex-pref-ic" v-html="prefIcon(ch.icon)"></span>{{ ch.label }}
-        </span>
-      </div>
       <!-- No back arrow: "Meet Jinni" is an invitation, not a return trip.
            Sits under the intro as the page's primary CTA, in the brand
            gradient — same treatment as the other conversion buttons. -->
@@ -38,6 +27,17 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 9 4-18 3 9h4"/></svg>
           {{ t('explore.preferences') || 'Preferences' }}
         </button>
+      </div>
+      <!-- The onboarding choices, visible (founder 2026-09-07): the page is
+           personalized — say so. Location mode + style + interests as chips. -->
+      <div v-if="prefChips.length" class="ex-pref-row">
+        <span class="ex-pref-lead">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
+          {{ t('explore.based_on') || 'Curated to your taste' }}
+        </span>
+        <span v-for="(ch, i) in prefChips" :key="i" class="ex-pref-chip" :class="'ex-pref-chip--' + ch.kind">
+          <span class="ex-pref-ic" v-html="prefIcon(ch.icon)"></span>{{ ch.label }}
+        </span>
       </div>
     </header>
 
