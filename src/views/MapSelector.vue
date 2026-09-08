@@ -320,28 +320,26 @@ export default {
         const zNight = currentTheme === 'night-mode';
         const paintZoom = (container) => {
           const set = (el, props) => Object.entries(props).forEach(([k, v]) => el.style.setProperty(k, v, 'important'));
+          // TWIN SQUIRCLES (founder 2026-09-08): each button is its own 46px
+          // glass squircle, identical to My Location — not a joined bar.
           set(container, {
-            border: 'none', 'border-radius': '14px', overflow: 'hidden',
-            /* leaflet-right anchors at right:0 and the margin IS the offset —
-               14px matches the floating My Location column exactly */
+            border: 'none', background: 'transparent', 'box-shadow': 'none', overflow: 'visible',
+            display: 'flex', 'flex-direction': 'column', gap: '8px',
             'margin-top': 'calc(env(safe-area-inset-top, 0px) + 68px)',
             'margin-right': '14px',
-            background: zNight ? 'rgba(40,30,62,0.5)' : 'rgba(255,251,245,0.6)',
-            'box-shadow': zNight
-              ? 'inset 0 0 0 1px rgba(167,139,250,0.25), inset 0 1px 0 rgba(185,208,255,0.15)'
-              : 'inset 0 0 0 1px rgba(160,82,45,0.22), inset 0 1px 0 rgba(255,255,255,0.8)',
-            'backdrop-filter': 'blur(16px) saturate(180%)', '-webkit-backdrop-filter': 'blur(16px) saturate(180%)',
           });
+          const baseBg = zNight ? 'rgba(40,30,62,0.5)' : 'rgba(255,251,245,0.6)';
           const hoverBg = zNight ? 'rgba(139,92,246,0.26)' : 'rgba(240,221,170,0.6)';
-          container.querySelectorAll('a').forEach((el, i) => {
-            // 42px to match the floating My Location button exactly
-            set(el, { border: 'none', background: 'transparent', width: '46px', height: '46px',
-              display: 'flex', 'align-items': 'center', 'justify-content': 'center' });
-            if (i === 0) set(el, { 'box-shadow': `inset 0 -1px 0 ${zNight ? 'rgba(167,139,250,0.25)' : 'rgba(160,82,45,0.18)'}` });
-            // hover must be JS: the inline-important transparent background
-            // (needed to beat Leaflet's white) also beats any CSS :hover
+          const ring = zNight
+            ? 'inset 0 0 0 1px rgba(167,139,250,0.25), inset 0 1px 0 rgba(185,208,255,0.15)'
+            : 'inset 0 0 0 1px rgba(160,82,45,0.22), inset 0 1px 0 rgba(255,255,255,0.8)';
+          container.querySelectorAll('a').forEach((el) => {
+            set(el, { border: 'none', background: baseBg, width: '46px', height: '46px',
+              'border-radius': '14px', 'box-shadow': ring,
+              display: 'flex', 'align-items': 'center', 'justify-content': 'center',
+              'backdrop-filter': 'blur(16px) saturate(180%)', '-webkit-backdrop-filter': 'blur(16px) saturate(180%)' });
             el.addEventListener('mouseenter', () => el.style.setProperty('background', hoverBg, 'important'));
-            el.addEventListener('mouseleave', () => el.style.setProperty('background', 'transparent', 'important'));
+            el.addEventListener('mouseleave', () => el.style.setProperty('background', baseBg, 'important'));
           });
         };
         const ZoomControl = L.Control.extend({
@@ -742,8 +740,8 @@ export default {
 .leave-modal.night-mode h3{background:linear-gradient(135deg,#8b5cf6,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700}
 .leave-modal-actions{display:flex;gap:10px}
 .leave-modal-btn{flex:1;padding:11px 14px;border-radius:12px;font-size:0.9rem;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:background 0.18s ease,box-shadow 0.18s ease}
-.leave-modal.day-mode .leave-modal-btn--stay{background:linear-gradient(135deg,rgba(212,175,55,0.9),rgba(227,194,94,0.9));color:#fff;box-shadow:0 0 12px -2px rgba(212,175,55,0.5),inset 0 0 0 1px rgba(255,255,255,0.3)}
-.leave-modal.day-mode .leave-modal-btn--leave{background:rgba(255,255,255,0.5);color:#5d4037;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.25)}
+.leave-modal.day-mode .leave-modal-btn--stay{background:linear-gradient(135deg,rgba(212,175,55,0.95),rgba(184,116,44,0.95));color:#fff;box-shadow:0 0 12px -2px rgba(212,175,55,0.5),inset 0 0 0 1px rgba(255,255,255,0.3)}
+.leave-modal.day-mode .leave-modal-btn--leave{background:rgba(255,251,245,0.6);color:#5d4037;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.22),inset 0 1px 0 rgba(255,255,255,0.8)}
 .leave-modal.day-mode .leave-modal-btn--leave:hover{background:rgba(240,221,170,0.6)}
 .leave-modal.night-mode .leave-modal-btn--stay{background:linear-gradient(135deg,rgba(139,92,246,0.85),rgba(168,85,247,0.85));color:#fff;box-shadow:0 0 12px -2px rgba(139,92,246,0.5),inset 0 0 0 1px rgba(255,255,255,0.18)}
 .leave-modal.night-mode .leave-modal-btn--leave{background:rgba(255,255,255,0.07);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25)}
