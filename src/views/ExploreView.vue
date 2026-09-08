@@ -443,10 +443,13 @@ export default {
     };
     window.addEventListener('keydown', this._onKey);
     window.addEventListener('scroll', this.onWinScroll, { passive: true });
+    this.computeRailN();
+    window.addEventListener('resize', this.computeRailN, { passive: true });
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this._onKey);
     window.removeEventListener('scroll', this.onWinScroll);
+    window.removeEventListener('resize', this.computeRailN);
     if (this._spy) this._spy.disconnect();
   },
   methods: {
@@ -512,6 +515,14 @@ export default {
       }
     },
     // Highlight the category chip of the section currently in view.
+    computeRailN() {
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      const rail = this.$el && this.$el.querySelector && this.$el.querySelector('.ex-rail');
+      if (!rail) return;
+      const g = 14, inner = rail.clientWidth - 32;
+      const n = Math.max(1, Math.floor((inner + g) / (280 + g)));
+      this.$el.style.setProperty('--ex-n', n);
+    },
     onWinScroll() {
       const el = this.$refs.navEl;
       this.navStuck = !!el && el.getBoundingClientRect().top <= 0.5 && window.scrollY > 8;
@@ -598,7 +609,11 @@ export default {
     scrollRail(c, dir) {
       const rail = this.railEls[c];
       if (!rail) return;
-      rail.scrollBy({ left: dir * Math.round(rail.clientWidth * 0.85), behavior: 'smooth' });
+      const card = rail.querySelector('.ex-card');
+      const g = 14, inner = rail.clientWidth - 32;
+      const w = card ? card.getBoundingClientRect().width : 300;
+      const n = Math.max(1, Math.floor((inner + g) / (w + g)));
+      rail.scrollBy({ left: dir * n * (w + g), behavior: 'smooth' });
     },
     authHeaders() { return { Authorization: `Bearer ${localStorage.getItem('authToken')}` }; },
     // ── Search any destination (Nominatim — same geocoder the rest of the app uses) ──
@@ -797,7 +812,7 @@ export default {
 
 /* Header — centered column */
 .ex-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
-  padding: 26px 18px 4px; max-width: 1200px; margin: 0 auto; }
+  padding: 26px 18px 4px; max-width: 1395px; margin: 0 auto; }
 /* Same recipe as .ex-pref (founder 2026-09-08: one button family, no
    special treatment for Meet Jinni). */
 .ex-back { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
@@ -853,7 +868,7 @@ export default {
 .ex-chip.active .ex-chip-count { opacity: 0.9; }
 
 /* Sections + rails */
-.ex-section { max-width: 1200px; margin: 0 auto; padding: 22px 0 2px; scroll-margin-top: 64px; }
+.ex-section { max-width: 1395px; margin: 0 auto; padding: 22px 0 2px; scroll-margin-top: 64px; }
 .ex-section-head { display: flex; align-items: baseline; gap: 10px; margin: 0 64px 20px; }
 .ex-section-title { margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; color: var(--ex-heading); }
 .ex-section-count { font-size: 0.82rem; color: var(--ex-muted); font-variant-numeric: tabular-nums; }
@@ -869,6 +884,13 @@ export default {
 /* TripAdvisor-style borderless tile — rounded image block, plain text below
    on the page background. No motion on hover: image brightens slightly. */
 .ex-card { position: relative; flex: none; width: 300px; cursor: pointer; scroll-snap-align: start; }
+/* Integer-fit rail (founder 2026-09-09): JS sets --ex-n = floor((W+g)/(280+g))
+   from the rail's real inner width, and each card is (W-(N-1)g)/N so a WHOLE
+   number of cards fills the row at any window size — 4 on a 13" MBP, 3 when
+   narrower. Arrows page by exactly N cards, so pages land flush. */
+@media (hover: hover) and (pointer: fine) {
+  .ex-card { width: calc((100% - (var(--ex-n, 4) - 1) * 14px) / var(--ex-n, 4)); }
+}
 .ex-card-imgwrap { position: relative; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden; margin-bottom: 9px;
   background: var(--ex-glass-2); box-shadow: var(--ex-ring); }
 .ex-card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
