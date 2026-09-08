@@ -41,21 +41,13 @@
       </button>
     </form>
 
-        <!-- The onboarding choices, visible (founder 2026-09-07): the page is
-             personalized — say so. Location mode + style + interests as chips. -->
-        <div v-if="prefChips.length" class="ex-pref-row">
-          <span class="ex-pref-lead">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
-            {{ t('explore.based_on') || 'Curated to your taste' }}
-          </span>
-          <span v-for="(ch, i) in prefChips" :key="i" class="ex-pref-chip" :class="'ex-pref-chip--' + ch.kind">
-            <span class="ex-pref-ic" v-html="prefIcon(ch.icon)"></span>{{ ch.label }}
-          </span>
-        </div>
-    <div v-if="override" class="ex-showing">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <strong>{{ override.label }}</strong>
-      <button class="ex-showing-clear" @click="clearSearch" :title="t('map.clear_route') || 'Clear'">✕</button>
+        <!-- One line is enough (founder 2026-09-08): the page says it's
+         personalized; the details live in Preferences. -->
+    <div class="ex-pref-row">
+      <span class="ex-pref-lead">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
+        {{ t('explore.based_on') || 'Curated to your taste' }}
+      </span>
     </div>
     <div v-else-if="searchMiss" class="ex-showing ex-showing--miss">{{ t('explore.search_none') || "Couldn't find that place." }}</div>
 
@@ -342,25 +334,6 @@ import { isNightTime } from '../utils/timeUtils';
 
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || '';
 
-// Mini glyphs for the preference chips — stroke icons in the app's icon
-// voice, keyed by the same ids onboarding stores (style + interest keys).
-const PREF_SVG = (inner) => `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
-const PREF_ICONS = {
-  gps: PREF_SVG('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'),
-  pin: PREF_SVG('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
-  luxury: PREF_SVG('<path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20M12 3L8 9l4 12 4-12-4-6"/>'),
-  budget: PREF_SVG('<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>'),
-  family: PREF_SVG('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'),
-  romantic: PREF_SVG('<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'),
-  nature: PREF_SVG('<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>'),
-  adventure: PREF_SVG('<path d="M8 3l4 8 5-5 5 15H2L8 3z"/>'),
-  cultural: PREF_SVG('<path d="M3 22h18M6 18v-7M10 18v-7M14 18v-7M18 18v-7M12 2L2 9h20L12 2z"/>'),
-  history: PREF_SVG('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'),
-  art: PREF_SVG('<path d="M12 22a10 10 0 1 1 10-10c0 1.66-1.34 3-3 3h-2a2 2 0 0 0-2 2c0 .5.2.95.5 1.3.3.35.5.8.5 1.3a2.4 2.4 0 0 1-2.4 2.4z"/><circle cx="7.5" cy="10.5" r="0.8"/><circle cx="12" cy="7.5" r="0.8"/><circle cx="16.5" cy="10.5" r="0.8"/>'),
-  food_drink: PREF_SVG('<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>'),
-  nightlife: PREF_SVG('<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'),
-  relaxation: PREF_SVG('<path d="M3 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>'),
-};
 
 const CAT_LABELS = {
   restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical sites',
@@ -399,27 +372,6 @@ export default {
     };
   },
   computed: {
-    // Onboarding choices → chips (location mode, travel style, interests).
-    // Read from the stored user profile; every label is resolved through the
-    // same onboarding locale keys the user picked them under.
-    prefChips() {
-      try {
-        const u = JSON.parse(localStorage.getItem('user') || '{}');
-        const p = u.preferences || {};
-        const chips = [];
-        if (p.useGPS) chips.push({ kind: 'loc', icon: 'gps', label: this.t('onboarding.use_current_location') || 'My location' });
-        else if (p.destination && p.destination.city) chips.push({ kind: 'loc', icon: 'pin', label: p.destination.city });
-        if (p.travelStyle) { const s = this.t(`onboarding.styles.${p.travelStyle}`); if (s) chips.push({ kind: 'style', icon: p.travelStyle, label: s }); }
-        const ints = Array.isArray(p.interests) ? p.interests : [];
-        const shown = ints.length > 5 ? ints.slice(0, 4) : ints;
-        shown.forEach((k) => {
-          const l = this.t(`onboarding.interests.${k}`);
-          if (l) chips.push({ kind: 'interest', icon: k, label: l });
-        });
-        if (ints.length > shown.length) chips.push({ kind: 'interest', icon: '', label: `+${ints.length - shown.length}` });
-        return chips;
-      } catch (e) { return []; }
-    },
     orderedCategories() {
       // Prefer the server's interest-weighted order (user preferences first);
       // fall back to a sensible default. Only categories that have places.
@@ -608,7 +560,6 @@ export default {
         if (this.railBar[c]) this.railBar = { ...this.railBar, [c]: { ...this.railBar[c], on: false } };
       }, 1000);
     },
-    prefIcon(name) { return PREF_ICONS[name] || ''; },
     // JinniChat's touch-reveal (its rec cards, ported 2026-09-08): buttons
     // live exactly while a finger is on the card — scroll included — and
     // fade 200ms after release.
@@ -1199,21 +1150,7 @@ export default {
 .ex-pref-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px; margin: 14px auto 0; max-width: 720px; padding: 0 16px; }
 .ex-pref-lead { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; opacity: 0.7; margin-right: 3px; color: #A0522D; }
 .explore.night-mode .ex-pref-lead { color: #c084fc; opacity: 0.85; }
-/* Information, not buttons (founder 2026-09-08): plain text with glyphs and
-   dot separators — nothing here is tappable, so nothing wears a pill. */
-.ex-pref-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; }
-.ex-pref-chip + .ex-pref-chip::before { content: '·'; margin-right: 7px; opacity: 0.45; }
-.ex-pref-ic { display: inline-flex; }
-.ex-pref-ic svg { display: block; }
-.ex-pref-chip--loc { color: #A0522D; font-weight: 600; }
-.explore.night-mode .ex-pref-chip--loc { color: #c084fc; }
-.ex-pref-chip--style { color: #8b5e1a; font-weight: 600; }
-.explore.night-mode .ex-pref-chip--style { color: #d9c2f7; }
-.ex-pref-chip--interest { color: #7a5c3e; opacity: 0.85; }
-.explore.night-mode .ex-pref-chip--interest { color: #cdc3ea; opacity: 0.85; }
 /* two-tone: glyphs carry the accent, text stays muted */
-.ex-pref-chip--interest .ex-pref-ic { color: #b8862c; }
-.explore.night-mode .ex-pref-chip--interest .ex-pref-ic { color: #c084fc; }
 
 /* Footer — quiet sign-off, genie hand-back, muted legal row */
 .ex-footer { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 34px 18px 44px; text-align: center; }
