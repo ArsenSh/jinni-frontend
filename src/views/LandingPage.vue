@@ -181,7 +181,7 @@ export default {
 
 <style scoped>
 .landing-container { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column }
-.hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2; padding: 2rem }
+.hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
 .hero, .features { position: relative; z-index: 2 }
 .hero-content { max-width: 800px; animation: fadeInUp 1s ease-out }
 .static-bottle { width: 150px; height: auto; max-height: 250px; margin: auto; display: block }
