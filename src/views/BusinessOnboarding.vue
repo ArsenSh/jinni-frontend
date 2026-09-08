@@ -2924,7 +2924,7 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin
 .day-mode .locked-overlay { background: rgba(249,245,235,0.75) }
 .day-mode .type-group-label { color: #5c3f2e }
 /* ========== NIGHT MODE ========== */
-.night-mode { background: linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%); color: #e2e8f0 }
+.night-mode { background: linear-gradient(180deg,#0a0118 0%,#1a0b2e 45%,#141031 78%,#0a0118 100%); color: #e2e8f0 }
 .night-mode .subtitle { color: #94a3b8 }
 .night-mode .back-button { color: #94a3b8 }
 .night-mode .card { background: #1e1438; box-shadow: 0 0 8px #8b5cf633 }

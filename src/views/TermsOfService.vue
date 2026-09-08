@@ -290,7 +290,7 @@ export default {
 .day-mode .lang-option{background:#fff8f0;color:#3c2a1e}
 .day-mode .lang-option:hover{background:#ffe4c4!important;color:#3c2a1e}
 .day-mode .lang-option.active{color:#A0522D;background:#ffe4c4;font-weight:600}
-.legal-page.night-mode{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 40%,#16213e 100%);color:#e2e8f0}
+.legal-page.night-mode{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 45%,#141031 78%,#0a0118 100%);color:#e2e8f0}
 .night-mode .back-btn{color:#c084fc;opacity:0.7}
 .night-mode .back-btn:hover{background:rgba(139,92,246,0.1);opacity:1}
 .night-mode .page-title{color:#c084fc}
