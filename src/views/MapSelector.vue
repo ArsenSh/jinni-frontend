@@ -6,6 +6,9 @@
     <transition name="hint-fade">
       <div v-if="showHint" class="map-hint">{{ $t('map_selector.pick_hint') }}</div>
     </transition>
+    <transition name="hint-fade">
+      <div v-if="toastMsg" class="map-hint map-toast">{{ toastMsg }}</div>
+    </transition>
     <button @click="goBack" class="float-btn float-back" :title="$t('map_selector.back')">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
     </button>
@@ -141,6 +144,7 @@ export default {
       capsuleOpen: false,
       capsuleFlash: false,
       showHint: true,
+      toastMsg: '',
       searchDebounce: null,
       returnTo: '/chat',
       gpsDenied: false
@@ -513,9 +517,14 @@ export default {
         result.onchange = () => { this.gpsDenied = result.state === 'denied'; };
       } catch (e) { /* Permissions API unavailable */ }
     },
+    mapToast(msg) {
+      this.toastMsg = msg;
+      clearTimeout(this._toastTimer);
+      this._toastTimer = setTimeout(() => { this.toastMsg = ''; }, 4200);
+    },
     async goToMyLocation() {
       if (!navigator.geolocation) {
-        alert('Geolocation is not supported by your browser.');
+        this.mapToast(this.$t('map_selector.gps_unavailable'));
         return;
       }
       try {
@@ -541,9 +550,9 @@ export default {
            globally). Both mean the OS blocked us: show the settings help. */
         if (e && (e.code === 1 || e.code === 2)) {
           this.gpsDenied = true;
-          alert(this.$t(this.locationHelpKey));
+          this.mapToast(this.$t(this.locationHelpKey));
         } else {
-          alert(this.$t('map_selector.gps_unavailable'));
+          this.mapToast(this.$t('map_selector.gps_unavailable'));
         }
       }
     },
@@ -778,8 +787,8 @@ export default {
 .hint-fade-leave-active{transition:opacity 0.6s ease}
 .hint-fade-leave-to{opacity:0}
 /* Themed leaflet popup ("You are here" was white-on-anything) */
-.map-selector-page.day-mode .leaflet-popup-content-wrapper,.map-selector-page.day-mode .leaflet-popup-tip{background:rgba(255,251,245,0.9);color:#5d4037;box-shadow:0 0 14px -2px rgba(0,0,0,0.3)}
-.map-selector-page.night-mode .leaflet-popup-content-wrapper,.map-selector-page.night-mode .leaflet-popup-tip{background:rgba(17,25,52,0.92);color:#e2e8f0;box-shadow:0 0 14px -2px rgba(0,0,0,0.6)}
+.map-selector-page.day-mode .leaflet-popup-content-wrapper,.map-selector-page.day-mode .leaflet-popup-tip{background:rgba(255,251,245,0.62);color:#5d4037;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.22),0 0 14px -2px rgba(0,0,0,0.25);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
+.map-selector-page.night-mode .leaflet-popup-content-wrapper,.map-selector-page.night-mode .leaflet-popup-tip{background:rgba(40,30,62,0.55);color:#e2e8f0;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25),0 0 14px -2px rgba(0,0,0,0.5);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
 .map-selector-page .leaflet-popup-content-wrapper{border-radius:12px;font-weight:600}
 .me-marker{background:transparent!important;border:none!important}
 
@@ -791,4 +800,6 @@ export default {
 .map-selector-page.night-mode .loading-content{background:rgba(40,30,62,0.62);color:#d9c2f7;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.12),0 0 40px rgba(0,0,0,0.4)}
 .map-selector-page.day-mode .loading-content .spinner{background:conic-gradient(from 0deg,rgba(212,175,55,0.15),#D4AF37)}
 .map-selector-page.night-mode .loading-content .spinner{background:conic-gradient(from 0deg,rgba(139,92,246,0.15),#a78bfa)}
+
+.map-toast{top:auto;bottom:96px;transform:translateX(-50%);max-width:min(440px,calc(100vw - 32px));font-size:0.85rem;font-weight:500;text-align:center;border-radius:16px;line-height:1.45;padding:12px 18px}
 </style>
