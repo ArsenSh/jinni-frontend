@@ -1245,10 +1245,12 @@ export default {
 
 /* Card buttons get a tone (founder 2026-09-08: white glass was invisible):
    gold-tinted glass day, violet night — white glyphs stay. */
-.ex-act-more, .ex-act--photo { background: rgba(184,134,44,0.5) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7) !important; }
-.ex-act-more:hover, .ex-act--photo:hover { background: rgba(184,134,44,0.68) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.95) !important; }
-.explore.night-mode .ex-act-more, .explore.night-mode .ex-act--photo { background: rgba(139,92,246,0.5) !important; }
-.explore.night-mode .ex-act-more:hover, .explore.night-mode .ex-act--photo:hover { background: rgba(139,92,246,0.68) !important; }
+/* Borders tinted to the tone too (founder 2026-09-08) — pale gold ring in
+   day, pale violet in night, instead of plain white. */
+.ex-act-more, .ex-act--photo { background: rgba(184,134,44,0.5) !important; box-shadow: inset 0 0 0 1px rgba(255,231,176,0.85) !important; }
+.ex-act-more:hover, .ex-act--photo:hover { background: rgba(184,134,44,0.68) !important; box-shadow: inset 0 0 0 1px rgba(255,231,176,1) !important; }
+.explore.night-mode .ex-act-more, .explore.night-mode .ex-act--photo { background: rgba(139,92,246,0.5) !important; box-shadow: inset 0 0 0 1px rgba(216,180,254,0.8) !important; }
+.explore.night-mode .ex-act-more:hover, .explore.night-mode .ex-act--photo:hover { background: rgba(139,92,246,0.68) !important; box-shadow: inset 0 0 0 1px rgba(216,180,254,1) !important; }
 .ex-save { color: rgba(233,196,106,0.85); }
 .explore.night-mode .ex-save { color: rgba(192,132,252,0.85); }
 </style>
