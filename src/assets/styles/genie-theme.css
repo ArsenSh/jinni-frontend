@@ -58,3 +58,25 @@ body.theme-light {
     background-color: #f9f5eb;
     color: #1a1a1a;
 }
+/* ── iOS 26 overscroll (founder saga, settled 2026-09-08) ──────────────────
+   iOS 26 ignores html backgrounds, gradients and theme-color; the rubber
+   band shows body's SOLID background-color, sampled live. The one blessed
+   way to give a page different top/bottom overscroll colors is a scroll-
+   driven animation on body: the timeline clamps at the edges, so the top
+   bounce sees the from-color and the bottom bounce the to-color.
+   Scoped to the day-mode desert-sky pages via :has(); browsers without
+   scroll-timeline just keep the painter's solid color. */
+@supports (animation-timeline: scroll()) {
+  body:has(.landing-container.day-mode),
+  body:has(.auth-page.day-mode),
+  body:has(.business-landing.day-mode),
+  body:has(.contact-page.day-mode),
+  body:has(.legal-page.day-mode) {
+    animation: jinni-sky-shift linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes jinni-sky-shift {
+  from { background-color: #f9f5eb; }
+  to   { background-color: #e0a082; }
+}
