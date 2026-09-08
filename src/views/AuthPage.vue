@@ -83,7 +83,7 @@ export default {
    taller — never clipped either way. */
 .auth-page :deep(.auth-card) { margin-top: auto; margin-bottom: auto; }
 @media (pointer: coarse) and (max-width: 480px) {
-  .auth-page :deep(.auth-modal-overlay) { padding: 12px 16px calc(env(safe-area-inset-bottom, 0px) + 20px); }
+  .auth-page :deep(.auth-modal-overlay) { padding: 30px 16px calc(env(safe-area-inset-bottom, 0px) + 20px); }
 }
 /* Day: same sky floor as the page so bounce, bars and background agree. */
 .auth-page.day-mode .auth-modal-overlay.day-mode {
