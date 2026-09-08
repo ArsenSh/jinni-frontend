@@ -13,6 +13,21 @@
 import AuthModal from '@/components/AuthModal.vue'
 
 export default {
+  mounted() {
+    // iOS 26 overscroll for a SHORT page (2026-09-08): the scroll-timeline
+    // trick needs range this page lacks, but the bounce tracks LIVE body
+    // background-color — flip it at the bottom edge by hand.
+    this._skyScroll = () => {
+      if (this.isNightMode) return;
+      const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+      document.body.style.backgroundColor = atBottom ? '#e0a082' : '#f9f5eb';
+    };
+    window.addEventListener('scroll', this._skyScroll, { passive: true });
+    this._skyScroll();
+  },
+  beforeUnmount() {
+    window.removeEventListener('scroll', this._skyScroll);
+  },
   name: 'AuthPage',
   components: { AuthModal },
   methods: {
