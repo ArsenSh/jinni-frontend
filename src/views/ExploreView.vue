@@ -463,8 +463,15 @@ export default {
       return typeof d === 'string' ? d.trim() : (d.short || d.detailed || '');
     },
   },
-  mounted() {
+  // Theme must exist on the FIRST render: App.vue's chrome painter reads this
+  // page's computed background at render time to tint iPhone Safari's bars,
+  // and iOS ignores post-paint changes — resolving the theme in mounted()
+  // left the first paint themeless, so the bars took a fallback color
+  // (founder 2026-09-08: "the safari bar does not behave like in jinnichat").
+  created() {
     this.theme = this.resolveTheme();
+  },
+  mounted() {
     this.load();
     this.loadSaved();
     this._onKey = (e) => {
