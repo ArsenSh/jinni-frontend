@@ -818,7 +818,7 @@ export default {
 .explore { min-height: 100vh; background: var(--ex-bg-grad); color: var(--ex-text); padding: 0 0 40px; }
 
 /* Search — TripAdvisor-style pill */
-.ex-search { display: flex; align-items: center; gap: 10px; width: min(640px, calc(100% - 36px)); margin: 16px auto 0;
+.ex-search { display: flex; align-items: center; gap: 10px; width: min(640px, calc(100% - 36px)); margin: 14px auto 0;
   padding: 6px 6px 6px 18px; border-radius: 999px; background: var(--ex-search-bg);
   box-shadow: var(--ex-ring), 0 0 5px #0000001a; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); }
 .ex-search-icon { flex: none; color: var(--ex-muted); }
@@ -879,7 +879,7 @@ export default {
 /* Materialize-on-stick (founder 2026-09-08): transparent at the top of the
    page — chips float as content; frosted glass + hairline appear only once
    real content scrolls underneath. */
-.ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 12px 0 0;
+.ex-nav { position: sticky; top: 0; z-index: 10; overflow-x: auto; padding: 10px 0; margin: 4px 0 0;
   scrollbar-width: none; background: transparent; transition: background .25s ease, box-shadow .25s ease; }
 /* Clearer glass when stuck (founder 2026-09-08): more transparent tint,
    deeper blur doing the separating work — no hairline, no border. */
@@ -1196,7 +1196,7 @@ export default {
 /* Preference chips — three families so location / style / interests read
    apart at a glance: location = accent-filled anchor, style = tinted accent
    outline, interests = quiet glass with per-interest glyphs. */
-.ex-pref-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px; margin: 12px auto 0; max-width: 720px; padding: 0 16px; }
+.ex-pref-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px; margin: 14px auto 0; max-width: 720px; padding: 0 16px; }
 .ex-pref-lead { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; opacity: 0.7; margin-right: 3px; color: #A0522D; }
 .explore.night-mode .ex-pref-lead { color: #c084fc; opacity: 0.85; }
 /* Information, not buttons (founder 2026-09-08): plain text with glyphs and
