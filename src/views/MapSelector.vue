@@ -790,7 +790,7 @@ export default {
 @media (max-width:520px){.map-selector-page .search-container{width:calc(100vw - 128px)}}
 
 /* Entry hint — glacier chip that introduces the page, then dissolves */
-.map-hint{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);z-index:1002;pointer-events:none;padding:12px 22px;border-radius:999px;font-size:0.95rem;font-weight:600;backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
+.map-hint{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);z-index:1002;pointer-events:none;padding:12px 22px;border-radius:999px;font-size:0.92rem;font-weight:500;backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%)}
 .map-selector-page.day-mode .map-hint{background:rgba(255,251,245,0.62);color:#8b5e1a;box-shadow:inset 0 0 0 1px rgba(160,82,45,0.22),inset 0 1px 0 rgba(255,255,255,0.8),0 0 20px -4px rgba(212,175,55,0.4)}
 .map-selector-page.night-mode .map-hint{background:rgba(40,30,62,0.55);color:#d9c2f7;box-shadow:inset 0 0 0 1px rgba(167,139,250,0.25),inset 0 1px 0 rgba(185,208,255,0.15),0 0 20px -4px rgba(139,92,246,0.45)}
 .hint-fade-leave-active{transition:opacity 0.6s ease}
