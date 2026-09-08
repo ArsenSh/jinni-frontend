@@ -67,8 +67,11 @@ body.theme-light {
    Scoped to the day-mode desert-sky pages via :has(); browsers without
    scroll-timeline just keep the painter's solid color. */
 @supports (animation-timeline: scroll()) {
+  /* .auth-page deliberately absent: its content fits the viewport, so the
+     scroll(root) timeline has zero range — and iOS then swallows the bounce
+     entirely (founder: "cannot scroll there anymore"). A no-scroll page has
+     one bounce color anyway; the painter's cream is correct for it. */
   body:has(.landing-container.day-mode),
-  body:has(.auth-page.day-mode),
   body:has(.business-landing.day-mode),
   body:has(.contact-page.day-mode),
   body:has(.legal-page.day-mode) {
