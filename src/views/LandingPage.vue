@@ -356,15 +356,21 @@ export default {
 .landing-container:not(.day-mode) .features::before {
   content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
 }
+/* Warm pools only — each fades to fully transparent INSIDE its section, so
+   no edge can appear. The vignette moved to a single page-level layer below,
+   because a per-section vignette reaches the section boundary still opaque
+   and draws a visible line across the page (founder saw it under the
+   features band). */
 .landing-container:not(.day-mode) .hero::before {
-  background:
-    radial-gradient(46% 38% at 50% 38%, rgba(255,196,110,0.16) 0%, rgba(255,190,105,0.07) 38%, rgba(255,190,105,0) 70%),
-    radial-gradient(115% 85% at 50% 40%, rgba(6,2,20,0) 42%, rgba(6,2,20,0.5) 100%);
+  background: radial-gradient(46% 38% at 50% 38%, rgba(255,196,110,0.16) 0%, rgba(255,190,105,0.07) 38%, rgba(255,190,105,0) 70%);
 }
 .landing-container:not(.day-mode) .features::before {
-  background:
-    radial-gradient(60% 50% at 50% 30%, rgba(255,196,110,0.09) 0%, rgba(255,190,105,0) 72%),
-    radial-gradient(120% 90% at 50% 45%, rgba(6,2,20,0) 40%, rgba(6,2,20,0.55) 100%);
+  background: radial-gradient(58% 46% at 50% 32%, rgba(255,196,110,0.08) 0%, rgba(255,190,105,0) 70%);
+}
+/* One vignette for the whole page: fixed, so it never meets a section edge. */
+.landing-container:not(.day-mode)::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(122% 88% at 50% 42%, rgba(6,2,20,0) 46%, rgba(6,2,20,0.5) 100%);
 }
 .landing-container:not(.day-mode) .hero-content,
 .landing-container:not(.day-mode) .features-container { position: relative; z-index: 1 }
