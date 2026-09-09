@@ -371,10 +371,32 @@ export default {
 
 /* Lit, not merely light: the headline gains a faint warm bloom, the way type
    behaves when a lamp is actually in the room. */
-.landing-container:not(.day-mode) .magic-title { color: #fbf2df; text-shadow: 0 0 26px rgba(255,190,95,0.2) }
-.landing-container:not(.day-mode) .features-heading { color: #f8ecd3; text-shadow: 0 0 22px rgba(255,190,95,0.16) }
-.landing-container:not(.day-mode) .hero .magic-button { box-shadow: inset 0 0 0 1px rgba(233,196,124,0.32), 0 0 34px -8px rgba(255,186,88,0.45), 0 0 20px -2px rgba(0,0,0,0.42) }
-.landing-container:not(.day-mode) .hero .magic-button:hover { box-shadow: inset 0 0 0 1px rgba(233,196,124,0.5), 0 0 44px -6px rgba(255,186,88,0.6), 0 0 24px -2px rgba(0,0,0,0.45) }
+/* HALATION (founder's pick 2026-09-09, from the specimen sheet): night stops
+   imitating daylight and behaves like a long exposure. Type blooms in three
+   layers — a tight warm core, a mid halo, a wide spill — which is what film
+   does around a bright source, and the hero button drops its capsule for a
+   word над a lit hairline: on a sky, a shape is a hole, but light is not. */
+.landing-container:not(.day-mode) .magic-title { color: #fff6e2;
+  text-shadow: 0 0 4px rgba(255,214,150,0.5), 0 0 18px rgba(255,170,90,0.4), 0 0 46px rgba(255,140,60,0.26) }
+.landing-container:not(.day-mode) .features-heading { color: #fbf0d8;
+  text-shadow: 0 0 4px rgba(255,214,150,0.4), 0 0 16px rgba(255,170,90,0.3), 0 0 40px rgba(255,140,60,0.2) }
+.landing-container:not(.day-mode) .hero .magic-button {
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; border-radius: 0; padding: 10px 4px 18px; position: relative;
+}
+.landing-container:not(.day-mode) .hero .magic-button::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 1px;
+  background: rgba(255,214,150,0.8); box-shadow: 0 0 14px rgba(255,180,90,0.9);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.landing-container:not(.day-mode) .hero .magic-button:hover { background: transparent; box-shadow: none }
+.landing-container:not(.day-mode) .hero .magic-button:hover::after { background: #fff3dc; box-shadow: 0 0 20px rgba(255,200,120,1) }
+/* the label leaves the gradient clip: halation needs a solid colour to bloom */
+.landing-container:not(.day-mode) .hero .wish-label {
+  background: none; -webkit-text-fill-color: initial; color: #ffe3ba;
+  text-shadow: 0 0 12px rgba(255,180,90,0.5); transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+.landing-container:not(.day-mode) .hero .magic-button:hover .wish-label { color: #fff8ec; text-shadow: 0 0 18px rgba(255,200,120,0.9) }
 
 /* ── Starfield palette (founder 2026-09-09) ──
    The night page was one temperature: everything beige on indigo, so the
