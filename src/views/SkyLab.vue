@@ -47,19 +47,24 @@ import StarrySky, { SKY_DEFAULTS } from '@/components/ui/StarrySky.vue'
 
 // [min, max, step] per knob — the range each slider sweeps.
 const META = {
-  starCount: [0, 6000, 50],
-  starSizeMin: [0.1, 3, 0.1], starSizeSpread: [0, 4, 0.1],
-  starOpacityMin: [0, 1, 0.05], starOpacitySpread: [0, 1, 0.05],
+  starCount: [0, 6000, 50], starSizeMin: [0.1, 3, 0.1], starSizeSpread: [0, 4, 0.1],
+  starOpacityMin: [0, 1, 0.05], starOpacitySpread: [0, 1, 0.05], starGlow: [0, 12, 0.5],
   starHueMin: [0, 360, 5], starHueSpread: [0, 180, 5],
-  starGlow: [0, 12, 0.5],
+  starDot: [0, 1, 1], starHalo: [1, 8, 0.5],
+  starWarmChance: [0, 1, 0.01], starWarmHueMin: [0, 60, 1], starWarmHueSpread: [0, 60, 1],
+  starEmberChance: [0, 1, 0.01], starEmberHueMin: [0, 60, 1], starEmberHueSpread: [0, 60, 1],
   twinkleChance: [0, 1, 0.01], twinkleMin: [1, 30, 1], twinkleSpread: [0, 30, 1],
   cometDelayMin: [200, 20000, 100], cometDelaySpread: [0, 20000, 100], cometChance: [0, 1, 0.05],
   cometDurMin: [0.3, 6, 0.1], cometDurSpread: [0, 6, 0.1],
   cometWidthMin: [0.5, 10, 0.5], cometWidthSpread: [0, 10, 0.5],
   cometLenMin: [20, 800, 10], cometLenSpread: [0, 800, 10],
+  cometAngleMin: [0, 360, 5], cometAngleSpread: [0, 360, 5],
+  cometStartXMin: [-60, 60, 5], cometStartXSpread: [0, 140, 5],
+  cometStartYMin: [0, 100, 1], cometStartYSpread: [0, 100, 1],
   cometPurpleChance: [0, 1, 0.05],
   cometBlurMin: [0, 5, 0.1], cometBlurSpread: [0, 5, 0.1],
-  cometGlow: [0, 60, 1], cometDistance: [500, 8000, 100],
+  // a percentage of the container diagonal, not pixels
+  cometGlow: [0, 60, 1], cometDistance: [20, 200, 5],
 }
 
 export default {
@@ -72,10 +77,12 @@ export default {
       folded: false,
       copied: false,
       groups: [
-        { name: 'Stars', keys: ['starCount', 'starSizeMin', 'starSizeSpread', 'starOpacityMin', 'starOpacitySpread', 'starGlow', 'starHueMin', 'starHueSpread'] },
+        { name: 'Stars', keys: ['starCount', 'starSizeMin', 'starSizeSpread', 'starOpacityMin', 'starOpacitySpread', 'starDot', 'starHalo', 'starGlow', 'starHueMin', 'starHueSpread'] },
+        { name: 'Star colour', keys: ['starWarmChance', 'starWarmHueMin', 'starWarmHueSpread', 'starEmberChance', 'starEmberHueMin', 'starEmberHueSpread'] },
         { name: 'Twinkle', keys: ['twinkleChance', 'twinkleMin', 'twinkleSpread'] },
         { name: 'Comet timing', keys: ['cometDelayMin', 'cometDelaySpread', 'cometChance', 'cometDurMin', 'cometDurSpread'] },
-        { name: 'Comet shape', keys: ['cometWidthMin', 'cometWidthSpread', 'cometLenMin', 'cometLenSpread', 'cometDistance'] },
+        { name: 'Comet path', keys: ['cometAngleMin', 'cometAngleSpread', 'cometStartXMin', 'cometStartXSpread', 'cometStartYMin', 'cometStartYSpread', 'cometDistance'] },
+        { name: 'Comet shape', keys: ['cometWidthMin', 'cometWidthSpread', 'cometLenMin', 'cometLenSpread'] },
         { name: 'Comet light', keys: ['cometGlow', 'cometBlurMin', 'cometBlurSpread', 'cometPurpleChance'] },
       ],
     }

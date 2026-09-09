@@ -31,9 +31,12 @@ export const SKY_DEFAULTS = {
   cometLenMin: 160, cometLenSpread: 220,
   cometPurpleChance: 0.3,
   cometBlurMin: 0.3, cometBlurSpread: 0.5,
-  cometGlow: 10, cometDistance: 1400,
+  /* cometDistance is a PERCENTAGE of the distance from the comet's start to
+     the screen edge it is aimed at, so a comet crosses any screen the same. */
+  cometGlow: 10, cometDistance: 100,
   cometAngleMin: 22, cometAngleSpread: 36,
-  cometStartYMin: 2, cometStartYSpread: 38,
+  cometStartXMin: -10, cometStartXSpread: 60,
+  cometStartYMin: 0, cometStartYSpread: 35,
 }
 
 export default {
@@ -129,14 +132,32 @@ export default {
             roughly half of them flew up off the screen and none crossed the
             sky. Now the streak is a horizontal bar (width = length), aimed by
             rotation, moved along its own axis in PIXELS, head leading. */
-      const startX = Math.random() * 100
+      /* Start in the upper-left region so the down-right flight crosses the
+         sky instead of leaving it. Starting anywhere across the full width
+         put most comets off the right edge within a few frames. */
+      const startX = c.cometStartXMin + Math.random() * c.cometStartXSpread
       const startY = c.cometStartYMin + Math.random() * c.cometStartYSpread
       const angle = c.cometAngleMin + Math.random() * c.cometAngleSpread
-      const duration = c.cometDurMin + Math.random() * c.cometDurSpread
       const thickness = c.cometWidthMin + Math.random() * c.cometWidthSpread
       const length = c.cometLenMin + Math.random() * c.cometLenSpread
       const hue = Math.random() < c.cometPurpleChance ? 290 : c.starHueMin + Math.random() * c.starHueSpread
-      const travel = c.cometDistance
+      /* Fly to the EDGE, not a fixed pixel count. 1400px crosses a laptop but
+         leaves a small window in a few frames, which is why firing one could
+         look like nothing happened. Measuring the distance from this start
+         point to the edge it is aimed at means every comet is visible for its
+         whole flight, on any screen. cometDistance is a percentage of that. */
+      const w = starrySky.value.offsetWidth || 1440
+      const h = starrySky.value.offsetHeight || 900
+      const rad = angle * Math.PI / 180
+      const x0 = (startX / 100) * w
+      const y0 = (startY / 100) * h
+      const dx = Math.cos(rad), dy = Math.sin(rad)
+      const exit = Math.min(dx > 0.001 ? (w - x0) / dx : Infinity, dy > 0.001 ? (h - y0) / dy : Infinity)
+      const travel = (exit + length) * (c.cometDistance / 100)
+      // constant apparent speed: the sliders set the pace of a full-screen trip
+      const diagonal = Math.hypot(w, h)
+      const pace = Math.min(1.5, Math.max(0.55, travel / (0.7 * diagonal)))
+      const duration = (c.cometDurMin + Math.random() * c.cometDurSpread) * pace
       shootingStar.style.position = 'absolute'
       shootingStar.style.left = `${startX}%`
       shootingStar.style.top = `${startY}%`
@@ -159,21 +180,38 @@ export default {
       starrySky.value.appendChild(shootingStar)
       const keyframes = [
         { opacity: 0, transform: `rotate(${angle}deg) translateX(0px)`, offset: 0 },
-        { opacity: 1, transform: `rotate(${angle}deg) translateX(${travel * 0.12}px)`, offset: 0.12 },
-        { opacity: 0.9, transform: `rotate(${angle}deg) translateX(${travel * 0.6}px)`, offset: 0.6 },
+        { opacity: 1, transform: `rotate(${angle}deg) translateX(${travel * 0.08}px)`, offset: 0.08 },
+        { opacity: 1, transform: `rotate(${angle}deg) translateX(${travel * 0.75}px)`, offset: 0.75 },
         { opacity: 0, transform: `rotate(${angle}deg) translateX(${travel}px)`, offset: 1 }
       ]
-      const animation = shootingStar.animate(keyframes, { duration: duration * 1000, easing: 'cubic-bezier(0.15, 0.6, 0.3, 1)' })
+      // linear: an eased comet rushes out of frame in the first quarter, then crawls
+      const animation = shootingStar.animate(keyframes, { duration: duration * 1000, easing: 'linear' })
       animation.onfinish = () => shootingStar.remove()
     }
     let shootingStarTimeout
     const scheduleShootingStar = () => {
+      clearTimeout(shootingStarTimeout)
+      if (document.hidden) return
       const c = cfg()
       const delay = Math.random() * c.cometDelaySpread + c.cometDelayMin
       shootingStarTimeout = setTimeout(() => {
-        if (Math.random() < c.cometChance) createShootingStar()
+        /* A hidden tab paints no frames, so an animation started there never
+           advances — comets queued up in the DOM and all struck at once the
+           moment you came back. Fire only while the page is actually on
+           screen, and drop anything left mid-flight when it goes away. */
+        if (!document.hidden && Math.random() < c.cometChance) createShootingStar()
         scheduleShootingStar()
       }, delay)
+    }
+    const handleVisibility = () => {
+      if (document.hidden) {
+        clearTimeout(shootingStarTimeout)
+        if (starrySky.value) {
+          starrySky.value.querySelectorAll('.shooting-star').forEach(el => el.remove())
+        }
+      } else {
+        scheduleShootingStar()
+      }
     }
     onMounted(() => {
       updateContainerHeight()
@@ -183,10 +221,12 @@ export default {
       resizeObserver = new ResizeObserver(() => {handleResize()})
       resizeObserver.observe(document.documentElement)
       window.addEventListener('resize', handleResize)
+      document.addEventListener('visibilitychange', handleVisibility)
     })
     onBeforeUnmount(() => {
       if (resizeObserver) resizeObserver.disconnect()
       window.removeEventListener('resize', handleResize)
+      document.removeEventListener('visibilitychange', handleVisibility)
       clearTimeout(shootingStarTimeout)
       if (resizeTimer) clearTimeout(resizeTimer)
     })
