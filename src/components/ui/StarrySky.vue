@@ -15,6 +15,11 @@ export const SKY_DEFAULTS = {
   starOpacityMin: 0.2, starOpacitySpread: 0.8,
   starHueMin: 210, starHueSpread: 30,
   starGlow: 2.5,
+  /* A sub-pixel div cannot render a circle — the browser has no subpixels to
+     round, so tiny stars came out square. Drawing each star as a radial
+     gradient instead gives a soft round point at any size, and drops the
+     box-shadow that 4000+ elements were each paying for. */
+  starDot: 1, starHalo: 3,
   /* Real starfields are not white: most stars read blue-white, a minority burn
      gold, a few amber. The warm share also rhymes with the golden type. */
   starWarmChance: 0.22, starWarmHueMin: 34, starWarmHueSpread: 14,
@@ -67,11 +72,21 @@ export default {
         star.style.position = 'absolute'
         star.style.left = `${x}px`
         star.style.top = `${y}px`
-        star.style.width = `${size}px`
-        star.style.height = `${size}px`
+        const px = c.starDot ? size * c.starHalo : size
+        star.style.width = `${px}px`
+        star.style.height = `${px}px`
         star.style.opacity = String(opacity)
-        star.style.backgroundColor = `hsl(${blueHue}, ${saturation}%, ${lightness}%)`
-        star.style.boxShadow = `0 0 ${size * c.starGlow}px hsla(${blueHue}, ${saturation}%, ${lightness}%, 0.8)`
+        if (c.starDot) {
+          const core = 50 / c.starHalo
+          star.style.background = `radial-gradient(circle,
+            hsla(${blueHue}, ${saturation}%, ${lightness}%, 1) 0%,
+            hsla(${blueHue}, ${saturation}%, ${lightness}%, 0.85) ${core * 0.7}%,
+            hsla(${blueHue}, ${saturation}%, ${lightness}%, 0.28) ${core * 1.8}%,
+            hsla(${blueHue}, ${saturation}%, ${lightness}%, 0) 70%)`
+        } else {
+          star.style.backgroundColor = `hsl(${blueHue}, ${saturation}%, ${lightness}%)`
+          star.style.boxShadow = `0 0 ${size * c.starGlow}px hsla(${blueHue}, ${saturation}%, ${lightness}%, 0.8)`
+        }
         starrySky.value.appendChild(star)
         if (Math.random() < c.twinkleChance) {star.style.animation = `gentle-twinkle ${Math.random() * c.twinkleSpread + c.twinkleMin}s infinite`}
       }
