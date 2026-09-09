@@ -1172,11 +1172,11 @@ export default {
 .ex-dots { display: none; align-items: center; justify-content: center; gap: 6px; margin: 10px 0 2px; }
 @media (max-width: 768px) { .ex-dots { display: flex; } }
 .ex-dot { position: relative; width: 6px; height: 6px; padding: 0; border: none; border-radius: 99px; cursor: pointer;
-  background: #b09679; opacity: 0.45; transition: width 0.28s ease, opacity 0.28s ease, background 0.28s ease; }
+  /* Same palette as the desktop rail scrollbar: track tone idle, accent active. */
+  background: color-mix(in srgb, var(--ex-line) 55%, transparent); opacity: 0.9;
+  transition: width 0.28s ease, opacity 0.28s ease, background 0.28s ease; }
 .ex-dot::before { content: ''; position: absolute; inset: -9px -5px; }
-.ex-dot.is-on { width: 18px; opacity: 1; background: #D4AF37; }
-.explore.night-mode .ex-dot { background: rgba(226,232,240,0.55); }
-.explore.night-mode .ex-dot.is-on { background: #c084fc; }
+.ex-dot.is-on { width: 18px; opacity: 1; background: var(--ex-accent); }
 
 /* Preference chips — three families so location / style / interests read
    apart at a glance: location = accent-filled anchor, style = tinted accent
