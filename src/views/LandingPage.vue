@@ -375,7 +375,7 @@ export default {
    imitating daylight and behaves like a long exposure. Type blooms in three
    layers — a tight warm core, a mid halo, a wide spill — which is what film
    does around a bright source, and the hero button drops its capsule for a
-   word над a lit hairline: on a sky, a shape is a hole, but light is not. */
+   word over a lit hairline: on a sky, a shape is a hole, but light is not. */
 .landing-container:not(.day-mode) .magic-title { color: #fff6e2;
   text-shadow: 0 0 4px rgba(255,214,150,0.5), 0 0 18px rgba(255,170,90,0.4), 0 0 46px rgba(255,140,60,0.26) }
 .landing-container:not(.day-mode) .features-heading { color: #fbf0d8;
