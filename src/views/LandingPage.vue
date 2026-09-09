@@ -320,21 +320,21 @@ export default {
    (night tint: violet-ink glass with a lilac hairline, the app's night
    chip recipe), and the headings in light ink with only the brand word /
    the payoff carrying the gradient. */
-.landing-container:not(.day-mode) .language-selector { background: rgba(40,30,62,0.55); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.25), 0 0 16px -2px rgba(0,0,0,0.35) }
-.landing-container:not(.day-mode) .language-selector:hover { background: rgba(48,36,74,0.7); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.38), 0 0 20px -2px rgba(0,0,0,0.4) }
+.landing-container:not(.day-mode) .language-selector { background: rgba(40,30,62,0.55); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.26), 0 0 16px -2px rgba(0,0,0,0.35) }
+.landing-container:not(.day-mode) .language-selector:hover { background: rgba(48,36,74,0.7); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.4), 0 0 20px -2px rgba(0,0,0,0.4) }
 .landing-container:not(.day-mode) .language-selector button { box-shadow: none }
-.landing-container:not(.day-mode) .language-selector button:hover { background: rgba(167,139,250,0.16); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.3); transform: none }
-.landing-container:not(.day-mode) .language-selector button.active { background: rgba(167,139,250,0.24); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.45) }
+.landing-container:not(.day-mode) .language-selector button:hover { background: rgba(233,196,124,0.14); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.3); transform: none }
+.landing-container:not(.day-mode) .language-selector button.active { background: rgba(233,196,124,0.2); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.45) }
 
 .landing-container:not(.day-mode) .hero .magic-button {
-  background: rgba(40,30,62,0.55);
+  background: rgba(52,38,80,0.62);
   backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.28), 0 0 18px -2px rgba(0,0,0,0.4);
+  box-shadow: inset 0 0 0 1px rgba(233,196,124,0.3), 0 0 20px -2px rgba(0,0,0,0.42);
   padding: 14px 32px;
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover {
-  background: rgba(52,38,80,0.72);
-  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.45), 0 0 24px -2px rgba(0,0,0,0.45);
+  background: rgba(66,49,100,0.78);
+  box-shadow: inset 0 0 0 1px rgba(233,196,124,0.5), 0 0 26px -2px rgba(0,0,0,0.45);
 }
 .landing-container:not(.day-mode) .hero .wish-label {
   background: linear-gradient(45deg, #D4AF37, #FF8C00);
@@ -353,28 +353,28 @@ export default {
    rules, body copy, links). That's the sky's own contrast: starlight against
    a violet ground, with gold only where the lamp light falls. */
 .landing-container:not(.day-mode) .wish-num {
-  background: linear-gradient(180deg, rgba(226,216,255,0.62), rgba(167,139,250,0.24));
+  background: linear-gradient(180deg, rgba(252,243,220,0.58), rgba(233,196,124,0.2));
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
-.landing-container:not(.day-mode) .wish-item { border-left-color: rgba(167,139,250,0.24) }
+.landing-container:not(.day-mode) .wish-item { border-left-color: rgba(240,218,170,0.2) }
 .landing-container:not(.day-mode) .wish-item h3 { color: #f0dcae }
-.landing-container:not(.day-mode) .wish-item p { color: #cdc5e4 }
-.landing-container:not(.day-mode) .magic-subtitle { color: #d3cbe8; text-shadow: 0 0 12px rgba(120,90,200,0.25) }
+.landing-container:not(.day-mode) .wish-item p { color: #e4d7bd }
+.landing-container:not(.day-mode) .magic-subtitle { color: #ead9b8; text-shadow: 0 0 14px rgba(212,175,55,0.18) }
 
 /* Footer: lavender at rest, warming to gold on hover — the link behaves like
    a star catching the lamp. The flat #FF8C00 was the loudest thing on the page. */
-.landing-container:not(.day-mode) .footer-links a { color: #bbaaee }
-.landing-container:not(.day-mode) .footer-links a:hover { color: #f0c96a; text-shadow: 0 0 12px rgba(212,175,55,0.35) }
-.landing-container:not(.day-mode) .footer-copyright { color: rgba(205,197,228,0.62) }
+.landing-container:not(.day-mode) .footer-links a { color: #dcb977 }
+.landing-container:not(.day-mode) .footer-links a:hover { color: #f7dc9c; text-shadow: 0 0 12px rgba(212,175,55,0.4) }
+.landing-container:not(.day-mode) .footer-copyright { color: rgba(234,217,184,0.55) }
 
 /* Mode switch: violet glass to match the button and the language pill; the
    selected side keeps the gold lettering so the choice still reads as lit. */
-.landing-container:not(.day-mode) .mode-switch-pill { background: rgba(40,30,62,0.55); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.24), 0 0 18px -2px rgba(0,0,0,0.4) }
-.landing-container:not(.day-mode) .mode-switch-btn { color: #bbaaee }
-.landing-container:not(.day-mode) .mode-switch-btn:hover { color: #e8d6a8; background: rgba(167,139,250,0.14); box-shadow: none }
+.landing-container:not(.day-mode) .mode-switch-pill { background: rgba(40,30,62,0.55); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.24), 0 0 18px -2px rgba(0,0,0,0.4) }
+.landing-container:not(.day-mode) .mode-switch-btn { color: #d9c8a2 }
+.landing-container:not(.day-mode) .mode-switch-btn:hover { color: #f5e3ba; background: rgba(233,196,124,0.12); box-shadow: none }
 .landing-container:not(.day-mode) .mode-switch-btn--active,
-.landing-container:not(.day-mode) .mode-switch-btn--active:hover { background: rgba(167,139,250,0.2); color: #f0d9a8; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.4) }
+.landing-container:not(.day-mode) .mode-switch-btn--active:hover { background: rgba(233,196,124,0.18); color: #f7e3b4; box-shadow: inset 0 0 0 1px rgba(233,196,124,0.42) }
 .landing-container:not(.day-mode) .language-selector button { color: #f5e6c8; box-shadow: 0 0 10px rgba(212,175,55,0.1) }
 .landing-container:not(.day-mode) .language-selector button:hover { background: rgba(212,175,55,0.18); box-shadow: 0 0 15px rgba(212,175,55,0.3) }
 .landing-container:not(.day-mode) .language-selector button.active { background: rgba(212,175,55,0.25); box-shadow: 0 0 18px rgba(212,175,55,0.4) }
