@@ -18,9 +18,9 @@
     <section class="hero">
       <div class="hero-content">
         <img src="/images/bottle.png?v=3" alt="Genie Bottle" class="static-bottle">
-        <h1 class="magic-title">{{ $t('landing.hero.title') }}</h1>
+        <h1 class="magic-title" v-html="heroTitleHtml"></h1>
         <p class="magic-subtitle">{{ $t('landing.hero.subtitle') }}</p>
-        <MagicButton @click="openAuthModal">{{ $t('landing.hero.cta') }}</MagicButton>
+        <MagicButton @click="openAuthModal"><span class="wish-label">{{ $t('landing.hero.cta') }}</span></MagicButton>
       </div>
     </section>
     <section class="features">
@@ -71,6 +71,16 @@ import StarrySky from '@/components/ui/StarrySky.vue'
 import DaySky from "@/components/ui/DaySky.vue";
 import DesertSky from '@/components/ui/DesertSky.vue'
 export default {
+  computed: {
+    // Only the brand word carries the gradient; the rest of the sentence is
+    // dark ink in day mode. The source is our own locale string, escaped
+    // before the one substitution, so v-html can never carry foreign markup.
+    heroTitleHtml() {
+      const raw = String(this.$t('landing.hero.title') || '');
+      const esc = raw.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      return esc.replace(/Jinni/g, '<span class="brand-grad">Jinni</span>');
+    },
+  },
   components: {
     MagicButton,
     GoldCard,
@@ -180,6 +190,35 @@ export default {
 
 
 <style scoped>
+/* Hero title, day mode (founder 2026-09-09): the full gradient sat at ~2:1
+   contrast on cream. Dark ink for the sentence, gradient kept for the brand
+   word only — more readable AND more brand-forward. Night is untouched. */
+.day-mode .magic-title { background: none; -webkit-text-fill-color: initial; color: #4a3226 }
+.magic-title .brand-grad { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+
+/* Wish button, day mode (founder's pick): the glacier glass of the Discovery
+   chips, with the label in the brand gradient. A gradient text-clip needs the
+   element's own background, so the glass lives on the button and the gradient
+   on the label span. Even shadow; hover changes light only, nothing moves.
+   Night mode is deliberately untouched. */
+.day-mode .hero .magic-button {
+  background: rgba(255, 251, 245, 0.6);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.35), 0 0 16px -2px rgba(120, 80, 30, 0.16);
+  padding: 14px 32px;
+}
+.day-mode .hero .magic-button:hover {
+  background: rgba(255, 251, 245, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.5), 0 0 22px -2px rgba(120, 80, 30, 0.22);
+}
+.day-mode .hero .wish-label {
+  background: linear-gradient(45deg, #D4AF37, #FF8C00);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  font-weight: 600;
+}
+
 .landing-container { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column }
 .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
 .hero, .features { position: relative; z-index: 2 }
