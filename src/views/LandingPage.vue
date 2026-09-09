@@ -345,6 +345,37 @@ export default {
 .landing-container:not(.day-mode) .magic-title,
 .landing-container:not(.day-mode) .features-heading { background: none; -webkit-text-fill-color: initial; color: #f4e7c9 }
 
+/* ── Night atmosphere (founder 2026-09-09: "night is not aesthetic like day") ──
+   The gap was never colour. Day has a smooth cream→peach gradient that
+   organises the page: content sits inside soft light. Night had text floating
+   on flat star noise — no depth, no focus, nothing lit. So night gets the same
+   organising light, sourced from the object the brand is about: a warm pool
+   spilling from the lamp, plus a vignette that darkens the far corners so the
+   eye is pulled to the middle and the stars stop competing with the words. */
+.landing-container:not(.day-mode) .hero::before,
+.landing-container:not(.day-mode) .features::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+}
+.landing-container:not(.day-mode) .hero::before {
+  background:
+    radial-gradient(46% 38% at 50% 38%, rgba(255,196,110,0.16) 0%, rgba(255,190,105,0.07) 38%, rgba(255,190,105,0) 70%),
+    radial-gradient(115% 85% at 50% 40%, rgba(6,2,20,0) 42%, rgba(6,2,20,0.5) 100%);
+}
+.landing-container:not(.day-mode) .features::before {
+  background:
+    radial-gradient(60% 50% at 50% 30%, rgba(255,196,110,0.09) 0%, rgba(255,190,105,0) 72%),
+    radial-gradient(120% 90% at 50% 45%, rgba(6,2,20,0) 40%, rgba(6,2,20,0.55) 100%);
+}
+.landing-container:not(.day-mode) .hero-content,
+.landing-container:not(.day-mode) .features-container { position: relative; z-index: 1 }
+
+/* Lit, not merely light: the headline gains a faint warm bloom, the way type
+   behaves when a lamp is actually in the room. */
+.landing-container:not(.day-mode) .magic-title { color: #fbf2df; text-shadow: 0 0 26px rgba(255,190,95,0.2) }
+.landing-container:not(.day-mode) .features-heading { color: #f8ecd3; text-shadow: 0 0 22px rgba(255,190,95,0.16) }
+.landing-container:not(.day-mode) .hero .magic-button { box-shadow: inset 0 0 0 1px rgba(233,196,124,0.32), 0 0 34px -8px rgba(255,186,88,0.45), 0 0 20px -2px rgba(0,0,0,0.42) }
+.landing-container:not(.day-mode) .hero .magic-button:hover { box-shadow: inset 0 0 0 1px rgba(233,196,124,0.5), 0 0 44px -6px rgba(255,186,88,0.6), 0 0 24px -2px rgba(0,0,0,0.45) }
+
 /* ── Starfield palette (founder 2026-09-09) ──
    The night page was one temperature: everything beige on indigo, so the
    numerals came out muddy brown and the orange footer links shouted. Two
