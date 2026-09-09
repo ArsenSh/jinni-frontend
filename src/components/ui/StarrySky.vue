@@ -10,12 +10,16 @@ import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 /* Every tunable of the sky, with the values that shipped. SkyLab (dev only)
    overrides them live; production passes nothing and gets exactly these. */
 export const SKY_DEFAULTS = {
-  starCount: 2000,
-  starSizeMin: 0.5, starSizeSpread: 1.2,
-  starOpacityMin: 0.3, starOpacitySpread: 0.8,
+  starCount: 4200,
+  starSizeMin: 0.3, starSizeSpread: 0.9,
+  starOpacityMin: 0.2, starOpacitySpread: 0.8,
   starHueMin: 210, starHueSpread: 30,
-  starGlow: 4,
-  twinkleChance: 0.05, twinkleMin: 10, twinkleSpread: 10,
+  starGlow: 2.5,
+  /* Real starfields are not white: most stars read blue-white, a minority burn
+     gold, a few amber. The warm share also rhymes with the golden type. */
+  starWarmChance: 0.22, starWarmHueMin: 34, starWarmHueSpread: 14,
+  starEmberChance: 0.05, starEmberHueMin: 18, starEmberHueSpread: 10,
+  twinkleChance: 0.12, twinkleMin: 10, twinkleSpread: 10,
   cometDelayMin: 4000, cometDelaySpread: 2000, cometChance: 0.7,
   cometDurMin: 1.5, cometDurSpread: 1.5,
   cometWidthMin: 1.5, cometWidthSpread: 1,
@@ -23,6 +27,8 @@ export const SKY_DEFAULTS = {
   cometPurpleChance: 0.3,
   cometBlurMin: 0.5, cometBlurSpread: 0.5,
   cometGlow: 15, cometDistance: 3000,
+  cometAngleMin: 0, cometAngleSpread: 360,
+  cometStartYMin: 0, cometStartYSpread: 0,
 }
 
 export default {
@@ -46,9 +52,18 @@ export default {
         const y = Math.random() * containerHeight
         const size = Math.random() * c.starSizeSpread + c.starSizeMin
         const opacity = Math.random() * c.starOpacitySpread + c.starOpacityMin
-        const blueHue = c.starHueMin + Math.random() * c.starHueSpread
-        const saturation = 80 + Math.random() * 20
-        const lightness = 80 + Math.random() * 20
+        const roll = Math.random()
+        let blueHue, saturation, lightness
+        if (roll < c.starEmberChance) {
+          blueHue = c.starEmberHueMin + Math.random() * c.starEmberHueSpread
+          saturation = 85 + Math.random() * 15; lightness = 68 + Math.random() * 12
+        } else if (roll < c.starEmberChance + c.starWarmChance) {
+          blueHue = c.starWarmHueMin + Math.random() * c.starWarmHueSpread
+          saturation = 85 + Math.random() * 15; lightness = 76 + Math.random() * 14
+        } else {
+          blueHue = c.starHueMin + Math.random() * c.starHueSpread
+          saturation = 80 + Math.random() * 20; lightness = 80 + Math.random() * 20
+        }
         star.style.position = 'absolute'
         star.style.left = `${x}px`
         star.style.top = `${y}px`
@@ -88,7 +103,8 @@ export default {
       shootingStar.classList.add('shooting-star')
       const c = cfg()
       const startX = Math.random() * 100
-      const angle = Math.random() * 360
+      const startY = c.cometStartYMin + Math.random() * c.cometStartYSpread
+      const angle = c.cometAngleMin + Math.random() * c.cometAngleSpread
       const duration = c.cometDurMin + Math.random() * c.cometDurSpread
       const width = c.cometWidthMin + Math.random() * c.cometWidthSpread
       const height = c.cometLenMin + Math.random() * c.cometLenSpread
@@ -99,7 +115,7 @@ export default {
       const endY = Math.sin(rad) * distance / window.innerHeight * 100
       shootingStar.style.position = 'absolute'
       shootingStar.style.left = `${startX}%`
-      shootingStar.style.top = '0'
+      shootingStar.style.top = `${startY}%`
       shootingStar.style.width = `${width}px`
       shootingStar.style.height = `${height}px`
       shootingStar.style.transform = `rotate(${angle}deg)`
