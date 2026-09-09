@@ -439,9 +439,9 @@
   "contact": {
     "back": "返回",
     "title": "联系我们",
-    "subtitle": "对您的AI旅行伴侣有疑问？我们在这里帮助您规划完美的旅程。",
+    "subtitle": "我们能为您做些什么？给我们留言，一起找到最合适的方案。",
     "form_title": "发送消息",
-    "form_description": "填写下面的表格，我们的AI旅行专家将很快与您联系。",
+    "form_description": "选择主题并写下您的留言，我们会尽快与您联系。",
     "subject": "主题",
     "select_topic": "选择主题",
     "subjects": {
@@ -452,10 +452,10 @@
       "partnership": "合作机会"
     },
     "message": "您的消息",
-    "message_placeholder": "告诉我们您的旅行计划或问题...",
+    "message_placeholder": "写下您的问题或建议…",
     "response_sent_to": "回复将发送至",
     "send_message": "发送",
-    "sending": "发送中...",
+    "sending": "发送中…",
     "response_time": "我们通常在工作日4小时内回复。",
     "tagline": "您非凡旅程的智能伴侣",
     "privacy_policy": "隐私",

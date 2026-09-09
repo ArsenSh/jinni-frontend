@@ -439,9 +439,9 @@
   "contact": {
     "back": "Retour",
     "title": "Contactez-nous",
-    "subtitle": "Des questions sur votre compagnon de voyage IA ? Nous sommes là pour vous aider à planifier le voyage parfait.",
+    "subtitle": "Comment pouvons-nous vous aider ? Écrivez-nous et nous trouverons ensemble la meilleure solution.",
     "form_title": "Envoyer un message",
-    "form_description": "Remplissez le formulaire ci-dessous et nos experts en voyage IA vous répondront rapidement.",
+    "form_description": "Choisissez un sujet et écrivez votre message. Nous vous répondrons.",
     "subject": "Sujet",
     "select_topic": "Sélectionnez un sujet",
     "subjects": {
@@ -452,10 +452,10 @@
       "partnership": "Opportunité de partenariat"
     },
     "message": "Votre message",
-    "message_placeholder": "Parlez-nous de vos projets de voyage ou de vos questions...",
+    "message_placeholder": "Écrivez-nous votre question ou suggestion…",
     "response_sent_to": "La réponse sera envoyée à",
     "send_message": "Envoyer",
-    "sending": "Envoi en cours...",
+    "sending": "Envoi en cours…",
     "response_time": "Nous répondons généralement dans les 4 heures pendant les jours ouvrables.",
     "tagline": "Votre compagnon intelligent pour des voyages extraordinaires",
     "privacy_policy": "Confidentialité",

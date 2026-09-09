@@ -439,9 +439,9 @@
   "contact": {
     "back": "Back",
     "title": "Get in Touch",
-    "subtitle": "Have questions about your AI travel companion? We're here to help you plan the perfect journey.",
+    "subtitle": "How can we help? Write to us and we'll find the best option together.",
     "form_title": "Send a Message",
-    "form_description": "Fill out the form below and our AI travel experts will get back to you shortly.",
+    "form_description": "Choose a topic and write your message. We'll get back to you.",
     "subject": "Subject",
     "select_topic": "Select a topic",
     "subjects": {
@@ -452,10 +452,10 @@
       "partnership": "Partnership Opportunity"
     },
     "message": "Your Message",
-    "message_placeholder": "Tell us about your travel plans or questions...",
+    "message_placeholder": "Write to us about your question or suggestion…",
     "response_sent_to": "Response will be sent to",
     "send_message": "Send",
-    "sending": "Sending...",
+    "sending": "Sending…",
     "response_time": "We typically respond within 4 hours during business days.",
     "tagline": "Your intelligent companion for extraordinary journeys",
     "privacy_policy": "Privacy",
