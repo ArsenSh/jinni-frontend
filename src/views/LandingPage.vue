@@ -341,10 +341,6 @@ export default {
   box-shadow: inset 0 0 0 1px rgba(233,196,124,0.3), 0 0 20px -2px rgba(0,0,0,0.42);
   padding: 14px 32px;
 }
-.landing-container:not(.day-mode) .hero .magic-button:hover {
-  background: rgba(66,49,100,0.78);
-  box-shadow: inset 0 0 0 1px rgba(233,196,124,0.5), 0 0 26px -2px rgba(0,0,0,0.45);
-}
 .landing-container:not(.day-mode) .hero .wish-label {
   background: linear-gradient(45deg, #D4AF37, #FF8C00);
   -webkit-background-clip: text; background-clip: text;
@@ -423,14 +419,13 @@ export default {
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover { background: transparent; box-shadow: none }
-.landing-container:not(.day-mode) .hero .magic-button:hover::after { background: #fff3dc; box-shadow: 0 0 20px rgba(255,200,120,1) }
+.landing-container:not(.day-mode) .hero .magic-button:hover::after { background: rgba(255,230,186,0.95); box-shadow: 0 0 16px rgba(255,190,100,0.95) }
 /* the label leaves the gradient clip: halation needs a solid colour to bloom */
 .landing-container:not(.day-mode) .hero .wish-label {
   background: none; -webkit-text-fill-color: initial; color: #fff0d2; font-weight: 700;
   text-shadow: 0 0 4px rgba(255,214,150,0.55), 0 0 16px rgba(255,180,90,0.6), 0 0 40px rgba(255,140,60,0.3);
   transition: color 0.3s ease, text-shadow 0.3s ease;
 }
-.landing-container:not(.day-mode) .hero .magic-button:hover .wish-label { color: #fff8ec; text-shadow: 0 0 18px rgba(255,200,120,0.9) }
 
 /* ── Starfield palette (founder 2026-09-09) ──
    The night page was one temperature: everything beige on indigo, so the
