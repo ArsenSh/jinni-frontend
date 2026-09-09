@@ -320,11 +320,20 @@ export default {
    (night tint: violet-ink glass with a lilac hairline, the app's night
    chip recipe), and the headings in light ink with only the brand word /
    the payoff carrying the gradient. */
-.landing-container:not(.day-mode) .language-selector { background: rgba(40,30,62,0.55); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.26), 0 0 16px -2px rgba(0,0,0,0.35) }
-.landing-container:not(.day-mode) .language-selector:hover { background: rgba(48,36,74,0.7); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.4), 0 0 20px -2px rgba(0,0,0,0.4) }
+/* Halation has no boxes, so the pill goes too (founder 2026-09-10). The flag
+   keeps a soft warm halo instead of a rim — findable, but nothing is drawn. */
+.landing-container:not(.day-mode) .language-selector { background: transparent; border: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none }
+.landing-container:not(.day-mode) .language-selector:hover { background: transparent; box-shadow: none }
 .landing-container:not(.day-mode) .language-selector button { box-shadow: none }
-.landing-container:not(.day-mode) .language-selector button:hover { background: rgba(233,196,124,0.14); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.3); transform: none }
-.landing-container:not(.day-mode) .language-selector button.active { background: rgba(233,196,124,0.2); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.45) }
+.landing-container:not(.day-mode) .language-selector button {
+  background: radial-gradient(circle at 50% 50%, rgba(255,196,110,0.16) 0%, rgba(255,190,105,0.05) 45%, rgba(255,190,105,0) 72%);
+  box-shadow: none; filter: drop-shadow(0 0 7px rgba(255,180,90,0.35));
+}
+.landing-container:not(.day-mode) .language-selector button:hover,
+.landing-container:not(.day-mode) .language-selector button.active {
+  background: radial-gradient(circle at 50% 50%, rgba(255,206,130,0.3) 0%, rgba(255,190,105,0.1) 48%, rgba(255,190,105,0) 74%);
+  box-shadow: none; transform: none; filter: drop-shadow(0 0 12px rgba(255,180,90,0.7));
+}
 
 .landing-container:not(.day-mode) .hero .magic-button {
   background: rgba(52,38,80,0.62);
