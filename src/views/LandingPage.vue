@@ -448,11 +448,33 @@ export default {
 
 /* Mode switch: violet glass to match the button and the language pill; the
    selected side keeps the gold lettering so the choice still reads as lit. */
-.landing-container:not(.day-mode) .mode-switch-pill { background: rgba(40,30,62,0.55); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(233,196,124,0.24), 0 0 18px -2px rgba(0,0,0,0.4) }
-.landing-container:not(.day-mode) .mode-switch-btn { color: #d9c8a2 }
-.landing-container:not(.day-mode) .mode-switch-btn:hover { color: #f5e3ba; background: rgba(233,196,124,0.12); box-shadow: none }
+/* Explore / For Business, halation form (founder 2026-09-10): the pill and
+   both fills are gone. Two words share a hairline baseline; only the chosen
+   one is LIT — its rule glows and its text blooms — so the state is carried
+   by light instead of by a filled shape. Same grammar as the wish button. */
+.landing-container:not(.day-mode) .mode-switch-pill {
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; border-radius: 0; padding: 0; gap: 26px;
+}
+.landing-container:not(.day-mode) .mode-switch-btn {
+  color: rgba(232,218,190,0.5); background: transparent; box-shadow: none;
+  padding: 8px 2px 14px; border-radius: 0; position: relative;
+}
+.landing-container:not(.day-mode) .mode-switch-btn::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 1px;
+  background: rgba(232,218,190,0.16); box-shadow: none;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.landing-container:not(.day-mode) .mode-switch-btn:hover { color: #f7e6c2; background: transparent; box-shadow: none }
+.landing-container:not(.day-mode) .mode-switch-btn:hover::after { background: rgba(255,214,150,0.45) }
 .landing-container:not(.day-mode) .mode-switch-btn--active,
-.landing-container:not(.day-mode) .mode-switch-btn--active:hover { background: rgba(233,196,124,0.18); color: #f7e3b4; box-shadow: inset 0 0 0 1px rgba(233,196,124,0.42) }
+.landing-container:not(.day-mode) .mode-switch-btn--active:hover {
+  background: transparent; box-shadow: none; color: #ffe8c4;
+  text-shadow: 0 0 12px rgba(255,180,90,0.5);
+}
+.landing-container:not(.day-mode) .mode-switch-btn--active::after {
+  background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9);
+}
 .landing-container:not(.day-mode) .language-selector button { color: #f5e6c8; box-shadow: 0 0 10px rgba(212,175,55,0.1) }
 .landing-container:not(.day-mode) .language-selector button:hover { background: rgba(212,175,55,0.18); box-shadow: 0 0 15px rgba(212,175,55,0.3) }
 .landing-container:not(.day-mode) .language-selector button.active { background: rgba(212,175,55,0.25); box-shadow: 0 0 18px rgba(212,175,55,0.4) }
