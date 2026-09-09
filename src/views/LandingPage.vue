@@ -25,12 +25,13 @@
     </section>
     <section class="features">
       <div class="features-container">
-        <h2 class="features-heading">{{ $t('landing.features.title') }}</h2>
+        <h2 class="features-heading" v-html="featuresTitleHtml"></h2>
         <div class="features-grid">
-          <GoldCard v-for="(feature, index) in features" :key="index" class="feature-card">
+          <div v-for="(feature, index) in features" :key="index" class="wish-item">
+            <span class="wish-num">{{ String(index + 1).padStart(2, '0') }}</span>
             <h3>{{ $t(feature.title) }}</h3>
             <p>{{ $t(feature.description) }}</p>
-          </GoldCard>
+          </div>
         </div>
       </div>
     </section>
@@ -65,7 +66,6 @@ import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue'
 import { useStore } from 'vuex'
 import MagicButton from '@/components/ui/MagicButton.vue'
 import { useRouter } from 'vue-router'
-import GoldCard from '@/components/ui/GoldCard.vue'
 import AuthModal from '@/components/AuthModal.vue'
 import StarrySky from '@/components/ui/StarrySky.vue'
 import DaySky from "@/components/ui/DaySky.vue";
@@ -75,6 +75,15 @@ export default {
     // Only the brand word carries the gradient; the rest of the sentence is
     // dark ink in day mode. The source is our own locale string, escaped
     // before the one substitution, so v-html can never carry foreign markup.
+    // The features heading splits at its separator (every locale has one:
+    // ',' '—' '،' '，'): the promise stays dark ink, the payoff takes the
+    // gradient. Escaped first, so v-html can only ever emit our own markup.
+    featuresTitleHtml() {
+      const raw = String(this.$t('landing.features.title') || '');
+      const esc = raw.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      const m = esc.match(/^(.*?[,—،，])\s*(.+)$/);
+      return m ? `${m[1]} <span class="brand-grad">${m[2]}</span>` : esc;
+    },
     heroTitleHtml() {
       const raw = String(this.$t('landing.hero.title') || '');
       const esc = raw.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -83,7 +92,6 @@ export default {
   },
   components: {
     MagicButton,
-    GoldCard,
     AuthModal,
     StarrySky,
     DaySky,
@@ -194,9 +202,10 @@ export default {
    contrast on cream. Dark ink for the sentence, gradient kept for the brand
    word only — more readable AND more brand-forward. Night is untouched. */
 .day-mode .magic-title { background: none; -webkit-text-fill-color: initial; color: #4a3226 }
+.day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #4a3226 }
 /* :deep — v-html content carries NO scope attribute, so a plain scoped
    descendant rule never matches this span. */
-.magic-title :deep(.brand-grad) { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+.magic-title :deep(.brand-grad), .features-heading :deep(.brand-grad) { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
 
 /* Wish button, day mode (founder's pick): the glacier glass of the Discovery
    chips, with the label in the brand gradient. A gradient text-clip needs the
@@ -232,10 +241,16 @@ export default {
 .features-container { max-width: 1200px; margin: 0 auto }
 .features-heading { text-align: center; margin-bottom: 3rem }
 .features h2 { font-family: 'Cinzel', serif; font-style: normal; font-size: 2.5rem; margin-bottom: 2rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
-.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; position: relative }
-.feature-card { background: rgba(25,25,35,0.15); backdrop-filter: blur(2px); box-shadow: none; border: none; position: relative; overflow: hidden }
-.feature-card p { font-family: 'Cinzel', serif; font-size: 1.1rem }
-.feature-card h3 { font-family: 'Cinzel', serif; font-size: 1.5rem; margin-bottom: 1rem; color: #FF8C00 }
+/* Manifest features (founder 2026-09-09): the boxes are gone. Translucent
+   cards on a peach sky sat under 1.2:1 contrast and read as stains; three
+   numbered columns divided by hairlines carry the section on type alone —
+   and the numerals finally deliver the "three wishes" the heading promises.
+   Body copy leaves Cinzel, which is a display face and slows paragraphs. */
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); position: relative }
+.wish-item { padding: 6px 30px }
+.wish-num { display: block; font-family: 'Cinzel', serif; font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 12px; font-variant-numeric: tabular-nums }
+.wish-item h3 { font-family: 'Cinzel', serif; font-size: 1.4rem; margin-bottom: 10px }
+.wish-item p { font-size: 1.02rem; line-height: 1.55 }
 .demo h2 { font-size: 2.5rem; margin-bottom: 2rem; color: #D4AF37 }
 .header-container { position: absolute; top: 0; left: 0; padding: 27px; z-index: 1000 }
 .app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
@@ -264,9 +279,12 @@ export default {
 /* ── Day mode ──────────────────────────────────────────────────────────────── */
 .day-mode .hero p, .day-mode .footer-copyright { color: #5a3c2e; text-shadow: 0 0 2px rgba(255,255,255,0.3) }
 .day-mode .magic-subtitle { color: #5a3c2e; text-shadow: 0 0 7px rgba(255,255,255,0.4) }
-.day-mode .feature-card { background: rgba(255,248,240,0.45); backdrop-filter: blur(6px); border-image: linear-gradient(145deg, #d9a770, #c9915f, #b87d4e) 1; box-shadow: 0 0 18px rgba(160,100,30,0.09), 0 0 20px rgba(0,0,0,0.06) }
-.day-mode .feature-card p { color: #5a3c2e }
-.day-mode .feature-card h3 { color: #b87d4e; text-shadow: 0 0 2px rgba(255,255,255,0.3) }
+.day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
+.day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
+.day-mode .wish-item:last-child { padding-right: 0 }
+.day-mode .wish-num { color: rgba(168,114,15,0.34) }
+.day-mode .wish-item h3 { color: #4a3226 }
+.day-mode .wish-item p { color: #6b4a36 }
 .day-mode .footer-links a { color: #b87d4e }
 .day-mode .footer-links a:hover { color: #a06c42; text-shadow: 0 0 10px rgba(184,125,78,0.3) }
 .day-mode .language-selector { background: rgba(255,248,240,0.5); border: 1.5px solid rgba(217,167,112,0.35); box-shadow: 0 4px 15px rgba(184,125,78,0.1) }
@@ -282,9 +300,12 @@ export default {
 
 /* ── Night mode explicit colors (override inherited body color) ───────────── */
 .landing-container:not(.day-mode) .magic-subtitle { color: #f5e6c8; text-shadow: 0 0 7px rgba(255,200,120,0.25) }
-.landing-container:not(.day-mode) .feature-card { background: rgba(20,10,45,0.55); backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,200,120,0.05) }
-.landing-container:not(.day-mode) .feature-card h3 { color: #FF8C00 }
-.landing-container:not(.day-mode) .feature-card p { color: #e8d9bb }
+.landing-container:not(.day-mode) .wish-item { border-left: 1px solid rgba(212,175,55,0.22) }
+.landing-container:not(.day-mode) .wish-item:first-child { border-left: none; padding-left: 0 }
+.landing-container:not(.day-mode) .wish-item:last-child { padding-right: 0 }
+.landing-container:not(.day-mode) .wish-num { color: rgba(212,175,55,0.38) }
+.landing-container:not(.day-mode) .wish-item h3 { color: #f0d9a8 }
+.landing-container:not(.day-mode) .wish-item p { color: #e8d9bb }
 .landing-container:not(.day-mode) .mode-switch-pill { background: rgba(20,10,45,0.7); border: none }
 .landing-container:not(.day-mode) .mode-switch-btn { color: rgba(245,230,200,0.55) }
 .landing-container:not(.day-mode) .mode-switch-btn:hover { color: #f5e6c8; background: rgba(212,175,55,0.15); box-shadow: 0 0 10px rgba(212,175,55,0.15) }
@@ -298,6 +319,13 @@ export default {
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* One column: the vertical hairline becomes a horizontal one between items. */
+  .features-grid { grid-template-columns: 1fr }
+  .wish-item { padding: 20px 0 }
+  .day-mode .wish-item, .landing-container:not(.day-mode) .wish-item { border-left: none; border-top: 1px solid rgba(150,100,55,0.26) }
+  .landing-container:not(.day-mode) .wish-item { border-top-color: rgba(212,175,55,0.2) }
+  .day-mode .wish-item:first-child, .landing-container:not(.day-mode) .wish-item:first-child { border-top: none; padding-top: 0 }
+  .wish-num { font-size: 2.1rem; margin-bottom: 8px }
   .hero h1 { font-size: 2.5rem }
   .hero p { font-size: 1.1rem }
   .features h2, .demo h2 { font-size: 2rem }
