@@ -7,7 +7,7 @@ const routes = [
         path: '/',
         name: 'Landing',
         component: LandingPage,
-        meta: { title: 'Welcome to Jinni', requiresAuth: false }
+        meta: { title: 'Jinni — AI Travel Guide to Places, Events & Hidden Gems', requiresAuth: false }
     },
     {
         path: '/auth',
