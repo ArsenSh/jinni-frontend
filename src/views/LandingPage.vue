@@ -343,7 +343,38 @@ export default {
   font-weight: 600;
 }
 .landing-container:not(.day-mode) .magic-title,
-.landing-container:not(.day-mode) .features-heading { background: none; -webkit-text-fill-color: initial; color: #f2e3c4 }
+.landing-container:not(.day-mode) .features-heading { background: none; -webkit-text-fill-color: initial; color: #f4e7c9 }
+
+/* ── Starfield palette (founder 2026-09-09) ──
+   The night page was one temperature: everything beige on indigo, so the
+   numerals came out muddy brown and the orange footer links shouted. Two
+   temperatures instead — warm gold carries meaning (headings, the brand,
+   the accent half of a heading), cool lavender carries structure (numerals,
+   rules, body copy, links). That's the sky's own contrast: starlight against
+   a violet ground, with gold only where the lamp light falls. */
+.landing-container:not(.day-mode) .wish-num {
+  background: linear-gradient(180deg, rgba(226,216,255,0.62), rgba(167,139,250,0.24));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.landing-container:not(.day-mode) .wish-item { border-left-color: rgba(167,139,250,0.24) }
+.landing-container:not(.day-mode) .wish-item h3 { color: #f0dcae }
+.landing-container:not(.day-mode) .wish-item p { color: #cdc5e4 }
+.landing-container:not(.day-mode) .magic-subtitle { color: #d3cbe8; text-shadow: 0 0 12px rgba(120,90,200,0.25) }
+
+/* Footer: lavender at rest, warming to gold on hover — the link behaves like
+   a star catching the lamp. The flat #FF8C00 was the loudest thing on the page. */
+.landing-container:not(.day-mode) .footer-links a { color: #bbaaee }
+.landing-container:not(.day-mode) .footer-links a:hover { color: #f0c96a; text-shadow: 0 0 12px rgba(212,175,55,0.35) }
+.landing-container:not(.day-mode) .footer-copyright { color: rgba(205,197,228,0.62) }
+
+/* Mode switch: violet glass to match the button and the language pill; the
+   selected side keeps the gold lettering so the choice still reads as lit. */
+.landing-container:not(.day-mode) .mode-switch-pill { background: rgba(40,30,62,0.55); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.24), 0 0 18px -2px rgba(0,0,0,0.4) }
+.landing-container:not(.day-mode) .mode-switch-btn { color: #bbaaee }
+.landing-container:not(.day-mode) .mode-switch-btn:hover { color: #e8d6a8; background: rgba(167,139,250,0.14); box-shadow: none }
+.landing-container:not(.day-mode) .mode-switch-btn--active,
+.landing-container:not(.day-mode) .mode-switch-btn--active:hover { background: rgba(167,139,250,0.2); color: #f0d9a8; box-shadow: inset 0 0 0 1px rgba(167,139,250,0.4) }
 .landing-container:not(.day-mode) .language-selector button { color: #f5e6c8; box-shadow: 0 0 10px rgba(212,175,55,0.1) }
 .landing-container:not(.day-mode) .language-selector button:hover { background: rgba(212,175,55,0.18); box-shadow: 0 0 15px rgba(212,175,55,0.3) }
 .landing-container:not(.day-mode) .language-selector button.active { background: rgba(212,175,55,0.25); box-shadow: 0 0 18px rgba(212,175,55,0.4) }
