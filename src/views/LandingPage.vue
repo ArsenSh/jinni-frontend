@@ -287,10 +287,14 @@ export default {
 .day-mode .wish-item p { color: #6b4a36 }
 .day-mode .footer-links a { color: #b87d4e }
 .day-mode .footer-links a:hover { color: #a06c42; text-shadow: 0 0 10px rgba(184,125,78,0.3) }
-.day-mode .language-selector { background: rgba(255,248,240,0.5); border: 1.5px solid rgba(217,167,112,0.35); box-shadow: 0 4px 15px rgba(184,125,78,0.1) }
-.day-mode .language-selector button { color: #b87d4e; box-shadow: 0 0 10px rgba(217,167,112,0.15) }
-.day-mode .language-selector button:hover { background: rgba(217,167,112,0.2); box-shadow: 0 0 15px rgba(217,167,112,0.35); transform: scale(1.1) }
-.day-mode .language-selector button.active { background: rgba(184,125,78,0.3); box-shadow: 0 0 20px rgba(184,125,78,0.4); color: #8b5a3c }
+/* Glacier glass, same recipe as the wish button: the hard 1.5px border and
+   the downward-offset shadow are replaced by an inset hairline and an even
+   glow, so the pill reads as frosted material rather than an outlined box. */
+.day-mode .language-selector { background: rgba(255,251,245,0.6); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.3), 0 0 16px -2px rgba(120,80,30,0.14) }
+.day-mode .language-selector:hover { background: rgba(255,251,245,0.8); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), 0 0 20px -2px rgba(120,80,30,0.18) }
+.day-mode .language-selector button { color: #a8720f; box-shadow: none }
+.day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
+.day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
 .day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
 .day-mode .mode-switch-pill { background: rgba(255,248,240,0.45); box-shadow: 0 0 18px rgba(160,100,30,0.09), 0 0 20px rgba(0,0,0,0.06) }
 .day-mode .mode-switch-btn { color: rgba(150,90,25,0.45) }
