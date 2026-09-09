@@ -194,7 +194,9 @@ export default {
    contrast on cream. Dark ink for the sentence, gradient kept for the brand
    word only — more readable AND more brand-forward. Night is untouched. */
 .day-mode .magic-title { background: none; -webkit-text-fill-color: initial; color: #4a3226 }
-.magic-title .brand-grad { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+/* :deep — v-html content carries NO scope attribute, so a plain scoped
+   descendant rule never matches this span. */
+.magic-title :deep(.brand-grad) { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
 
 /* Wish button, day mode (founder's pick): the glacier glass of the Discovery
    chips, with the label in the brand gradient. A gradient text-clip needs the
