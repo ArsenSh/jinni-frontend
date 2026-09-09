@@ -315,7 +315,35 @@ export default {
 .landing-container:not(.day-mode) .mode-switch-btn:hover { color: #f5e6c8; background: rgba(212,175,55,0.15); box-shadow: 0 0 10px rgba(212,175,55,0.15) }
 .landing-container:not(.day-mode) .mode-switch-btn--active { background: linear-gradient(45deg, rgba(212,175,55,0.32), rgba(255,140,0,0.22)); color: #fff3d4; box-shadow: 0 0 14px rgba(212,175,55,0.3) }
 .landing-container:not(.day-mode) .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(212,175,55,0.32), rgba(255,140,0,0.22)); color: #fff3d4; box-shadow: 0 0 14px rgba(212,175,55,0.3) }
-.landing-container:not(.day-mode) .language-selector { background: rgba(20,10,45,0.7); border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3) }
+/* ── Night mode, matching the day pass (founder 2026-09-09) ──
+   Same three moves: glacier glass on the wish button and the language pill
+   (night tint: violet-ink glass with a lilac hairline, the app's night
+   chip recipe), and the headings in light ink with only the brand word /
+   the payoff carrying the gradient. */
+.landing-container:not(.day-mode) .language-selector { background: rgba(40,30,62,0.55); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.25), 0 0 16px -2px rgba(0,0,0,0.35) }
+.landing-container:not(.day-mode) .language-selector:hover { background: rgba(48,36,74,0.7); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.38), 0 0 20px -2px rgba(0,0,0,0.4) }
+.landing-container:not(.day-mode) .language-selector button { box-shadow: none }
+.landing-container:not(.day-mode) .language-selector button:hover { background: rgba(167,139,250,0.16); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.3); transform: none }
+.landing-container:not(.day-mode) .language-selector button.active { background: rgba(167,139,250,0.24); box-shadow: inset 0 0 0 1px rgba(167,139,250,0.45) }
+
+.landing-container:not(.day-mode) .hero .magic-button {
+  background: rgba(40,30,62,0.55);
+  backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.28), 0 0 18px -2px rgba(0,0,0,0.4);
+  padding: 14px 32px;
+}
+.landing-container:not(.day-mode) .hero .magic-button:hover {
+  background: rgba(52,38,80,0.72);
+  box-shadow: inset 0 0 0 1px rgba(167,139,250,0.45), 0 0 24px -2px rgba(0,0,0,0.45);
+}
+.landing-container:not(.day-mode) .hero .wish-label {
+  background: linear-gradient(45deg, #D4AF37, #FF8C00);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  font-weight: 600;
+}
+.landing-container:not(.day-mode) .magic-title,
+.landing-container:not(.day-mode) .features-heading { background: none; -webkit-text-fill-color: initial; color: #f2e3c4 }
 .landing-container:not(.day-mode) .language-selector button { color: #f5e6c8; box-shadow: 0 0 10px rgba(212,175,55,0.1) }
 .landing-container:not(.day-mode) .language-selector button:hover { background: rgba(212,175,55,0.18); box-shadow: 0 0 15px rgba(212,175,55,0.3) }
 .landing-container:not(.day-mode) .language-selector button.active { background: rgba(212,175,55,0.25); box-shadow: 0 0 18px rgba(212,175,55,0.4) }
