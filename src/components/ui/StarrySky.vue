@@ -25,15 +25,15 @@ export const SKY_DEFAULTS = {
   starWarmChance: 0.22, starWarmHueMin: 34, starWarmHueSpread: 14,
   starEmberChance: 0.05, starEmberHueMin: 18, starEmberHueSpread: 10,
   twinkleChance: 0.12, twinkleMin: 10, twinkleSpread: 10,
-  cometDelayMin: 4000, cometDelaySpread: 2000, cometChance: 0.7,
-  cometDurMin: 1.5, cometDurSpread: 1.5,
-  cometWidthMin: 1.5, cometWidthSpread: 1,
-  cometLenMin: 150, cometLenSpread: 200,
+  cometDelayMin: 3500, cometDelaySpread: 3500, cometChance: 0.8,
+  cometDurMin: 1.0, cometDurSpread: 0.9,
+  cometWidthMin: 1.6, cometWidthSpread: 1.4,
+  cometLenMin: 160, cometLenSpread: 220,
   cometPurpleChance: 0.3,
-  cometBlurMin: 0.5, cometBlurSpread: 0.5,
-  cometGlow: 15, cometDistance: 3000,
-  cometAngleMin: 0, cometAngleSpread: 360,
-  cometStartYMin: 0, cometStartYSpread: 0,
+  cometBlurMin: 0.3, cometBlurSpread: 0.5,
+  cometGlow: 10, cometDistance: 1400,
+  cometAngleMin: 22, cometAngleSpread: 36,
+  cometStartYMin: 2, cometStartYSpread: 38,
 }
 
 export default {
@@ -117,45 +117,53 @@ export default {
       const shootingStar = document.createElement('div')
       shootingStar.classList.add('shooting-star')
       const c = cfg()
+      /* GEOMETRY, corrected. Three bugs lived here:
+         1. FATAL — travel was computed as a percentage of the VIEWPORT but
+            applied to translate(), whose percentages are relative to the
+            ELEMENT. A 1.5px-wide element told to move "190%" moved 3px, so
+            comets flickered in place and were effectively invisible.
+         2. The element was tall and thin (width = thickness, height = length)
+            while its gradient and mask ran at 90deg — across the 1.5px axis.
+            The tail therefore never faded along its own length.
+         3. Angle was random over the full 360° from a fixed y=0 start, so
+            roughly half of them flew up off the screen and none crossed the
+            sky. Now the streak is a horizontal bar (width = length), aimed by
+            rotation, moved along its own axis in PIXELS, head leading. */
       const startX = Math.random() * 100
       const startY = c.cometStartYMin + Math.random() * c.cometStartYSpread
       const angle = c.cometAngleMin + Math.random() * c.cometAngleSpread
       const duration = c.cometDurMin + Math.random() * c.cometDurSpread
-      const width = c.cometWidthMin + Math.random() * c.cometWidthSpread
-      const height = c.cometLenMin + Math.random() * c.cometLenSpread
-      const blueHue = Math.random() < c.cometPurpleChance ? 290 : c.starHueMin + Math.random() * c.starHueSpread
-      const distance = c.cometDistance
-      const rad = angle * Math.PI / 180
-      const endX = startX + Math.cos(rad) * distance / window.innerWidth * 100
-      const endY = Math.sin(rad) * distance / window.innerHeight * 100
+      const thickness = c.cometWidthMin + Math.random() * c.cometWidthSpread
+      const length = c.cometLenMin + Math.random() * c.cometLenSpread
+      const hue = Math.random() < c.cometPurpleChance ? 290 : c.starHueMin + Math.random() * c.starHueSpread
+      const travel = c.cometDistance
       shootingStar.style.position = 'absolute'
       shootingStar.style.left = `${startX}%`
       shootingStar.style.top = `${startY}%`
-      shootingStar.style.width = `${width}px`
-      shootingStar.style.height = `${height}px`
-      shootingStar.style.transform = `rotate(${angle}deg)`
+      shootingStar.style.width = `${length}px`
+      shootingStar.style.height = `${thickness}px`
       shootingStar.style.transformOrigin = 'left center'
-      shootingStar.style.borderRadius = '50%'
+      shootingStar.style.borderRadius = '999px'
+      shootingStar.style.maskImage = 'none'
+      shootingStar.style.webkitMaskImage = 'none'
+      // head at the leading (right) end, tail dissolving behind it
       shootingStar.style.background = `linear-gradient(90deg,
-        rgba(255, 255, 255, 1) 0%,
-        hsla(${blueHue}, 100%, 95%, 0.9) 10%,
-        hsla(${blueHue}, 100%, 85%, 0.7) 30%,
-        hsla(${blueHue}, 100%, 75%, 0.4) 60%,
-        hsla(${blueHue}, 100%, 70%, 0.1) 80%,
-        transparent 100%)`
-      shootingStar.style.boxShadow = `0 0 ${width * c.cometGlow}px hsla(${blueHue}, 100%, 85%, 0.8), 0 0 ${width * c.cometGlow * 2}px hsla(${blueHue}, 100%, 80%, 0.4)`
-      shootingStar.style.filter = `blur(${Math.random() * c.cometBlurSpread + c.cometBlurMin}px) brightness(1.5)`
+        hsla(${hue}, 100%, 75%, 0) 0%,
+        hsla(${hue}, 100%, 80%, 0.18) 35%,
+        hsla(${hue}, 100%, 88%, 0.55) 72%,
+        hsla(${hue}, 100%, 95%, 0.95) 93%,
+        rgba(255, 255, 255, 1) 100%)`
+      shootingStar.style.boxShadow = `0 0 ${thickness * c.cometGlow}px hsla(${hue}, 100%, 85%, 0.55)`
+      shootingStar.style.filter = `blur(${Math.random() * c.cometBlurSpread + c.cometBlurMin}px)`
       shootingStar.style.willChange = 'transform, opacity'
       starrySky.value.appendChild(shootingStar)
       const keyframes = [
-        { opacity: 0, transform: `rotate(${angle}deg) translate(0, 0) scale(0.1, 0.1)`, offset: 0 },
-        { opacity: 0.2, transform: `rotate(${angle}deg) translate(0, 0) scale(0.3, 0.3)`, offset: 0.05 },
-        { opacity: 1, transform: `rotate(${angle}deg) translate(${endX / 4}%, ${endY / 4}%) scale(1, 1)`, offset: 0.15 },
-        { opacity: 0.8, transform: `rotate(${angle}deg) translate(${endX / 2}%, ${endY / 2}%) scale(1, 0.8)`, offset: 0.5 },
-        { opacity: 0.4, transform: `rotate(${angle}deg) translate(${endX * 0.75}%, ${endY * 0.75}%) scale(0.8, 0.5)`, offset: 0.8 },
-        { opacity: 0, transform: `rotate(${angle}deg) translate(${endX}%, ${endY}%) scale(0.3, 0.1)`, offset: 1 }
+        { opacity: 0, transform: `rotate(${angle}deg) translateX(0px)`, offset: 0 },
+        { opacity: 1, transform: `rotate(${angle}deg) translateX(${travel * 0.12}px)`, offset: 0.12 },
+        { opacity: 0.9, transform: `rotate(${angle}deg) translateX(${travel * 0.6}px)`, offset: 0.6 },
+        { opacity: 0, transform: `rotate(${angle}deg) translateX(${travel}px)`, offset: 1 }
       ]
-      const animation = shootingStar.animate(keyframes, {duration: duration * 1000, easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'})
+      const animation = shootingStar.animate(keyframes, { duration: duration * 1000, easing: 'cubic-bezier(0.15, 0.6, 0.3, 1)' })
       animation.onfinish = () => shootingStar.remove()
     }
     let shootingStarTimeout
