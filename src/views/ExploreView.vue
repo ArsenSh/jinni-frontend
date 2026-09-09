@@ -410,8 +410,8 @@ export default {
       return hrs.map(line => {
         const s = String(line);
         const idx = s.indexOf(': ');
-        if (idx > 0) return { day: s.slice(0, idx).trim(), time: s.slice(idx + 2).trim() };
-        return { day: s.trim(), time: '' };
+        if (idx > 0) return { day: this.localDay(s.slice(0, idx).trim()), time: this.localTime(s.slice(idx + 2).trim()) };
+        return { day: this.localDay(s.trim()), time: '' };
       });
     },
     // Tier tint for the modal — only partners get one (mirrors the chat's
@@ -487,6 +487,35 @@ export default {
       return ed.end && f(ed.end) !== f(ed.start) ? `${f(ed.start)} → ${f(ed.end)}` : f(ed.start);
     },
     /* One place = singular label ("Hidden gem"), not the rail's plural. */
+    /* Google returns English weekday names and AM/PM times. Day names come
+       from Intl in the user's language (no 7x6 translation table to keep in
+       sync); AM/PM becomes 24-hour everywhere except English, which is the
+       only locale here that reads 12-hour time naturally. */
+    uiLocale() {
+      return localStorage.getItem('jinni_language') || localStorage.getItem('lang') || 'en';
+    },
+    localDay(name) {
+      const IX = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6,
+                   sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+      const ix = IX[String(name).toLowerCase().replace(/[.,]/g, '').trim()];
+      if (ix == null) return name;
+      const loc = this.uiLocale();
+      if (loc === 'en') return name;
+      try {
+        // 2024-01-07 was a Sunday, so +ix lands on the wanted weekday.
+        const d = new Date(Date.UTC(2024, 0, 7 + ix));
+        const out = new Intl.DateTimeFormat(loc, { weekday: 'long', timeZone: 'UTC' }).format(d);
+        return out.charAt(0).toUpperCase() + out.slice(1);
+      } catch (e) { return name; }
+    },
+    localTime(time) {
+      if (this.uiLocale() === 'en') return time;
+      return String(time).replace(/(\d{1,2}):(\d{2})\s*([AP])M/gi, (m, h, mm, ap) => {
+        let hr = parseInt(h, 10) % 12;
+        if (ap.toUpperCase() === 'P') hr += 12;
+        return String(hr).padStart(2, '0') + ':' + mm;
+      });
+    },
     catLabelOne(c) {
       const key = 'explore.cat_one.' + c;
       const s = this.$t ? this.$t(key) : null;
