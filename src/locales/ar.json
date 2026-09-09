@@ -1130,7 +1130,17 @@
     "search": "بحث",
     "search_none": "تعذر العثور على هذا المكان.",
     "back_chat": "تعرّف على Jinni",
-    "search_ph_short": "إلى أين؟"
+    "search_ph_short": "إلى أين؟",
+    "cat_one": {
+      "restaurants": "مطعم",
+      "hotels": "فندق",
+      "historical": "موقع تاريخي",
+      "events": "فعالية",
+      "photo_spots": "مكان للتصوير",
+      "hidden_gems": "كنز مخفي",
+      "shopping": "متجر",
+      "activities": "نشاط"
+    }
   },
   "usage": {
     "cooldown": {

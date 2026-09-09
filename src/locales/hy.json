@@ -1130,7 +1130,17 @@
     "search": "Որոնել",
     "search_none": "Չհաջողվեց գտնել այդ վայրը:",
     "back_chat": "Դեպի Jinni",
-    "search_ph_short": "Ո՞ւր"
+    "search_ph_short": "Ո՞ւր",
+    "cat_one": {
+      "restaurants": "Ռեստորան",
+      "hotels": "Հյուրանոց",
+      "historical": "Պատմական վայր",
+      "events": "Միջոցառում",
+      "photo_spots": "Ֆոտո վայր",
+      "hidden_gems": "Գաղտնիք",
+      "shopping": "Խանութ",
+      "activities": "Ժամանց"
+    }
   },
   "usage": {
     "cooldown": {

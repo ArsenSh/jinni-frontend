@@ -1130,7 +1130,17 @@
     "search": "Найти",
     "search_none": "Не удалось найти это место.",
     "back_chat": "Встретить Jinni",
-    "search_ph_short": "Куда?"
+    "search_ph_short": "Куда?",
+    "cat_one": {
+      "restaurants": "Ресторан",
+      "hotels": "Отель",
+      "historical": "Историческое место",
+      "events": "Событие",
+      "photo_spots": "Фотоместо",
+      "hidden_gems": "Секрет",
+      "shopping": "Магазин",
+      "activities": "Развлечение"
+    }
   },
   "usage": {
     "cooldown": {

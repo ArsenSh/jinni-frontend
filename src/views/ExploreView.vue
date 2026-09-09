@@ -230,7 +230,7 @@
           <div v-if="info.loading" class="loading-container"><p>{{ t('place_info.loading') || 'Loading…' }}</p></div>
           <div v-else class="place-details">
             <!-- Category subtitle, directly under the title -->
-            <div class="pd-subtitle" v-if="info.cat">{{ catLabel(info.cat) }}</div>
+            <div class="pd-subtitle" v-if="info.cat">{{ catLabelOne(info.cat) }}</div>
 
             <!-- Event date — surfaced first: for an event the date IS the primary fact -->
             <div class="info-row info-row--event" v-if="info.place?.eventDates">
@@ -485,6 +485,12 @@ export default {
       const f = d => new Date(d).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
       if (!ed?.start) return '';
       return ed.end && f(ed.end) !== f(ed.start) ? `${f(ed.start)} → ${f(ed.end)}` : f(ed.start);
+    },
+    /* One place = singular label ("Hidden gem"), not the rail's plural. */
+    catLabelOne(c) {
+      const key = 'explore.cat_one.' + c;
+      const s = this.$t ? this.$t(key) : null;
+      return (s && s !== key) ? s : this.catLabel(c);
     },
     catLabel(c) {
       // $t returns the key itself when a message is missing (e.g. a new

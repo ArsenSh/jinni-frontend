@@ -1130,7 +1130,17 @@
     "search": "Rechercher",
     "search_none": "Impossible de trouver cet endroit.",
     "back_chat": "Rencontrez Jinni",
-    "search_ph_short": "Où ?"
+    "search_ph_short": "Où ?",
+    "cat_one": {
+      "restaurants": "Restaurant",
+      "hotels": "Hôtel",
+      "historical": "Site historique",
+      "events": "Événement",
+      "photo_spots": "Spot photo",
+      "hidden_gems": "Trésor caché",
+      "shopping": "Boutique",
+      "activities": "Activité"
+    }
   },
   "usage": {
     "cooldown": {

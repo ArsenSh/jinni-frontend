@@ -1130,7 +1130,17 @@
     "search": "Search",
     "search_none": "Couldn't find that place.",
     "back_chat": "Meet Jinni",
-    "search_ph_short": "Where to?"
+    "search_ph_short": "Where to?",
+    "cat_one": {
+      "restaurants": "Restaurant",
+      "hotels": "Hotel",
+      "historical": "Historical site",
+      "events": "Event",
+      "photo_spots": "Photo spot",
+      "hidden_gems": "Hidden gem",
+      "shopping": "Shop",
+      "activities": "Activity"
+    }
   },
   "usage": {
     "cooldown": {
