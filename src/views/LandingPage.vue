@@ -250,7 +250,7 @@ export default {
 .wish-item { padding: 6px 30px }
 .wish-num { display: block; font-family: 'Cinzel', serif; font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 12px; font-variant-numeric: tabular-nums }
 .wish-item h3 { font-family: 'Cinzel', serif; font-size: 1.4rem; margin-bottom: 10px }
-.wish-item p { font-size: 1.02rem; line-height: 1.55 }
+.wish-item p { font-size: 1.02rem; line-height: 1.55; text-wrap: pretty }
 .demo h2 { font-size: 2.5rem; margin-bottom: 2rem; color: #D4AF37 }
 .header-container { position: absolute; top: 0; left: 0; padding: 27px; z-index: 1000 }
 .app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
@@ -326,13 +326,13 @@ export default {
 .landing-container:not(.day-mode) .language-selector:hover { background: transparent; box-shadow: none }
 .landing-container:not(.day-mode) .language-selector button { box-shadow: none }
 .landing-container:not(.day-mode) .language-selector button {
-  background: radial-gradient(circle at 50% 50%, rgba(255,196,110,0.16) 0%, rgba(255,190,105,0.05) 45%, rgba(255,190,105,0) 72%);
-  box-shadow: none; filter: drop-shadow(0 0 7px rgba(255,180,90,0.35));
+  background: transparent; box-shadow: none;
+  filter: drop-shadow(0 0 5px rgba(255,190,110,0.45));
 }
 .landing-container:not(.day-mode) .language-selector button:hover,
 .landing-container:not(.day-mode) .language-selector button.active {
-  background: radial-gradient(circle at 50% 50%, rgba(255,206,130,0.3) 0%, rgba(255,190,105,0.1) 48%, rgba(255,190,105,0) 74%);
-  box-shadow: none; transform: none; filter: drop-shadow(0 0 12px rgba(255,180,90,0.7));
+  background: transparent; box-shadow: none; transform: none;
+  filter: drop-shadow(0 0 11px rgba(255,200,120,0.85));
 }
 
 .landing-container:not(.day-mode) .hero .magic-button {
@@ -399,9 +399,8 @@ export default {
    gradient-clipped element can't use text-shadow (the fill is transparent),
    so the halo comes from drop-shadow filters on the rendered pixels. */
 .landing-container:not(.day-mode) .app-name {
-  filter: drop-shadow(0 0 6px rgba(255,214,150,0.45))
-          drop-shadow(0 0 18px rgba(255,170,90,0.35))
-          drop-shadow(0 0 44px rgba(255,140,60,0.22));
+  filter: drop-shadow(0 0 3px rgba(255,214,150,0.5))
+          drop-shadow(0 0 9px rgba(255,170,90,0.28));
 }
 .landing-container:not(.day-mode) .static-bottle {
   filter: saturate(0.76) brightness(1.06) contrast(0.96)
@@ -415,19 +414,21 @@ export default {
   text-shadow: 0 0 4px rgba(255,214,150,0.4), 0 0 16px rgba(255,170,90,0.3), 0 0 40px rgba(255,140,60,0.2) }
 .landing-container:not(.day-mode) .hero .magic-button {
   background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
-  box-shadow: none; border-radius: 0; padding: 10px 4px 18px; position: relative;
+  box-shadow: none; border-radius: 0; padding: 14px 8px 22px; position: relative;
+  font-size: 1.32rem; letter-spacing: 0.01em;
 }
 .landing-container:not(.day-mode) .hero .magic-button::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 1px;
-  background: rgba(255,214,150,0.8); box-shadow: 0 0 14px rgba(255,180,90,0.9);
+  content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
+  background: rgba(255,222,168,0.9); box-shadow: 0 0 18px rgba(255,180,90,1);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover { background: transparent; box-shadow: none }
 .landing-container:not(.day-mode) .hero .magic-button:hover::after { background: #fff3dc; box-shadow: 0 0 20px rgba(255,200,120,1) }
 /* the label leaves the gradient clip: halation needs a solid colour to bloom */
 .landing-container:not(.day-mode) .hero .wish-label {
-  background: none; -webkit-text-fill-color: initial; color: #ffe3ba;
-  text-shadow: 0 0 12px rgba(255,180,90,0.5); transition: color 0.3s ease, text-shadow 0.3s ease;
+  background: none; -webkit-text-fill-color: initial; color: #fff0d2; font-weight: 700;
+  text-shadow: 0 0 4px rgba(255,214,150,0.55), 0 0 16px rgba(255,180,90,0.6), 0 0 40px rgba(255,140,60,0.3);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover .wish-label { color: #fff8ec; text-shadow: 0 0 18px rgba(255,200,120,0.9) }
 
@@ -439,7 +440,7 @@ export default {
    rules, body copy, links). That's the sky's own contrast: starlight against
    a violet ground, with gold only where the lamp light falls. */
 .landing-container:not(.day-mode) .wish-num {
-  background: linear-gradient(180deg, rgba(252,243,220,0.58), rgba(233,196,124,0.2));
+  background: linear-gradient(180deg, rgba(255,231,181,0.72), rgba(226,175,88,0.3));
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
