@@ -279,8 +279,8 @@
       }
     },
     "footer": {
-      "privacy": "隐私政策",
-      "terms": "服务条款",
+      "privacy": "隐私",
+      "terms": "条款",
       "contact": "联系我们",
       "copyright": "© 2026 Jinni。版权所有。"
     },
@@ -458,8 +458,8 @@
     "sending": "发送中...",
     "response_time": "我们通常在工作日4小时内回复。",
     "tagline": "您非凡旅程的智能伴侣",
-    "privacy_policy": "隐私政策",
-    "terms_of_service": "服务条款",
+    "privacy_policy": "隐私",
+    "terms_of_service": "条款",
     "copyright": "© 2026 Jinni AI。版权所有。",
     "modal": {
       "title": "消息发送成功！",

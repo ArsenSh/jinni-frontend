@@ -79,8 +79,8 @@
     <footer class="contact-footer">
       <div class="footer-content">
         <div class="footer-links">
-          <router-link :to="privacyPath" class="footer-link">{{ $t('contact.privacy_policy') }}</router-link>
-          <router-link :to="termsPath" class="footer-link">{{ $t('contact.terms_of_service') }}</router-link>
+          <router-link :to="privacyPath" class="footer-link"><span class="lbl-full">{{ $t('privacy.title') }}</span><span class="lbl-short">{{ $t('contact.privacy_policy') }}</span></router-link>
+          <router-link :to="termsPath" class="footer-link"><span class="lbl-full">{{ $t('terms.title') }}</span><span class="lbl-short">{{ $t('contact.terms_of_service') }}</span></router-link>
         </div>
         <p class="copyright">{{ $t('contact.copyright') }}</p>
       </div>

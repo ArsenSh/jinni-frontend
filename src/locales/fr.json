@@ -279,8 +279,8 @@
       }
     },
     "footer": {
-      "privacy": "Politique de confidentialité",
-      "terms": "Conditions d'utilisation",
+      "privacy": "Confidentialité",
+      "terms": "Conditions",
       "contact": "Contactez-nous",
       "copyright": "© 2026 Jinni. Tous droits réservés."
     },
@@ -458,8 +458,8 @@
     "sending": "Envoi en cours...",
     "response_time": "Nous répondons généralement dans les 4 heures pendant les jours ouvrables.",
     "tagline": "Votre compagnon intelligent pour des voyages extraordinaires",
-    "privacy_policy": "Politique de confidentialité",
-    "terms_of_service": "Conditions d'utilisation",
+    "privacy_policy": "Confidentialité",
+    "terms_of_service": "Conditions",
     "copyright": "© 2026 Jinni AI. Tous droits réservés.",
     "modal": {
       "title": "Message envoyé avec succès",

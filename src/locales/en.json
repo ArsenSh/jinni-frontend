@@ -279,8 +279,8 @@
       }
     },
     "footer": {
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Service",
+      "privacy": "Privacy",
+      "terms": "Terms",
       "contact": "Contact Us",
       "copyright": "© 2026 Jinni. All rights reserved."
     },
@@ -458,8 +458,8 @@
     "sending": "Sending...",
     "response_time": "We typically respond within 4 hours during business days.",
     "tagline": "Your intelligent companion for extraordinary journeys",
-    "privacy_policy": "Privacy Policy",
-    "terms_of_service": "Terms of Service",
+    "privacy_policy": "Privacy",
+    "terms_of_service": "Terms",
     "copyright": "© 2026 Jinni AI. All rights reserved.",
     "modal": {
       "title": "Message Sent Successfully!",

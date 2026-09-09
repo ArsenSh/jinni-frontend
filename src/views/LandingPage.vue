@@ -49,8 +49,8 @@
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-links">
-          <a href="/terms">{{ $t('landing.footer.terms') }}</a>
-          <a href="/privacy">{{ $t('landing.footer.privacy') }}</a>
+          <a href="/terms"><span class="lbl-full">{{ $t('terms.title') }}</span><span class="lbl-short">{{ $t('landing.footer.terms') }}</span></a>
+          <a href="/privacy"><span class="lbl-full">{{ $t('privacy.title') }}</span><span class="lbl-short">{{ $t('landing.footer.privacy') }}</span></a>
         </div>
         <p class="footer-copyright">{{ $t('landing.footer.copyright') }}</p>
       </div>

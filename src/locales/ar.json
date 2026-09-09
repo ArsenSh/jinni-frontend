@@ -279,8 +279,8 @@
       }
     },
     "footer": {
-      "privacy": "سياسة الخصوصية",
-      "terms": "شروط الخدمة",
+      "privacy": "الخصوصية",
+      "terms": "الشروط",
       "contact": "اتصل بنا",
       "copyright": "© 2026 Jinni. جميع الحقوق محفوظة."
     },
@@ -458,8 +458,8 @@
     "sending": "جارٍ الإرسال...",
     "response_time": "عادة ما نرد خلال 4 ساعات في أيام العمل.",
     "tagline": "رفيقك الذكي للرحلات الاستثنائية",
-    "privacy_policy": "سياسة الخصوصية",
-    "terms_of_service": "شروط الخدمة",
+    "privacy_policy": "الخصوصية",
+    "terms_of_service": "الشروط",
     "copyright": "© 2026 Jinni AI. جميع الحقوق محفوظة.",
     "modal": {
       "title": "شكراً لتواصلك!",

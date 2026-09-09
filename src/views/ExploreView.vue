@@ -194,9 +194,9 @@
         <div class="ex-footer-links">
           <router-link to="/contact">{{ t('chat.profile.contact_us') || 'Contact' }}</router-link>
           <span>·</span>
-          <router-link to="/terms">{{ t('explore.terms') || 'Terms' }}</router-link>
+          <router-link to="/terms"><span class="lbl-full">{{ t('terms.title') || 'Terms of Service' }}</span><span class="lbl-short">{{ t('explore.terms') || 'Terms' }}</span></router-link>
           <span>·</span>
-          <router-link to="/privacy">{{ t('explore.privacy') || 'Privacy' }}</router-link>
+          <router-link to="/privacy"><span class="lbl-full">{{ t('privacy.title') || 'Privacy Policy' }}</span><span class="lbl-short">{{ t('explore.privacy') || 'Privacy' }}</span></router-link>
         </div>
       </footer>
     </template>

@@ -80,3 +80,11 @@ body.theme-light {
   from { background-color: #f9f5eb; }
   to   { background-color: #e0a082; }
 }
+
+/* Legal-link labels (founder 2026-09-09): full document names where there is
+   room, short one-word forms on phones. Both are rendered; CSS picks. */
+.lbl-short { display: none; }
+@media (max-width: 520px) {
+  .lbl-full { display: none; }
+  .lbl-short { display: inline; }
+}
