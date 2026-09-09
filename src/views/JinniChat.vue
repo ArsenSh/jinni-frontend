@@ -5858,13 +5858,32 @@ export default {
       // lines make width:max-content shrink-wrap the box to the true longest
       // line — lamp gap becomes exactly the flex gap, centering is pure CSS,
       // and no runtime measuring is involved (the iOS saga, final form).
+      // Break into as many BALANCED lines as the sentence needs (2026-09-09):
+      // a single midpoint cut left halves that were still wider than the 72%
+      // cap, so one half wrapped again. max-content then measured the long
+      // pre-broken half, the box clamped to the full 72%, and the shorter
+      // rendered lines centred inside it — that empty strip is the "lamp is
+      // far" gap on 3-line greetings. Every segment must fit uncut.
       if (window.innerWidth <= 768 && line.length > 28) {
-        const mid = Math.floor(line.length / 2);
-        let best = -1;
-        for (let i = 0; i < line.length; i++) {
-          if (line[i] === ' ' && (best === -1 || Math.abs(i - mid) < Math.abs(best - mid))) best = i;
+        const n = Math.min(3, Math.ceil(line.length / 28));
+        const spaces = [];
+        for (let i = 0; i < line.length; i++) if (line[i] === ' ') spaces.push(i);
+        const cuts = [];
+        for (let k = 1; k < n; k++) {
+          const target = Math.round(k * line.length / n);
+          let best = -1;
+          for (const s of spaces) {
+            if (cuts.indexOf(s) !== -1) continue;
+            if (best === -1 || Math.abs(s - target) < Math.abs(best - target)) best = s;
+          }
+          if (best > 0) cuts.push(best);
         }
-        if (best > 0) line = line.slice(0, best) + '\n' + line.slice(best + 1);
+        cuts.sort((a, b) => a - b);
+        if (cuts.length) {
+          let out = '', prev = 0;
+          for (const c of cuts) { out += line.slice(prev, c) + '\n'; prev = c + 1; }
+          line = out + line.slice(prev);
+        }
       }
       return line.replace(/ (\S+)$/, '\u00A0$1');
     },
@@ -8945,7 +8964,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    centered lines float mid-box — reading as a big gap beside the lamp
    (founder 2026-08-31). Left-anchor the text against the lamp; the slack
    moves to the right edge where it is invisible. Desktop keeps center. */
-@media (max-width:768px){.greeting{justify-content:center;text-align:center;white-space:pre-line;width:max-content;max-width:72%}.greeting-icon{height:38px;width:auto;align-self:auto}}
+@media (max-width:768px){.greeting{justify-content:center;text-align:center;white-space:pre-line;width:max-content;max-width:72%;text-wrap:balance}.greeting-icon{height:38px;width:auto;align-self:auto}}
 
 /* Route answers ("how to reach X"): the map exists only for the See-route
    button's fullscreen trip — its inline "Show on map" bar is noise next to
