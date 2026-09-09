@@ -1129,7 +1129,8 @@
     "search_ph": "Where to? City, region, country…",
     "search": "Search",
     "search_none": "Couldn't find that place.",
-    "back_chat": "Meet Jinni"
+    "back_chat": "Meet Jinni",
+    "search_ph_short": "Where to?"
   },
   "usage": {
     "cooldown": {

@@ -1129,7 +1129,8 @@
     "search_ph": "Ո՞ւր. քաղաք, մարզ, երկիր…",
     "search": "Որոնել",
     "search_none": "Չհաջողվեց գտնել այդ վայրը:",
-    "back_chat": "Դեպի Jinni"
+    "back_chat": "Դեպի Jinni",
+    "search_ph_short": "Ո՞ւր"
   },
   "usage": {
     "cooldown": {

@@ -1129,7 +1129,8 @@
     "search_ph": "Куда? Город, регион, страна…",
     "search": "Найти",
     "search_none": "Не удалось найти это место.",
-    "back_chat": "Встретить Jinni"
+    "back_chat": "Встретить Jinni",
+    "search_ph_short": "Куда?"
   },
   "usage": {
     "cooldown": {

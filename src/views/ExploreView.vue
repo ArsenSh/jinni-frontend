@@ -35,7 +35,7 @@
     <form class="ex-search" @submit.prevent="searchPlace">
       <svg class="ex-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input v-model="searchQ" class="ex-search-input" type="search" enterkeyhint="search"
-             :placeholder="t('explore.search_ph') || 'Where to? City, region, country…'"/>
+             :placeholder="searchPlaceholder"/>
       <button type="submit" class="ex-search-btn" :disabled="searchBusy || !searchQ.trim()">
         {{ searchBusy ? '…' : (t('explore.search') || 'Search') }}
       </button>
@@ -357,6 +357,7 @@ export default {
       navStuck: false,
       serverOrder: null,
       catEls: {},
+      narrowVp: false,
       railEls: {},
       chipEls: {},
       railIx: {},
@@ -377,6 +378,11 @@ export default {
     };
   },
   computed: {
+    /* Long hint has room on desktop; phones get just the question. */
+    searchPlaceholder() {
+      const k = this.narrowVp ? 'explore.search_ph_short' : 'explore.search_ph';
+      return this.t(k) || (this.narrowVp ? 'Where to?' : 'Where to? City, region, country…');
+    },
     orderedCategories() {
       // Prefer the server's interest-weighted order (user preferences first);
       // fall back to a sensible default. Only categories that have places.
@@ -516,6 +522,7 @@ export default {
     },
     // Highlight the category chip of the section currently in view.
     computeRailN() {
+      this.narrowVp = window.innerWidth <= 520;
       if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
       const rail = this.$el && this.$el.querySelector && this.$el.querySelector('.ex-rail');
       if (!rail) return;

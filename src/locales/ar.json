@@ -1129,7 +1129,8 @@
     "search_ph": "إلى أين؟ مدينة، منطقة، دولة…",
     "search": "بحث",
     "search_none": "تعذر العثور على هذا المكان.",
-    "back_chat": "تعرّف على Jinni"
+    "back_chat": "تعرّف على Jinni",
+    "search_ph_short": "إلى أين؟"
   },
   "usage": {
     "cooldown": {
