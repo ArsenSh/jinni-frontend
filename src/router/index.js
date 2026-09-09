@@ -123,6 +123,18 @@ const routes = [
     }
 ]
 
+// Dev-only sky tuning harness: `npm run dev` → /lab/sky. import.meta.env.DEV
+// is statically false in a production build, so this route (and SkyLab, and
+// the whole control panel) is tree-shaken out of the shipped bundle.
+if (import.meta.env.DEV) {
+    routes.push({
+        path: '/lab/sky',
+        name: 'SkyLab',
+        component: () => import('@/views/SkyLab.vue'),
+        meta: { title: 'Sky Lab — dev', requiresAuth: false }
+    })
+}
+
 const router = createRouter({ history: createWebHistory(), routes, scrollBehavior() { return { top: 0 } } })
 const isValidToken = (token) => {
     if (!token) return false;

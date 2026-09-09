@@ -415,16 +415,17 @@ export default {
 }
 .landing-container:not(.day-mode) .hero .magic-button::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
-  background: rgba(255,222,168,0.9); box-shadow: 0 0 18px rgba(255,180,90,1);
+  background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover { background: transparent; box-shadow: none }
-.landing-container:not(.day-mode) .hero .magic-button:hover::after { background: rgba(255,230,186,0.95); box-shadow: 0 0 16px rgba(255,190,100,0.95) }
+.landing-container:not(.day-mode) .hero .magic-button:hover::after { background: #fff3dc; box-shadow: 0 0 16px rgba(255,190,105,1) }
 /* the label leaves the gradient clip: halation needs a solid colour to bloom */
 .landing-container:not(.day-mode) .hero .wish-label {
-  background: none; -webkit-text-fill-color: initial; color: #fff0d2; font-weight: 700;
-  text-shadow: 0 0 4px rgba(255,214,150,0.55), 0 0 16px rgba(255,180,90,0.6), 0 0 40px rgba(255,140,60,0.3);
-  transition: color 0.3s ease, text-shadow 0.3s ease;
+  /* Same restraint as the Explore switch (founder preferred it): one soft
+     glow on the words, and only the rule beneath them answers the pointer. */
+  background: none; -webkit-text-fill-color: initial; color: #ffe8c4; font-weight: 700;
+  text-shadow: 0 0 12px rgba(255,180,90,0.5);
 }
 
 /* ── Starfield palette (founder 2026-09-09) ──

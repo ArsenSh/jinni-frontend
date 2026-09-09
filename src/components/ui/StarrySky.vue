@@ -5,9 +5,30 @@
 
 
 <script>
-import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
+
+/* Every tunable of the sky, with the values that shipped. SkyLab (dev only)
+   overrides them live; production passes nothing and gets exactly these. */
+export const SKY_DEFAULTS = {
+  starCount: 2000,
+  starSizeMin: 0.5, starSizeSpread: 1.2,
+  starOpacityMin: 0.3, starOpacitySpread: 0.8,
+  starHueMin: 210, starHueSpread: 30,
+  starGlow: 4,
+  twinkleChance: 0.05, twinkleMin: 10, twinkleSpread: 10,
+  cometDelayMin: 4000, cometDelaySpread: 2000, cometChance: 0.7,
+  cometDurMin: 1.5, cometDurSpread: 1.5,
+  cometWidthMin: 1.5, cometWidthSpread: 1,
+  cometLenMin: 150, cometLenSpread: 200,
+  cometPurpleChance: 0.3,
+  cometBlurMin: 0.5, cometBlurSpread: 0.5,
+  cometGlow: 15, cometDistance: 3000,
+}
+
 export default {
-  setup() {
+  props: { config: { type: Object, default: () => ({}) } },
+  setup(props) {
+    const cfg = () => ({ ...SKY_DEFAULTS, ...(props.config || {}) })
     const starrySky = ref(null)
     let resizeObserver = null
     let resizeTimer = null
@@ -17,14 +38,15 @@ export default {
       while (starrySky.value.firstChild) {starrySky.value.removeChild(starrySky.value.firstChild)}
       const containerHeight = starrySky.value.offsetHeight
       const containerWidth = starrySky.value.offsetWidth
-      for (let i = 0; i < 2000; i++) {
+      const c = cfg()
+      for (let i = 0; i < c.starCount; i++) {
         const star = document.createElement('div')
         star.classList.add('star')
         const x = Math.random() * containerWidth
         const y = Math.random() * containerHeight
-        const size = Math.random() * 1.2 + 0.5
-        const opacity = Math.random() * 0.8 + 0.3
-        const blueHue = 210 + Math.random() * 30
+        const size = Math.random() * c.starSizeSpread + c.starSizeMin
+        const opacity = Math.random() * c.starOpacitySpread + c.starOpacityMin
+        const blueHue = c.starHueMin + Math.random() * c.starHueSpread
         const saturation = 80 + Math.random() * 20
         const lightness = 80 + Math.random() * 20
         star.style.position = 'absolute'
@@ -34,9 +56,9 @@ export default {
         star.style.height = `${size}px`
         star.style.opacity = String(opacity)
         star.style.backgroundColor = `hsl(${blueHue}, ${saturation}%, ${lightness}%)`
-        star.style.boxShadow = `0 0 ${size * 4}px hsla(${blueHue}, ${saturation}%, ${lightness}%, 0.8)`
+        star.style.boxShadow = `0 0 ${size * c.starGlow}px hsla(${blueHue}, ${saturation}%, ${lightness}%, 0.8)`
         starrySky.value.appendChild(star)
-        if (Math.random() > 0.95) {star.style.animation = `gentle-twinkle ${Math.random() * 10 + 10}s infinite`}
+        if (Math.random() < c.twinkleChance) {star.style.animation = `gentle-twinkle ${Math.random() * c.twinkleSpread + c.twinkleMin}s infinite`}
       }
     }
     const updateContainerHeight = () => {
@@ -64,13 +86,14 @@ export default {
       if (!starrySky.value) return
       const shootingStar = document.createElement('div')
       shootingStar.classList.add('shooting-star')
+      const c = cfg()
       const startX = Math.random() * 100
       const angle = Math.random() * 360
-      const duration = 1.5 + Math.random() * 1.5
-      const width = 1.5 + Math.random()
-      const height = 150 + Math.random() * 200
-      const blueHue = Math.random() > 0.7 ? 290 : 210 + Math.random() * 30
-      const distance = 3000
+      const duration = c.cometDurMin + Math.random() * c.cometDurSpread
+      const width = c.cometWidthMin + Math.random() * c.cometWidthSpread
+      const height = c.cometLenMin + Math.random() * c.cometLenSpread
+      const blueHue = Math.random() < c.cometPurpleChance ? 290 : c.starHueMin + Math.random() * c.starHueSpread
+      const distance = c.cometDistance
       const rad = angle * Math.PI / 180
       const endX = startX + Math.cos(rad) * distance / window.innerWidth * 100
       const endY = Math.sin(rad) * distance / window.innerHeight * 100
@@ -89,8 +112,8 @@ export default {
         hsla(${blueHue}, 100%, 75%, 0.4) 60%,
         hsla(${blueHue}, 100%, 70%, 0.1) 80%,
         transparent 100%)`
-      shootingStar.style.boxShadow = `0 0 ${width * 15}px hsla(${blueHue}, 100%, 85%, 0.8), 0 0 ${width * 30}px hsla(${blueHue}, 100%, 80%, 0.4)`
-      shootingStar.style.filter = `blur(${Math.random() * 0.5 + 0.5}px) brightness(1.5)`
+      shootingStar.style.boxShadow = `0 0 ${width * c.cometGlow}px hsla(${blueHue}, 100%, 85%, 0.8), 0 0 ${width * c.cometGlow * 2}px hsla(${blueHue}, 100%, 80%, 0.4)`
+      shootingStar.style.filter = `blur(${Math.random() * c.cometBlurSpread + c.cometBlurMin}px) brightness(1.5)`
       shootingStar.style.willChange = 'transform, opacity'
       starrySky.value.appendChild(shootingStar)
       const keyframes = [
@@ -106,9 +129,10 @@ export default {
     }
     let shootingStarTimeout
     const scheduleShootingStar = () => {
-      const delay = Math.random() * 2000 + 4000
+      const c = cfg()
+      const delay = Math.random() * c.cometDelaySpread + c.cometDelayMin
       shootingStarTimeout = setTimeout(() => {
-        if (Math.random() > 0.3) createShootingStar()
+        if (Math.random() < c.cometChance) createShootingStar()
         scheduleShootingStar()
       }, delay)
     }
@@ -127,7 +151,12 @@ export default {
       clearTimeout(shootingStarTimeout)
       if (resizeTimer) clearTimeout(resizeTimer)
     })
-    return { starrySky }
+    watch(() => props.config, () => {
+      createStars()
+      clearTimeout(shootingStarTimeout)
+      scheduleShootingStar()
+    }, { deep: true })
+    return { starrySky, createShootingStar, createStars }
   }
 }
 </script>
