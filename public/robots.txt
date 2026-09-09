@@ -1,0 +1,16 @@
+# jinni.travel
+User-agent: *
+Allow: /
+
+# Private surfaces: no value in the index, and several need a session anyway.
+Disallow: /auth
+Disallow: /onboarding
+Disallow: /chat
+Disallow: /explore
+Disallow: /map-selector
+Disallow: /admin
+Disallow: /business/dashboard
+Disallow: /marketing
+Disallow: /share/
+
+Sitemap: https://jinni.travel/sitemap.xml

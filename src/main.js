@@ -27,5 +27,11 @@ const i18n = createI18n({
     messages
 })
 
+// <html lang> must state the language actually rendered: index.html ships
+// lang="en" statically, so every non-English visitor was served English-tagged
+// markup — wrong for search engines, screen readers and Safari's translation
+// prompt. Kept in sync on every language change (see the watcher in App.vue).
+document.documentElement.setAttribute('lang', i18n.global.locale.value || 'en')
+
 applyDisplayPrefs()   // font style + text size, before first paint
 createApp(App).use(i18n).use(store).use(router).mount('#app')

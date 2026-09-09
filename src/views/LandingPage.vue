@@ -17,7 +17,7 @@
     </div>
     <section class="hero">
       <div class="hero-content">
-        <img src="/images/bottle.png?v=3" alt="Genie Bottle" class="static-bottle">
+        <img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle">
         <h1 class="magic-title" v-html="heroTitleHtml"></h1>
         <p class="magic-subtitle">{{ $t('landing.hero.subtitle') }}</p>
         <MagicButton @click="openAuthModal"><span class="wish-label">{{ $t('landing.hero.cta') }}</span></MagicButton>
@@ -395,6 +395,14 @@ export default {
    orange next to parchment type, so it read as a sticker dropped on the page.
    Pulled toward the text's gold and given the same three-layer bloom, it now
    looks like the source of the light the type is catching. */
+/* The wordmark had no glow at all while everything around it bloomed — a
+   gradient-clipped element can't use text-shadow (the fill is transparent),
+   so the halo comes from drop-shadow filters on the rendered pixels. */
+.landing-container:not(.day-mode) .app-name {
+  filter: drop-shadow(0 0 6px rgba(255,214,150,0.45))
+          drop-shadow(0 0 18px rgba(255,170,90,0.35))
+          drop-shadow(0 0 44px rgba(255,140,60,0.22));
+}
 .landing-container:not(.day-mode) .static-bottle {
   filter: saturate(0.76) brightness(1.06) contrast(0.96)
           drop-shadow(0 0 8px rgba(255,214,150,0.5))

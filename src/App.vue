@@ -123,6 +123,13 @@ export default {
   name: 'App',
   computed: {...mapGetters('settings', ['effectiveTheme', 'themeClass'])},
   watch: {
+    // <html lang> follows the rendered language. Several screens can change
+    // it (landing selector, chat settings, business dashboard), so it is
+    // watched centrally rather than patched at each call site.
+    '$i18n.locale': {
+      immediate: true,
+      handler(val) { if (val) document.documentElement.setAttribute('lang', val); }
+    },
     effectiveTheme: {
       immediate: true,
       handler(val, oldVal) {

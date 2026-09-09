@@ -12,8 +12,10 @@
          error for the unknown key, so the boot script injects it on Android
          instead of shipping it statically (2026-08-23). -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-    <title>Jinni - Your AI Guide</title>
-    <meta name="description" content="Ask Jinni anything — restaurants, hotels, events, activities, hidden gems and more. Your next discovery is one wish away.">
+    <title>Jinni — AI Travel Guide to Places, Events &amp; Hidden Gems</title>
+    <meta name="description" content="Jinni is an AI travel guide that finds restaurants, hotels, events, activities and hidden gems around you — personalised to how you like to travel.">
+    <link rel="canonical" href="https://jinni.travel/">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
     <!-- Open Graph / Twitter cards: what Facebook, Instagram, TikTok, Telegram
          and WhatsApp render when a jinni.travel link is shared. Crawlers fetch
          this raw HTML and never run Vue, so the tags must live HERE, static,
@@ -36,6 +38,41 @@
     <meta name="twitter:title" content="Jinni — Your AI Guide">
     <meta name="twitter:description" content="Ask Jinni anything — restaurants, hotels, events, activities, hidden gems and more. Your next discovery is one wish away.">
     <meta name="twitter:image" content="https://jinni.travel/og-image.jpg?v=2">
+    <!-- Structured data: identifies the brand and the product to search
+         engines, and is what earns a sitelinks search box / knowledge panel.
+         Keep the URLs absolute — crawlers read this file, never the SPA. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://jinni.travel/#organization",
+          "name": "Jinni",
+          "url": "https://jinni.travel/",
+          "logo": "https://jinni.travel/apple-touch-icon.png",
+          "description": "AI travel guide for discovering places, events and hidden gems."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://jinni.travel/#website",
+          "url": "https://jinni.travel/",
+          "name": "Jinni",
+          "publisher": { "@id": "https://jinni.travel/#organization" },
+          "inLanguage": ["en", "ru", "hy", "fr", "ar", "zh"]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Jinni",
+          "applicationCategory": "TravelApplication",
+          "operatingSystem": "Web",
+          "url": "https://jinni.travel/",
+          "description": "An AI travel companion that recommends restaurants, hotels, events, activities and hidden gems based on your taste and location.",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+        }
+      ]
+    }
+    </script>
     <!-- Armenian text (event names, venues, ticket prices) had no font of its
          own: the app stack is Latin-only, so each Armenian character was
          substituted separately by the OS and bold was synthesised. One real
