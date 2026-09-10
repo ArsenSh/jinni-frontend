@@ -15,13 +15,12 @@
       </div>
     </div>
 
-    <!-- Hero — now using i18n -->
     <section class="hero">
       <div class="hero-content">
-        <img src="/images/bottle.png?v=3" alt="Genie Bottle" class="static-bottle">
+        <img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle">
         <h1 class="magic-title">{{ $t('businessLanding.hero.title') }}</h1>
-        <p class="magic-subtitle">{{ $t('businessLanding.hero.subtitle') }}</p>
-        <MagicButton @click="goApply('verified')">{{ $t('businessLanding.hero.cta') }}</MagicButton>
+        <p class="magic-subtitle" v-html="heroSubtitleHtml"></p>
+        <MagicButton @click="goApply('verified')"><span class="wish-label">{{ $t('businessLanding.hero.cta') }}</span></MagicButton>
       </div>
     </section>
 
@@ -29,53 +28,16 @@
       <div class="features-container">
         <h2 class="features-heading">{{ $t('businessLanding.features.title') }}</h2>
         <div class="features-grid">
-          <!-- Verified -->
-          <GoldCard class="feature-card">
-            <div class="tier-icon tier-icon--verified">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </div>
-            <div class="tier-label tier-label--verified">{{ $t('businessLanding.tiers.verified.label') }}</div>
-            <div class="tier-price">{{ $t('businessLanding.tiers.verified.price') }}</div>
-            <h3>{{ $t('businessLanding.tiers.verified.heading') }}</h3>
-            <p>{{ $t('businessLanding.tiers.verified.description') }}</p>
-            <button class="tier-cta tier-cta--verified" @click="goApply('verified')">{{ $t('businessLanding.tiers.verified.cta') }}</button>
-          </GoldCard>
-          <!-- Spotlight -->
-          <GoldCard class="feature-card">
-            <div class="tier-icon tier-icon--spotlight">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="#3b9edd">
-                <circle cx="12" cy="12" r="5"/>
-                <line x1="12" y1="1" x2="12" y2="3" stroke="#3b9edd" stroke-width="2"/>
-                <line x1="12" y1="21" x2="12" y2="23" stroke="#3b9edd" stroke-width="2"/>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#3b9edd" stroke-width="2"/>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#3b9edd" stroke-width="2"/>
-                <line x1="1" y1="12" x2="3" y2="12" stroke="#3b9edd" stroke-width="2"/>
-                <line x1="21" y1="12" x2="23" y2="12" stroke="#3b9edd" stroke-width="2"/>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#3b9edd" stroke-width="2"/>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="#3b9edd" stroke-width="2"/>
-              </svg>
-            </div>
-            <div class="tier-label tier-label--spotlight">{{ $t('businessLanding.tiers.spotlight.label') }}</div>
-            <div class="tier-price">{{ $t('businessLanding.tiers.spotlight.price') }}<span>{{ $t('businessLanding.tiers.spotlight.priceSuffix') }}</span></div>
-            <h3>{{ $t('businessLanding.tiers.spotlight.heading') }}</h3>
-            <p>{{ $t('businessLanding.tiers.spotlight.description') }}</p>
-            <button class="tier-cta tier-cta--spotlight" @click="goApply('spotlight')">{{ $t('businessLanding.tiers.spotlight.cta') }}</button>
-          </GoldCard>
-          <!-- Signature -->
-          <GoldCard class="feature-card">
-            <div class="tier-icon tier-icon--signature">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="#D4AF37">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
-            </div>
-            <div class="tier-label tier-label--signature">{{ $t('businessLanding.tiers.signature.label') }}</div>
-            <div class="tier-price">{{ $t('businessLanding.tiers.signature.price') }}<span>{{ $t('businessLanding.tiers.signature.priceSuffix') }}</span></div>
-            <h3>{{ $t('businessLanding.tiers.signature.heading') }}</h3>
-            <p>{{ $t('businessLanding.tiers.signature.description') }}</p>
-            <button class="tier-cta tier-cta--signature" @click="goApply('signature')">{{ $t('businessLanding.tiers.signature.cta') }}</button>
-          </GoldCard>
+          <div v-for="tier in tiers" :key="tier.key" class="wish-item">
+            <span class="tier-label">{{ $t(`businessLanding.tiers.${tier.key}.label`) }}</span>
+            <span class="tier-price">{{ $t(`businessLanding.tiers.${tier.key}.price`) }}<span
+              v-if="tier.suffix" class="tier-price-suffix">{{ $t(`businessLanding.tiers.${tier.key}.priceSuffix`) }}</span></span>
+            <h3>{{ $t(`businessLanding.tiers.${tier.key}.heading`) }}</h3>
+            <p>{{ $t(`businessLanding.tiers.${tier.key}.description`) }}</p>
+            <button class="tier-cta" @click="goApply(tier.key)">
+              <span class="wish-label">{{ $t(`businessLanding.tiers.${tier.key}.cta`) }}</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -112,14 +74,14 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
+import { useI18n } from 'vue-i18n'
 import { isNightTime } from '@/utils/timeUtils'
 import MagicButton from '@/components/ui/MagicButton.vue'
-import GoldCard from '@/components/ui/GoldCard.vue'
 import StarrySky from '@/components/ui/StarrySky.vue'
 import DesertSky from '@/components/ui/DesertSky.vue'
 export default {
   name: 'BusinessLanding',
-  components: { MagicButton, GoldCard, StarrySky, DesertSky },
+  components: { MagicButton, StarrySky, DesertSky },
   setup() {
     const router = useRouter()
     const store = useStore()
@@ -135,6 +97,20 @@ export default {
       { code: 'ar', flag: '🇸🇦', title: 'العربية' },
       { code: 'hy', flag: '🇦🇲', title: 'Հայերեն' }
     ])
+    /* The brand word carries the gradient, the sentence stays solid — the
+       landing page's rule. Inserted with v-html, so the span carries no scope
+       attribute and the CSS has to reach it with :deep(). */
+    const { t: translate } = useI18n()
+    const heroSubtitleHtml = computed(() => {
+      const raw = String(translate('businessLanding.hero.subtitle') || '')
+      const esc = raw.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+      return esc.replace(/Jinni/g, '<span class="brand-grad">Jinni</span>')
+    })
+    const tiers = [
+      { key: 'verified', suffix: false },
+      { key: 'spotlight', suffix: true },
+      { key: 'signature', suffix: true }
+    ]
     const currentLanguageFlag = computed(() => languageOptions.value.find(l => l.code === selectedLanguage.value)?.flag || '🌐')
     const currentLanguageTitle = computed(() => languageOptions.value.find(l => l.code === selectedLanguage.value)?.title || 'Select Language')
     const startAutoCloseTimer = () => {
@@ -174,6 +150,7 @@ export default {
       selectedLanguage, showAllLanguages, languageOptions,
       currentLanguageFlag, currentLanguageTitle,
       selectLanguage, toggleLanguageSelector, languageSelectorRef,
+      heroSubtitleHtml, tiers,
       goHome, goApply
     }
   }
@@ -184,113 +161,255 @@ export default {
 
 
 <style scoped>
+/* This page speaks the landing page's language (founder 2026-09-10: "make it
+   same like the landing page", both modes). Day = glacier glass on cream;
+   night = halation, where nothing is a box and everything is lit. The tiers
+   keep the landing's manifest layout: hairline-divided columns carried by
+   type, with the PRICE as the display numeral — on a pricing page the number
+   is real information, so it earns the position 01/02/03 holds on the
+   landing. */
+
 /* ── Base ──────────────────────────────────────────────────────────────────── */
 .business-landing { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; flex: 1 }
 .hero, .features { position: relative; z-index: 2 }
-/* ── Header ────────────────────────────────────────────────────────────────── */
 .header-container { position: absolute; top: 0; left: 0; padding: 27px; z-index: 1000 }
-.app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px; text-shadow: 0 0 10px rgba(255,140,0,0.3) }
-/* ── Language selector (mirrors LandingPage) ──────────────────────────────── */
+.app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
 .language-selector-container { position: fixed; top: 20px; right: 20px; z-index: 1001 }
 .language-selector { display: flex; gap: 12px; background: rgba(26,9,51,0.5); padding: 10px; border-radius: 50px; backdrop-filter: blur(5px); border: 1px solid rgba(157,123,255,0.3); transition: all 0.3s ease; overflow: hidden }
-.language-selector button { background: transparent; color: #9D7BFF; border: none; padding: 12px; border-radius: 50%; cursor: pointer; transition: transform 0.3s ease, background 0.3s ease; font-size: 24px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(157,123,255,0.2) }
+.language-selector button { background: transparent; color: #9D7BFF; border: none; padding: 12px; border-radius: 50%; cursor: pointer; transition: transform 0.3s ease, background 0.3s ease, opacity 0.3s ease; font-size: 24px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(157,123,255,0.2) }
 .language-selector button:hover { transform: scale(1.1); background: rgba(157,123,255,0.2); box-shadow: 0 0 15px rgba(157,123,255,0.4) }
 .language-selector button.active { background: rgba(157,123,255,0.3); box-shadow: 0 0 15px rgba(157,123,255,0.5); animation: pulse 0.5s ease }
-.static-bottle { width: 150px; height: auto; max-height: 250px; margin: auto; display: block }
-/* ── Hero — matches LandingPage hero exactly ──────────────────────────────── */
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
 .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
 .hero-content { max-width: 800px; animation: fadeInUp 1s ease-out }
-.magic-title { font-family: 'Cinzel', serif; font-size: 3.5rem; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
-.magic-subtitle { font-family: 'Cinzel', serif; font-size: 1.3rem; max-width: 700px; margin: 0 auto 2rem; color: #e0e0e0; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
-.hero-note { font-family: 'Cinzel', serif; font-size: 0.78rem; opacity: 0.45; margin: 1rem 0 0; color: #e0e0e0 }
-/* ── Features — matches LandingPage features section ─────────────────────── */
+.static-bottle { width: 150px; height: auto; max-height: 250px; margin: auto; display: block }
+.magic-title { font-family: 'Cinzel', serif; font-size: 4rem; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+.magic-subtitle { font-family: 'Cinzel', serif; font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
+/* v-html content carries NO scope attribute — a plain scoped descendant rule
+   would never match this span. */
+.magic-subtitle :deep(.brand-grad) { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+
+/* ── The tiers, as a manifest ──────────────────────────────────────────────── */
 .features { padding: 2rem 1rem 4rem 1rem; position: relative; z-index: 2 }
 .features-container { max-width: 1200px; margin: 0 auto }
 .features-heading { font-family: 'Cinzel', serif; text-align: center; margin-bottom: 3rem; font-size: 2.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
-.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; position: relative }
-/* Card base — matches LandingPage .feature-card */
-.feature-card { background: rgba(25,25,35,0.15); backdrop-filter: blur(2px); box-shadow: none; border: none; position: relative; overflow: hidden }
-.feature-card h3 { font-family: 'Cinzel', serif; font-size: 1.5rem; margin-bottom: 1rem; color: #FF8C00 }
-.feature-card p  { font-family: 'Cinzel', serif; font-size: 1.05rem; line-height: 1.7; opacity: 0.85 }
-/* Tier icon circle */
-.tier-icon { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
-.tier-icon--verified  { background: rgba(76,175,80,0.12);  box-shadow: 0 0 14px rgba(76,175,80,0.25) }
-.tier-icon--spotlight { background: rgba(59,158,221,0.12); box-shadow: 0 0 14px rgba(59,158,221,0.25) }
-.tier-icon--signature { background: rgba(212,175,55,0.12); box-shadow: 0 0 16px rgba(212,175,55,0.35) }
-/* Tier name label */
-.tier-label { font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-align: center; margin-bottom: 6px }
-.tier-label--verified  { color: #4CAF50 }
-.tier-label--spotlight { color: #3b9edd }
-.tier-label--signature { color: #D4AF37 }
-/* Price */
-.tier-price { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 0.6rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
-.tier-price span { font-size: 1rem; font-weight: 400; opacity: 1 }
-/* CTA button inside each card */
-.tier-cta { width: 100%; margin-top: 1.4rem; padding: 10px 0; border-radius: 50px; font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; transition: all 0.3s ease; border: none }
-.tier-cta--verified  { color: #4CAF50; border-color: rgba(76,175,80,0.45) }
-.tier-cta--verified:hover  { background: rgba(76,175,80,0.12);  box-shadow: 0 0 12px rgba(76,175,80,0.2) }
-.tier-cta--spotlight { color: #3b9edd; border-color: rgba(59,158,221,0.45) }
-.tier-cta--spotlight:hover { background: rgba(59,158,221,0.12); box-shadow: 0 0 12px rgba(59,158,221,0.2) }
-.tier-cta--signature { color: #D4AF37; border-color: rgba(212,175,55,0.45) }
-.tier-cta--signature:hover { background: rgba(212,175,55,0.12); box-shadow: 0 0 14px rgba(212,175,55,0.25) }
-.tier-cta { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); color: #D4AF37; box-shadow: 0 0 7px rgba(212,175,55,0.25) }
-.tier-cta:hover {background: linear-gradient(45deg, rgba(255,140,0,0.1), rgba(255,140,0,0.2)); box-shadow: 0 0 7px rgba(212, 175, 55, 0.25) }
-/* ── Mode switch pill (mirrors LandingPage exactly) ──────────────────────── */
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); position: relative }
+.wish-item { padding: 6px 30px; display: flex; flex-direction: column; align-items: flex-start }
+.tier-label { font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px }
+.tier-price { font-family: 'Cinzel', serif; font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 12px; font-variant-numeric: tabular-nums }
+.tier-price-suffix { font-size: 1rem; font-weight: 400; letter-spacing: 0.02em }
+.wish-item h3 { font-family: 'Cinzel', serif; font-size: 1.4rem; margin-bottom: 10px }
+.wish-item p { font-size: 1.02rem; line-height: 1.55; text-wrap: pretty; margin-bottom: 1.4rem }
+.tier-cta { margin-top: auto; font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; border: none; background: transparent; padding: 12px 26px; border-radius: 50px; transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease }
+
+/* ── Mode switch ───────────────────────────────────────────────────────────── */
 .mode-switch-wrapper { display: flex; justify-content: center; padding: 0 0 4rem; position: relative; z-index: 2 }
 .mode-switch-pill { display: inline-flex; align-items: center; gap: 2px; background: rgba(26,9,51,0.8); border-radius: 50px; padding: 4px; backdrop-filter: blur(10px); box-shadow: 0 0 12px rgba(212,175,55,0.1), 0 0 24px rgba(0,0,0,0.35) }
 .mode-switch-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 20px; border-radius: 40px; border: none; background: transparent; font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; color: rgba(212,175,55,0.45); transition: all 0.25s ease; white-space: nowrap }
 .mode-switch-btn:hover { color: #D4AF37; background: rgba(212,175,55,0.12); box-shadow: 0 0 10px rgba(212,175,55,0.12) }
 .mode-switch-btn--active { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); color: #D4AF37; box-shadow: 0 0 14px rgba(212,175,55,0.25); cursor: default }
 .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); box-shadow: 0 0 14px rgba(212,175,55,0.25) }
-/* ── Footer (mirrors LandingPage exactly) ────────────────────────────────── */
-.footer { margin-top: auto; padding: 0.3rem 0.3rem; position: relative; z-index: 2; width: 100%; }
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+.footer { margin-top: auto; padding: 0.3rem 0.3rem; position: relative; z-index: 2; width: 100% }
 .footer-content { max-width: 1200px; margin: 0 auto; text-align: center }
 .footer-links { display: flex; justify-content: center; gap: 2rem }
 .footer-links a { color: #FF8C00; text-decoration: none; font-family: 'Cinzel', serif; font-size: 1.1rem; transition: all 0.3s ease; padding: 0.5rem }
 .footer-copyright { color: rgba(224,224,224,0.7); font-family: 'Cinzel', serif; font-size: 0.9rem }
-/* ── Animations ──────────────────────────────────────────────────────────── */
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(50px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes pulse { 0% { transform: scale(1) } 50% { transform: scale(1.1) } 100% { transform: scale(1) } }
-/* ── Day mode ────────────────────────────────────────────────────────────── */
+
+/* ── Day mode: glacier glass on cream ──────────────────────────────────────── */
+/* The full gradient sat at ~2:1 contrast on cream, so the sentence takes dark
+   ink and only the brand word keeps the gradient. */
+.day-mode .magic-title, .day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #4a3226 }
 .day-mode .magic-subtitle { color: #5a3c2e; text-shadow: 0 0 7px rgba(255,255,255,0.4) }
-.day-mode .hero-note { color: #5a3c2e }
-.day-mode .feature-card { background: rgba(255,248,240,0.45); backdrop-filter: blur(6px); box-shadow: 0 0 18px rgba(160,100,30,0.09), 0 0 20px rgba(0,0,0,0.06) }
-.day-mode .feature-card p { color: #5a3c2e }
-.day-mode .feature-card h3 { color: #b87d4e }
-.day-mode .tier-cta--verified  { color: #3a8f3e; border-color: rgba(58,143,62,0.45) }
-.day-mode .tier-cta--spotlight { color: #2a7daa; border-color: rgba(42,125,170,0.45) }
-.day-mode .tier-cta--signature { color: #7a3e1a; border-color: rgba(184,125,78,0.5) }
-.day-mode .footer-links a { color: #b87d4e }
 .day-mode .footer-copyright { color: #5a3c2e }
-.day-mode .language-selector { background: rgba(255,248,240,0.5); border: 1.5px solid rgba(217,167,112,0.35); box-shadow: 0 0 15px rgba(184, 125, 78, 0.1) }
-.day-mode .language-selector button { color: #b87d4e; box-shadow: 0 0 10px rgba(217, 167, 112, 0.15) }
-.day-mode .language-selector button:hover { background: rgba(217,167,112,0.2); box-shadow: 0 0 15px rgba(217, 167, 112, 0.35); transform: scale(1.1) }
-.day-mode .language-selector button.active { background: rgba(184,125,78,0.3); box-shadow: 0 0 20px rgba(184, 125, 78, 0.4); color: #8b5a3c }
+/* Wish button: the glacier glass of the Discovery chips, label in the brand
+   gradient. A gradient text-clip needs the element's own background, so the
+   glass lives on the button and the gradient on the label span. Even shadow;
+   hover changes light only, nothing moves. */
+.day-mode .hero .magic-button,
+.day-mode .tier-cta {
+  background: rgba(255, 251, 245, 0.6);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.35), 0 0 16px -2px rgba(120, 80, 30, 0.16);
+  padding: 14px 32px;
+}
+.day-mode .tier-cta { padding: 11px 24px }
+.day-mode .hero .magic-button:hover,
+.day-mode .tier-cta:hover {
+  background: rgba(255, 251, 245, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.5), 0 0 22px -2px rgba(120, 80, 30, 0.22);
+}
+.day-mode .wish-label {
+  background: linear-gradient(45deg, #D4AF37, #FF8C00);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  font-weight: 600;
+}
+.day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
+.day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
+.day-mode .wish-item:last-child { padding-right: 0 }
+.day-mode .tier-label { color: rgba(150,100,55,0.75) }
+.day-mode .tier-price { color: rgba(168,114,15,0.9) }
+.day-mode .tier-price-suffix { color: rgba(150,100,55,0.6) }
+.day-mode .wish-item h3 { color: #4a3226 }
+.day-mode .wish-item p { color: #6b4a36 }
+.day-mode .footer-links a { color: #b87d4e }
+.day-mode .footer-links a:hover { color: #a06c42; text-shadow: 0 0 10px rgba(184,125,78,0.3) }
+/* Same glass recipe on the language pill: an inset hairline and an even glow
+   instead of a hard border and a downward shadow. */
+.day-mode .language-selector { background: rgba(255,251,245,0.6); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.3), 0 0 16px -2px rgba(120,80,30,0.14) }
+.day-mode .language-selector:hover { background: rgba(255,251,245,0.8); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), 0 0 20px -2px rgba(120,80,30,0.18) }
+.day-mode .language-selector button { color: #a8720f; box-shadow: none }
+.day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
+.day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
+.day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
 .day-mode .mode-switch-pill { background: rgba(255,248,240,0.45); box-shadow: 0 0 18px rgba(160,100,30,0.09), 0 0 20px rgba(0,0,0,0.06) }
 .day-mode .mode-switch-btn { color: rgba(150,90,25,0.45) }
 .day-mode .mode-switch-btn:hover { background: rgba(160,100,30,0.13); box-shadow: 0 0 10px rgba(160,100,30,0.12) }
 .day-mode .mode-switch-btn--active { background: linear-gradient(45deg, rgba(200,140,60,0.32), rgba(150,90,25,0.24)); color: #4a2600; box-shadow: 0 0 14px rgba(139,69,19,0.18) }
 .day-mode .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(200,140,60,0.32), rgba(150,90,25,0.24)); box-shadow: 0 0 14px rgba(139,69,19,0.18) }
 
-/* ── Night mode ──────────────────────────────────────────────────────────── */
-.night-mode .magic-subtitle { color: #f5e6c8; text-shadow: 0 0 7px rgba(255,200,120,0.25) }
-.night-mode .hero-note { color: #f5e6c8 }
-.night-mode .feature-card { background: rgba(20,10,45,0.55); backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,200,120,0.05) }
-.night-mode .feature-card h3 { color: #FF8C00 }
-.night-mode .feature-card p { color: #e8d9bb }
-.night-mode .mode-switch-pill { background: rgba(20,10,45,0.7); border: none }
-.night-mode .mode-switch-btn { color: rgba(245,230,200,0.55) }
-.night-mode .mode-switch-btn:hover { color: #f5e6c8; background: rgba(212,175,55,0.15); box-shadow: 0 0 10px rgba(212,175,55,0.15) }
-.night-mode .mode-switch-btn--active { background: linear-gradient(45deg, rgba(212,175,55,0.32), rgba(255,140,0,0.22)); color: #fff3d4; box-shadow: 0 0 14px rgba(212,175,55,0.3) }
-.night-mode .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(212,175,55,0.32), rgba(255,140,0,0.22)); color: #fff3d4; box-shadow: 0 0 14px rgba(212,175,55,0.3) }
-.night-mode .language-selector { background: rgba(20,10,45,0.7); border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3) }
-.night-mode .language-selector button { color: #f5e6c8; box-shadow: 0 0 10px rgba(212,175,55,0.1) }
-.night-mode .language-selector button:hover { background: rgba(212,175,55,0.18); box-shadow: 0 0 15px rgba(212,175,55,0.3) }
-.night-mode .language-selector button.active { background: rgba(212,175,55,0.25); box-shadow: 0 0 18px rgba(212,175,55,0.4) }
-.night-mode .footer-links a { color: #FF8C00 }
-.night-mode .footer-copyright { color: rgba(245,230,200,0.6) }
-/* ── Responsive ──────────────────────────────────────────────────────────── */
+/* ── Night mode: halation ──────────────────────────────────────────────────── */
+/* Night stops imitating daylight and behaves like a long exposure: type blooms
+   in three layers — tight warm core, mid halo, wide spill — and every capsule
+   is gone. On a sky a filled shape reads as a hole punched in the stars;
+   light does not. */
+/* The organising light comes from the object the brand is about: a warm pool
+   spilling from the lamp, and one page-level vignette so the far corners fall
+   away and the stars stop competing with the words. A per-section vignette
+   reaches the section boundary still opaque and draws a visible line. */
+.night-mode .hero::before, .night-mode .features::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+}
+.night-mode .hero::before {
+  background: radial-gradient(46% 38% at 50% 38%, rgba(255,196,110,0.16) 0%, rgba(255,190,105,0.07) 38%, rgba(255,190,105,0) 70%);
+}
+.night-mode .features::before {
+  background: radial-gradient(58% 46% at 50% 32%, rgba(255,196,110,0.08) 0%, rgba(255,190,105,0) 70%);
+}
+.night-mode::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(122% 88% at 50% 42%, rgba(6,2,20,0) 46%, rgba(6,2,20,0.5) 100%);
+}
+.night-mode .hero-content, .night-mode .features-container { position: relative; z-index: 1 }
+/* A gradient-clipped element can't use text-shadow — the fill is transparent —
+   so the wordmark's halo comes from drop-shadow on the rendered pixels. */
+.night-mode .app-name {
+  filter: drop-shadow(0 0 3px rgba(255,214,150,0.5)) drop-shadow(0 0 9px rgba(255,170,90,0.28));
+}
+/* The lamp PNG is a saturated orange next to parchment type, so on its own it
+   reads as a sticker dropped on the page. Pulled toward the type's gold and
+   given the same bloom, it becomes the source of the light. */
+.night-mode .static-bottle {
+  filter: saturate(0.76) brightness(1.06) contrast(0.96)
+          drop-shadow(0 0 8px rgba(255,214,150,0.5))
+          drop-shadow(0 0 26px rgba(255,170,90,0.4))
+          drop-shadow(0 0 60px rgba(255,140,60,0.26));
+}
+.night-mode .magic-title, .night-mode .features-heading { background: none; -webkit-text-fill-color: initial }
+.night-mode .magic-title { color: #fff6e2;
+  text-shadow: 0 0 4px rgba(255,214,150,0.5), 0 0 18px rgba(255,170,90,0.4), 0 0 46px rgba(255,140,60,0.26) }
+.night-mode .features-heading { color: #fbf0d8;
+  text-shadow: 0 0 4px rgba(255,214,150,0.4), 0 0 16px rgba(255,170,90,0.3), 0 0 40px rgba(255,140,60,0.2) }
+.night-mode .magic-subtitle { color: #ead9b8; text-shadow: 0 0 14px rgba(212,175,55,0.18) }
+.night-mode .magic-subtitle :deep(.brand-grad) {
+  background: none; -webkit-text-fill-color: initial; color: #ffd9a0;
+  text-shadow: 0 0 10px rgba(255,180,90,0.45);
+}
+/* CTAs drop the capsule for a word over a lit hairline — the same grammar as
+   the landing's Make a Wish and its Explore switch. */
+.night-mode .hero .magic-button, .night-mode .tier-cta {
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; border-radius: 0; padding: 14px 8px 22px; position: relative;
+  font-size: 1.32rem; letter-spacing: 0.01em;
+}
+.night-mode .tier-cta { font-size: 0.98rem; padding: 10px 4px 18px }
+.night-mode .hero .magic-button::after, .night-mode .tier-cta::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
+  background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.night-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(255,214,150,0.55); box-shadow: 0 0 9px rgba(255,180,90,0.5) }
+.night-mode .hero .magic-button:hover, .night-mode .tier-cta:hover { background: transparent; box-shadow: none }
+.night-mode .hero .magic-button:hover::after { background: #fff3dc; box-shadow: 0 0 16px rgba(255,190,105,1) }
+.night-mode .tier-cta:hover::after { background: #fff3dc; box-shadow: 0 0 14px rgba(255,190,105,0.9) }
+/* the label leaves the gradient clip: halation needs a solid colour to bloom */
+.night-mode .wish-label {
+  background: none; -webkit-text-fill-color: initial; color: #ffe8c4; font-weight: 700;
+  text-shadow: 0 0 12px rgba(255,180,90,0.5);
+}
+.night-mode .tier-cta .wish-label { font-weight: 600 }
+/* Two temperatures, the sky's own contrast: warm gold where the lamp light
+   falls (headings, prices, the brand), cool parchment for structure. */
+.night-mode .wish-item { border-left: 1px solid rgba(240,218,170,0.2) }
+.night-mode .wish-item:first-child { border-left: none; padding-left: 0 }
+.night-mode .wish-item:last-child { padding-right: 0 }
+.night-mode .tier-label { color: rgba(240,218,170,0.55) }
+.night-mode .tier-price {
+  background: linear-gradient(180deg, rgba(255,231,181,0.82), rgba(226,175,88,0.38));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.night-mode .tier-price-suffix { color: rgba(240,218,170,0.5); -webkit-text-fill-color: initial }
+.night-mode .wish-item h3 { color: #f0dcae }
+.night-mode .wish-item p { color: #e4d7bd }
+/* Explore / For Business: the pill and both fills are gone. Two words share a
+   hairline baseline and only the chosen one is LIT, so the state is carried by
+   light instead of by a filled shape. */
+.night-mode .mode-switch-pill {
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; border-radius: 0; padding: 0; gap: 26px;
+}
+.night-mode .mode-switch-btn {
+  color: rgba(232,218,190,0.5); background: transparent; box-shadow: none;
+  padding: 8px 2px 14px; border-radius: 0; position: relative;
+}
+.night-mode .mode-switch-btn::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 1px;
+  background: rgba(232,218,190,0.16); box-shadow: none;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.night-mode .mode-switch-btn:hover { color: #f7e6c2; background: transparent; box-shadow: none }
+.night-mode .mode-switch-btn:hover::after { background: rgba(255,214,150,0.45) }
+.night-mode .mode-switch-btn--active, .night-mode .mode-switch-btn--active:hover {
+  background: transparent; box-shadow: none; color: #ffe8c4;
+  text-shadow: 0 0 12px rgba(255,180,90,0.5);
+}
+.night-mode .mode-switch-btn--active::after {
+  background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9);
+}
+/* Halation has no boxes, so the language pill goes too — the flag keeps a soft
+   warm halo instead of a rim: findable, but nothing is drawn. */
+.night-mode .language-selector { background: transparent; border: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none }
+.night-mode .language-selector:hover { background: transparent; box-shadow: none }
+.night-mode .language-selector button {
+  background: transparent; box-shadow: none; color: #f5e6c8;
+  filter: drop-shadow(0 0 5px rgba(255,190,110,0.45));
+}
+.night-mode .language-selector button:hover, .night-mode .language-selector button.active {
+  background: transparent; box-shadow: none; transform: none;
+  filter: drop-shadow(0 0 11px rgba(255,200,120,0.85));
+}
+/* Lavender at rest, warming to gold on hover — the link behaves like a star
+   catching the lamp. The flat #FF8C00 was the loudest thing on the page. */
+.night-mode .footer-links a { color: #dcb977 }
+.night-mode .footer-links a:hover { color: #f7dc9c; text-shadow: 0 0 12px rgba(212,175,55,0.4) }
+.night-mode .footer-copyright { color: rgba(234,217,184,0.55) }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* One column: the vertical hairline becomes a horizontal one between items. */
+  .features-grid { grid-template-columns: 1fr }
+  .wish-item { padding: 20px 0 }
+  .day-mode .wish-item, .night-mode .wish-item { border-left: none; border-top: 1px solid rgba(150,100,55,0.26) }
+  .night-mode .wish-item { border-top-color: rgba(212,175,55,0.2) }
+  .day-mode .wish-item:first-child, .night-mode .wish-item:first-child { border-top: none; padding-top: 0 }
+  .tier-price { font-size: 2.1rem; margin-bottom: 8px }
   .magic-title { font-size: 2.5rem }
   .magic-subtitle { font-size: 1.1rem }
   .features-heading { font-size: 2rem }
