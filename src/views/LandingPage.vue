@@ -332,17 +332,18 @@ export default {
 .day-mode .language-selector {
   background: rgba(255,251,245,0.34); border: none; padding: 6px; gap: 6px;
   backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 0 0 1.5px rgba(255,253,247,0.9),
-              inset 0 0 14px -4px rgba(255,255,255,0.95),
-              0 0 0 1px rgba(198,143,90,0.34),
-              0 0 18px -3px rgba(150,100,40,0.18);
+  /* No hard outer ring here: on a large, mostly empty pill a 1px line reads
+     as a plain border. The edge is carried by an inner frost rim and a soft
+     warm glow instead — ice, not an outline. */
+  box-shadow: inset 0 0 0 1.5px rgba(255,253,247,0.92),
+              inset 0 0 18px -5px rgba(255,255,255,1),
+              0 0 22px -4px rgba(150,100,40,0.22);
 }
 .day-mode .language-selector:hover {
   background: rgba(255,251,245,0.8);
-  box-shadow: inset 0 0 0 1.5px rgba(255,254,250,0.95),
-              inset 0 0 16px -4px rgba(255,255,255,1),
-              0 0 0 1px rgba(198,143,90,0.46),
-              0 0 22px -3px rgba(150,100,40,0.22);
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,252,1),
+              inset 0 0 20px -5px rgba(255,255,255,1),
+              0 0 26px -4px rgba(150,100,40,0.26);
 }
 /* A flag emoji is a rectangular colour bitmap, so drop-shadow traces its box
    and the "shadow" comes out square. Round light has to be drawn by the round
@@ -407,19 +408,21 @@ export default {
 /* Each flag carries its own light: a warm halo at rest, brighter under the
    pointer, and a three-layer bloom on the chosen one — the same halation the
    type uses, so the selected language is lit rather than boxed. */
+/* Round light, drawn by the round BUTTON. A filter would trace the flag
+   emoji's rectangle and the halo would come out as a cube. */
 .landing-container:not(.day-mode) .language-selector button {
-  background: transparent; box-shadow: none;
-  filter: drop-shadow(0 0 7px rgba(255,190,110,0.5));
+  background: transparent; color: #f5e6c8; filter: none;
+  box-shadow: 0 0 12px -2px rgba(255,190,110,0.4);
 }
 .landing-container:not(.day-mode) .language-selector button:hover {
-  background: transparent; box-shadow: none; transform: none;
-  filter: drop-shadow(0 0 13px rgba(255,200,120,0.9));
+  background: transparent; transform: none; filter: none;
+  box-shadow: 0 0 18px -2px rgba(255,205,130,0.75);
 }
 .landing-container:not(.day-mode) .language-selector button.active {
-  background: transparent; box-shadow: none; transform: none;
-  filter: drop-shadow(0 0 4px rgba(255,238,205,0.95))
-          drop-shadow(0 0 13px rgba(255,190,110,0.8))
-          drop-shadow(0 0 30px rgba(255,150,60,0.45));
+  background: transparent; transform: none; filter: none;
+  box-shadow: 0 0 0 1px rgba(255,214,150,0.35),
+              0 0 14px -1px rgba(255,205,130,0.85),
+              0 0 30px -4px rgba(255,150,60,0.5);
 }
 
 .landing-container:not(.day-mode) .hero .magic-button {
