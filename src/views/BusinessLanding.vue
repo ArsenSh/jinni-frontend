@@ -48,7 +48,7 @@
               v-if="tier.suffix" class="tier-price-suffix">{{ $t(`businessLanding.tiers.${tier.key}.priceSuffix`) }}</span></span>
             <h3>{{ $t(`businessLanding.tiers.${tier.key}.heading`) }}</h3>
             <p>{{ $t(`businessLanding.tiers.${tier.key}.description`) }}</p>
-            <button class="tier-cta" @click="goApply(tier.key)">
+            <button class="tier-cta" :class="`tier-cta--${tier.key}`" @click="goApply(tier.key)">
               <span class="wish-label">{{ $t(`businessLanding.tiers.${tier.key}.cta`) }}</span>
             </button>
           </div>
@@ -205,7 +205,14 @@ export default {
 .magic-subtitle { font-family: 'Cinzel', serif; font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* v-html content carries NO scope attribute — a plain scoped descendant rule
    would never match this span. */
-.magic-subtitle :deep(.brand-grad) { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+/* The brand word was the only gradient-clipped run in the line, and clipped
+   type renders thinner than the solid text around it — so Jinni read as the
+   skinniest word in its own sentence. Heavier weight and a shadow of its own
+   put it back on equal footing. */
+.magic-subtitle :deep(.brand-grad) { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; font-weight: 700 }
+.day-mode .magic-subtitle :deep(.brand-grad) {
+  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.3)) drop-shadow(0 0 9px rgba(212,175,55,0.4));
+}
 
 /* ── The tiers, as a manifest ──────────────────────────────────────────────── */
 .features { padding: 2rem 1rem 4rem 1rem; position: relative; z-index: 2 }
@@ -257,14 +264,21 @@ export default {
   background: rgba(255, 251, 245, 0.6);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.35), 0 0 16px -2px rgba(120, 80, 30, 0.16);
+  /* Same frost ring as the landing's wish button — see the note there. */
+  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.38),
+              inset 0 0 0 2px rgba(255, 255, 255, 0.5),
+              inset 0 0 12px -3px rgba(255, 255, 255, 0.9),
+              0 0 16px -2px rgba(120, 80, 30, 0.16);
   padding: 14px 32px;
 }
 .day-mode .tier-cta { padding: 13px 24px }
 .day-mode .hero .magic-button:hover,
 .day-mode .tier-cta:hover {
   background: rgba(255, 251, 245, 0.86);
-  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.5), 0 0 22px -2px rgba(120, 80, 30, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.5),
+              inset 0 0 0 2px rgba(255, 255, 255, 0.62),
+              inset 0 0 14px -3px rgba(255, 255, 255, 0.95),
+              0 0 22px -2px rgba(120, 80, 30, 0.22);
 }
 .day-mode .wish-label {
   background: linear-gradient(45deg, #D4AF37, #FF8C00);
@@ -272,6 +286,12 @@ export default {
   -webkit-text-fill-color: transparent; color: transparent;
   font-weight: 600;
 }
+/* Each tier answers the pointer in its own colour — the green, blue and gold
+   the tiers carried before the cards came off. They stay identical at rest,
+   so the row is calm until you reach for one. */
+.day-mode .tier-cta--verified:hover .wish-label { background: linear-gradient(45deg, #2f8a3a, #5cb85c); background-clip: text; -webkit-background-clip: text }
+.day-mode .tier-cta--spotlight:hover .wish-label { background: linear-gradient(45deg, #1f6f9c, #46aada); background-clip: text; -webkit-background-clip: text }
+.day-mode .tier-cta--signature:hover .wish-label { background: linear-gradient(45deg, #C9971F, #FF8C00); background-clip: text; -webkit-background-clip: text }
 .day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
 .day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
 .day-mode .wish-item:last-child { padding-right: 0 }
@@ -281,12 +301,28 @@ export default {
 .day-mode .tier-price-suffix { color: rgba(150,100,55,0.6) }
 .day-mode .wish-item h3 { color: #4a3226 }
 .day-mode .wish-item p { color: #6b4a36 }
-.day-mode .footer-links a { color: #b87d4e }
-.day-mode .footer-links a:hover { color: #a06c42; text-shadow: 0 0 10px rgba(184,125,78,0.3) }
+/* #b87d4e is the same value as the peach behind it — mid-tone on
+   mid-tone, so the links nearly vanished on the lower half of the page. */
+.day-mode .footer-links a { color: #7a4a24 }
+.day-mode .footer-links a:hover { color: #5c3416; text-shadow: 0 0 10px rgba(255,255,255,0.35) }
 /* Same glass recipe on the language pill: an inset hairline and an even glow
    instead of a hard border and a downward shadow. */
-.day-mode .language-selector { background: rgba(255,251,245,0.6); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.3), 0 0 16px -2px rgba(120,80,30,0.14) }
-.day-mode .language-selector:hover { background: rgba(255,251,245,0.8); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), 0 0 20px -2px rgba(120,80,30,0.18) }
+/* Same three rings as the wish button, so the pill is the same ice. */
+.day-mode .language-selector {
+  background: rgba(255,251,245,0.6); border: none;
+  backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.38),
+              inset 0 0 0 2px rgba(255,255,255,0.5),
+              inset 0 0 12px -3px rgba(255,255,255,0.9),
+              0 0 16px -2px rgba(120,80,30,0.16);
+}
+.day-mode .language-selector:hover {
+  background: rgba(255,251,245,0.8);
+  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.5),
+              inset 0 0 0 2px rgba(255,255,255,0.62),
+              inset 0 0 14px -3px rgba(255,255,255,0.95),
+              0 0 20px -2px rgba(120,80,30,0.2);
+}
 .day-mode .language-selector button { color: #a8720f; box-shadow: none;
   filter: drop-shadow(0 1px 2px rgba(120,80,30,0.32)) }
 .day-mode .language-selector button.active {
@@ -294,11 +330,25 @@ export default {
 .day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
 .day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
 .day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
-.day-mode .mode-switch-pill { background: rgba(255,248,240,0.45); box-shadow: 0 0 18px rgba(160,100,30,0.09), 0 0 20px rgba(0,0,0,0.06) }
-.day-mode .mode-switch-btn { color: rgba(150,90,25,0.45) }
-.day-mode .mode-switch-btn:hover { background: rgba(160,100,30,0.13); box-shadow: 0 0 10px rgba(160,100,30,0.12) }
-.day-mode .mode-switch-btn--active { background: linear-gradient(45deg, rgba(200,140,60,0.32), rgba(150,90,25,0.24)); color: #4a2600; box-shadow: 0 0 14px rgba(139,69,19,0.18) }
-.day-mode .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(200,140,60,0.32), rgba(150,90,25,0.24)); box-shadow: 0 0 14px rgba(139,69,19,0.18) }
+/* The switch takes the wish button's glacier glass (founder 2026-09-10), so
+   day mode has one material instead of a frosted button beside a muddy pill.
+   The chosen side is a brighter pane of the same glass — no saturated fill. */
+.day-mode .mode-switch-pill {
+  background: rgba(255,251,245,0.6);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.38),
+              inset 0 0 0 2px rgba(255,255,255,0.5),
+              inset 0 0 12px -3px rgba(255,255,255,0.9),
+              0 0 16px -2px rgba(120,80,30,0.16);
+}
+.day-mode .mode-switch-btn { color: rgba(122,77,16,0.62) }
+.day-mode .mode-switch-btn:hover { color: #7a4d10; background: rgba(255,252,246,0.6); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.26) }
+.day-mode .mode-switch-btn--active,
+.day-mode .mode-switch-btn--active:hover {
+  background: rgba(255,252,246,0.92); color: #6b3f0c;
+  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), inset 0 0 10px -3px rgba(255,255,255,0.95);
+}
 
 /* ── Night mode: halation ──────────────────────────────────────────────────── */
 /* Night stops imitating daylight and behaves like a long exposure: type blooms
@@ -325,8 +375,17 @@ export default {
 .night-mode .hero-content, .night-mode .features-container { position: relative; z-index: 1 }
 /* A gradient-clipped element can't use text-shadow — the fill is transparent —
    so the wordmark's halo comes from drop-shadow on the rendered pixels. */
+/* The wordmark, the hero's brand word and the lamp all bloom the same way —
+   one light source, three sizes. Gradient-clipped text can't use text-shadow
+   (the fill is transparent), so the halo is a drop-shadow on the pixels. */
 .night-mode .app-name {
-  filter: drop-shadow(0 0 3px rgba(255,214,150,0.5)) drop-shadow(0 0 9px rgba(255,170,90,0.28));
+  filter: drop-shadow(0 0 3px rgba(255,214,150,0.55))
+          drop-shadow(0 0 11px rgba(255,170,90,0.4))
+          drop-shadow(0 0 26px rgba(255,140,60,0.24));
+}
+.day-mode .app-name {
+  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.34))
+          drop-shadow(0 0 10px rgba(212,175,55,0.34));
 }
 /* The lamp PNG is a saturated orange next to parchment type, so on its own it
    reads as a sticker dropped on the page. Pulled toward the type's gold and
@@ -347,8 +406,8 @@ export default {
   text-shadow: 0 0 4px rgba(255,214,150,0.4), 0 0 16px rgba(255,170,90,0.3), 0 0 40px rgba(255,140,60,0.2) }
 .night-mode .magic-subtitle { color: #ead9b8; text-shadow: 0 0 14px rgba(212,175,55,0.18) }
 .night-mode .magic-subtitle :deep(.brand-grad) {
-  background: none; -webkit-text-fill-color: initial; color: #ffd9a0;
-  text-shadow: 0 0 10px rgba(255,180,90,0.45);
+  background: none; -webkit-text-fill-color: initial; color: #ffd9a0; font-weight: 700;
+  text-shadow: 0 0 4px rgba(255,235,200,0.55), 0 0 13px rgba(255,180,90,0.5);
 }
 /* CTAs drop the capsule for a word over a lit hairline — the same grammar as
    the landing's Make a Wish and its Explore switch. */

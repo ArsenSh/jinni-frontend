@@ -216,12 +216,21 @@ export default {
   background: rgba(255, 251, 245, 0.6);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.35), 0 0 16px -2px rgba(120, 80, 30, 0.16);
+  /* Three rings, all zero-offset: the warm hairline, a crisp white rim just
+     inside it, and a soft frost that fades inward — that inner light is what
+     makes an edge read as ice instead of as a drawn outline. */
+  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.38),
+              inset 0 0 0 2px rgba(255, 255, 255, 0.5),
+              inset 0 0 12px -3px rgba(255, 255, 255, 0.9),
+              0 0 16px -2px rgba(120, 80, 30, 0.16);
   padding: 14px 32px;
 }
 .day-mode .hero .magic-button:hover {
   background: rgba(255, 251, 245, 0.86);
-  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.5), 0 0 22px -2px rgba(120, 80, 30, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.5),
+              inset 0 0 0 2px rgba(255, 255, 255, 0.62),
+              inset 0 0 14px -3px rgba(255, 255, 255, 0.95),
+              0 0 22px -2px rgba(120, 80, 30, 0.22);
 }
 .day-mode .hero .wish-label {
   background: linear-gradient(45deg, #D4AF37, #FF8C00);
@@ -282,16 +291,32 @@ export default {
 .day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
 .day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
 .day-mode .wish-item:last-child { padding-right: 0 }
-.day-mode .wish-num { color: rgba(168,114,15,0.34) }
+.day-mode .wish-num { color: rgba(130,82,14,0.62) }
 .day-mode .wish-item h3 { color: #4a3226 }
 .day-mode .wish-item p { color: #6b4a36 }
-.day-mode .footer-links a { color: #b87d4e }
-.day-mode .footer-links a:hover { color: #a06c42; text-shadow: 0 0 10px rgba(184,125,78,0.3) }
+/* #b87d4e is the same value as the peach behind it — mid-tone on
+   mid-tone, so the links nearly vanished on the lower half of the page. */
+.day-mode .footer-links a { color: #7a4a24 }
+.day-mode .footer-links a:hover { color: #5c3416; text-shadow: 0 0 10px rgba(255,255,255,0.35) }
 /* Glacier glass, same recipe as the wish button: the hard 1.5px border and
    the downward-offset shadow are replaced by an inset hairline and an even
    glow, so the pill reads as frosted material rather than an outlined box. */
-.day-mode .language-selector { background: rgba(255,251,245,0.6); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.3), 0 0 16px -2px rgba(120,80,30,0.14) }
-.day-mode .language-selector:hover { background: rgba(255,251,245,0.8); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), 0 0 20px -2px rgba(120,80,30,0.18) }
+/* Same three rings as the wish button, so the pill is the same ice. */
+.day-mode .language-selector {
+  background: rgba(255,251,245,0.6); border: none;
+  backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.38),
+              inset 0 0 0 2px rgba(255,255,255,0.5),
+              inset 0 0 12px -3px rgba(255,255,255,0.9),
+              0 0 16px -2px rgba(120,80,30,0.16);
+}
+.day-mode .language-selector:hover {
+  background: rgba(255,251,245,0.8);
+  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.5),
+              inset 0 0 0 2px rgba(255,255,255,0.62),
+              inset 0 0 14px -3px rgba(255,255,255,0.95),
+              0 0 20px -2px rgba(120,80,30,0.2);
+}
 .day-mode .language-selector button { color: #a8720f; box-shadow: none;
   filter: drop-shadow(0 1px 2px rgba(120,80,30,0.32)) }
 .day-mode .language-selector button.active {
@@ -299,11 +324,25 @@ export default {
 .day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
 .day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
 .day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
-.day-mode .mode-switch-pill { background: rgba(255,248,240,0.45); box-shadow: 0 0 18px rgba(160,100,30,0.09), 0 0 20px rgba(0,0,0,0.06) }
-.day-mode .mode-switch-btn { color: rgba(150,90,25,0.45) }
-.day-mode .mode-switch-btn:hover { background: rgba(160,100,30,0.13); box-shadow: 0 0 10px rgba(160,100,30,0.12) }
-.day-mode .mode-switch-btn--active { background: linear-gradient(45deg, rgba(200,140,60,0.32), rgba(150,90,25,0.24)); color: #4a2600; box-shadow: 0 0 14px rgba(139,69,19,0.18) }
-.day-mode .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(200,140,60,0.32), rgba(150,90,25,0.24)); box-shadow: 0 0 14px rgba(139,69,19,0.18) }
+/* The switch takes the wish button's glacier glass (founder 2026-09-10), so
+   day mode has one material instead of a frosted button beside a muddy pill.
+   The chosen side is a brighter pane of the same glass — no saturated fill. */
+.day-mode .mode-switch-pill {
+  background: rgba(255,251,245,0.6);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.38),
+              inset 0 0 0 2px rgba(255,255,255,0.5),
+              inset 0 0 12px -3px rgba(255,255,255,0.9),
+              0 0 16px -2px rgba(120,80,30,0.16);
+}
+.day-mode .mode-switch-btn { color: rgba(122,77,16,0.62) }
+.day-mode .mode-switch-btn:hover { color: #7a4d10; background: rgba(255,252,246,0.6); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.26) }
+.day-mode .mode-switch-btn--active,
+.day-mode .mode-switch-btn--active:hover {
+  background: rgba(255,252,246,0.92); color: #6b3f0c;
+  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), inset 0 0 10px -3px rgba(255,255,255,0.95);
+}
 
 /* ── Night mode explicit colors (override inherited body color) ───────────── */
 .landing-container:not(.day-mode) .magic-subtitle { color: #f5e6c8; text-shadow: 0 0 7px rgba(255,200,120,0.25) }
@@ -405,9 +444,17 @@ export default {
 /* The wordmark had no glow at all while everything around it bloomed — a
    gradient-clipped element can't use text-shadow (the fill is transparent),
    so the halo comes from drop-shadow filters on the rendered pixels. */
+/* The wordmark, the hero's brand word and the lamp all bloom the same way —
+   one light source, three sizes. Gradient-clipped text can't use text-shadow
+   (the fill is transparent), so the halo is a drop-shadow on the pixels. */
 .landing-container:not(.day-mode) .app-name {
-  filter: drop-shadow(0 0 3px rgba(255,214,150,0.5))
-          drop-shadow(0 0 9px rgba(255,170,90,0.28));
+  filter: drop-shadow(0 0 3px rgba(255,214,150,0.55))
+          drop-shadow(0 0 11px rgba(255,170,90,0.4))
+          drop-shadow(0 0 26px rgba(255,140,60,0.24));
+}
+.day-mode .app-name {
+  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.34))
+          drop-shadow(0 0 10px rgba(212,175,55,0.34));
 }
 .landing-container:not(.day-mode) .static-bottle {
   filter: saturate(0.76) brightness(1.06) contrast(0.96)
@@ -425,8 +472,15 @@ export default {
           drop-shadow(0 0 16px rgba(255,170,90,0.42))
           drop-shadow(0 0 40px rgba(255,140,60,0.26));
 }
-.landing-container:not(.day-mode) .features-heading { color: #fbf0d8;
-  text-shadow: 0 0 4px rgba(255,214,150,0.4), 0 0 16px rgba(255,170,90,0.3), 0 0 40px rgba(255,140,60,0.2) }
+/* Same rule as the hero (founder 2026-09-10): the plain half of the heading
+   carries no bloom and only the accent half is lit, so the light marks the
+   payoff instead of the whole line. */
+.landing-container:not(.day-mode) .features-heading { color: #fbf0d8; text-shadow: none }
+.landing-container:not(.day-mode) .features-heading :deep(.brand-grad) {
+  filter: drop-shadow(0 0 4px rgba(255,214,150,0.45))
+          drop-shadow(0 0 14px rgba(255,170,90,0.36))
+          drop-shadow(0 0 34px rgba(255,140,60,0.22));
+}
 .landing-container:not(.day-mode) .hero .magic-button {
   background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
   box-shadow: none; border-radius: 0; padding: 14px 8px 22px; position: relative;
