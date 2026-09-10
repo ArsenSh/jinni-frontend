@@ -17,7 +17,7 @@
 
     <section class="hero">
       <div class="hero-content">
-        <img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle">
+        <span class="lamp"><img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
         <h1 class="magic-title">{{ $t('businessLanding.hero.title') }}</h1>
         <p class="magic-subtitle" v-html="heroSubtitleHtml"></p>
         <MagicButton @click="goApply('verified')"><span class="wish-label">{{ $t('businessLanding.hero.cta') }}</span></MagicButton>
@@ -196,7 +196,30 @@ export default {
 /* ── Hero ──────────────────────────────────────────────────────────────────── */
 .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
 .hero-content { max-width: 1080px; animation: fadeInUp 1s ease-out }
-.static-bottle { width: 150px; height: auto; max-height: 250px; margin: auto; display: block }
+.lamp { position: relative; display: block; width: 150px; margin: auto }
+.static-bottle { width: 100%; height: auto; max-height: 250px; display: block }
+/* Colour ON the metal, not only behind it: the lamp's own silhouette masks a
+   gradient that is blended INTO the image, so the body carries a lit edge and
+   a deep base instead of reading as one flat orange. Night takes the sky's
+   violet in its shadow; day takes the ground's terracotta. */
+.lamp::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask-image: url('/images/bottle.png?v=3'); mask-image: url('/images/bottle.png?v=3');
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  mix-blend-mode: soft-light;
+}
+.day-mode .lamp::after {
+  background: linear-gradient(148deg,
+    rgba(255,255,240,0.9) 0%, rgba(255,214,150,0.3) 40%,
+    rgba(196,104,36,0.45) 74%, rgba(120,52,12,0.6) 100%);
+}
+.night-mode .lamp::after {
+  background: linear-gradient(148deg,
+    rgba(255,244,214,0.85) 0%, rgba(255,178,96,0.28) 38%,
+    rgba(120,70,170,0.42) 72%, rgba(48,22,86,0.62) 100%);
+}
 /* The sentence used to break with one word stranded on the second line: an
    800px box at a fixed 4rem. It now scales with the window and balances, so
    longer translations split evenly instead of orphaning a word. */
@@ -273,8 +296,7 @@ export default {
   padding: 14px 32px;
 }
 .day-mode .tier-cta { padding: 13px 24px }
-.day-mode .hero .magic-button:hover,
-.day-mode .tier-cta:hover {
+.day-mode .hero .magic-button:hover {
   background: rgba(255, 251, 245, 0.86);
   box-shadow: inset 0 0 0 1.5px rgba(255, 254, 250, 0.95),
               inset 0 0 16px -4px rgba(255, 255, 255, 1),
@@ -290,9 +312,13 @@ export default {
 /* Each tier answers the pointer in its own colour — the green, blue and gold
    the tiers carried before the cards came off. They stay identical at rest,
    so the row is calm until you reach for one. */
+/* The tier buttons hold still under the pointer — only their words change
+   colour (founder 2026-09-10), so three glass pills don't all light up as
+   the cursor crosses the row. */
+.day-mode .tier-cta:hover { background: rgba(255, 251, 245, 0.6); box-shadow: inset 0 0 0 1.5px rgba(255, 253, 247, 0.9), inset 0 0 14px -4px rgba(255, 255, 255, 0.95), 0 0 0 1px rgba(198, 143, 90, 0.34), 0 0 18px -3px rgba(150, 100, 40, 0.18) }
 .day-mode .tier-cta--verified:hover .wish-label { background: linear-gradient(45deg, #2f8a3a, #5cb85c); background-clip: text; -webkit-background-clip: text }
 .day-mode .tier-cta--spotlight:hover .wish-label { background: linear-gradient(45deg, #1f6f9c, #46aada); background-clip: text; -webkit-background-clip: text }
-.day-mode .tier-cta--signature:hover .wish-label { background: linear-gradient(45deg, #C9971F, #FF8C00); background-clip: text; -webkit-background-clip: text }
+.day-mode .tier-cta--signature:hover .wish-label { background: linear-gradient(45deg, #A8660F, #D96A00); background-clip: text; -webkit-background-clip: text }
 .day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
 .day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
 .day-mode .wish-item:last-child { padding-right: 0 }
@@ -324,52 +350,41 @@ export default {
               0 0 0 1px rgba(198,143,90,0.46),
               0 0 22px -3px rgba(150,100,40,0.22);
 }
-.day-mode .language-selector button { color: #a8720f; box-shadow: none;
-  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.32)) }
+/* A flag emoji is a rectangular colour bitmap, so drop-shadow traces its box
+   and the "shadow" comes out square. Round light has to be drawn by the round
+   BUTTON, not by the glyph. */
+.day-mode .language-selector button { color: #a8720f; box-shadow: 0 0 10px -1px rgba(150,100,40,0.22) }
 .day-mode .language-selector button.active {
-  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.3)) drop-shadow(0 0 7px rgba(212,175,55,0.75)) }
+  box-shadow: inset 0 0 0 1px rgba(198,143,90,0.4), 0 0 14px -1px rgba(212,175,55,0.6);
+}
 .day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
 .day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
 .day-mode .static-bottle {
-  filter: drop-shadow(0 0 14px rgba(255,186,104,0.55))
-          drop-shadow(0 0 38px rgba(232,140,60,0.32));
+  filter: drop-shadow(0 3px 6px rgba(150,62,12,0.32))
+          drop-shadow(0 0 16px rgba(255,170,80,0.5))
+          drop-shadow(0 0 44px rgba(206,96,26,0.34));
 }
 .day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
 /* The switch takes the wish button's glacier glass (founder 2026-09-10), so
    day mode has one material instead of a frosted button beside a muddy pill.
    The chosen side is a brighter pane of the same glass — no saturated fill. */
-/* Two glass capsules side by side, not a pane inside a pane (founder
-   2026-09-10: the selected one looked like a button drawn inside a button).
-   The container carries nothing; each side is its own ice, and the chosen one
-   is simply the clearer, brighter piece. */
+/* One glass track holding two plain words; the chosen side is a flat white
+   pill with darker ink (founder 2026-09-10 — glass inside glass was the
+   problem, not the track itself). */
 .day-mode .mode-switch-pill {
-  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
-  box-shadow: none; padding: 0; gap: 10px;
-}
-.day-mode .mode-switch-btn {
-  color: rgba(122,77,16,0.66);
   background: rgba(255,251,245,0.5);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   backdrop-filter: blur(14px) saturate(160%);
   box-shadow: inset 0 0 0 1.5px rgba(255,253,247,0.85),
-              inset 0 0 13px -4px rgba(255,255,255,0.9),
+              inset 0 0 14px -4px rgba(255,255,255,0.9),
               0 0 0 1px rgba(198,143,90,0.3),
-              0 0 16px -3px rgba(150,100,40,0.16);
+              0 0 18px -3px rgba(150,100,40,0.16);
 }
-.day-mode .mode-switch-btn:hover {
-  color: #7a4d10; background: rgba(255,252,246,0.72);
-  box-shadow: inset 0 0 0 1.5px rgba(255,254,250,0.92),
-              inset 0 0 15px -4px rgba(255,255,255,0.98),
-              0 0 0 1px rgba(198,143,90,0.42),
-              0 0 20px -3px rgba(150,100,40,0.2);
-}
+.day-mode .mode-switch-btn { color: rgba(122,77,16,0.66); background: transparent; box-shadow: none }
+.day-mode .mode-switch-btn:hover { color: #7a4d10; background: rgba(255,255,255,0.42); box-shadow: none }
 .day-mode .mode-switch-btn--active,
 .day-mode .mode-switch-btn--active:hover {
-  color: #6b3f0c; background: rgba(255,253,248,0.92);
-  box-shadow: inset 0 0 0 1.5px rgba(255,255,252,1),
-              inset 0 0 16px -4px rgba(255,255,255,1),
-              0 0 0 1px rgba(198,143,90,0.5),
-              0 0 24px -3px rgba(150,100,40,0.24);
+  background: #fffdfa; color: #5c3416; box-shadow: none;
 }
 
 /* ── Night mode: halation ──────────────────────────────────────────────────── */
@@ -405,9 +420,23 @@ export default {
           drop-shadow(0 0 11px rgba(255,170,90,0.4))
           drop-shadow(0 0 26px rgba(255,140,60,0.24));
 }
-/* Day gets NO bloom (founder 2026-09-10): a glow is a night effect, and on
-   cream it reads as a smudge rather than as light. The wordmark stands on
-   its gradient alone. */
+/* Day carries warmth, not a white halo (founder 2026-09-10): a deep
+   terracotta shadow under the gold, the same colour the ground fades to, so
+   the letters sit ON the page instead of glowing over it. */
+.day-mode .app-name {
+  filter: drop-shadow(0 2px 3px rgba(150,62,12,0.4)) drop-shadow(0 0 14px rgba(200,96,24,0.28));
+}
+.day-mode .magic-title { text-shadow: 0 2px 5px rgba(150,62,12,0.22) }
+.day-mode .magic-title :deep(.brand-grad) {
+  filter: drop-shadow(0 2px 4px rgba(150,62,12,0.42)) drop-shadow(0 0 14px rgba(200,96,24,0.3));
+}
+.day-mode .features-heading { text-shadow: 0 2px 5px rgba(150,62,12,0.2) }
+.day-mode .features-heading :deep(.brand-grad) {
+  filter: drop-shadow(0 2px 4px rgba(150,62,12,0.4)) drop-shadow(0 0 13px rgba(200,96,24,0.28));
+}
+.day-mode .magic-subtitle :deep(.brand-grad) {
+  filter: drop-shadow(0 1px 3px rgba(150,62,12,0.4)) drop-shadow(0 0 11px rgba(200,96,24,0.28));
+}
 /* The lamp PNG is a saturated orange next to parchment type, so on its own it
    reads as a sticker dropped on the page. Pulled toward the type's gold and
    given the same bloom, it becomes the source of the light. */
@@ -501,11 +530,11 @@ export default {
    pointer, and a three-layer bloom on the chosen one. */
 .night-mode .language-selector button {
   background: transparent; box-shadow: none; color: #f5e6c8;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 6px rgba(255,190,110,0.4));
+  filter: drop-shadow(0 0 7px rgba(255,190,110,0.5));
 }
 .night-mode .language-selector button:hover {
   background: transparent; box-shadow: none; transform: none;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 12px rgba(255,200,120,0.85));
+  filter: drop-shadow(0 0 13px rgba(255,200,120,0.9));
 }
 .night-mode .language-selector button.active {
   background: transparent; box-shadow: none; transform: none;
