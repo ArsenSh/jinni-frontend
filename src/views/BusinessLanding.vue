@@ -29,6 +29,19 @@
         <h2 class="features-heading">{{ $t('businessLanding.features.title') }}</h2>
         <div class="features-grid">
           <div v-for="tier in tiers" :key="tier.key" class="wish-item">
+            <span class="tier-mark">
+              <svg v-if="tier.key === 'verified'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.6l7.2 3v6.1c0 4.3-3 8.3-7.2 9.7-4.2-1.4-7.2-5.4-7.2-9.7V5.6l7.2-3z"/>
+                <polyline points="8.8 11.8 11.2 14.2 15.4 10"/>
+              </svg>
+              <svg v-else-if="tier.key === 'spotlight'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4.2"/>
+                <path d="M12 2.4v2.6M12 19v2.6M4.2 12H1.6M22.4 12h-2.6M6.5 6.5L4.7 4.7M19.3 19.3l-1.8-1.8M17.5 6.5l1.8-1.8M4.7 19.3l1.8-1.8"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.8l2.9 5.9 6.5.95-4.7 4.6 1.11 6.47L12 17.66l-5.81 3.06L7.3 14.25 2.6 9.65l6.5-.95L12 2.8z"/>
+              </svg>
+            </span>
             <span class="tier-label">{{ $t(`businessLanding.tiers.${tier.key}.label`) }}</span>
             <span class="tier-price">{{ $t(`businessLanding.tiers.${tier.key}.price`) }}<span
               v-if="tier.suffix" class="tier-price-suffix">{{ $t(`businessLanding.tiers.${tier.key}.priceSuffix`) }}</span></span>
@@ -182,9 +195,12 @@ export default {
 
 /* ── Hero ──────────────────────────────────────────────────────────────────── */
 .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
-.hero-content { max-width: 800px; animation: fadeInUp 1s ease-out }
+.hero-content { max-width: 1080px; animation: fadeInUp 1s ease-out }
 .static-bottle { width: 150px; height: auto; max-height: 250px; margin: auto; display: block }
-.magic-title { font-family: 'Cinzel', serif; font-size: 4rem; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+/* The sentence used to break with one word stranded on the second line: an
+   800px box at a fixed 4rem. It now scales with the window and balances, so
+   longer translations split evenly instead of orphaning a word. */
+.magic-title { font-family: 'Cinzel', serif; font-size: clamp(2.4rem, 5.4vw, 4rem); text-wrap: balance; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .magic-subtitle { font-family: 'Cinzel', serif; font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* v-html content carries NO scope attribute — a plain scoped descendant rule
    would never match this span. */
@@ -196,6 +212,11 @@ export default {
 .features-heading { font-family: 'Cinzel', serif; text-align: center; margin-bottom: 3rem; font-size: 2.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); position: relative }
 .wish-item { padding: 6px 30px; display: flex; flex-direction: column; align-items: flex-start }
+/* The tier icons come back as line marks, not filled discs: a stroke drawn
+   in the same ink as the type, so it belongs to the manifest instead of
+   sitting on it. */
+.tier-mark { display: block; margin-bottom: 10px; line-height: 0 }
+.tier-mark svg { width: 24px; height: 24px }
 .tier-label { font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px }
 .tier-price { font-family: 'Cinzel', serif; font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 12px; font-variant-numeric: tabular-nums }
 .tier-price-suffix { font-size: 1rem; font-weight: 400; letter-spacing: 0.02em }
@@ -253,6 +274,7 @@ export default {
 .day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
 .day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
 .day-mode .wish-item:last-child { padding-right: 0 }
+.day-mode .tier-mark { color: rgba(168,114,15,0.75) }
 .day-mode .tier-label { color: rgba(150,100,55,0.75) }
 .day-mode .tier-price { color: rgba(168,114,15,0.9) }
 .day-mode .tier-price-suffix { color: rgba(150,100,55,0.6) }
@@ -349,6 +371,7 @@ export default {
 .night-mode .wish-item { border-left: 1px solid rgba(240,218,170,0.2) }
 .night-mode .wish-item:first-child { border-left: none; padding-left: 0 }
 .night-mode .wish-item:last-child { padding-right: 0 }
+.night-mode .tier-mark { color: #f0d9a8; filter: drop-shadow(0 0 7px rgba(255,180,90,0.45)) }
 .night-mode .tier-label { color: rgba(240,218,170,0.55) }
 .night-mode .tier-price {
   background: linear-gradient(180deg, rgba(255,231,181,0.82), rgba(226,175,88,0.38));
@@ -410,6 +433,7 @@ export default {
   .night-mode .wish-item { border-top-color: rgba(212,175,55,0.2) }
   .day-mode .wish-item:first-child, .night-mode .wish-item:first-child { border-top: none; padding-top: 0 }
   .tier-price { font-size: 2.1rem; margin-bottom: 8px }
+  .tier-mark svg { width: 21px; height: 21px }
   .magic-title { font-size: 2.5rem }
   .magic-subtitle { font-size: 1.1rem }
   .features-heading { font-size: 2rem }
