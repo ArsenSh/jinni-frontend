@@ -219,18 +219,22 @@ export default {
   /* Three rings, all zero-offset: the warm hairline, a crisp white rim just
      inside it, and a soft frost that fades inward — that inner light is what
      makes an edge read as ice instead of as a drawn outline. */
-  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.38),
-              inset 0 0 0 2px rgba(255, 255, 255, 0.5),
-              inset 0 0 12px -3px rgba(255, 255, 255, 0.9),
-              0 0 16px -2px rgba(120, 80, 30, 0.16);
+  /* No dark hairline UNDER the white rim: a brown line seen through
+     translucent white blends to grey, which is the grey edge that showed up
+     on close inspection. The warm ring moves OUTSIDE the glass, where it
+     stays warm, and the rims are warm-white rather than pure white. */
+  box-shadow: inset 0 0 0 1.5px rgba(255, 253, 247, 0.9),
+              inset 0 0 14px -4px rgba(255, 255, 255, 0.95),
+              0 0 0 1px rgba(198, 143, 90, 0.34),
+              0 0 18px -3px rgba(150, 100, 40, 0.18);
   padding: 14px 32px;
 }
 .day-mode .hero .magic-button:hover {
   background: rgba(255, 251, 245, 0.86);
-  box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.5),
-              inset 0 0 0 2px rgba(255, 255, 255, 0.62),
-              inset 0 0 14px -3px rgba(255, 255, 255, 0.95),
-              0 0 22px -2px rgba(120, 80, 30, 0.22);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 254, 250, 0.95),
+              inset 0 0 16px -4px rgba(255, 255, 255, 1),
+              0 0 0 1px rgba(198, 143, 90, 0.46),
+              0 0 24px -3px rgba(150, 100, 40, 0.24);
 }
 .day-mode .hero .wish-label {
   background: linear-gradient(45deg, #D4AF37, #FF8C00);
@@ -303,19 +307,19 @@ export default {
    glow, so the pill reads as frosted material rather than an outlined box. */
 /* Same three rings as the wish button, so the pill is the same ice. */
 .day-mode .language-selector {
-  background: rgba(255,251,245,0.6); border: none;
+  background: rgba(255,251,245,0.34); border: none; padding: 6px; gap: 6px;
   backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.38),
-              inset 0 0 0 2px rgba(255,255,255,0.5),
-              inset 0 0 12px -3px rgba(255,255,255,0.9),
-              0 0 16px -2px rgba(120,80,30,0.16);
+  box-shadow: inset 0 0 0 1.5px rgba(255,253,247,0.9),
+              inset 0 0 14px -4px rgba(255,255,255,0.95),
+              0 0 0 1px rgba(198,143,90,0.34),
+              0 0 18px -3px rgba(150,100,40,0.18);
 }
 .day-mode .language-selector:hover {
   background: rgba(255,251,245,0.8);
-  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.5),
-              inset 0 0 0 2px rgba(255,255,255,0.62),
-              inset 0 0 14px -3px rgba(255,255,255,0.95),
-              0 0 20px -2px rgba(120,80,30,0.2);
+  box-shadow: inset 0 0 0 1.5px rgba(255,254,250,0.95),
+              inset 0 0 16px -4px rgba(255,255,255,1),
+              0 0 0 1px rgba(198,143,90,0.46),
+              0 0 22px -3px rgba(150,100,40,0.22);
 }
 .day-mode .language-selector button { color: #a8720f; box-shadow: none;
   filter: drop-shadow(0 1px 2px rgba(120,80,30,0.32)) }
@@ -323,25 +327,46 @@ export default {
   filter: drop-shadow(0 1px 2px rgba(120,80,30,0.3)) drop-shadow(0 0 7px rgba(212,175,55,0.75)) }
 .day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
 .day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
+.day-mode .static-bottle {
+  filter: drop-shadow(0 0 14px rgba(255,186,104,0.55))
+          drop-shadow(0 0 38px rgba(232,140,60,0.32));
+}
 .day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
 /* The switch takes the wish button's glacier glass (founder 2026-09-10), so
    day mode has one material instead of a frosted button beside a muddy pill.
    The chosen side is a brighter pane of the same glass — no saturated fill. */
+/* Two glass capsules side by side, not a pane inside a pane (founder
+   2026-09-10: the selected one looked like a button drawn inside a button).
+   The container carries nothing; each side is its own ice, and the chosen one
+   is simply the clearer, brighter piece. */
 .day-mode .mode-switch-pill {
-  background: rgba(255,251,245,0.6);
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; padding: 0; gap: 10px;
+}
+.day-mode .mode-switch-btn {
+  color: rgba(122,77,16,0.66);
+  background: rgba(255,251,245,0.5);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.38),
-              inset 0 0 0 2px rgba(255,255,255,0.5),
-              inset 0 0 12px -3px rgba(255,255,255,0.9),
-              0 0 16px -2px rgba(120,80,30,0.16);
+  box-shadow: inset 0 0 0 1.5px rgba(255,253,247,0.85),
+              inset 0 0 13px -4px rgba(255,255,255,0.9),
+              0 0 0 1px rgba(198,143,90,0.3),
+              0 0 16px -3px rgba(150,100,40,0.16);
 }
-.day-mode .mode-switch-btn { color: rgba(122,77,16,0.62) }
-.day-mode .mode-switch-btn:hover { color: #7a4d10; background: rgba(255,252,246,0.6); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.26) }
+.day-mode .mode-switch-btn:hover {
+  color: #7a4d10; background: rgba(255,252,246,0.72);
+  box-shadow: inset 0 0 0 1.5px rgba(255,254,250,0.92),
+              inset 0 0 15px -4px rgba(255,255,255,0.98),
+              0 0 0 1px rgba(198,143,90,0.42),
+              0 0 20px -3px rgba(150,100,40,0.2);
+}
 .day-mode .mode-switch-btn--active,
 .day-mode .mode-switch-btn--active:hover {
-  background: rgba(255,252,246,0.92); color: #6b3f0c;
-  box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), inset 0 0 10px -3px rgba(255,255,255,0.95);
+  color: #6b3f0c; background: rgba(255,253,248,0.92);
+  box-shadow: inset 0 0 0 1.5px rgba(255,255,252,1),
+              inset 0 0 16px -4px rgba(255,255,255,1),
+              0 0 0 1px rgba(198,143,90,0.5),
+              0 0 24px -3px rgba(150,100,40,0.24);
 }
 
 /* ── Night mode explicit colors (override inherited body color) ───────────── */
@@ -452,10 +477,9 @@ export default {
           drop-shadow(0 0 11px rgba(255,170,90,0.4))
           drop-shadow(0 0 26px rgba(255,140,60,0.24));
 }
-.day-mode .app-name {
-  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.34))
-          drop-shadow(0 0 10px rgba(212,175,55,0.34));
-}
+/* Day gets NO bloom (founder 2026-09-10): a glow is a night effect, and on
+   cream it reads as a smudge rather than as light. The wordmark stands on
+   its gradient alone. */
 .landing-container:not(.day-mode) .static-bottle {
   filter: saturate(0.76) brightness(1.06) contrast(0.96)
           drop-shadow(0 0 8px rgba(255,214,150,0.5))
