@@ -287,7 +287,10 @@ export default {
    instead of a hard border and a downward shadow. */
 .day-mode .language-selector { background: rgba(255,251,245,0.6); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.3), 0 0 16px -2px rgba(120,80,30,0.14) }
 .day-mode .language-selector:hover { background: rgba(255,251,245,0.8); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), 0 0 20px -2px rgba(120,80,30,0.18) }
-.day-mode .language-selector button { color: #a8720f; box-shadow: none }
+.day-mode .language-selector button { color: #a8720f; box-shadow: none;
+  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.32)) }
+.day-mode .language-selector button.active {
+  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.3)) drop-shadow(0 0 7px rgba(212,175,55,0.75)) }
 .day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
 .day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
 .day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
@@ -414,13 +417,21 @@ export default {
    warm halo instead of a rim: findable, but nothing is drawn. */
 .night-mode .language-selector { background: transparent; border: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none }
 .night-mode .language-selector:hover { background: transparent; box-shadow: none }
+/* Each flag carries its own light: a warm halo at rest, brighter under the
+   pointer, and a three-layer bloom on the chosen one. */
 .night-mode .language-selector button {
   background: transparent; box-shadow: none; color: #f5e6c8;
-  filter: drop-shadow(0 0 5px rgba(255,190,110,0.45));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 6px rgba(255,190,110,0.4));
 }
-.night-mode .language-selector button:hover, .night-mode .language-selector button.active {
+.night-mode .language-selector button:hover {
   background: transparent; box-shadow: none; transform: none;
-  filter: drop-shadow(0 0 11px rgba(255,200,120,0.85));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 12px rgba(255,200,120,0.85));
+}
+.night-mode .language-selector button.active {
+  background: transparent; box-shadow: none; transform: none;
+  filter: drop-shadow(0 0 4px rgba(255,238,205,0.95))
+          drop-shadow(0 0 13px rgba(255,190,110,0.8))
+          drop-shadow(0 0 30px rgba(255,150,60,0.45));
 }
 /* Lavender at rest, warming to gold on hover — the link behaves like a star
    catching the lamp. The flat #FF8C00 was the loudest thing on the page. */

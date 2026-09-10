@@ -292,7 +292,10 @@ export default {
    glow, so the pill reads as frosted material rather than an outlined box. */
 .day-mode .language-selector { background: rgba(255,251,245,0.6); border: none; backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.3), 0 0 16px -2px rgba(120,80,30,0.14) }
 .day-mode .language-selector:hover { background: rgba(255,251,245,0.8); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.42), 0 0 20px -2px rgba(120,80,30,0.18) }
-.day-mode .language-selector button { color: #a8720f; box-shadow: none }
+.day-mode .language-selector button { color: #a8720f; box-shadow: none;
+  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.32)) }
+.day-mode .language-selector button.active {
+  filter: drop-shadow(0 1px 2px rgba(120,80,30,0.3)) drop-shadow(0 0 7px rgba(212,175,55,0.75)) }
 .day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
 .day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
 .day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
@@ -325,14 +328,22 @@ export default {
 .landing-container:not(.day-mode) .language-selector { background: transparent; border: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none }
 .landing-container:not(.day-mode) .language-selector:hover { background: transparent; box-shadow: none }
 .landing-container:not(.day-mode) .language-selector button { box-shadow: none }
+/* Each flag carries its own light: a warm halo at rest, brighter under the
+   pointer, and a three-layer bloom on the chosen one — the same halation the
+   type uses, so the selected language is lit rather than boxed. */
 .landing-container:not(.day-mode) .language-selector button {
   background: transparent; box-shadow: none;
-  filter: drop-shadow(0 0 5px rgba(255,190,110,0.45));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55)) drop-shadow(0 0 6px rgba(255,190,110,0.4));
 }
-.landing-container:not(.day-mode) .language-selector button:hover,
+.landing-container:not(.day-mode) .language-selector button:hover {
+  background: transparent; box-shadow: none; transform: none;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)) drop-shadow(0 0 12px rgba(255,200,120,0.85));
+}
 .landing-container:not(.day-mode) .language-selector button.active {
   background: transparent; box-shadow: none; transform: none;
-  filter: drop-shadow(0 0 11px rgba(255,200,120,0.85));
+  filter: drop-shadow(0 0 4px rgba(255,238,205,0.95))
+          drop-shadow(0 0 13px rgba(255,190,110,0.8))
+          drop-shadow(0 0 30px rgba(255,150,60,0.45));
 }
 
 .landing-container:not(.day-mode) .hero .magic-button {
@@ -488,9 +499,7 @@ export default {
 .landing-container:not(.day-mode) .mode-switch-btn--active::after {
   background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9);
 }
-.landing-container:not(.day-mode) .language-selector button { color: #f5e6c8; box-shadow: 0 0 10px rgba(212,175,55,0.1) }
-.landing-container:not(.day-mode) .language-selector button:hover { background: rgba(212,175,55,0.18); box-shadow: 0 0 15px rgba(212,175,55,0.3) }
-.landing-container:not(.day-mode) .language-selector button.active { background: rgba(212,175,55,0.25); box-shadow: 0 0 18px rgba(212,175,55,0.4) }
+.landing-container:not(.day-mode) .language-selector button { color: #f5e6c8 }
 .landing-container:not(.day-mode) .footer-copyright { color: rgba(245,230,200,0.6) }
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
