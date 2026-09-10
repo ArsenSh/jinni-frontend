@@ -16,8 +16,13 @@
       </div>
     </div>
     <section class="hero">
+      <!-- day only: the sand arrives, builds the lamp, and stops for good -->
+      <!-- `&& lampEl`: template refs are only assigned after the first render,
+           so without this the component mounts with a null lamp and silently
+           does nothing -->
+      <DesertSand v-if="isDayMode && lampEl" :lamp-el="lampEl" />
       <div class="hero-content">
-        <span class="lamp"><img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
+        <span class="lamp" ref="lampEl"><img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
         <h1 class="magic-title" v-html="heroTitleHtml"></h1>
         <p class="magic-subtitle">{{ $t('landing.hero.subtitle') }}</p>
         <MagicButton @click="openAuthModal"><span class="wish-label">{{ $t('landing.hero.cta') }}</span></MagicButton>
@@ -70,6 +75,7 @@ import AuthModal from '@/components/AuthModal.vue'
 import StarrySky from '@/components/ui/StarrySky.vue'
 import DaySky from "@/components/ui/DaySky.vue";
 import DesertSky from '@/components/ui/DesertSky.vue'
+import DesertSand from '@/components/ui/DesertSand.vue'
 export default {
   computed: {
     // Only the brand word carries the gradient; the rest of the sentence is
@@ -95,7 +101,8 @@ export default {
     AuthModal,
     StarrySky,
     DaySky,
-    DesertSky
+    DesertSky,
+    DesertSand
   },
   setup() {
     const store = useStore()
@@ -130,6 +137,8 @@ export default {
     // sky flip day/night when navigating between the two landings whenever a
     // manually chosen theme disagreed with the hour.
     const isNightMode = computed(() => store.getters['settings/effectiveTheme'] === 'dark')
+    const isDayMode = computed(() => !isNightMode.value)
+    const lampEl = ref(null)
     // Browser-chrome painting was removed here: App.vue now DERIVES the
     // chrome/canvas/backdrop colors from whatever the page actually renders
     // (getComputedStyle on the rendered sky), so the landing's clock-based
@@ -188,7 +197,9 @@ export default {
       selectLanguage,
       toggleLanguageSelector,
       languageSelectorRef,
-      isNightMode
+      isNightMode,
+      isDayMode,
+      lampEl
     }
   }
 }

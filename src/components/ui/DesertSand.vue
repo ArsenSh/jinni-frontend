@@ -1,0 +1,350 @@
+<template>
+  <canvas class="desert-sand" ref="cv"></canvas>
+</template>
+
+<script>
+import { onMounted, onBeforeUnmount, ref } from 'vue'
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DESERT ARRIVAL (day mode)
+
+   Vents open in the ground and breathe columns of sand up an S-shaped channel
+   — the same shared-path idea as the lamp's smoke in AnimatedLamp, so a column
+   reads as one moving body rather than as scattered dots. Every channel ends
+   at the lamp, which starts as a faint shape made of sand, fills as the wind
+   delivers, and only then hands over to the real icon.
+
+   Tuned in ~/Desktop/DesertLab — a standalone copy of this page with sliders.
+   Paste new values from its "Copy as SAND_DEFAULTS" button straight in below.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+export const SAND_DEFAULTS = {
+  // the vents, and how hard each one breathes
+  ventCount: 6, ventSpread: 84, ventDrift: 4,
+  emitPerSec: 480, life: 0.85, lifeSpread: 0.4,
+  // the serpent: one shared channel per vent, widening low, narrowing high
+  snakeAmp: 46, snakeWaves: 2.2, snakeWiden: 70, snakePhase: 22, personal: 34,
+  // the climb, leaning into the lamp
+  converge: 98, rise: 140, riseEase: 22, reach: 34,
+  // the grains
+  sizeMin: 1.3, sizeSpread: 2.2, squash: 94, alpha: 100, fadeIn: 3, fadeOut: 6,
+  depthSpread: 70, spin: 26, wobble: 26, wobbleRate: 42, flicker: 30, grow: 35,
+  // colour: the sand lamp's own palette, weighted to the tones that show
+  darkShare: 72, tintDepth: 6, warmDistance: 190, absorbAt: 9,
+  // the becoming
+  formSeconds: 1.5, baseOpacity: 0, maxOpacity: 20,
+  waitForSand: 1, clearBelow: 1400,
+  holdMs: 120, revealMs: 1600, sandHoldMs: 700, sandFadeMs: 900,
+  warmAmount: 38, warmDelayMs: 900, warmMs: 3200,
+  stopWhenFormed: 1,
+  // performance: the canvas renders small and is scaled up, because dust is
+  // blurry by nature and fill rate is the whole cost of this layer
+  renderScale: 70, maxPuffs: 4500,
+}
+
+/* Every colour the sand lamp is made of, read from the PNG by coverage. One
+   flat tint made the grains read as dots; real sand is many close browns. */
+const SAND = [[189, 117, 45], [171, 99, 27], [207, 135, 63], [225, 153, 81], [153, 81, 9],
+              [171, 99, 45], [153, 81, 27], [225, 153, 63], [189, 99, 27]]
+const SAND_SORTED = [...SAND].sort((a, b) =>
+  (a[0] * 0.3 + a[1] * 0.59 + a[2] * 0.11) - (b[0] * 0.3 + b[1] * 0.59 + b[2] * 0.11))
+
+export default {
+  name: 'DesertSand',
+  props: {
+    /* The element holding the lamp image. The sand and tint layers are added
+       inside it and removed again on unmount, so the page keeps ownership of
+       its own markup and a page without this component renders a normal lamp. */
+    lampEl: { type: Object, default: null },
+    config: { type: Object, default: () => ({}) },
+  },
+  setup(props) {
+    const cv = ref(null)
+    const cfg = { ...SAND_DEFAULTS, ...(props.config || {}) }
+
+    let ctx, W = 0, H = 0, RS = 1, raf = 0
+    let vents = [], dust = [], puff = null
+    const tintCache = {}
+    let fill = 0, formed = false, revealAt = 0, revealFrom = 0
+    let lampImg = null, sandLamp = null, warmLamp = null
+    let lampBox = { x: 0, y: 0, w: 0, h: 0 }
+    let stopped = false
+
+    const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    /* Phones get a much thinner wind: this layer is fill-rate bound, and a
+       phone has a quarter of the pixels but nothing like a quarter of the
+       fill rate. */
+    const phone = () => window.innerWidth < 760 || window.matchMedia?.('(pointer: coarse)').matches
+    if (phone()) {
+      cfg.emitPerSec = Math.round(cfg.emitPerSec * 0.4)
+      cfg.maxPuffs = Math.round(cfg.maxPuffs * 0.35)
+      cfg.renderScale = 55
+      cfg.ventCount = 4
+    }
+
+    function buildPuff() {
+      const S = 128
+      const c = document.createElement('canvas')
+      c.width = c.height = S
+      const x = c.getContext('2d')
+      const g = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2)
+      g.addColorStop(0, 'rgba(255,255,255,1)')
+      g.addColorStop(0.62, 'rgba(255,255,255,0.98)')
+      g.addColorStop(0.82, 'rgba(255,255,255,0.55)')
+      g.addColorStop(1, 'rgba(255,255,255,0)')
+      x.fillStyle = g
+      x.fillRect(0, 0, S, S)
+      puff = c
+    }
+    /* One sprite per colour, drawn once. Building a gradient per grain per
+       frame costs more than everything else in this component combined. */
+    function tinted(r, g, b) {
+      const key = r + '_' + g + '_' + b
+      if (tintCache[key]) return tintCache[key]
+      const S = puff.width
+      const c = document.createElement('canvas')
+      c.width = c.height = S
+      const x = c.getContext('2d')
+      x.drawImage(puff, 0, 0)
+      x.globalCompositeOperation = 'source-in'
+      x.fillStyle = `rgb(${r},${g},${b})`
+      x.fillRect(0, 0, S, S)
+      tintCache[key] = c
+      return c
+    }
+    function pickSand() {
+      const half = Math.ceil(SAND_SORTED.length / 2)
+      const dark = Math.random() * 100 < cfg.darkShare
+      const from = dark ? 0 : half
+      const span = dark ? half : SAND_SORTED.length - half
+      return SAND_SORTED[from + Math.floor(Math.random() * span)]
+    }
+
+    function measureLamp() {
+      if (!props.lampEl || !cv.value) return
+      const r = props.lampEl.getBoundingClientRect()
+      const h = cv.value.parentElement.getBoundingClientRect()
+      lampBox = { x: r.left - h.left, y: r.top - h.top, w: r.width, h: r.height }
+    }
+    function placeVents() {
+      vents = []
+      const spread = (cfg.ventSpread / 100) * W
+      const left = (W - spread) / 2
+      for (let i = 0; i < cfg.ventCount; i++) {
+        const slot = cfg.ventCount === 1 ? 0.5 : i / (cfg.ventCount - 1)
+        vents.push({
+          x: left + spread * slot + (Math.random() - 0.5) * (spread / Math.max(1, cfg.ventCount * 2)),
+          seed: Math.random() * 6.28,
+          dir: Math.random() < 0.5 ? -1 : 1,
+          due: 0,
+        })
+      }
+    }
+    function resize() {
+      if (!cv.value || !ctx) return
+      const host = cv.value.parentElement
+      RS = Math.max(0.25, cfg.renderScale / 100)
+      W = host.clientWidth; H = host.clientHeight
+      cv.value.width = Math.round(W * RS); cv.value.height = Math.round(H * RS)
+      cv.value.style.width = W + 'px'; cv.value.style.height = H + 'px'
+      ctx.setTransform(RS, 0, 0, RS, 0, 0)
+      measureLamp(); placeVents()
+    }
+
+    const pool = []
+    function emit(v) {
+      const d = pool.pop() || {}
+      Object.assign(d, {
+        v, t: 0,
+        life: cfg.life + Math.random() * cfg.lifeSpread,
+        off: (Math.random() * 2 - 1) * cfg.personal,
+        size: cfg.sizeMin + Math.random() * cfg.sizeSpread,
+        seed: Math.random(),
+        sand: pickSand(),
+        depth: 1 - (cfg.depthSpread / 100) * Math.random(),
+        rot: Math.random() * Math.PI,
+        spin: (Math.random() * 2 - 1),
+        wob: Math.random(),
+        warm: 0, x: 0, y: 0,
+      })
+      dust.push(d)
+    }
+    /* Every puff from a vent walks the SAME serpent — that shared path is what
+       makes a column look like one body of sand instead of confetti. */
+    function channel(v, t, off, now) {
+      const lampCx = lampBox.x + lampBox.w / 2
+      const lampCy = lampBox.y + lampBox.h * (cfg.reach / 100)
+      const eased = t + (1 - t) * t * (cfg.riseEase / 100)
+      const startY = H + 10
+      const y = startY + (lampCy - startY) * eased
+      const pull = Math.pow(t, 1.6) * (cfg.converge / 100)
+      const baseX = v.x + (lampCx - v.x) * pull
+      const widen = 1 - (cfg.snakeWiden / 100) * t
+      const phase = v.seed + now * (cfg.snakePhase / 1000)
+      const swing = Math.sin(t * Math.PI * 2 * cfg.snakeWaves + phase) * cfg.snakeAmp * widen * v.dir
+      return { x: baseX + swing + off * widen, y }
+    }
+
+    const put = (el, prop, value) => { if (el && el.style[prop] !== value) el.style[prop] = value }
+
+    let last = performance.now()
+    function frame(now) {
+      if (stopped) return
+      const dt = Math.min((now - last) / 1000, 0.05)
+      last = now
+      const tSec = now / 1000
+      ctx.clearRect(0, 0, W, H)
+
+      if (!formed) {
+        fill = Math.min(1, fill + dt / Math.max(0.5, cfg.formSeconds))
+        if (fill >= 1) { formed = true; revealAt = now }
+      }
+
+      for (const v of vents) {
+        v.x += Math.sin(tSec * 0.3 + v.seed) * cfg.ventDrift * dt
+        v.due -= dt
+        if (v.due <= 0) {
+          const closed = formed && cfg.stopWhenFormed
+          const per = 1 / Math.max(1, cfg.emitPerSec)
+          let owed = 0
+          // a vent may release the whole backlog it has earned: capping it at
+          // one per frame silently ignored anything above ~60 per second
+          while (v.due <= 0 && owed < 14) { v.due += per; owed++ }
+          if (!closed) for (let k = 0; k < owed && dust.length < cfg.maxPuffs; k++) emit(v)
+        }
+      }
+
+      const lampCx = lampBox.x + lampBox.w / 2
+      const lampCy = lampBox.y + lampBox.h * (cfg.reach / 100)
+
+      for (let i = dust.length - 1; i >= 0; i--) {
+        const d = dust[i]
+        d.t += dt / d.life
+        if (d.t >= 1) { pool.push(dust.splice(i, 1)[0]); continue }
+        const wob = Math.sin(d.t * cfg.wobbleRate / 6 + d.wob * 6.28) * cfg.wobble * d.depth
+        const pos = channel(d.v, d.t, d.off + wob, tSec)
+        d.x = pos.x; d.y = pos.y
+        d.rot += d.spin * (cfg.spin / 1000) * (1 + d.t)
+        const dd = Math.hypot(lampCx - d.x, lampCy - d.y)
+        d.warm = cfg.warmDistance > 0 ? Math.max(0, 1 - dd / cfg.warmDistance) : 0
+        if (dd < cfg.absorbAt) { pool.push(dust.splice(i, 1)[0]); continue }
+
+        const fi = Math.min(1, d.t / Math.max(0.01, cfg.fadeIn / 100))
+        const fo = d.t > 1 - cfg.fadeOut / 100
+          ? Math.max(0, (1 - d.t) / Math.max(0.01, cfg.fadeOut / 100)) : 1
+        const flick = 1 + Math.sin(d.t * 9 + d.seed * 6.28) * (cfg.flicker / 100) * 0.5
+        const a = (cfg.alpha / 100) * fi * fo * (0.6 + 0.4 * d.seed) * d.depth * flick
+        const warm = Math.round(d.warm * 4) / 4
+        const s = d.sand
+        const r = Math.min(255, Math.round(s[0] + cfg.tintDepth * -0.45 + warm * 50))
+        const g = Math.min(255, Math.round(s[1] + cfg.tintDepth * -0.55 + warm * 46))
+        const b = Math.max(0, Math.round(s[2] + cfg.tintDepth * -0.5 - warm * 10))
+        const w = d.size * (0.55 + (cfg.grow / 100) * d.t)
+        const h = w * (cfg.squash / 100)
+        ctx.globalAlpha = Math.max(0, Math.min(1, a))
+        ctx.translate(d.x, d.y)
+        ctx.rotate(d.rot)
+        ctx.drawImage(tinted(r, g, b), -w / 2, -h / 2, w, h)
+        ctx.setTransform(RS, 0, 0, RS, 0, 0)
+      }
+      ctx.globalAlpha = 1
+
+      /* THE LAMP. Before: a shape made of sand, filling as the columns feed it.
+         After: the real icon rises THROUGH the sand — never a swap — and the
+         metal itself then warms toward AnimatedLamp's golden. */
+      const base = cfg.baseOpacity / 100
+      const top = Math.max(base, cfg.maxOpacity / 100)
+      if (!formed) {
+        const eased = fill * fill * fill * fill
+        put(sandLamp, 'opacity', (base + eased * (top - base)).toFixed(3))
+        put(lampImg, 'opacity', '0')
+        put(warmLamp, 'opacity', '0')
+      } else {
+        /* The gold waits for an empty sky: grains already in flight kept
+           arriving for a second after the vents closed, and revealing during
+           that put the icon into a stream of sand. */
+        if (!revealFrom) {
+          const held = now - revealAt >= cfg.holdMs
+          const clear = !cfg.waitForSand || dust.length <= cfg.clearBelow
+          if (held && clear) revealFrom = now
+        }
+        const since = revealFrom ? now - revealFrom : -1
+        const rev = Math.max(0, Math.min(1, since / cfg.revealMs))
+        const out = Math.max(0, Math.min(1, (since - cfg.sandHoldMs) / cfg.sandFadeMs))
+        const warmT = Math.max(0, Math.min(1, (since - cfg.warmDelayMs) / cfg.warmMs))
+        put(lampImg, 'opacity', rev.toFixed(2))
+        put(sandLamp, 'opacity', ((1 - out) * top).toFixed(3))
+        put(warmLamp, 'opacity', (warmT * (cfg.warmAmount / 100)).toFixed(3))
+        // vents shut, air empty, lamp arrived: there is nothing left to draw
+        if (cfg.stopWhenFormed && dust.length === 0 && rev >= 1 && warmT >= 1) {
+          ctx.clearRect(0, 0, W, H)
+          stopped = true
+          return
+        }
+      }
+      raf = requestAnimationFrame(frame)
+    }
+
+    /* The extra layers are created here rather than in the page's template, so
+       a page without this component renders a normal lamp and a failure here
+       can never leave the icon invisible. */
+    function attachLamp() {
+      if (!props.lampEl) return
+      lampImg = props.lampEl.querySelector('img')
+      if (!lampImg) return
+      const mk = (src, filter, z) => {
+        const el = document.createElement('img')
+        el.src = src
+        el.alt = ''
+        el.setAttribute('aria-hidden', 'true')
+        el.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;' +
+          'pointer-events:none;opacity:0;z-index:' + z + ';'
+        if (filter) el.style.filter = filter
+        props.lampEl.appendChild(el)
+        return el
+      }
+      sandLamp = mk('/images/sand-lamp.png', null, 2)
+      // the metal's own colour, the way AnimatedLamp does it: a second copy of
+      // the same image, hue-shifted, over the natural gold
+      warmLamp = mk('/images/bottle.png?v=3', 'hue-rotate(-9deg) saturate(1.4) brightness(0.9)', 3)
+      lampImg.style.opacity = '0'
+    }
+    function detachLamp() {
+      if (lampImg) lampImg.style.opacity = ''
+      if (sandLamp) sandLamp.remove()
+      if (warmLamp) warmLamp.remove()
+    }
+
+    let ro = null
+    onMounted(() => {
+      if (!cv.value) return
+      // Reduce Motion: no columns, no becoming — the lamp is simply there.
+      if (reduced()) { stopped = true; return }
+      ctx = cv.value.getContext('2d')
+      buildPuff()
+      attachLamp()
+      resize()
+      ro = new ResizeObserver(() => resize())
+      ro.observe(cv.value.parentElement)
+      raf = requestAnimationFrame(frame)
+    })
+    onBeforeUnmount(() => {
+      stopped = true
+      cancelAnimationFrame(raf)
+      if (ro) ro.disconnect()
+      detachLamp()
+    })
+
+    return { cv }
+  },
+}
+</script>
+
+<style scoped>
+.desert-sand {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+</style>
