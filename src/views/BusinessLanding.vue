@@ -420,23 +420,26 @@ export default {
           drop-shadow(0 0 11px rgba(255,170,90,0.4))
           drop-shadow(0 0 26px rgba(255,140,60,0.24));
 }
-/* Day carries warmth, not a white halo (founder 2026-09-10): a deep
-   terracotta shadow under the gold, the same colour the ground fades to, so
-   the letters sit ON the page instead of glowing over it. */
-.day-mode .app-name {
-  filter: drop-shadow(0 2px 3px rgba(150,62,12,0.4)) drop-shadow(0 0 14px rgba(200,96,24,0.28));
-}
-.day-mode .magic-title { text-shadow: 0 2px 5px rgba(150,62,12,0.22) }
-.day-mode .magic-title :deep(.brand-grad) {
-  filter: drop-shadow(0 2px 4px rgba(150,62,12,0.42)) drop-shadow(0 0 14px rgba(200,96,24,0.3));
-}
-.day-mode .features-heading { text-shadow: 0 2px 5px rgba(150,62,12,0.2) }
-.day-mode .features-heading :deep(.brand-grad) {
-  filter: drop-shadow(0 2px 4px rgba(150,62,12,0.4)) drop-shadow(0 0 13px rgba(200,96,24,0.28));
-}
+/* Day mode, gradient words (founder 2026-09-10: "the brand name with this
+   shadow is not good"). A blurred dark shadow works under DARK letters — it
+   hides behind them. Under a LIGHT gold word on a light peach ground it has
+   nowhere to hide: the halo spreads out past every stroke and the word reads
+   as out of focus. So the gradient words take their weight from COLOUR
+   instead — a deeper, more burnt gradient that holds its own against the
+   sand — with a 1px ink shadow to seat them, and no blur at all. */
+.day-mode .app-name,
+.day-mode .magic-title :deep(.brand-grad),
+.day-mode .features-heading :deep(.brand-grad),
 .day-mode .magic-subtitle :deep(.brand-grad) {
-  filter: drop-shadow(0 1px 3px rgba(150,62,12,0.4)) drop-shadow(0 0 11px rgba(200,96,24,0.28));
+  background: linear-gradient(45deg, #C08512, #B4540A);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(110,45,6,0.34));
 }
+/* The dark half of a heading keeps a real shadow — it has letters to hide
+   behind — but a tighter one, so the type stays sharp. */
+.day-mode .magic-title { text-shadow: 0 1px 3px rgba(150,62,12,0.18) }
+.day-mode .features-heading { text-shadow: 0 1px 3px rgba(150,62,12,0.16) }
 /* The lamp PNG is a saturated orange next to parchment type, so on its own it
    reads as a sticker dropped on the page. Pulled toward the type's gold and
    given the same bloom, it becomes the source of the light. */
