@@ -62,7 +62,7 @@ const META = {
   cometMirrorChance: [0, 1, 0.05], cometFromTopChance: [0, 1, 0.05], cometMargin: [0, 40, 1],
   cometEntryXMin: [-80, 60, 5], cometEntryXSpread: [0, 200, 5],
   cometEntryYMin: [-40, 80, 5], cometEntryYSpread: [0, 140, 5],
-  cometPurpleChance: [0, 1, 0.05],
+  cometHueJitter: [0, 60, 1], cometColorCycle: [0, 1, 1],
   cometBlurMin: [0, 5, 0.1], cometBlurSpread: [0, 5, 0.1],
   // a percentage of the container diagonal, not pixels
   cometGlow: [0, 60, 1], cometDistance: [20, 200, 5],
@@ -85,7 +85,7 @@ export default {
         { name: 'Comet path', keys: ['cometAngleMin', 'cometAngleSpread', 'cometMirrorChance', 'cometDistance'] },
         { name: 'Comet birth', keys: ['cometFromTopChance', 'cometMargin', 'cometEntryXMin', 'cometEntryXSpread', 'cometEntryYMin', 'cometEntryYSpread'] },
         { name: 'Comet shape', keys: ['cometWidthMin', 'cometWidthSpread', 'cometLenMin', 'cometLenSpread'] },
-        { name: 'Comet light', keys: ['cometGlow', 'cometBlurMin', 'cometBlurSpread', 'cometPurpleChance'] },
+        { name: 'Comet light', keys: ['cometGlow', 'cometBlurMin', 'cometBlurSpread', 'cometHueJitter', 'cometColorCycle'] },
       ],
     }
   },
@@ -94,7 +94,7 @@ export default {
     diff() {
       const out = {}
       for (const k of Object.keys(SKY_DEFAULTS)) {
-        if (this.cfg[k] !== SKY_DEFAULTS[k]) out[k] = this.cfg[k]
+        if (!Array.isArray(this.cfg[k]) && this.cfg[k] !== SKY_DEFAULTS[k]) out[k] = this.cfg[k]
       }
       return Object.keys(out).length
         ? Object.entries(out).map(([k, v]) => `  ${k}: ${v},`).join('\n')
@@ -107,7 +107,7 @@ export default {
     rebuild() { this.$refs.sky?.createStars?.() },
     reset() { this.cfg = { ...SKY_DEFAULTS } },
     copy() {
-      const body = Object.keys(SKY_DEFAULTS).map(k => `  ${k}: ${this.cfg[k]},`).join('\n')
+      const body = Object.keys(SKY_DEFAULTS).map(k => `  ${k}: ${JSON.stringify(this.cfg[k])},`).join('\n')
       navigator.clipboard?.writeText(`export const SKY_DEFAULTS = {\n${body}\n}`)
       this.copied = true
       setTimeout(() => { this.copied = false }, 1500)

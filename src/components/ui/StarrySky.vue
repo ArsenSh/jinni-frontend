@@ -29,7 +29,11 @@ export const SKY_DEFAULTS = {
   cometDurMin: 1.0, cometDurSpread: 0.9,
   cometWidthMin: 1.6, cometWidthSpread: 1.4,
   cometLenMin: 160, cometLenSpread: 220,
-  cometPurpleChance: 0.3,
+  /* The lamp animation's night palette, cycled: ice blue, blue, indigo,
+     violet (from LampLab I_Loved2's nightTypes). Comets take the next hue
+     each time rather than a random one, so consecutive strikes always differ
+     — the way the lamp's smoke switches colour. */
+  cometHues: [197, 218, 244, 260], cometHueJitter: 7, cometColorCycle: 1,
   cometBlurMin: 0.3, cometBlurSpread: 0.5,
   /* cometDistance is a PERCENTAGE of the distance from the comet's start to
      the screen edge it is aimed at, so a comet crosses any screen the same. */
@@ -157,7 +161,11 @@ export default {
       const angle = mirrored ? 180 - angleBase : angleBase
       const thickness = c.cometWidthMin + Math.random() * c.cometWidthSpread
       const length = c.cometLenMin + Math.random() * c.cometLenSpread
-      const hue = Math.random() < c.cometPurpleChance ? 290 : c.starHueMin + Math.random() * c.starHueSpread
+      const palette = (c.cometHues && c.cometHues.length) ? c.cometHues : [218]
+      const picked = c.cometColorCycle
+        ? palette[cometColorIndex++ % palette.length]
+        : palette[Math.floor(Math.random() * palette.length)]
+      const hue = picked + (Math.random() * 2 - 1) * c.cometHueJitter
       const w = starrySky.value.offsetWidth || 1440
       const h = starrySky.value.offsetHeight || 900
       const rad = angle * Math.PI / 180
@@ -201,14 +209,17 @@ export default {
       shootingStar.style.borderRadius = '999px'
       shootingStar.style.maskImage = 'none'
       shootingStar.style.webkitMaskImage = 'none'
-      // head at the leading (right) end, tail dissolving behind it
+      /* Head at the leading (right) end, tail dissolving behind it. The body
+         stays in the 70s for lightness and the head stops just short of
+         white: at 95% and a pure-white tip the hue washed out and every
+         comet read as the same blue-white streak. */
       shootingStar.style.background = `linear-gradient(90deg,
-        hsla(${hue}, 100%, 75%, 0) 0%,
-        hsla(${hue}, 100%, 80%, 0.18) 35%,
-        hsla(${hue}, 100%, 88%, 0.55) 72%,
-        hsla(${hue}, 100%, 95%, 0.95) 93%,
-        rgba(255, 255, 255, 1) 100%)`
-      shootingStar.style.boxShadow = `0 0 ${thickness * c.cometGlow}px hsla(${hue}, 100%, 85%, 0.55)`
+        hsla(${hue}, 100%, 68%, 0) 0%,
+        hsla(${hue}, 100%, 72%, 0.2) 35%,
+        hsla(${hue}, 100%, 78%, 0.6) 72%,
+        hsla(${hue}, 100%, 88%, 0.96) 93%,
+        hsla(${hue}, 100%, 97%, 1) 100%)`
+      shootingStar.style.boxShadow = `0 0 ${thickness * c.cometGlow}px hsla(${hue}, 100%, 74%, 0.6)`
       shootingStar.style.filter = `blur(${Math.random() * c.cometBlurSpread + c.cometBlurMin}px)`
       shootingStar.style.willChange = 'transform, opacity'
       starrySky.value.appendChild(shootingStar)
@@ -221,6 +232,7 @@ export default {
       const animation = shootingStar.animate(keyframes, { duration: duration * 1000, easing: 'linear' })
       animation.onfinish = () => shootingStar.remove()
     }
+    let cometColorIndex = Math.floor(Math.random() * 4)
     let shootingStarTimeout
     const scheduleShootingStar = () => {
       clearTimeout(shootingStarTimeout)
