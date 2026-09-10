@@ -238,7 +238,7 @@ export default {
   box-shadow: inset 0 0 0 1px rgba(184, 125, 78, 0.35), 0 0 16px -2px rgba(120, 80, 30, 0.16);
   padding: 14px 32px;
 }
-.day-mode .tier-cta { padding: 11px 24px }
+.day-mode .tier-cta { padding: 13px 24px }
 .day-mode .hero .magic-button:hover,
 .day-mode .tier-cta:hover {
   background: rgba(255, 251, 245, 0.86);

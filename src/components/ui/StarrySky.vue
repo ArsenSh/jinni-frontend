@@ -10,7 +10,7 @@ import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 /* Every tunable of the sky, with the values that shipped. SkyLab (dev only)
    overrides them live; production passes nothing and gets exactly these. */
 export const SKY_DEFAULTS = {
-  starCount: 4200,
+  starCount: 4200, starMin: 900,
   starSizeMin: 0.3, starSizeSpread: 0.9,
   starOpacityMin: 0.2, starOpacitySpread: 0.8,
   starHueMin: 210, starHueSpread: 30,
@@ -56,11 +56,26 @@ export default {
       const containerHeight = starrySky.value.offsetHeight
       const containerWidth = starrySky.value.offsetWidth
       const c = cfg()
-      for (let i = 0; i < c.starCount; i++) {
+      /* starCount is the count for a REFERENCE 1440x900 screen; the field is
+         scaled to the actual area so density is the same everywhere. Pinned
+         to the viewport, a phone would otherwise pack the same 4200 stars
+         into a quarter of the pixels — four times the desktop density, and
+         four times the work for a phone GPU. */
+      /* Overscan: on iOS the viewport GROWS when Safari collapses its bars,
+         and a viewport-pinned field would leave a starless strip at the
+         bottom. Stars are laid out over a taller area than the sky and the
+         surplus is clipped — cheaper than rebuilding the field on every bar
+         movement, which is why height changes don't trigger a rebuild. */
+      const fieldHeight = containerHeight * 1.18
+      const total = Math.max(
+        c.starMin,
+        Math.round(c.starCount * ((containerWidth * fieldHeight) / (1440 * 900)))
+      )
+      for (let i = 0; i < total; i++) {
         const star = document.createElement('div')
         star.classList.add('star')
         const x = Math.random() * containerWidth
-        const y = Math.random() * containerHeight
+        const y = Math.random() * fieldHeight
         const size = Math.random() * c.starSizeSpread + c.starSizeMin
         const opacity = Math.random() * c.starOpacitySpread + c.starOpacityMin
         const roll = Math.random()
