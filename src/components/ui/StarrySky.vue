@@ -50,6 +50,9 @@ export default {
   props: { config: { type: Object, default: () => ({}) } },
   setup(props) {
     const cfg = () => ({ ...SKY_DEFAULTS, ...(props.config || {}) })
+    // Reduce Motion is a setting people turn on because movement makes them
+    // ill — a sky full of twinkling and streaking is exactly what it means.
+    const stillSky = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     const starrySky = ref(null)
     let resizeObserver = null
     let resizeTimer = null
@@ -113,7 +116,7 @@ export default {
           star.style.boxShadow = `0 0 ${size * c.starGlow}px hsla(${blueHue}, ${saturation}%, ${lightness}%, 0.8)`
         }
         starrySky.value.appendChild(star)
-        if (Math.random() < c.twinkleChance) {star.style.animation = `gentle-twinkle ${Math.random() * c.twinkleSpread + c.twinkleMin}s infinite`}
+        if (!stillSky() && Math.random() < c.twinkleChance) {star.style.animation = `gentle-twinkle ${Math.random() * c.twinkleSpread + c.twinkleMin}s infinite`}
       }
     }
     const handleResize = () => {
@@ -236,7 +239,7 @@ export default {
     let shootingStarTimeout
     const scheduleShootingStar = () => {
       clearTimeout(shootingStarTimeout)
-      if (document.hidden) return
+      if (document.hidden || stillSky()) return
       const c = cfg()
       const delay = Math.random() * c.cometDelaySpread + c.cometDelayMin
       shootingStarTimeout = setTimeout(() => {
@@ -302,10 +305,16 @@ export default {
   pointer-events: none;
   /* Top fades from the night-mode chrome color (#0a0118 from App.vue) into the
      cosmic radial gradient below, so there's no seam with the browser chrome. */
+  /* Eased in three stops, not one straight ramp. A linear fade ends with an
+     abrupt change of slope, and the eye reads that as a line drawn across
+     the page — visible on a phone, where the band lands right under the
+     lamp. */
   background:
     linear-gradient(to bottom,
       #0a0118 0px,
-      rgba(10, 1, 24, 0) 300px
+      rgba(10, 1, 24, 0.72) 90px,
+      rgba(10, 1, 24, 0.3) 210px,
+      rgba(10, 1, 24, 0) 360px
     ),
     radial-gradient(ellipse at center,
     #1a0933 0%,

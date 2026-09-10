@@ -404,8 +404,16 @@ export default {
           drop-shadow(0 0 26px rgba(255,170,90,0.4))
           drop-shadow(0 0 60px rgba(255,140,60,0.26));
 }
-.landing-container:not(.day-mode) .magic-title { color: #fff6e2;
-  text-shadow: 0 0 4px rgba(255,214,150,0.5), 0 0 18px rgba(255,170,90,0.4), 0 0 46px rgba(255,140,60,0.26) }
+/* Founder 2026-09-10: the sentence stops blooming and only the brand word is
+   lit, so the halation marks the name instead of the whole line. The word is
+   gradient-clipped, so its glow has to come from drop-shadow on the rendered
+   pixels — text-shadow paints behind a transparent fill and shows nothing. */
+.landing-container:not(.day-mode) .magic-title { color: #fff6e2; text-shadow: none }
+.landing-container:not(.day-mode) .magic-title :deep(.brand-grad) {
+  filter: drop-shadow(0 0 4px rgba(255,214,150,0.5))
+          drop-shadow(0 0 16px rgba(255,170,90,0.42))
+          drop-shadow(0 0 40px rgba(255,140,60,0.26));
+}
 .landing-container:not(.day-mode) .features-heading { color: #fbf0d8;
   text-shadow: 0 0 4px rgba(255,214,150,0.4), 0 0 16px rgba(255,170,90,0.3), 0 0 40px rgba(255,140,60,0.2) }
 .landing-container:not(.day-mode) .hero .magic-button {
@@ -487,6 +495,14 @@ export default {
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* The lamp's 60px spill is sized for a desktop hero; on a phone it covers a
+     third of the screen and its outer edge bands against the dark sky, which
+     reads as a border drawn across the top. */
+  .landing-container:not(.day-mode) .static-bottle {
+    filter: saturate(0.76) brightness(1.06) contrast(0.96)
+            drop-shadow(0 0 7px rgba(255,214,150,0.45))
+            drop-shadow(0 0 20px rgba(255,170,90,0.3));
+  }
   /* One column: the vertical hairline becomes a horizontal one between items. */
   .features-grid { grid-template-columns: 1fr }
   .wish-item { padding: 20px 0 }

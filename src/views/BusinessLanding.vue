@@ -334,8 +334,11 @@ export default {
           drop-shadow(0 0 60px rgba(255,140,60,0.26));
 }
 .night-mode .magic-title, .night-mode .features-heading { background: none; -webkit-text-fill-color: initial }
+/* Founder 2026-09-10: at hero size the three-layer bloom is too much — the
+   same glow that flatters a small line becomes glare on the biggest sentence
+   on the page. A tight core halo only, and the wide spill goes. */
 .night-mode .magic-title { color: #fff6e2;
-  text-shadow: 0 0 4px rgba(255,214,150,0.5), 0 0 18px rgba(255,170,90,0.4), 0 0 46px rgba(255,140,60,0.26) }
+  text-shadow: 0 0 3px rgba(255,214,150,0.3), 0 0 14px rgba(255,170,90,0.2) }
 .night-mode .features-heading { color: #fbf0d8;
   text-shadow: 0 0 4px rgba(255,214,150,0.4), 0 0 16px rgba(255,170,90,0.3), 0 0 40px rgba(255,140,60,0.2) }
 .night-mode .magic-subtitle { color: #ead9b8; text-shadow: 0 0 14px rgba(212,175,55,0.18) }
@@ -426,6 +429,14 @@ export default {
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* The lamp's 60px spill is sized for a desktop hero; on a phone it covers a
+     third of the screen and its outer edge bands against the dark sky, which
+     reads as a border drawn across the top. */
+  .night-mode .static-bottle {
+    filter: saturate(0.76) brightness(1.06) contrast(0.96)
+            drop-shadow(0 0 7px rgba(255,214,150,0.45))
+            drop-shadow(0 0 20px rgba(255,170,90,0.3));
+  }
   /* One column: the vertical hairline becomes a horizontal one between items. */
   .features-grid { grid-template-columns: 1fr }
   .wish-item { padding: 20px 0 }
