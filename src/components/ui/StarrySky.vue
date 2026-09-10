@@ -94,20 +94,13 @@ export default {
         if (Math.random() < c.twinkleChance) {star.style.animation = `gentle-twinkle ${Math.random() * c.twinkleSpread + c.twinkleMin}s infinite`}
       }
     }
-    const updateContainerHeight = () => {
-      if (!starrySky.value) return
-      starrySky.value.style.height = `${document.documentElement.scrollHeight}px`
-    }
     const handleResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer)
       resizeTimer = setTimeout(() => {
-        updateContainerHeight()
-        // Only rebuild the starfield when the WIDTH actually changes (a genuine
-        // layout / orientation change). Height-only changes — the mobile address
-        // bar collapsing/expanding on scroll, or 100dvh reflow — must NOT trigger
-        // createStars(), or every star gets a new random position and the whole
-        // field appears to "shuffle" as you scroll.
         const width = starrySky.value ? starrySky.value.offsetWidth : 0
+        // rebuild only on a real width change — mobile chrome collapsing its
+        // bars fires resize constantly and rebuilding 4200 nodes each time
+        // would stutter the page
         if (Math.abs(width - lastWidth) > 1) {
           lastWidth = width
           createStars()
@@ -214,7 +207,6 @@ export default {
       }
     }
     onMounted(() => {
-      updateContainerHeight()
       createStars()
       lastWidth = starrySky.value ? starrySky.value.offsetWidth : 0
       scheduleShootingStar()
@@ -244,10 +236,15 @@ export default {
 
 <style scoped>
 .starry-sky {
-  position: absolute;
+  /* Pinned to the VIEWPORT, not to the document. Sized to the whole scroll
+     height, the same star count spread over two or three screens, so a page
+     showed roughly a third of the density it was tuned for and grew emptier
+     as the page grew longer. */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
+  height: 100%;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
