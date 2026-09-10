@@ -35,8 +35,11 @@ export const SKY_DEFAULTS = {
      the screen edge it is aimed at, so a comet crosses any screen the same. */
   cometGlow: 10, cometDistance: 100,
   cometAngleMin: 22, cometAngleSpread: 36,
-  cometStartXMin: -10, cometStartXSpread: 60,
-  cometStartYMin: 0, cometStartYSpread: 35,
+  /* Where a comet is born, in percentages of the container, always outside
+     the frame; mirror sends a minority down-LEFT instead of down-right. */
+  cometMirrorChance: 0.35, cometFromTopChance: 0.6, cometMargin: 6,
+  cometEntryXMin: -25, cometEntryXSpread: 105,
+  cometEntryYMin: -10, cometEntryYSpread: 65,
 }
 
 export default {
@@ -125,35 +128,58 @@ export default {
             roughly half of them flew up off the screen and none crossed the
             sky. Now the streak is a horizontal bar (width = length), aimed by
             rotation, moved along its own axis in PIXELS, head leading. */
-      /* Start in the upper-left region so the down-right flight crosses the
-         sky instead of leaving it. Starting anywhere across the full width
-         put most comets off the right edge within a few frames. */
-      const startX = c.cometStartXMin + Math.random() * c.cometStartXSpread
-      const startY = c.cometStartYMin + Math.random() * c.cometStartYSpread
-      const angle = c.cometAngleMin + Math.random() * c.cometAngleSpread
+      /* BIRTH OFF-SCREEN. A comet that appears in open sky and sets off looks
+         conjured; a real one is already travelling when it enters the frame.
+         So the HEAD is placed just outside an edge and the body is hung back
+         behind it, which also means the streak needs no fade-in.
+
+         DIRECTION. All of them flying down-right made the sky read as one
+         repeating gesture. Meteors mostly fall away from a radiant, so most
+         still run down-right, and a minority mirror to down-left — enough
+         variety to feel like sky, not enough to look like confetti. */
+      const angleBase = c.cometAngleMin + Math.random() * c.cometAngleSpread
+      const mirrored = Math.random() < c.cometMirrorChance
+      const angle = mirrored ? 180 - angleBase : angleBase
       const thickness = c.cometWidthMin + Math.random() * c.cometWidthSpread
       const length = c.cometLenMin + Math.random() * c.cometLenSpread
       const hue = Math.random() < c.cometPurpleChance ? 290 : c.starHueMin + Math.random() * c.starHueSpread
-      /* Fly to the EDGE, not a fixed pixel count. 1400px crosses a laptop but
-         leaves a small window in a few frames, which is why firing one could
-         look like nothing happened. Measuring the distance from this start
-         point to the edge it is aimed at means every comet is visible for its
-         whole flight, on any screen. cometDistance is a percentage of that. */
       const w = starrySky.value.offsetWidth || 1440
       const h = starrySky.value.offsetHeight || 900
       const rad = angle * Math.PI / 180
-      const x0 = (startX / 100) * w
-      const y0 = (startY / 100) * h
       const dx = Math.cos(rad), dy = Math.sin(rad)
-      const exit = Math.min(dx > 0.001 ? (w - x0) / dx : Infinity, dy > 0.001 ? (h - y0) / dy : Infinity)
+      const margin = (c.cometMargin / 100) * (2 + Math.random() * 8) / 6
+      let headX, headY
+      if (Math.random() < c.cometFromTopChance) {
+        // over the top edge, anywhere along a span wider than the screen
+        const span = c.cometEntryXMin + Math.random() * c.cometEntryXSpread
+        headX = (mirrored ? 100 - span : span) / 100 * w
+        headY = -margin * h
+      } else {
+        // in from the side it is heading away from
+        const span = c.cometEntryYMin + Math.random() * c.cometEntryYSpread
+        headX = mirrored ? w + margin * w : -margin * w
+        headY = (span / 100) * h
+      }
+      /* Fly to the EDGE, not a fixed pixel count. 1400px crosses a laptop but
+         leaves a small window in a few frames, which is why firing one could
+         look like nothing happened. Measuring from the head to the edge it is
+         aimed at keeps every comet visible for its whole flight, on any
+         screen; cometDistance is a percentage of that, plus its own length so
+         the tail clears too. */
+      const toSide = Math.abs(dx) > 0.001 ? (dx > 0 ? (w - headX) / dx : -headX / dx) : Infinity
+      const toBottom = dy > 0.001 ? (h - headY) / dy : Infinity
+      const exit = Math.max(0, Math.min(toSide, toBottom))
       const travel = (exit + length) * (c.cometDistance / 100)
       // constant apparent speed: the sliders set the pace of a full-screen trip
       const diagonal = Math.hypot(w, h)
       const pace = Math.min(1.5, Math.max(0.55, travel / (0.7 * diagonal)))
       const duration = (c.cometDurMin + Math.random() * c.cometDurSpread) * pace
+      // the element is anchored at its TAIL, so hang it a length behind the head
+      const startPxX = headX - length * dx
+      const startPxY = headY - length * dy
       shootingStar.style.position = 'absolute'
-      shootingStar.style.left = `${startX}%`
-      shootingStar.style.top = `${startY}%`
+      shootingStar.style.left = `${startPxX}px`
+      shootingStar.style.top = `${startPxY}px`
       shootingStar.style.width = `${length}px`
       shootingStar.style.height = `${thickness}px`
       shootingStar.style.transformOrigin = 'left center'
@@ -172,9 +198,8 @@ export default {
       shootingStar.style.willChange = 'transform, opacity'
       starrySky.value.appendChild(shootingStar)
       const keyframes = [
-        { opacity: 0, transform: `rotate(${angle}deg) translateX(0px)`, offset: 0 },
-        { opacity: 1, transform: `rotate(${angle}deg) translateX(${travel * 0.08}px)`, offset: 0.08 },
-        { opacity: 1, transform: `rotate(${angle}deg) translateX(${travel * 0.75}px)`, offset: 0.75 },
+        { opacity: 1, transform: `rotate(${angle}deg) translateX(0px)`, offset: 0 },
+        { opacity: 1, transform: `rotate(${angle}deg) translateX(${travel * 0.7}px)`, offset: 0.7 },
         { opacity: 0, transform: `rotate(${angle}deg) translateX(${travel}px)`, offset: 1 }
       ]
       // linear: an eased comet rushes out of frame in the first quarter, then crawls
