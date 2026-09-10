@@ -31,15 +31,16 @@
           <div v-for="tier in tiers" :key="tier.key" class="wish-item">
             <span class="tier-mark">
               <svg v-if="tier.key === 'verified'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2.6l7.2 3v6.1c0 4.3-3 8.3-7.2 9.7-4.2-1.4-7.2-5.4-7.2-9.7V5.6l7.2-3z"/>
-                <polyline points="8.8 11.8 11.2 14.2 15.4 10"/>
+                <circle cx="12" cy="12" r="8.4"/>
+                <polyline points="8.4 12.2 10.9 14.7 15.6 9.5"/>
               </svg>
               <svg v-else-if="tier.key === 'spotlight'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="4.2"/>
                 <path d="M12 2.4v2.6M12 19v2.6M4.2 12H1.6M22.4 12h-2.6M6.5 6.5L4.7 4.7M19.3 19.3l-1.8-1.8M17.5 6.5l1.8-1.8M4.7 19.3l1.8-1.8"/>
               </svg>
               <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2.8l2.9 5.9 6.5.95-4.7 4.6 1.11 6.47L12 17.66l-5.81 3.06L7.3 14.25 2.6 9.65l6.5-.95L12 2.8z"/>
+                <!-- filled: the top tier is the only solid mark of the three -->
+                <path fill="currentColor" d="M12 2.8l2.9 5.9 6.5.95-4.7 4.6 1.11 6.47L12 17.66l-5.81 3.06L7.3 14.25 2.6 9.65l6.5-.95L12 2.8z"/>
               </svg>
             </span>
             <span class="tier-label">{{ $t(`businessLanding.tiers.${tier.key}.label`) }}</span>
