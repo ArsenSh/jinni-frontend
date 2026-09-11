@@ -310,7 +310,14 @@ export default {
    ink and only the brand word keeps the gradient. */
 /* Same change as the landing page (founder 2026-09-11): the cocoa brown goes,
    the lamp's burnt end carries the headings. */
-.day-mode .magic-title, .day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #732F06 }
+/* Founder 2026-09-11: closer to the Jinni gold. It moves from #732F06 to
+   #8C3D07 — warmer, more orange, the same family as the brand gradient's
+   burnt end rather than a dark red-brown sitting near it. It deliberately
+   stops SHORT of that end (#B4540A): the plain words have to stay a step
+   below the brand word, or "Jinni" loses the contrast that makes it read as
+   the lit one. At #8C3D07 the heading still measures 4.5:1 on the sand, so
+   it gains warmth without spending legibility. */
+.day-mode .magic-title, .day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #8C3D07 }
 .day-mode .magic-subtitle { color: #5a3c2e; text-shadow: 0 0 7px rgba(255,255,255,0.4) }
 .day-mode .footer-copyright { color: #5a3c2e }
 /* Day now carries the SAME grammar as night (founder 2026-09-11): no glacier

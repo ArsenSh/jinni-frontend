@@ -218,8 +218,15 @@ export default {
    is the deepest stop of the lamp and still clears 4.5:1 on the peach sky;
    the bright half of the brand gradient sits under 2:1 there and cannot be
    used for running type. */
-.day-mode .magic-title { background: none; -webkit-text-fill-color: initial; color: #732F06 }
-.day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #732F06 }
+/* Founder 2026-09-11: closer to the Jinni gold. It moves from #732F06 to
+   #8C3D07 — warmer, more orange, the same family as the brand gradient's
+   burnt end rather than a dark red-brown sitting near it. It deliberately
+   stops SHORT of that end (#B4540A): the plain words have to stay a step
+   below the brand word, or "Jinni" loses the contrast that makes it read as
+   the lit one. At #8C3D07 the heading still measures 4.5:1 on the sand, so
+   it gains warmth without spending legibility. */
+.day-mode .magic-title { background: none; -webkit-text-fill-color: initial; color: #8C3D07 }
+.day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #8C3D07 }
 /* :deep — v-html content carries NO scope attribute, so a plain scoped
    descendant rule never matches this span. */
 .magic-title :deep(.brand-grad), .features-heading :deep(.brand-grad) { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
