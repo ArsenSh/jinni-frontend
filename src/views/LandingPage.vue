@@ -313,10 +313,14 @@ export default {
   display: flex; align-items: center; justify-content: center; position: relative;
   opacity: 0.5; transition: opacity 0.3s ease;
 }
-/* The rule is the one every other control draws: full width of the target,
-   1.5px, sitting 6px off the bottom — the same as the mode switch beside it. */
+/* Same rule as every other control — 1.5px, 6px off the bottom — but drawn to
+   the FLAG, not to the button. The button is 44px because a tap target has to
+   be; the glyph inside it is about 30px, and a rule run to the button's full
+   width overhangs the flag at both ends and reads as a stray line. Every other
+   control on the page has a label as wide as itself, so there the two are the
+   same measurement; here they are not. */
 .language-selector button::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 1.5px;
+  content: ''; position: absolute; left: 7px; right: 7px; bottom: 6px; height: 1.5px;
   background: transparent; transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 /* Nothing moves under the pointer — light only. */
