@@ -19,10 +19,11 @@ import { onMounted, onBeforeUnmount, ref } from 'vue'
    ═══════════════════════════════════════════════════════════════════════════ */
 
 export const SAND_DEFAULTS = {
-  // the vents, and how hard each one breathes. Spread 84 -> 70 and the
-  // birth line dropped further below the fold (see startY), so the sand is
-  // born lower and closer to the middle rather than across the whole width.
-  ventCount: 6, ventSpread: 70, ventDrift: 4,
+  // the vents, and how hard each one breathes. The birth line sits further
+  // below the fold (see startY). Spread went back to 84 after 70 crowded the
+  // columns into each other — narrowing the BIRTH line is not what moved the
+  // meeting point; reach is.
+  ventCount: 6, ventSpread: 84, ventDrift: 4,
   emitPerSec: 680, life: 0.85, lifeSpread: 0.4,
   // the serpent: one shared channel per vent, widening low, narrowing high
   snakeAmp: 46, snakeWaves: 2.2, snakeWiden: 70, snakePhase: 22, personal: 34,
@@ -87,6 +88,11 @@ export default {
       cfg.maxPuffs = Math.round(cfg.maxPuffs * 0.4)
       cfg.renderScale = 55
       cfg.ventCount = 4
+      /* 84% of a 1440px desktop is 1210px between four columns; 84% of a
+         390px phone is 328px, and at that width the columns overlap into one
+         smear. The span has to open up as the screen narrows, not hold a
+         constant fraction of it. */
+      cfg.ventSpread = 96
     }
 
     function buildPuff() {
