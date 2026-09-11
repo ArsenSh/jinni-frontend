@@ -299,7 +299,15 @@ export default {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  /* On a fixed element `height: 100%` resolves against the initial containing
+     block, which on a phone is the viewport WITH the browser bars showing. The
+     bars retract as you scroll, the viewport grows, and the sky stops short —
+     the stars overscan past it (see createStars) but the background gradient
+     is painted on this box and cannot. 100lvh is the viewport at its tallest,
+     so the sky covers every bar state; the surplus is clipped by overflow.
+     dvh would track the bars live and slide the gradient while scrolling. */
+  height: 100vh;
+  height: 100lvh;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;

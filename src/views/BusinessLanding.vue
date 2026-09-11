@@ -16,8 +16,13 @@
     </div>
 
     <section class="hero">
+      <!-- day only: the sand arrives, builds the lamp, and stops for good -->
+      <!-- `&& lampEl`: template refs are only assigned after the first render,
+           so without this the component mounts with a null lamp and silently
+           does nothing -->
+      <DesertSand v-if="isDayMode && lampEl" :lamp-el="lampEl" />
       <div class="hero-content">
-        <span class="lamp"><img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
+        <span class="lamp" ref="lampEl"><img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
         <h1 class="magic-title">{{ $t('businessLanding.hero.title') }}</h1>
         <p class="magic-subtitle" v-html="heroSubtitleHtml"></p>
         <MagicButton @click="goApply('verified')"><span class="wish-label">{{ $t('businessLanding.hero.cta') }}</span></MagicButton>
@@ -92,9 +97,10 @@ import { isNightTime } from '@/utils/timeUtils'
 import MagicButton from '@/components/ui/MagicButton.vue'
 import StarrySky from '@/components/ui/StarrySky.vue'
 import DesertSky from '@/components/ui/DesertSky.vue'
+import DesertSand from '@/components/ui/DesertSand.vue'
 export default {
   name: 'BusinessLanding',
-  components: { MagicButton, StarrySky, DesertSky },
+  components: { MagicButton, StarrySky, DesertSky, DesertSand },
   setup() {
     const router = useRouter()
     const store = useStore()
@@ -151,6 +157,8 @@ export default {
     // chrome writes needed anymore.
     const isNightMode = computed(() => store.getters['settings/effectiveTheme'] === 'dark')
     const currentTheme = computed(() => isNightMode.value ? 'night-mode' : 'day-mode')
+    const isDayMode = computed(() => !isNightMode.value)
+    const lampEl = ref(null)
     onMounted(() => {
       if (store.state.i18n?.locale) selectedLanguage.value = store.state.i18n.locale
       showAllLanguages.value = false
@@ -159,7 +167,7 @@ export default {
     function goHome()  { router.push('/') }
     function goApply(tier = 'verified') { router.push({ path: '/business/apply', query: { tier } }) }
     return {
-      currentTheme, isNightMode,
+      currentTheme, isNightMode, isDayMode, lampEl,
       selectedLanguage, showAllLanguages, languageOptions,
       currentLanguageFlag, currentLanguageTitle,
       selectLanguage, toggleLanguageSelector, languageSelectorRef,
@@ -272,53 +280,50 @@ export default {
 /* ── Day mode: glacier glass on cream ──────────────────────────────────────── */
 /* The full gradient sat at ~2:1 contrast on cream, so the sentence takes dark
    ink and only the brand word keeps the gradient. */
-.day-mode .magic-title, .day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #4a3226 }
+/* Same change as the landing page (founder 2026-09-11): the cocoa brown goes,
+   the lamp's burnt end carries the headings. */
+.day-mode .magic-title, .day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #8A3E0B }
 .day-mode .magic-subtitle { color: #5a3c2e; text-shadow: 0 0 7px rgba(255,255,255,0.4) }
 .day-mode .footer-copyright { color: #5a3c2e }
-/* Wish button: the glacier glass of the Discovery chips, label in the brand
-   gradient. A gradient text-clip needs the element's own background, so the
-   glass lives on the button and the gradient on the label span. Even shadow;
-   hover changes light only, nothing moves. */
+/* Day now carries the SAME grammar as night (founder 2026-09-11): no glacier
+   capsule anywhere — every call to action is a word over a lit hairline. Only
+   the palette differs, because the two grounds differ: night lights the rule
+   in lamp-gold on indigo, day draws it in the lamp's burnt end so it holds
+   against a peach sky. */
 .day-mode .hero .magic-button,
 .day-mode .tier-cta {
-  background: rgba(255, 251, 245, 0.6);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  backdrop-filter: blur(14px) saturate(160%);
-  /* Same frost ring as the landing's wish button — see the note there. */
-  /* No dark hairline UNDER the white rim: a brown line seen through
-     translucent white blends to grey, which is the grey edge that showed up
-     on close inspection. The warm ring moves OUTSIDE the glass, where it
-     stays warm, and the rims are warm-white rather than pure white. */
-  box-shadow: inset 0 0 0 1.5px rgba(255, 253, 247, 0.9),
-              inset 0 0 14px -4px rgba(255, 255, 255, 0.95),
-              0 0 0 1px rgba(198, 143, 90, 0.34),
-              0 0 18px -3px rgba(150, 100, 40, 0.18);
-  padding: 14px 32px;
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; border-radius: 0; padding: 14px 8px 22px; position: relative;
+  font-size: 1.32rem; letter-spacing: 0.01em;
 }
-.day-mode .tier-cta { padding: 13px 24px }
-.day-mode .hero .magic-button:hover {
-  background: rgba(255, 251, 245, 0.86);
-  box-shadow: inset 0 0 0 1.5px rgba(255, 254, 250, 0.95),
-              inset 0 0 16px -4px rgba(255, 255, 255, 1),
-              0 0 0 1px rgba(198, 143, 90, 0.46),
-              0 0 24px -3px rgba(150, 100, 40, 0.24);
+.day-mode .tier-cta { font-size: 0.98rem; padding: 10px 4px 18px }
+.day-mode .hero .magic-button::after,
+.day-mode .tier-cta::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
+  background: rgba(178, 82, 10, 0.8); box-shadow: 0 0 12px rgba(214, 120, 40, 0.4);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
+/* The tier rules sit a step quieter than the hero's, the same way night's do,
+   so three of them in a row don't compete with the one wish above. */
+.day-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(178, 82, 10, 0.55); box-shadow: 0 0 9px rgba(214, 120, 40, 0.3) }
+.day-mode .hero .magic-button:hover,
+.day-mode .tier-cta:hover { background: transparent; box-shadow: none }
+.day-mode .hero .magic-button:hover::after { background: #8A3E0B; box-shadow: 0 0 16px rgba(214, 120, 40, 0.6) }
+.day-mode .tier-cta:hover::after { background: #8A3E0B; box-shadow: 0 0 14px rgba(214, 120, 40, 0.5) }
+/* the label leaves the gradient clip: a clip carries no glow, and on a light
+   ground the bright half of the brand gradient falls under 2:1 */
 .day-mode .wish-label {
-  background: linear-gradient(45deg, #D4AF37, #FF8C00);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
-  font-weight: 600;
+  background: none; -webkit-text-fill-color: initial; color: #8A3E0B; font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 224, 176, 0.7);
 }
-/* Each tier answers the pointer in its own colour — the green, blue and gold
-   the tiers carried before the cards came off. They stay identical at rest,
-   so the row is calm until you reach for one. */
-/* The tier buttons hold still under the pointer — only their words change
-   colour (founder 2026-09-10), so three glass pills don't all light up as
-   the cursor crosses the row. */
-.day-mode .tier-cta:hover { background: rgba(255, 251, 245, 0.6); box-shadow: inset 0 0 0 1.5px rgba(255, 253, 247, 0.9), inset 0 0 14px -4px rgba(255, 255, 255, 0.95), 0 0 0 1px rgba(198, 143, 90, 0.34), 0 0 18px -3px rgba(150, 100, 40, 0.18) }
-.day-mode .tier-cta--verified:hover .wish-label { background: linear-gradient(45deg, #2f8a3a, #5cb85c); background-clip: text; -webkit-background-clip: text }
-.day-mode .tier-cta--spotlight:hover .wish-label { background: linear-gradient(45deg, #1f6f9c, #46aada); background-clip: text; -webkit-background-clip: text }
-.day-mode .tier-cta--signature:hover .wish-label { background: linear-gradient(45deg, #A8660F, #D96A00); background-clip: text; -webkit-background-clip: text }
+.day-mode .tier-cta .wish-label { font-weight: 600 }
+/* Each tier still answers the pointer in its own colour (founder 2026-09-10)
+   and the buttons still hold still — but as a solid colour now, because the
+   label left the gradient clip and a clip shows nothing through an opaque
+   -webkit-text-fill-color. */
+.day-mode .tier-cta--verified:hover .wish-label { color: #2F7D38 }
+.day-mode .tier-cta--spotlight:hover .wish-label { color: #1F6F9C }
+.day-mode .tier-cta--signature:hover .wish-label { color: #A8660F }
 .day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
 .day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
 .day-mode .wish-item:last-child { padding-right: 0 }
@@ -365,7 +370,7 @@ export default {
           drop-shadow(0 0 16px rgba(255,170,80,0.5))
           drop-shadow(0 0 44px rgba(206,96,26,0.34));
 }
-.day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
+.day-mode .button-glow-wrapper { filter: none }
 /* The switch takes the wish button's glacier glass (founder 2026-09-10), so
    day mode has one material instead of a frosted button beside a muddy pill.
    The chosen side is a brighter pane of the same glass — no saturated fill. */

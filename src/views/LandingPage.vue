@@ -212,8 +212,14 @@ export default {
 /* Hero title, day mode (founder 2026-09-09): the full gradient sat at ~2:1
    contrast on cream. Dark ink for the sentence, gradient kept for the brand
    word only — more readable AND more brand-forward. Night is untouched. */
-.day-mode .magic-title { background: none; -webkit-text-fill-color: initial; color: #4a3226 }
-.day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #4a3226 }
+/* Founder 2026-09-11: #4a3226 was a cocoa brown — the one warm colour on the
+   page that belonged to no light source. The headings take the lamp's own
+   burnt end instead, the shadow side of the metal rather than a new hue. It
+   is the deepest stop of the lamp and still clears 4.5:1 on the peach sky;
+   the bright half of the brand gradient sits under 2:1 there and cannot be
+   used for running type. */
+.day-mode .magic-title { background: none; -webkit-text-fill-color: initial; color: #8A3E0B }
+.day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #8A3E0B }
 /* :deep — v-html content carries NO scope attribute, so a plain scoped
    descendant rule never matches this span. */
 .magic-title :deep(.brand-grad), .features-heading :deep(.brand-grad) { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
@@ -224,34 +230,24 @@ export default {
    on the label span. Even shadow; hover changes light only, nothing moves.
    Night mode is deliberately untouched. */
 .day-mode .hero .magic-button {
-  background: rgba(255, 251, 245, 0.6);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  backdrop-filter: blur(14px) saturate(160%);
-  /* Three rings, all zero-offset: the warm hairline, a crisp white rim just
-     inside it, and a soft frost that fades inward — that inner light is what
-     makes an edge read as ice instead of as a drawn outline. */
-  /* No dark hairline UNDER the white rim: a brown line seen through
-     translucent white blends to grey, which is the grey edge that showed up
-     on close inspection. The warm ring moves OUTSIDE the glass, where it
-     stays warm, and the rims are warm-white rather than pure white. */
-  box-shadow: inset 0 0 0 1.5px rgba(255, 253, 247, 0.9),
-              inset 0 0 14px -4px rgba(255, 255, 255, 0.95),
-              0 0 0 1px rgba(198, 143, 90, 0.34),
-              0 0 18px -3px rgba(150, 100, 40, 0.18);
-  padding: 14px 32px;
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; border-radius: 0; padding: 14px 8px 22px; position: relative;
+  font-size: 1.32rem; letter-spacing: 0.01em;
 }
-.day-mode .hero .magic-button:hover {
-  background: rgba(255, 251, 245, 0.86);
-  box-shadow: inset 0 0 0 1.5px rgba(255, 254, 250, 0.95),
-              inset 0 0 16px -4px rgba(255, 255, 255, 1),
-              0 0 0 1px rgba(198, 143, 90, 0.46),
-              0 0 24px -3px rgba(150, 100, 40, 0.24);
+.day-mode .hero .magic-button::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
+  background: rgba(178, 82, 10, 0.8); box-shadow: 0 0 12px rgba(214, 120, 40, 0.4);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
+.day-mode .hero .magic-button:hover { background: transparent; box-shadow: none }
+.day-mode .hero .magic-button:hover::after { background: #8A3E0B; box-shadow: 0 0 16px rgba(214, 120, 40, 0.6) }
+/* Solid, exactly as night's is, and for night's reason: a gradient text-clip
+   paints over a transparent fill, so it can carry neither a glow nor enough
+   contrast here — the bright half of the brand gradient falls under 2:1 on
+   the sand. */
 .day-mode .hero .wish-label {
-  background: linear-gradient(45deg, #D4AF37, #FF8C00);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
-  font-weight: 600;
+  background: none; -webkit-text-fill-color: initial; color: #8A3E0B; font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 224, 176, 0.7);
 }
 
 .landing-container { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column }
@@ -370,7 +366,7 @@ export default {
           drop-shadow(0 0 16px rgba(255,170,80,0.5))
           drop-shadow(0 0 44px rgba(206,96,26,0.34));
 }
-.day-mode .button-glow-wrapper { filter: drop-shadow(0 0 25px rgba(212,175,55,0.4)) drop-shadow(0 0 50px rgba(255,140,0,0.3)) }
+.day-mode .button-glow-wrapper { filter: none }
 /* The switch takes the wish button's glacier glass (founder 2026-09-10), so
    day mode has one material instead of a frosted button beside a muddy pill.
    The chosen side is a brighter pane of the same glass — no saturated fill. */
