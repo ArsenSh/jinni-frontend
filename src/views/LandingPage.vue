@@ -394,8 +394,13 @@ export default {
    legal break point. The locale now uses a narrow no-break space (U+202F),
    which is the correct French space before ? ! : ; anyway; balance is the
    general guard for every other language. */
-.magic-title { font-family: var(--brand-serif); font-size: 4rem; letter-spacing: 1px; text-wrap: balance }
-.magic-subtitle { font-family: var(--brand-serif); font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
+/* Was a flat 4rem, where the business page already scaled. At 64px this
+   wraps on an iPad in portrait and breaks apart on a foldable's cover
+   screen — and the longest translation decides, not English. clamp lets the
+   line find one row wherever it can and shrink instead of wrapping where it
+   cannot; 5.4vw is the same curve the business hero uses. */
+.magic-title { font-family: var(--brand-serif); font-size: clamp(2.1rem, 5.4vw, 4rem); letter-spacing: 1px; text-wrap: balance }
+.magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
 .mode-switch-wrapper { display: flex; justify-content: center; padding: 0 0 4rem; position: relative; z-index: 2 }
 .mode-switch-pill { display: inline-flex; align-items: center; gap: 2px; background: rgba(26,9,51,0.8); border-radius: 50px; padding: 4px; backdrop-filter: blur(10px); box-shadow: 0 0 12px rgba(212,175,55,0.1), 0 0 24px rgba(0,0,0,0.35) }

@@ -87,6 +87,7 @@ export default {
     let lampImg = null, sandLamp = null, warmLamp = null
     let lampBox = { x: 0, y: 0, w: 0, h: 0 }
     let stopped = false
+    let frameCount = 0
 
     const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     /* Phones get a much thinner wind: this layer is fill-rate bound, and a
@@ -222,6 +223,12 @@ export default {
     /* Every puff from a vent walks the SAME serpent — that shared path is what
        makes a column look like one body of sand instead of confetti. */
     function channel(v, t, off, now) {
+      /* Re-read the lamp a few times a second while the sand is still flying.
+         Observers catch resizes and font loads; this catches everything else —
+         a late image, a scrollbar appearing, an orientation change mid-flight.
+         It is a single getBoundingClientRect every 12th frame, for about three
+         seconds, and then the animation stops for good. */
+      if ((frameCount = (frameCount + 1) % 12) === 0) measureLamp()
       const lampCx = lampBox.x + lampBox.w / 2
       const lampCy = lampBox.y + lampBox.h * (cfg.reach / 100)
       const eased = t + (1 - t) * t * (cfg.riseEase / 100)
@@ -392,6 +399,15 @@ export default {
       resize()
       ro = new ResizeObserver(() => resize())
       ro.observe(cv.value.parentElement)
+      /* The lamp is watched too, not just the hero around it. A longer
+         translation makes hero-content taller and the lamp rides up with it
+         WITHOUT the hero changing size, so observing only the host left
+         lampBox pointing at where the lamp used to be — and the columns
+         converged on empty sky, differently in every language. */
+      if (props.lampEl) ro.observe(props.lampEl)
+      /* Webfonts land after first paint and reflow the hero, which moves the
+         lamp again. Cinzel and Noto Serif Armenian both arrive this way. */
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => measureLamp())
       raf = requestAnimationFrame(frame)
     })
     onBeforeUnmount(() => {

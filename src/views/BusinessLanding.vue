@@ -294,7 +294,7 @@ export default {
    800px box at a fixed 4rem. It now scales with the window and balances, so
    longer translations split evenly instead of orphaning a word. */
 .magic-title { font-family: var(--brand-serif); font-size: clamp(2.4rem, 5.4vw, 4rem); text-wrap: balance; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
-.magic-subtitle { font-family: var(--brand-serif); font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
+.magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* v-html content carries NO scope attribute — a plain scoped descendant rule
    would never match this span. */
 /* The brand word was the only gradient-clipped run in the line, and clipped
@@ -531,7 +531,8 @@ export default {
    sand — with a 1px ink shadow to seat them, and no blur at all. */
 .day-mode .app-name,
 .day-mode .magic-title :deep(.brand-grad),
-.day-mode .features-heading :deep(.brand-grad) {
+.day-mode .features-heading :deep(.brand-grad),
+.day-mode .magic-subtitle :deep(.brand-grad) {
   /* Founder 2026-09-11: the icon's own gradient, the same one night uses —
      #D4AF37 to #FF8C00 — so the word is the brand rather than a darkened
      version of it. On a light ground that gradient alone measures about
@@ -558,17 +559,12 @@ export default {
           drop-shadow(0 0 13px rgba(255,247,230,0.6))
           drop-shadow(0 1px 1px rgba(110,45,6,0.22));
 }
-/* The subtitle's brand word leaves the gradient (founder 2026-09-11: "Jinni
-   there is hard to see"). The same gold that carries a 4rem headline is body
-   text here, and it lands near 1.9:1 on the sand — a gradient cannot be read
-   at 1.5rem on a light ground. Weight marks the word instead of colour, and
-   the colour drops to the lamp's deep end at 5.2:1. The display sizes keep
-   the gradient: large type is held to a lower bar, and it was approved. */
-.day-mode .magic-subtitle :deep(.brand-grad) {
-  background: none; -webkit-background-clip: initial; background-clip: initial;
-  -webkit-text-fill-color: initial; color: #7A3A06; font-weight: 700;
-  filter: none;
-}
+/* Founder 2026-09-11: the Jinni in "Let Jinni find them" is the brand, so it
+   wears the brand — icon gradient and Cinzel, like every other Jinni on the
+   site. It was solid for a while because pure gold at this size measured under
+   2:1 on the sand; what changed is the pale halo the headings gained, which
+   lifts the word off the ground by light instead of by darkening it. The face
+   was never the problem: --brand-serif already puts Latin on Cinzel here. */
 /* The dark half of a heading keeps a real shadow — it has letters to hide
    behind — but a tighter one, so the type stays sharp. */
 .day-mode .magic-title { text-shadow: 0 1px 3px rgba(150,62,12,0.18) }
