@@ -552,8 +552,19 @@ export default {
 }
 .night-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(255,214,150,0.55); box-shadow: 0 0 9px rgba(255,180,90,0.5) }
 .night-mode .hero .magic-button:hover, .night-mode .tier-cta:hover { background: transparent; box-shadow: none }
-.night-mode .hero .magic-button:hover::after { background: #fff3dc; box-shadow: 0 0 16px rgba(255,190,105,1) }
-.night-mode .tier-cta:hover::after { background: #fff3dc; box-shadow: 0 0 14px rgba(255,190,105,0.9) }
+/* The rest state is bright here and stays that way — it is the approved
+   halation. What was missing is headroom in the ANSWER: 0.85 -> 1.0 alpha
+   with a 12px -> 16px glow is a step small enough to read as nothing. On a
+   dark ground there is room to go further, so the hover now goes to white,
+   roughly doubles the near glow and adds a wide one underneath, and lifts the
+   label's own bloom with it. Nothing moves; only the light changes. */
+.night-mode .hero .magic-button:hover::after {
+  background: #ffffff;
+  box-shadow: 0 0 22px rgba(255,205,130,1), 0 0 44px rgba(255,160,60,0.5);
+}
+.night-mode .hero .magic-button:hover .wish-label { color: #fff6e6; text-shadow: 0 0 20px rgba(255,190,110,0.95) }
+.night-mode .tier-cta:hover::after { background: #ffffff; box-shadow: 0 0 18px rgba(255,205,130,0.95), 0 0 34px rgba(255,160,60,0.4) }
+.night-mode .tier-cta:hover .wish-label { color: #fff6e6; text-shadow: 0 0 16px rgba(255,190,110,0.85) }
 /* the label leaves the gradient clip: halation needs a solid colour to bloom */
 .night-mode .wish-label {
   background: none; -webkit-text-fill-color: initial; color: #ffe8c4; font-weight: 700;

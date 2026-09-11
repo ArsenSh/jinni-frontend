@@ -599,7 +599,17 @@ export default {
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover { background: transparent; box-shadow: none }
-.landing-container:not(.day-mode) .hero .magic-button:hover::after { background: #fff3dc; box-shadow: 0 0 16px rgba(255,190,105,1) }
+/* The rest state is bright here and stays that way — it is the approved
+   halation. What was missing is headroom in the ANSWER: 0.85 -> 1.0 alpha
+   with a 12px -> 16px glow is a step small enough to read as nothing. On a
+   dark ground there is room to go further, so the hover now goes to white,
+   roughly doubles the near glow and adds a wide one underneath, and lifts the
+   label's own bloom with it. Nothing moves; only the light changes. */
+.landing-container:not(.day-mode) .hero .magic-button:hover::after {
+  background: #ffffff;
+  box-shadow: 0 0 22px rgba(255,205,130,1), 0 0 44px rgba(255,160,60,0.5);
+}
+.landing-container:not(.day-mode) .hero .magic-button:hover .wish-label { color: #fff6e6; text-shadow: 0 0 20px rgba(255,190,110,0.95) }
 /* the label leaves the gradient clip: halation needs a solid colour to bloom */
 .landing-container:not(.day-mode) .hero .wish-label {
   /* Same restraint as the Explore switch (founder preferred it): one soft
