@@ -48,9 +48,20 @@ export const SAND_DEFAULTS = {
      spending the whole range on it. */
   depthSpread: 55, spin: 26, wobble: 26, wobbleRate: 42, flicker: 46, grow: 6,
   // colour: the sand lamp's own palette, weighted to the tones that show
-  darkShare: 72, tintDepth: 6, warmDistance: 190, absorbAt: 9,
+  /* tintDepth is NEGATIVE now, which lifts the grains instead of deepening
+     them. Airborne dust scatters light: lit from behind against a bright sky
+     it reads paler and hazier than the material it came from — which is why a
+     sandstorm looks washed out and a dune does not. Painted in the lamp's own
+     body colour (luminance ~140) against a day sky at ~197, every grain was a
+     dark speck rather than dust. darkShare comes down with it: the new palette
+     is a tight band, so weighting it 72% toward the dark half was pulling the
+     whole column to its floor. */
+  darkShare: 58, tintDepth: -26, warmDistance: 190, absorbAt: 9,
   // the becoming
-  formSeconds: 1.5, baseOpacity: 0, maxOpacity: 20,
+  /* maxOpacity 20 -> 34 (founder 2026-09-11): the lamp the sand builds only
+     ever reached a fifth opacity, so the thing being assembled was fainter
+     than the grains assembling it. */
+  formSeconds: 1.5, baseOpacity: 0, maxOpacity: 34,
   waitForSand: 1, clearBelow: 1400,
   holdMs: 120, revealMs: 1600, sandHoldMs: 700, sandFadeMs: 900,
   /* 38 -> 0 (founder 2026-09-11): this ramped a hue-shifted COPY of the
@@ -63,10 +74,14 @@ export const SAND_DEFAULTS = {
   renderScale: 70, maxPuffs: 6200,
 }
 
-/* Every colour the sand lamp is made of, read from the PNG by coverage. One
-   flat tint made the grains read as dots; real sand is many close browns. */
-const SAND = [[189, 117, 45], [171, 99, 27], [207, 135, 63], [225, 153, 81], [153, 81, 9],
-              [171, 99, 45], [153, 81, 27], [225, 153, 63], [189, 99, 27]]
+/* Every colour the sand lamp is actually made of, read from the PNG by
+   coverage — resampled 2026-09-11 when sand-lamp.png was regenerated from the
+   bottle. The old list came from artwork that no longer exists, so the grains
+   and the lamp they build were no longer the same material. These twelve
+   cover 99% of the lamp's pixels; the first four alone are 90% of it. */
+const SAND = [[198, 126, 54], [186, 126, 54], [198, 138, 54], [174, 114, 42],
+              [210, 138, 66], [222, 162, 90], [186, 114, 54], [222, 150, 78],
+              [222, 162, 78], [210, 150, 78], [186, 114, 42], [210, 138, 54]]
 const SAND_SORTED = [...SAND].sort((a, b) =>
   (a[0] * 0.3 + a[1] * 0.59 + a[2] * 0.11) - (b[0] * 0.3 + b[1] * 0.59 + b[2] * 0.11))
 
