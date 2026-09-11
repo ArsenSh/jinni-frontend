@@ -209,6 +209,24 @@ export default {
 
 
 <style scoped>
+/* Cinzel is a Latin-only face. Every heading here asked for 'Cinzel', serif,
+   so in Armenian, Russian, Arabic and Chinese the script fell through to the
+   generic serif — whatever the OS happened to pick, different on every device,
+   sitting in the same line as a Cinzel "Jinni". Two typefaces per sentence,
+   one of them unchosen.
+
+   The stack now names what each script should land on, and it is the Elegant
+   pairing from Settings (founder's own preference): Palatino for Latin it
+   cannot give to Cinzel, Noto Serif Armenian — already loaded in index.html —
+   for Armenian, and Georgia/Palatino for Cyrillic, both of which carry it.
+   Serif throughout, so a mixed line reads as one decision.
+
+   The brand word is unaffected in every case: "Jinni" is Latin, so it always
+   lands on Cinzel, in all six languages. */
+.landing-container {
+  --brand-serif: 'Cinzel', 'Noto Serif Armenian', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+}
+
 /* Hero title, day mode (founder 2026-09-09): the full gradient sat at ~2:1
    contrast on cream. Dark ink for the sentence, gradient kept for the brand
    word only — more readable AND more brand-forward. Night is untouched. */
@@ -306,7 +324,7 @@ export default {
 .features { padding: 2rem 1rem 4rem 1rem; position: relative; z-index: 2 }
 .features-container { max-width: 1200px; margin: 0 auto }
 .features-heading { text-align: center; margin-bottom: 3rem }
-.features h2 { font-family: 'Cinzel', serif; font-style: normal; font-size: 2.5rem; margin-bottom: 2rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+.features h2 { font-family: var(--brand-serif); font-style: normal; font-size: 2.5rem; margin-bottom: 2rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 /* Manifest features (founder 2026-09-09): the boxes are gone. Translucent
    cards on a peach sky sat under 1.2:1 contrast and read as stains; three
    numbered columns divided by hairlines carry the section on type alone —
@@ -314,8 +332,13 @@ export default {
    Body copy leaves Cinzel, which is a display face and slows paragraphs. */
 .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); position: relative }
 .wish-item { padding: 6px 30px }
-.wish-num { display: block; font-family: 'Cinzel', serif; font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 12px; font-variant-numeric: tabular-nums }
-.wish-item h3 { font-family: 'Cinzel', serif; font-size: 1.4rem; margin-bottom: 10px }
+.wish-num { display: block; font-family: var(--brand-serif); font-size: 2.6rem; font-weight: 700; line-height: 1; margin-bottom: 12px; font-variant-numeric: tabular-nums }
+/* Measured at one font size across all six: French card titles want 39%
+   more width than English and Armenian 31%, so those two wrap to a second
+   line in a column English fills with one. Nothing is scaled up — the
+   words are longer. balance splits the two lines evenly instead of
+   leaving one word stranded underneath. */
+.wish-item h3 { font-family: var(--brand-serif); font-size: 1.4rem; margin-bottom: 10px; text-wrap: balance }
 .wish-item p { font-size: 1.02rem; line-height: 1.55; text-wrap: pretty }
 .demo h2 { font-size: 2.5rem; margin-bottom: 2rem; color: #D4AF37 }
 /* The wordmark and the language row are set from the same top and given the
@@ -335,7 +358,7 @@ export default {
   [dir="rtl"] .header-container { left: auto; right: 10px }
 }
 
-.app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
+.app-name { font-family: var(--brand-serif); font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
 .language-selector-container { position: fixed; top: 20px; right: 20px; z-index: 1001 }
 /* No capsule, no ring (founder 2026-09-11): the flags sit in a row and the
    chosen one is LIT — the same grammar the CTAs and the mode switch use. A
@@ -371,20 +394,20 @@ export default {
    legal break point. The locale now uses a narrow no-break space (U+202F),
    which is the correct French space before ? ! : ; anyway; balance is the
    general guard for every other language. */
-.magic-title { font-family: 'Cinzel', serif; font-size: 4rem; letter-spacing: 1px; text-wrap: balance }
-.magic-subtitle { font-family: 'Cinzel', serif; font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
+.magic-title { font-family: var(--brand-serif); font-size: 4rem; letter-spacing: 1px; text-wrap: balance }
+.magic-subtitle { font-family: var(--brand-serif); font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
 .mode-switch-wrapper { display: flex; justify-content: center; padding: 0 0 4rem; position: relative; z-index: 2 }
 .mode-switch-pill { display: inline-flex; align-items: center; gap: 2px; background: rgba(26,9,51,0.8); border-radius: 50px; padding: 4px; backdrop-filter: blur(10px); box-shadow: 0 0 12px rgba(212,175,55,0.1), 0 0 24px rgba(0,0,0,0.35) }
-.mode-switch-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 20px; border-radius: 40px; border: none; background: transparent; font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; color: rgba(212,175,55,0.45); transition: all 0.25s ease; white-space: nowrap }
+.mode-switch-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 20px; border-radius: 40px; border: none; background: transparent; font-family: var(--brand-serif); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; color: rgba(212,175,55,0.45); transition: all 0.25s ease; white-space: nowrap }
 .mode-switch-btn:hover { color: #D4AF37; background: rgba(212,175,55,0.12); box-shadow: 0 0 10px rgba(212,175,55,0.12) }
 .mode-switch-btn--active { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); color: #D4AF37; box-shadow: 0 0 14px rgba(212,175,55,0.25); cursor: default }
 .mode-switch-btn--active:hover { background: linear-gradient(45deg, rgba(212,175,55,0.28), rgba(255,140,0,0.2)); box-shadow: 0 0 14px rgba(212,175,55,0.25) }
 .footer { margin-top: auto; padding: 0.3rem 0.3rem; position: relative; z-index: 2; width: 100%; }
 .footer-content { max-width: 1200px; margin: 0 auto; text-align: center }
 .footer-links { display: flex; justify-content: center; gap: 2rem }
-.footer-links a { color: #FF8C00; text-decoration: none; font-family: 'Cinzel', serif; font-size: 1.1rem; transition: all 0.3s ease; position: relative; padding: 0.5rem }
-.footer-copyright { color: rgba(224,224,224,0.7); font-family: 'Cinzel', serif; font-size: 0.9rem }
+.footer-links a { color: #FF8C00; text-decoration: none; font-family: var(--brand-serif); font-size: 1.1rem; transition: all 0.3s ease; position: relative; padding: 0.5rem }
+.footer-copyright { color: rgba(224,224,224,0.7); font-family: var(--brand-serif); font-size: 0.9rem }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(50px) } to { opacity: 1; transform: translateY(0) } }
 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 @keyframes pulse { 0% { transform: scale(1) } 50% { transform: scale(1.1) } 100% { transform: scale(1) } }
