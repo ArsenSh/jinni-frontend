@@ -32,8 +32,14 @@ export const SAND_DEFAULTS = {
   // centimetre higher, centred behind the lamp instead of under it.
   converge: 98, rise: 140, riseEase: 22, reach: 21,
   // the grains
-  sizeMin: 1.3, sizeSpread: 2.2, squash: 94, alpha: 100, fadeIn: 3, fadeOut: 6,
-  depthSpread: 70, spin: 26, wobble: 26, wobbleRate: 42, flicker: 30, grow: 35,
+  /* squash 94 -> 58: a grain is a chip, not a ball, and because each one
+     carries its own rotation a field of elongated chips reads as grit
+     while a field of circles reads as foam. grow 35 -> 6: a dot that
+     swells over its life is the other half of the bubble impression —
+     sand does not expand as it travels. The size range widens and its
+     floor drops, because uniform size is itself a tell. */
+  sizeMin: 0.9, sizeSpread: 2.6, squash: 58, alpha: 100, fadeIn: 3, fadeOut: 6,
+  depthSpread: 70, spin: 26, wobble: 26, wobbleRate: 42, flicker: 46, grow: 6,
   // colour: the sand lamp's own palette, weighted to the tones that show
   darkShare: 72, tintDepth: 6, warmDistance: 190, absorbAt: 9,
   // the becoming
@@ -100,10 +106,15 @@ export default {
       const c = document.createElement('canvas')
       c.width = c.height = S
       const x = c.getContext('2d')
+      /* Sand is opaque grit, not vapour. The old stops held full strength to
+         62% and then faded over the remaining 38% — a lit core inside a soft
+         halo, which is exactly how a bubble is drawn. A grain is solid almost
+         to its edge and only the last few percent antialias, so at 1-3px it
+         lands as a speck rather than a dot with a glow around it. */
       const g = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2)
       g.addColorStop(0, 'rgba(255,255,255,1)')
-      g.addColorStop(0.62, 'rgba(255,255,255,0.98)')
-      g.addColorStop(0.82, 'rgba(255,255,255,0.55)')
+      g.addColorStop(0.80, 'rgba(255,255,255,1)')
+      g.addColorStop(0.93, 'rgba(255,255,255,0.72)')
       g.addColorStop(1, 'rgba(255,255,255,0)')
       x.fillStyle = g
       x.fillRect(0, 0, S, S)
