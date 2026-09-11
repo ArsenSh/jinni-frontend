@@ -303,7 +303,11 @@ export default {
         props.lampEl.appendChild(el)
         return el
       }
-      sandLamp = mk('/images/sand-lamp.png', null, 2)
+      // ?v=1 is not decoration: while the deploy was stale this path returned
+      // the SPA's index.html with a 200, and Cloudflare cached that HTML under
+      // the .png URL for 4 hours. A version query is a fresh cache key, so the
+      // poisoned entry can never be served again — bump it if it ever recurs.
+      sandLamp = mk('/images/sand-lamp.png?v=1', null, 2)
       // the metal's own colour, the way AnimatedLamp does it: a second copy of
       // the same image, hue-shifted, over the natural gold
       warmLamp = mk('/images/bottle.png?v=3', 'hue-rotate(-9deg) saturate(1.4) brightness(0.9)', 3)
