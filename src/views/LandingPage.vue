@@ -3,7 +3,7 @@
     <StarrySky v-if="isNightMode" />
     <DesertSky v-else />
     <div class="header-container">
-      <div class="app-name">Jinni</div>
+      <div class="app-name" translate="no">Jinni</div>
     </div>
     <div class="language-selector-container">
       <div class="language-selector" ref="languageSelectorRef" @click.stop>
@@ -93,7 +93,7 @@ export default {
     heroTitleHtml() {
       const raw = String(this.$t('landing.hero.title') || '');
       const esc = raw.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-      return esc.replace(/Jinni/g, '<span class="brand-grad">Jinni</span>');
+      return esc.replace(/Jinni/g, '<span class="brand-grad" translate="no">Jinni</span>');
     },
   },
   components: {

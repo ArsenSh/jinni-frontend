@@ -10,7 +10,7 @@
       <div class="app-header">
         <div v-if="sidebarOpen || mobileSidebarOpen" class="app-brand">
           <img src="/images/bottle.png?v=3" class="app-icon" alt="Jinni">
-          <span class="app-name">{{ t('chat.sidebar.app_name') }}</span>
+          <span class="app-name" translate="no">{{ t('chat.sidebar.app_name') }}</span>
           <button @click="toggleSidebar" class="collapse-btn collapse-btn-inline">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M15 18l-6-6 6-6"/>

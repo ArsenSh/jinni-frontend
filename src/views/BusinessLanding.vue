@@ -3,7 +3,7 @@
     <StarrySky v-if="isNightMode" />
     <DesertSky v-else />
     <div class="header-container">
-      <div class="app-name">Jinni</div>
+      <div class="app-name" translate="no">Jinni</div>
     </div>
 
     <div class="language-selector-container">
@@ -123,7 +123,7 @@ export default {
     const heroSubtitleHtml = computed(() => {
       const raw = String(translate('businessLanding.hero.subtitle') || '')
       const esc = raw.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
-      return esc.replace(/Jinni/g, '<span class="brand-grad">Jinni</span>')
+      return esc.replace(/Jinni/g, '<span class="brand-grad" translate="no">Jinni</span>')
     })
     const tiers = [
       { key: 'verified', suffix: false },

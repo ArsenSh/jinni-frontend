@@ -12,7 +12,7 @@
       <div class="app-header">
         <div v-if="sidebarOpen || mobileNavOpen" class="app-brand">
           <img src="/images/bottle.png?v=3" class="app-icon" alt="Jinni" />
-          <span class="app-name">Jinni</span>
+          <span class="app-name" translate="no">Jinni</span>
           <button v-if="isDesktop" @click="sidebarOpen = false" class="collapse-btn collapse-btn-inline">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M15 18l-6-6 6-6"/>
