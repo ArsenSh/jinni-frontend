@@ -445,7 +445,14 @@ export default {
   padding: 14px 32px;
 }
 .landing-container:not(.day-mode) .hero .wish-label {
-  background: linear-gradient(45deg, #D4AF37, #FF8C00);
+  /* Three stops, not two (founder 2026-09-11: "Infinite became yellow, is not
+     visible"). A two-stop gold->orange ramp spends most of a short word in
+     its pale half, and #D4AF37 measures 1.6:1 on the sand — fine for a 4rem
+     headline carried by the halo below, invisible for one word inside a
+     smaller heading. The ramp now passes through the icon's orange quickly
+     and lands on the lamp's burnt base, so every word has dark mass in it
+     while the opening stop keeps the brand's gold. */
+  background: linear-gradient(45deg, #D4AF37 0%, #E8860C 38%, #B4540A 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
   font-weight: 600;
@@ -518,16 +525,21 @@ export default {
   /* Founder 2026-09-11: the icon's own gradient, the same one night uses —
      #D4AF37 to #FF8C00 — so the word is the brand rather than a darkened
      version of it. On a light ground that gradient alone measures about
-     1.6:1, which is why it gets a hairline EDGE instead of a deeper colour:
-     a 0.7px stroke in the lamp's burnt end draws the letterform while the
-     fill stays pure icon gold. An edge is what the earlier blurred shadow
-     was reaching for and could not do — a blur under a light word on a light
-     ground has nowhere to hide, a 0.7px line has. */
+     1.6:1 against the sand, so the separation is made with light rather than
+     with colour — see the filter below. */
   background: linear-gradient(45deg, #D4AF37, #FF8C00);
-  -webkit-text-stroke: 0.7px rgba(122, 58, 6, 0.55);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
-  filter: drop-shadow(0 1px 1px rgba(110,45,6,0.3));
+  /* The gold is lifted off the sand by PALE light behind it, not by an edge
+     around it — a stroke drew a border on every glyph. This is night's
+     halation with the colour inverted: night blooms warm light into the dark,
+     day blooms near-white into the peach, so the letters sit in a patch of
+     lit paper. A gradient clip paints over a transparent fill, so it has to
+     be drop-shadow on the rendered pixels; text-shadow would show nothing.
+     The last one is a 1px warm seat so the word still touches the page. */
+  filter: drop-shadow(0 0 5px rgba(255,252,245,0.95))
+          drop-shadow(0 0 13px rgba(255,247,230,0.6))
+          drop-shadow(0 1px 1px rgba(110,45,6,0.22));
 }
 /* The subtitle's brand word leaves the gradient (founder 2026-09-11: "Jinni
    there is hard to see"). The same gold that carries a 4rem headline is body
