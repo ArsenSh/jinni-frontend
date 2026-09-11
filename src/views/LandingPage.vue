@@ -234,13 +234,20 @@ export default {
   box-shadow: none; border-radius: 0; padding: 14px 8px 22px; position: relative;
   font-size: 1.32rem; letter-spacing: 0.01em;
 }
+/* The rest state has to sit BELOW full strength or the hover has nowhere to
+   go (founder 2026-09-11: the day buttons looked like they had no hover). On
+   a dark ground night can answer by moving toward white, which is a long way;
+   on a light ground the only direction is down into the colour, and that trip
+   is short — so it starts at half strength and arrives at full, with the glow
+   roughly tripling underneath it. */
 .day-mode .hero .magic-button::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
-  background: rgba(115, 47, 6, 0.8); box-shadow: 0 0 12px rgba(214, 120, 40, 0.4);
+  background: rgba(115, 47, 6, 0.5); box-shadow: 0 0 10px rgba(214, 120, 40, 0.22);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .day-mode .hero .magic-button:hover { background: transparent; box-shadow: none }
-.day-mode .hero .magic-button:hover::after { background: #732F06; box-shadow: 0 0 16px rgba(214, 120, 40, 0.6) }
+.day-mode .hero .magic-button:hover::after { background: #732F06; box-shadow: 0 0 20px rgba(214, 120, 40, 0.75) }
+.day-mode .hero .magic-button:hover .wish-label { text-shadow: 0 0 14px rgba(255, 224, 176, 1) }
 /* Solid, exactly as night's is, and for night's reason: a gradient text-clip
    paints over a transparent fill, so it can carry neither a glow nor enough
    contrast here — the bright half of the brand gradient falls under 2:1 on

@@ -325,10 +325,14 @@ export default {
   font-size: 1.32rem; letter-spacing: 0.01em;
 }
 .day-mode .tier-cta { font-size: 0.98rem; padding: 10px 4px 18px }
+/* The rest state sits BELOW full strength or the hover has nowhere to go
+   (founder 2026-09-11). Night can answer by moving toward white, which is a
+   long way on a dark ground; day can only move down into the colour, and that
+   trip is short — so it starts at half strength and arrives at full. */
 .day-mode .hero .magic-button::after,
 .day-mode .tier-cta::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
-  background: rgba(115, 47, 6, 0.8); box-shadow: 0 0 12px rgba(214, 120, 40, 0.4);
+  background: rgba(115, 47, 6, 0.5); box-shadow: 0 0 10px rgba(214, 120, 40, 0.22);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 /* The tier rules sit a step quieter than the hero's, the same way night's do,
@@ -336,7 +340,8 @@ export default {
 .day-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(115, 47, 6, 0.55); box-shadow: 0 0 9px rgba(214, 120, 40, 0.3) }
 .day-mode .hero .magic-button:hover,
 .day-mode .tier-cta:hover { background: transparent; box-shadow: none }
-.day-mode .hero .magic-button:hover::after { background: #732F06; box-shadow: 0 0 16px rgba(214, 120, 40, 0.6) }
+.day-mode .hero .magic-button:hover::after { background: #732F06; box-shadow: 0 0 20px rgba(214, 120, 40, 0.75) }
+.day-mode .hero .magic-button:hover .wish-label { text-shadow: 0 0 14px rgba(255, 224, 176, 1) }
 .day-mode .tier-cta:hover::after { background: #732F06; box-shadow: 0 0 14px rgba(214, 120, 40, 0.5) }
 /* the label leaves the gradient clip: a clip carries no glow, and on a light
    ground the bright half of the brand gradient falls under 2:1 */
