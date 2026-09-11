@@ -350,7 +350,12 @@ export default {
    the current language, and it carries the same rule every other control does.
    Opening the row is what introduces unchosen siblings to dim. */
 .language-selector button:only-child { opacity: 1 }
-.magic-title { font-family: 'Cinzel', serif; font-size: 4rem; letter-spacing: 1px }
+/* text-wrap: balance so no language can strip a fragment onto a line of its
+   own — French put the "?" there by itself, since the space before it is a
+   legal break point. The locale now uses a narrow no-break space (U+202F),
+   which is the correct French space before ? ! : ; anyway; balance is the
+   general guard for every other language. */
+.magic-title { font-family: 'Cinzel', serif; font-size: 4rem; letter-spacing: 1px; text-wrap: balance }
 .magic-subtitle { font-family: 'Cinzel', serif; font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
 .mode-switch-wrapper { display: flex; justify-content: center; padding: 0 0 4rem; position: relative; z-index: 2 }
