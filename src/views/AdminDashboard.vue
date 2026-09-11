@@ -2052,7 +2052,14 @@
                 <button class="action-btn" v-if="mapChanged && !mapBusy" @click="mapSelected = [...mapT.installed]">Cancel changes</button>
               </div>
 
-              <p v-if="mapEst" class="cov-meta">
+              <!-- The server answers two different questions. When a selection
+                   does not fit this box it reports no size at all, so showing
+                   "an unknown amount of disk" beside the reason would read as a
+                   glitch rather than an answer — one or the other, never both. -->
+              <p v-if="mapEst && mapEst.wontFit" class="cov-meta map-warn">
+                {{ mapEst.countries.join(', ') }} — {{ mapEst.wontFit }}
+              </p>
+              <p v-else-if="mapEst" class="cov-meta">
                 {{ mapEst.countries.join(', ') }} would take <strong>{{ mapEst.bytes ? mapBytes(mapEst.bytes) : 'an unknown amount of' }}</strong> disk<template v-if="mapEst.transferBytes"> and download {{ mapBytes(mapEst.transferBytes) }}</template><template v-if="mapEst.tiles"> · {{ fmt(mapEst.tiles) }} tiles</template>.
               </p>
 
@@ -7303,6 +7310,17 @@ export default {
       } catch (e) { showToast(e.message, 'error') }
       finally { mapEstimating.value = false }
     }
+
+    // An estimate describes ONE selection. It used to survive ticking a country
+    // on or off, so a size — or now a refusal — could sit there describing a
+    // set that is no longer on screen. Drop it the moment the selection moves;
+    // "Check size first" is one click away.
+    //
+    // Watched as the sorted CODES, not the array: fetchMapTiles reassigns
+    // mapSelected to a fresh array whenever the selection matches what is
+    // installed, and watching the ref would clear a perfectly good estimate on
+    // every refresh. Same comparison mapChanged already uses.
+    watch(() => [...mapSelected.value].sort().join(','), () => { mapEst.value = null })
 
     const mapBuild = async () => {
       // One archive, so a rebuild REPLACES it. Dropping a country from the
