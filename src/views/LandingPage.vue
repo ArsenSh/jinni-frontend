@@ -319,6 +319,16 @@ export default {
 .wish-item p { font-size: 1.02rem; line-height: 1.55; text-wrap: pretty }
 .demo h2 { font-size: 2.5rem; margin-bottom: 2rem; color: #D4AF37 }
 .header-container { position: absolute; top: 0; left: 0; padding: 27px; z-index: 1000 }
+/* The two pinned corners are the only things on these pages that a logical
+   property cannot flip for us: they are positioned, not laid out. In Arabic
+   the wordmark takes the right corner and the language row the left, the way
+   every other element already mirrors. */
+[dir="rtl"] .header-container { left: auto; right: 0 }
+[dir="rtl"] .language-selector-container { right: auto; left: 20px }
+@media (max-width: 768px) {
+  [dir="rtl"] .language-selector-container { right: auto; left: 10px }
+}
+
 .app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
 .language-selector-container { position: fixed; top: 20px; right: 20px; z-index: 1001 }
 /* No capsule, no ring (founder 2026-09-11): the flags sit in a row and the
@@ -375,9 +385,9 @@ export default {
 /* ── Day mode ──────────────────────────────────────────────────────────────── */
 .day-mode .hero p, .day-mode .footer-copyright { color: #5a3c2e; text-shadow: 0 0 2px rgba(255,255,255,0.3) }
 .day-mode .magic-subtitle { color: #5a3c2e; text-shadow: 0 0 7px rgba(255,255,255,0.4) }
-.day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
-.day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
-.day-mode .wish-item:last-child { padding-right: 0 }
+.day-mode .wish-item { border-inline-start: 1px solid rgba(150,100,55,0.28) }
+.day-mode .wish-item:first-child { border-inline-start: none; padding-inline-start: 0 }
+.day-mode .wish-item:last-child { padding-inline-end: 0 }
 .day-mode .wish-num { color: rgba(130,82,14,0.62) }
 .day-mode .wish-item h3 { color: #4a3226 }
 .day-mode .wish-item p { color: #6b4a36 }
@@ -446,9 +456,9 @@ export default {
 
 /* ── Night mode explicit colors (override inherited body color) ───────────── */
 .landing-container:not(.day-mode) .magic-subtitle { color: #f5e6c8; text-shadow: 0 0 7px rgba(255,200,120,0.25) }
-.landing-container:not(.day-mode) .wish-item { border-left: 1px solid rgba(212,175,55,0.22) }
-.landing-container:not(.day-mode) .wish-item:first-child { border-left: none; padding-left: 0 }
-.landing-container:not(.day-mode) .wish-item:last-child { padding-right: 0 }
+.landing-container:not(.day-mode) .wish-item { border-inline-start: 1px solid rgba(212,175,55,0.22) }
+.landing-container:not(.day-mode) .wish-item:first-child { border-inline-start: none; padding-inline-start: 0 }
+.landing-container:not(.day-mode) .wish-item:last-child { padding-inline-end: 0 }
 .landing-container:not(.day-mode) .wish-num { color: rgba(212,175,55,0.38) }
 .landing-container:not(.day-mode) .wish-item h3 { color: #f0d9a8 }
 .landing-container:not(.day-mode) .wish-item p { color: #e8d9bb }
@@ -654,7 +664,7 @@ export default {
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
-.landing-container:not(.day-mode) .wish-item { border-left-color: rgba(240,218,170,0.2) }
+.landing-container:not(.day-mode) .wish-item { border-inline-start-color: rgba(240,218,170,0.2) }
 .landing-container:not(.day-mode) .wish-item h3 { color: #f0dcae }
 .landing-container:not(.day-mode) .wish-item p { color: #e4d7bd }
 .landing-container:not(.day-mode) .magic-subtitle { color: #ead9b8; text-shadow: 0 0 14px rgba(212,175,55,0.18) }
@@ -710,7 +720,7 @@ export default {
   /* One column: the vertical hairline becomes a horizontal one between items. */
   .features-grid { grid-template-columns: 1fr }
   .wish-item { padding: 20px 0 }
-  .day-mode .wish-item, .landing-container:not(.day-mode) .wish-item { border-left: none; border-top: 1px solid rgba(150,100,55,0.26) }
+  .day-mode .wish-item, .landing-container:not(.day-mode) .wish-item { border-inline-start: none; border-top: 1px solid rgba(150,100,55,0.26) }
   .landing-container:not(.day-mode) .wish-item { border-top-color: rgba(212,175,55,0.2) }
   .day-mode .wish-item:first-child, .landing-container:not(.day-mode) .wish-item:first-child { border-top: none; padding-top: 0 }
   .wish-num { font-size: 2.1rem; margin-bottom: 8px }

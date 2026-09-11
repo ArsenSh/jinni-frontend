@@ -128,7 +128,12 @@ export default {
     // watched centrally rather than patched at each call site.
     '$i18n.locale': {
       immediate: true,
-      handler(val) { if (val) document.documentElement.setAttribute('lang', val); }
+      handler(val) {
+        if (!val) return;
+        document.documentElement.setAttribute('lang', val);
+        // dir moves with lang — see the note in main.js
+        document.documentElement.setAttribute('dir', val === 'ar' ? 'rtl' : 'ltr');
+      }
     },
     effectiveTheme: {
       immediate: true,

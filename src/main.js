@@ -19,6 +19,10 @@ function savedLocale() {
     return localStorage.getItem('jinni_language') || localStorage.getItem('lang') || 'en';
 }
 
+// The only right-to-left locale Jinni ships. Add to this set, not to a
+// condition scattered through a view.
+const RTL_LOCALES = new Set(['ar'])
+
 const i18n = createI18n({
     locale: savedLocale(),
     fallbackLocale: 'en',
@@ -32,6 +36,13 @@ const i18n = createI18n({
 // markup — wrong for search engines, screen readers and Safari's translation
 // prompt. Kept in sync on every language change (see the watcher in App.vue).
 document.documentElement.setAttribute('lang', i18n.global.locale.value || 'en')
+// <html dir> belongs next to <html lang>, and for the same reason: it has to
+// describe what is actually rendered. It used to be set only inside JinniChat,
+// so an Arabic visitor who never opened the chat got Arabic copy laid out
+// left-to-right — correct words, wrong page. Setting it here covers every
+// route at once, including the two landing pages, and survives the reload that
+// changeLanguage performs.
+document.documentElement.setAttribute('dir', RTL_LOCALES.has(i18n.global.locale.value) ? 'rtl' : 'ltr')
 
 applyDisplayPrefs()   // font style + text size, before first paint
 createApp(App).use(i18n).use(store).use(router).mount('#app')

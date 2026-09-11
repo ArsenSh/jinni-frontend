@@ -194,6 +194,16 @@ export default {
 .business-landing { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; flex: 1 }
 .hero, .features { position: relative; z-index: 2 }
 .header-container { position: absolute; top: 0; left: 0; padding: 27px; z-index: 1000 }
+/* The two pinned corners are the only things on these pages that a logical
+   property cannot flip for us: they are positioned, not laid out. In Arabic
+   the wordmark takes the right corner and the language row the left, the way
+   every other element already mirrors. */
+[dir="rtl"] .header-container { left: auto; right: 0 }
+[dir="rtl"] .language-selector-container { right: auto; left: 20px }
+@media (max-width: 768px) {
+  [dir="rtl"] .language-selector-container { right: auto; left: 10px }
+}
+
 .app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
 .language-selector-container { position: fixed; top: 20px; right: 20px; z-index: 1001 }
 /* No capsule, no ring (founder 2026-09-11): the flags sit in a row and the
@@ -379,9 +389,9 @@ export default {
 .day-mode .tier-cta--verified:hover::after { background: #35853C; box-shadow: 0 0 12px rgba(53,133,60,0.45) }
 .day-mode .tier-cta--spotlight:hover::after { background: #2A7DA8; box-shadow: 0 0 12px rgba(42,125,168,0.45) }
 .day-mode .tier-cta--signature:hover::after { background: #A8660F; box-shadow: 0 0 12px rgba(168,102,15,0.45) }
-.day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
-.day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
-.day-mode .wish-item:last-child { padding-right: 0 }
+.day-mode .wish-item { border-inline-start: 1px solid rgba(150,100,55,0.28) }
+.day-mode .wish-item:first-child { border-inline-start: none; padding-inline-start: 0 }
+.day-mode .wish-item:last-child { padding-inline-end: 0 }
 .day-mode .tier-mark { color: rgba(168,114,15,0.75) }
 .day-mode .tier-label { color: rgba(150,100,55,0.75) }
 .day-mode .tier-price { color: rgba(168,114,15,0.9) }
@@ -592,9 +602,9 @@ export default {
 .night-mode .tier-cta .wish-label { font-weight: 600 }
 /* Two temperatures, the sky's own contrast: warm gold where the lamp light
    falls (headings, prices, the brand), cool parchment for structure. */
-.night-mode .wish-item { border-left: 1px solid rgba(240,218,170,0.2) }
-.night-mode .wish-item:first-child { border-left: none; padding-left: 0 }
-.night-mode .wish-item:last-child { padding-right: 0 }
+.night-mode .wish-item { border-inline-start: 1px solid rgba(240,218,170,0.2) }
+.night-mode .wish-item:first-child { border-inline-start: none; padding-inline-start: 0 }
+.night-mode .wish-item:last-child { padding-inline-end: 0 }
 .night-mode .tier-mark { color: #f0d9a8; filter: drop-shadow(0 0 7px rgba(255,180,90,0.45)) }
 .night-mode .tier-label { color: rgba(240,218,170,0.55) }
 .night-mode .tier-price {
@@ -655,7 +665,7 @@ export default {
   /* One column: the vertical hairline becomes a horizontal one between items. */
   .features-grid { grid-template-columns: 1fr }
   .wish-item { padding: 20px 0 }
-  .day-mode .wish-item, .night-mode .wish-item { border-left: none; border-top: 1px solid rgba(150,100,55,0.26) }
+  .day-mode .wish-item, .night-mode .wish-item { border-inline-start: none; border-top: 1px solid rgba(150,100,55,0.26) }
   .night-mode .wish-item { border-top-color: rgba(212,175,55,0.2) }
   .day-mode .wish-item:first-child, .night-mode .wish-item:first-child { border-top: none; padding-top: 0 }
   .tier-price { font-size: 2.1rem; margin-bottom: 8px }
