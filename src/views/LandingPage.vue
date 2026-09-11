@@ -310,8 +310,10 @@ export default {
   display: flex; align-items: center; justify-content: center; position: relative;
   opacity: 0.5; transition: opacity 0.3s ease;
 }
+/* The rule is the one every other control draws: full width of the target,
+   1.5px, sitting 6px off the bottom — the same as the mode switch beside it. */
 .language-selector button::after {
-  content: ''; position: absolute; left: 4px; right: 4px; bottom: 4px; height: 1.5px;
+  content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 1.5px;
   background: transparent; transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 /* Nothing moves under the pointer — light only. */
