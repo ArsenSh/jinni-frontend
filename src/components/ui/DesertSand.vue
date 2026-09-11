@@ -38,8 +38,12 @@ export const SAND_DEFAULTS = {
      swells over its life is the other half of the bubble impression —
      sand does not expand as it travels. The size range widens and its
      floor drops, because uniform size is itself a tell. */
-  sizeMin: 0.9, sizeSpread: 2.6, squash: 58, alpha: 100, fadeIn: 3, fadeOut: 6,
-  depthSpread: 70, spin: 26, wobble: 26, wobbleRate: 42, flicker: 46, grow: 6,
+  sizeMin: 1.2, sizeSpread: 2.8, squash: 70, alpha: 100, fadeIn: 3, fadeOut: 6,
+  /* depthSpread 70 meant the faintest grains rendered at 30% of their
+     size — good for depth, but stacked on top of the shrink above it
+     left most of the field below a pixel. 55 keeps the depth without
+     spending the whole range on it. */
+  depthSpread: 55, spin: 26, wobble: 26, wobbleRate: 42, flicker: 46, grow: 6,
   // colour: the sand lamp's own palette, weighted to the tones that show
   darkShare: 72, tintDepth: 6, warmDistance: 190, absorbAt: 9,
   // the becoming
@@ -263,7 +267,12 @@ export default {
         const r = Math.min(255, Math.round(s[0] + cfg.tintDepth * -0.45 + warm * 50))
         const g = Math.min(255, Math.round(s[1] + cfg.tintDepth * -0.55 + warm * 46))
         const b = Math.max(0, Math.round(s[2] + cfg.tintDepth * -0.5 - warm * 10))
-        const w = d.size * (0.55 + (cfg.grow / 100) * d.t)
+        /* The 0.55 floor existed because grow was 35: a grain started at 55%
+           and swelled to 90% of its size. With grow at 6 that floor never
+           got repaid and every grain rendered at 58% — which is why the
+           sand went faint the moment it stopped inflating. The grain is
+           full size now and simply does not grow. */
+        const w = d.size * (0.92 + (cfg.grow / 100) * d.t)
         const h = w * (cfg.squash / 100)
         ctx.globalAlpha = Math.max(0, Math.min(1, a))
         ctx.translate(d.x, d.y)
