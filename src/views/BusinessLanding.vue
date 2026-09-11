@@ -196,10 +196,29 @@ export default {
 .header-container { position: absolute; top: 0; left: 0; padding: 27px; z-index: 1000 }
 .app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
 .language-selector-container { position: fixed; top: 20px; right: 20px; z-index: 1001 }
-.language-selector { display: flex; gap: 12px; background: rgba(26,9,51,0.5); padding: 10px; border-radius: 50px; backdrop-filter: blur(5px); border: 1px solid rgba(157,123,255,0.3); transition: all 0.3s ease; overflow: hidden }
-.language-selector button { background: transparent; color: #9D7BFF; border: none; padding: 12px; border-radius: 50%; cursor: pointer; transition: transform 0.3s ease, background 0.3s ease, opacity 0.3s ease; font-size: 24px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(157,123,255,0.2) }
-.language-selector button:hover { transform: scale(1.1); background: rgba(157,123,255,0.2); box-shadow: 0 0 15px rgba(157,123,255,0.4) }
-.language-selector button.active { background: rgba(157,123,255,0.3); box-shadow: 0 0 15px rgba(157,123,255,0.5); animation: pulse 0.5s ease }
+/* No capsule, no ring (founder 2026-09-11): the flags sit in a row and the
+   chosen one is LIT — the same grammar the CTAs and the mode switch use. A
+   flag emoji is a rectangular colour bitmap, so light can never be drawn ON
+   the glyph (a filter traces its box and the halo comes out square); the rule
+   underneath carries the state instead. */
+.language-selector { display: flex; gap: 14px; background: transparent; padding: 0; border: none; border-radius: 0; backdrop-filter: none; -webkit-backdrop-filter: none; overflow: visible; transition: none }
+.language-selector button {
+  background: transparent; border: none; box-shadow: none; border-radius: 0;
+  padding: 6px 2px 12px; width: 44px; height: 40px; font-size: 24px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; position: relative;
+  opacity: 0.5; transition: opacity 0.3s ease;
+}
+.language-selector button::after {
+  content: ''; position: absolute; left: 4px; right: 4px; bottom: 4px; height: 1.5px;
+  background: transparent; transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+/* Nothing moves under the pointer — light only. */
+.language-selector button:hover { opacity: 0.85; transform: none; background: transparent; box-shadow: none }
+.language-selector button.active { opacity: 1; background: transparent; box-shadow: none; animation: none }
+/* Collapsed, the row is a single flag and there is nothing to be chosen from
+   — so it is not dimmed. The 0.5 rest state only means "one of several". */
+.language-selector button:only-child { opacity: 1 }
+.language-selector button:only-child::after { background: transparent; box-shadow: none }
 
 /* ── Hero ──────────────────────────────────────────────────────────────────── */
 .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
@@ -282,7 +301,7 @@ export default {
    ink and only the brand word keeps the gradient. */
 /* Same change as the landing page (founder 2026-09-11): the cocoa brown goes,
    the lamp's burnt end carries the headings. */
-.day-mode .magic-title, .day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #8A3E0B }
+.day-mode .magic-title, .day-mode .features-heading { background: none; -webkit-text-fill-color: initial; color: #732F06 }
 .day-mode .magic-subtitle { color: #5a3c2e; text-shadow: 0 0 7px rgba(255,255,255,0.4) }
 .day-mode .footer-copyright { color: #5a3c2e }
 /* Day now carries the SAME grammar as night (founder 2026-09-11): no glacier
@@ -300,20 +319,20 @@ export default {
 .day-mode .hero .magic-button::after,
 .day-mode .tier-cta::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
-  background: rgba(178, 82, 10, 0.8); box-shadow: 0 0 12px rgba(214, 120, 40, 0.4);
+  background: rgba(115, 47, 6, 0.8); box-shadow: 0 0 12px rgba(214, 120, 40, 0.4);
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 /* The tier rules sit a step quieter than the hero's, the same way night's do,
    so three of them in a row don't compete with the one wish above. */
-.day-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(178, 82, 10, 0.55); box-shadow: 0 0 9px rgba(214, 120, 40, 0.3) }
+.day-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(115, 47, 6, 0.55); box-shadow: 0 0 9px rgba(214, 120, 40, 0.3) }
 .day-mode .hero .magic-button:hover,
 .day-mode .tier-cta:hover { background: transparent; box-shadow: none }
-.day-mode .hero .magic-button:hover::after { background: #8A3E0B; box-shadow: 0 0 16px rgba(214, 120, 40, 0.6) }
-.day-mode .tier-cta:hover::after { background: #8A3E0B; box-shadow: 0 0 14px rgba(214, 120, 40, 0.5) }
+.day-mode .hero .magic-button:hover::after { background: #732F06; box-shadow: 0 0 16px rgba(214, 120, 40, 0.6) }
+.day-mode .tier-cta:hover::after { background: #732F06; box-shadow: 0 0 14px rgba(214, 120, 40, 0.5) }
 /* the label leaves the gradient clip: a clip carries no glow, and on a light
    ground the bright half of the brand gradient falls under 2:1 */
 .day-mode .wish-label {
-  background: none; -webkit-text-fill-color: initial; color: #8A3E0B; font-weight: 700;
+  background: none; -webkit-text-fill-color: initial; color: #732F06; font-weight: 700;
   text-shadow: 0 0 10px rgba(255, 224, 176, 0.7);
 }
 .day-mode .tier-cta .wish-label { font-weight: 600 }
@@ -340,31 +359,9 @@ export default {
 /* Same glass recipe on the language pill: an inset hairline and an even glow
    instead of a hard border and a downward shadow. */
 /* Same three rings as the wish button, so the pill is the same ice. */
-.day-mode .language-selector {
-  background: rgba(255,251,245,0.34); border: none; padding: 6px; gap: 6px;
-  backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
-  /* No hard outer ring here: on a large, mostly empty pill a 1px line reads
-     as a plain border. The edge is carried by an inner frost rim and a soft
-     warm glow instead — ice, not an outline. */
-  box-shadow: inset 0 0 0 1.5px rgba(255,253,247,0.92),
-              inset 0 0 18px -5px rgba(255,255,255,1),
-              0 0 22px -4px rgba(150,100,40,0.22);
-}
-.day-mode .language-selector:hover {
-  background: rgba(255,251,245,0.8);
-  box-shadow: inset 0 0 0 1.5px rgba(255,255,252,1),
-              inset 0 0 20px -5px rgba(255,255,255,1),
-              0 0 26px -4px rgba(150,100,40,0.26);
-}
-/* A flag emoji is a rectangular colour bitmap, so drop-shadow traces its box
-   and the "shadow" comes out square. Round light has to be drawn by the round
-   BUTTON, not by the glyph. */
-.day-mode .language-selector button { color: #a8720f; box-shadow: 0 0 10px -1px rgba(150,100,40,0.22) }
-.day-mode .language-selector button.active {
-  box-shadow: inset 0 0 0 1px rgba(198,143,90,0.4), 0 0 14px -1px rgba(212,175,55,0.6);
-}
-.day-mode .language-selector button:hover { background: rgba(255,252,246,0.75); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.28); transform: none }
-.day-mode .language-selector button.active { background: rgba(255,252,246,0.9); box-shadow: inset 0 0 0 1px rgba(184,125,78,0.4); color: #7a4d10 }
+.day-mode .language-selector button { color: #732F06 }
+.day-mode .language-selector button:hover::after { background: rgba(115,47,6,0.35) }
+.day-mode .language-selector button.active::after { background: rgba(115,47,6,0.85); box-shadow: 0 0 12px rgba(214,120,40,0.5) }
 .day-mode .static-bottle {
   filter: drop-shadow(0 3px 6px rgba(150,62,12,0.32))
           drop-shadow(0 0 16px rgba(255,170,80,0.5))
@@ -377,20 +374,31 @@ export default {
 /* One glass track holding two plain words; the chosen side is a flat white
    pill with darker ink (founder 2026-09-10 — glass inside glass was the
    problem, not the track itself). */
+/* The switch follows the CTAs (founder 2026-09-11): no capsule, no filled
+   tab. Two words, each over a rule, and the one you are on is LIT — state
+   carried by light, exactly as night carries it. */
 .day-mode .mode-switch-pill {
-  background: rgba(255,251,245,0.5);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: inset 0 0 0 1.5px rgba(255,253,247,0.85),
-              inset 0 0 14px -4px rgba(255,255,255,0.9),
-              0 0 0 1px rgba(198,143,90,0.3),
-              0 0 18px -3px rgba(150,100,40,0.16);
+  background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; border-radius: 0; padding: 0; gap: 26px;
 }
-.day-mode .mode-switch-btn { color: rgba(122,77,16,0.66); background: transparent; box-shadow: none }
-.day-mode .mode-switch-btn:hover { color: #7a4d10; background: rgba(255,255,255,0.42); box-shadow: none }
+.day-mode .mode-switch-btn {
+  color: rgba(122,77,16,0.55); background: transparent; box-shadow: none;
+  padding: 8px 2px 14px; border-radius: 0; position: relative;
+}
+.day-mode .mode-switch-btn::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 1px;
+  background: rgba(115,47,6,0.18); box-shadow: none;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.day-mode .mode-switch-btn:hover { color: #7a4d10; background: transparent; box-shadow: none }
+.day-mode .mode-switch-btn:hover::after { background: rgba(115,47,6,0.45) }
 .day-mode .mode-switch-btn--active,
 .day-mode .mode-switch-btn--active:hover {
-  background: #fffdfa; color: #5c3416; box-shadow: none;
+  background: transparent; box-shadow: none; color: #732F06;
+  text-shadow: 0 0 10px rgba(255,224,176,0.7);
+}
+.day-mode .mode-switch-btn--active::after {
+  background: rgba(115,47,6,0.85); box-shadow: 0 0 12px rgba(214,120,40,0.5);
 }
 
 /* ── Night mode: halation ──────────────────────────────────────────────────── */
@@ -533,26 +541,9 @@ export default {
 }
 /* Halation has no boxes, so the language pill goes too — the flag keeps a soft
    warm halo instead of a rim: findable, but nothing is drawn. */
-.night-mode .language-selector { background: transparent; border: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none }
-.night-mode .language-selector:hover { background: transparent; box-shadow: none }
-/* Each flag carries its own light: a warm halo at rest, brighter under the
-   pointer, and a three-layer bloom on the chosen one. */
-/* Round light, drawn by the round BUTTON. A filter would trace the flag
-   emoji's rectangle and the halo would come out as a cube. */
-.night-mode .language-selector button {
-  background: transparent; color: #f5e6c8; filter: none;
-  box-shadow: 0 0 12px -2px rgba(255,190,110,0.4);
-}
-.night-mode .language-selector button:hover {
-  background: transparent; transform: none; filter: none;
-  box-shadow: 0 0 18px -2px rgba(255,205,130,0.75);
-}
-.night-mode .language-selector button.active {
-  background: transparent; transform: none; filter: none;
-  box-shadow: 0 0 0 1px rgba(255,214,150,0.35),
-              0 0 14px -1px rgba(255,205,130,0.85),
-              0 0 30px -4px rgba(255,150,60,0.5);
-}
+.night-mode .language-selector button { color: #f5e6c8 }
+.night-mode .language-selector button:hover::after { background: rgba(255,214,150,0.45) }
+.night-mode .language-selector button.active::after { background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9) }
 /* Lavender at rest, warming to gold on hover — the link behaves like a star
    catching the lamp. The flat #FF8C00 was the loudest thing on the page. */
 .night-mode .footer-links a { color: #dcb977 }
@@ -583,6 +574,7 @@ export default {
   .language-selector-container { top: 10px; right: 10px }
   .header-container { padding: 25px }
   .app-name { font-size: 1.5rem }
+  .language-selector { gap: 6px }
   .language-selector button { width: 40px; height: 40px; font-size: 20px }
   .footer-links { gap: 0.1rem }
   .footer-links a { font-size: 1rem }
