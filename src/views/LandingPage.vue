@@ -243,10 +243,16 @@ export default {
 .day-mode .hero .magic-button::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
   background: rgba(115, 47, 6, 0.5); box-shadow: 0 0 10px rgba(214, 120, 40, 0.22);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease, height 0.3s ease;
 }
 .day-mode .hero .magic-button:hover { background: transparent; box-shadow: none }
-.day-mode .hero .magic-button:hover::after { background: #732F06; box-shadow: 0 0 20px rgba(214, 120, 40, 0.75) }
+/* A 1.5px rule changing alpha is too small a signal to see, and a warm glow
+   on a warm light ground is almost none at all — so the rule gains WEIGHT on
+   hover, not just strength. It thickens in place from its own baseline; the
+   button does not move and nothing shifts around it. */
+.day-mode .hero .magic-button:hover::after {
+  background: #732F06; height: 3px; box-shadow: 0 0 20px rgba(214, 120, 40, 0.75);
+}
 .day-mode .hero .magic-button:hover .wish-label { text-shadow: 0 0 14px rgba(255, 224, 176, 1) }
 /* Solid, exactly as night's is, and for night's reason: a gradient text-clip
    paints over a transparent fill, so it can carry neither a glow nor enough
@@ -383,8 +389,14 @@ export default {
    the edge reads 0,0,0 against the sky on all three sides. The 0 3px offset
    went too: shadows here are even on all sides, never dropped down. */
 .day-mode .static-bottle {
+  /* Founder 2026-09-11: shorter. Both radii are 8px now, which is denser
+     rather than layered — a chained drop-shadow filters the OUTPUT of the one
+     before it, so the second casts a shadow of the first instead of sitting
+     at its own distance. The old 18px was sized to a constraint that is gone:
+     it had to fade out inside the 150px blend group .lamp::after used to
+     create. Day has no such group any more, so radius is free. */
   filter: drop-shadow(0 0 8px rgba(255,170,80,0.45))
-          drop-shadow(0 0 18px rgba(206,96,26,0.22));
+          drop-shadow(0 0 8px rgba(206,96,26,0.22));
 }
 .day-mode .button-glow-wrapper { filter: none }
 /* The switch takes the wish button's glacier glass (founder 2026-09-10), so
@@ -596,7 +608,7 @@ export default {
 .landing-container:not(.day-mode) .hero .magic-button::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
   background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  transition: background 0.3s ease, box-shadow 0.3s ease, height 0.3s ease;
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover { background: transparent; box-shadow: none }
 /* The rest state is bright here and stays that way — it is the approved
@@ -606,7 +618,7 @@ export default {
    roughly doubles the near glow and adds a wide one underneath, and lifts the
    label's own bloom with it. Nothing moves; only the light changes. */
 .landing-container:not(.day-mode) .hero .magic-button:hover::after {
-  background: #ffffff;
+  background: #ffffff; height: 3px;
   box-shadow: 0 0 22px rgba(255,205,130,1), 0 0 44px rgba(255,160,60,0.5);
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover .wish-label { color: #fff6e6; text-shadow: 0 0 20px rgba(255,190,110,0.95) }
