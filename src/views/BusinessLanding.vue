@@ -511,9 +511,13 @@ export default {
 .night-mode .features::before {
   background: radial-gradient(58% 46% at 50% 32%, rgba(255,196,110,0.08) 0%, rgba(255,190,105,0) 70%);
 }
+/* Same change as the landing page: the rim reached half-opaque near-black,
+   which erased the stars along the bottom of a phone, and a fixed inset:0
+   element re-scales every time Safari's toolbar moves — so the dead band grew
+   and shrank as you scrolled. Core to 58%, rim to 0.30. */
 .night-mode::after {
   content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-  background: radial-gradient(122% 88% at 50% 42%, rgba(6,2,20,0) 46%, rgba(6,2,20,0.5) 100%);
+  background: radial-gradient(128% 96% at 50% 46%, rgba(6,2,20,0) 58%, rgba(6,2,20,0.30) 100%);
 }
 .night-mode .hero-content, .night-mode .features-container { position: relative; z-index: 1 }
 /* A gradient-clipped element can't use text-shadow — the fill is transparent —

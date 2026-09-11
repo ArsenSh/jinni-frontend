@@ -561,10 +561,16 @@ export default {
 .landing-container:not(.day-mode) .features::before {
   background: radial-gradient(58% 46% at 50% 32%, rgba(255,196,110,0.08) 0%, rgba(255,190,105,0) 70%);
 }
-/* One vignette for the whole page: fixed, so it never meets a section edge. */
+/* One vignette for the whole page: fixed, so it never meets a section edge.
+   It reached rgba(6,2,20,0.5) at its rim, which is half-opaque near-black —
+   enough to erase the stars along the bottom of a phone, and because the
+   element is fixed with inset:0 it RE-SCALES every time Safari's toolbar
+   collapses or expands, so the dead band grew and shrank as you scrolled.
+   The transparent core now runs to 58% and the rim stops at 0.30: the corners
+   still fall away, but the starfield reads through them. */
 .landing-container:not(.day-mode)::after {
   content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-  background: radial-gradient(122% 88% at 50% 42%, rgba(6,2,20,0) 46%, rgba(6,2,20,0.5) 100%);
+  background: radial-gradient(128% 96% at 50% 46%, rgba(6,2,20,0) 58%, rgba(6,2,20,0.30) 100%);
 }
 .landing-container:not(.day-mode) .hero-content,
 .landing-container:not(.day-mode) .features-container { position: relative; z-index: 1 }
