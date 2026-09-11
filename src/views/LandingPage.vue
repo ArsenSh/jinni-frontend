@@ -268,11 +268,14 @@ export default {
   -webkit-mask-position: center; mask-position: center;
   mix-blend-mode: soft-light;
 }
-.day-mode .lamp::after {
-  background: linear-gradient(148deg,
-    rgba(255,255,240,0.9) 0%, rgba(255,214,150,0.3) 40%,
-    rgba(196,104,36,0.45) 74%, rgba(120,52,12,0.6) 100%);
-}
+/* Day takes NO colour on the metal (founder 2026-09-11): the tint read as a
+   warm gold wash over the whole lamp, and the lamp should be its own PNG. Not
+   a transparent background but `display: none` — an element with a blend mode
+   forms a blending group even when it paints nothing, and that group is what
+   clipped the bottle's glow into a rectangle. Removing it in day also removes
+   the clip, so the glow below could afford to go wider again if wanted.
+   Night keeps its tint: there the violet is the sky landing on the metal. */
+.day-mode .lamp::after { display: none }
 .landing-container:not(.day-mode) .lamp::after {
   background: linear-gradient(148deg,
     rgba(255,244,214,0.85) 0%, rgba(255,178,96,0.28) 38%,
@@ -319,10 +322,10 @@ export default {
 /* Nothing moves under the pointer — light only. */
 .language-selector button:hover { opacity: 0.85; transform: none; background: transparent; box-shadow: none }
 .language-selector button.active { opacity: 1; background: transparent; box-shadow: none; animation: none }
-/* Collapsed, the row is a single flag and there is nothing to be chosen from
-   — so it is not dimmed. The 0.5 rest state only means "one of several". */
+/* Collapsed, the row is a single flag: it is neither dimmed nor unlit — it is
+   the current language, and it carries the same rule every other control does.
+   Opening the row is what introduces unchosen siblings to dim. */
 .language-selector button:only-child { opacity: 1 }
-.language-selector button:only-child::after { background: transparent; box-shadow: none }
 .magic-title { font-family: 'Cinzel', serif; font-size: 4rem; letter-spacing: 1px }
 .magic-subtitle { font-family: 'Cinzel', serif; font-size: 1.5rem; max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
@@ -359,7 +362,8 @@ export default {
 /* Same three rings as the wish button, so the pill is the same ice. */
 .day-mode .language-selector button { color: #732F06 }
 .day-mode .language-selector button:hover::after { background: rgba(115,47,6,0.35) }
-.day-mode .language-selector button.active::after { background: rgba(115,47,6,0.85); box-shadow: 0 0 12px rgba(214,120,40,0.5) }
+.day-mode .language-selector button.active::after,
+.day-mode .language-selector button:only-child::after { background: rgba(115,47,6,0.85); box-shadow: 0 0 12px rgba(214,120,40,0.5) }
 /* The 44px glow drew a RECTANGLE around the lamp (founder 2026-09-11). Not a
    filter bug: .lamp::after blends with mix-blend-mode, which forces this whole
    subtree into its own blending group, and that group is the 150x150 .lamp box
@@ -427,7 +431,8 @@ export default {
    keeps a soft warm halo instead of a rim — findable, but nothing is drawn. */
 .landing-container:not(.day-mode) .language-selector button { color: #f5e6c8 }
 .landing-container:not(.day-mode) .language-selector button:hover::after { background: rgba(255,214,150,0.45) }
-.landing-container:not(.day-mode) .language-selector button.active::after { background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9) }
+.landing-container:not(.day-mode) .language-selector button.active::after,
+.landing-container:not(.day-mode) .language-selector button:only-child::after { background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9) }
 
 .landing-container:not(.day-mode) .hero .magic-button {
   background: rgba(52,38,80,0.62);
@@ -506,15 +511,19 @@ export default {
 .day-mode .app-name,
 .day-mode .magic-title :deep(.brand-grad),
 .day-mode .features-heading :deep(.brand-grad) {
-  /* Founder 2026-09-11: closer to the bottle's own tone. The gradient now
-     opens on the lamp's lit gold and lands on its burnt base, so the word is
-     the metal rather than a brown that merely lives near it. It cannot go
-     brighter than this: pure lamp gold measures 1.6:1 on the sand, and even
-     display type needs 3:1. */
-  background: linear-gradient(45deg, #E39A16, #A8460A);
+  /* Founder 2026-09-11: the icon's own gradient, the same one night uses —
+     #D4AF37 to #FF8C00 — so the word is the brand rather than a darkened
+     version of it. On a light ground that gradient alone measures about
+     1.6:1, which is why it gets a hairline EDGE instead of a deeper colour:
+     a 0.7px stroke in the lamp's burnt end draws the letterform while the
+     fill stays pure icon gold. An edge is what the earlier blurred shadow
+     was reaching for and could not do — a blur under a light word on a light
+     ground has nowhere to hide, a 0.7px line has. */
+  background: linear-gradient(45deg, #D4AF37, #FF8C00);
+  -webkit-text-stroke: 0.7px rgba(122, 58, 6, 0.55);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
-  filter: drop-shadow(0 1px 1px rgba(110,45,6,0.34));
+  filter: drop-shadow(0 1px 1px rgba(110,45,6,0.3));
 }
 /* The subtitle's brand word leaves the gradient (founder 2026-09-11: "Jinni
    there is hard to see"). The same gold that carries a 4rem headline is body

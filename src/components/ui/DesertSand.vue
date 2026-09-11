@@ -39,7 +39,10 @@ export const SAND_DEFAULTS = {
   formSeconds: 1.5, baseOpacity: 0, maxOpacity: 20,
   waitForSand: 1, clearBelow: 1400,
   holdMs: 120, revealMs: 1600, sandHoldMs: 700, sandFadeMs: 900,
-  warmAmount: 38, warmDelayMs: 900, warmMs: 3200,
+  /* 38 -> 0 (founder 2026-09-11): this ramped a hue-shifted COPY of the
+     bottle over the real one, which is the other half of the warm gold
+     cast. The lamp the sand hands over to is now the PNG itself. */
+  warmAmount: 0, warmDelayMs: 900, warmMs: 3200,
   stopWhenFormed: 1,
   // performance: the canvas renders small and is scaled up, because dust is
   // blurry by nature and fill rate is the whole cost of this layer
