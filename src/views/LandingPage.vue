@@ -291,7 +291,11 @@ export default {
 .landing-container { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column }
 .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
 .hero, .features { position: relative; z-index: 2 }
-.hero-content { max-width: 800px; animation: fadeInUp 1s ease-out }
+/* Nothing was holding the hero off the edge — max-width alone does not
+   help once the viewport is narrower than it. Armenian showed it first
+   because its lines are long, but every language hit the edge on a small
+   screen. padding-inline so it mirrors in Arabic without a second rule. */
+.hero-content { max-width: 800px; padding-inline: 22px; animation: fadeInUp 1s ease-out }
 .lamp { position: relative; display: block; width: 150px; margin: auto }
 .static-bottle { width: 100%; height: auto; max-height: 250px; display: block }
 /* Colour ON the metal, not only behind it: the lamp's own silhouette masks a
