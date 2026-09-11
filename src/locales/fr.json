@@ -266,16 +266,16 @@
     "features": {
       "title": "Trois souhaits, possibilités infinies",
       "ai": {
-        "title": "Personnalisé rien que pour vous",
-        "description": "Jinni décode votre style et vos goûts pour révéler des lieux avec lesquels vous vous connecterez instantanément"
+        "title": "Rien que pour vous",
+        "description": "Jinni comprend votre humeur et vos envies pour vous faire découvrir des lieux qui vous correspondent vraiment."
       },
       "gems": {
-        "title": "Découvrez des trésors cachés",
-        "description": "Accédez à des lieux secrets et des expériences authentiques qui transforment les voyages en histoires inoubliables"
+        "title": "Des pépites bien cachées",
+        "description": "Des lieux confidentiels et des expériences authentiques qui transforment un voyage en histoire."
       },
       "business": {
-        "title": "Planification à la vitesse de la pensée",
-        "description": "Un clic pour une inspiration instantanée. Ou plongez plus profond. Jinni reflète la façon dont vous rêvez - fluidement, librement"
+        "title": "Planifiez à la vitesse de la pensée",
+        "description": "Un geste suffit pour trouver l’inspiration. Ou explorez plus en profondeur. Jinni s’adapte à votre façon de rêver — avec fluidité, audace et liberté."
       }
     },
     "footer": {
