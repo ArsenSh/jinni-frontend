@@ -261,12 +261,12 @@ export default {
 .language-selector button:only-child { opacity: 1 }
 
 /* ── Hero ──────────────────────────────────────────────────────────────────── */
-.hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
-/* Nothing was holding the hero off the edge — max-width alone does not help
-   once the viewport is narrower than it. Armenian showed it first because
-   its lines are long, but every language hit the edge on a small screen.
-   padding-inline so it mirrors in Arabic without a second rule. */
-.hero-content { max-width: 1080px; padding-inline: 22px; animation: fadeInUp 1s ease-out }
+/* The inset lives HERE, not on .hero-content: that box has a max-width,
+   and padding on a content-box max-width ADDS to it — 800 + 44 — so the
+   hero grew wider than the viewport and the page scrolled sideways into
+   a white strip. .hero is full width with nothing to overflow. */
+.hero { padding-inline: 22px; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
+.hero-content { max-width: 1080px; animation: fadeInUp 1s ease-out }
 .lamp { position: relative; display: block; width: 150px; margin: auto }
 .static-bottle { width: 100%; height: auto; max-height: 250px; display: block }
 /* Colour ON the metal, not only behind it: the lamp's own silhouette masks a
@@ -535,8 +535,7 @@ export default {
    sand — with a 1px ink shadow to seat them, and no blur at all. */
 .day-mode .app-name,
 .day-mode .magic-title :deep(.brand-grad),
-.day-mode .features-heading :deep(.brand-grad),
-.day-mode .magic-subtitle :deep(.brand-grad) {
+.day-mode .features-heading :deep(.brand-grad) {
   /* Founder 2026-09-11: the icon's own gradient, the same one night uses —
      #D4AF37 to #FF8C00 — so the word is the brand rather than a darkened
      version of it. On a light ground that gradient alone measures about
@@ -562,6 +561,18 @@ export default {
   filter: drop-shadow(0 0 5px rgba(255,252,245,0.95))
           drop-shadow(0 0 13px rgba(255,247,230,0.6))
           drop-shadow(0 1px 1px rgba(110,45,6,0.22));
+}
+/* The subtitle keeps the icon gradient but not the halo. That bloom is sized
+   for 2.5-4rem display type; under a 1.5rem word it has nowhere to fall off
+   and reads as a smudge around the letters rather than as light behind them.
+   A 1px warm seat instead, and a deeper opening stop so the word holds its
+   own at this size. */
+.day-mode .magic-subtitle :deep(.brand-grad) {
+  background: linear-gradient(45deg, #C89114 0%, #D2760C 38%, #9E4708 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(110,45,6,0.3));
+  font-weight: 700;
 }
 /* Founder 2026-09-11: the Jinni in "Let Jinni find them" is the brand, so it
    wears the brand — icon gradient and Cinzel, like every other Jinni on the

@@ -27,10 +27,13 @@ export const SAND_DEFAULTS = {
   emitPerSec: 680, life: 0.85, lifeSpread: 0.4,
   // the serpent: one shared channel per vent, widening low, narrowing high
   snakeAmp: 46, snakeWaves: 2.2, snakeWiden: 70, snakePhase: 22, personal: 34,
-  // the climb, leaning into the lamp. reach 34 -> 21 (founder 2026-09-11):
-  // the columns met low on the body; they now converge about half a
-  // centimetre higher, centred behind the lamp instead of under it.
-  converge: 98, rise: 140, riseEase: 22, reach: 21,
+  // the climb, leaning into the lamp. reach is a percentage of the LAMP BOX,
+  // and the lamp DRAWING only occupies 23.5%-75.6% of that box — measured from
+  // bottle.png's alpha, bbox (84,295)-(1182,948) of 1254 square. So reach 21
+  // aimed at empty space ABOVE the lamp, which is exactly what showed on a
+  // phone. 46 is just above the drawing's own centre (49.6%), the little that
+  // is left accounting for the fade over each grain's last 6% of life.
+  converge: 98, rise: 140, riseEase: 22, reach: 46,
   // the grains
   /* squash 94 -> 58: a grain is a chip, not a ball, and because each one
      carries its own rotation a field of elongated chips reads as grit
