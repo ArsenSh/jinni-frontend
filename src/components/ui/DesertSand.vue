@@ -341,6 +341,23 @@ export default {
       // the .png URL for 4 hours. A version query is a fresh cache key, so the
       // poisoned entry can never be served again — bump it if it ever recurs.
       sandLamp = mk('/images/sand-lamp.png?v=1', null, 2)
+      /* The two PNGs are both 1254 square, but the lamp fills a different
+         fraction of each one — the sand lamp carries less transparent padding,
+         so object-fit: contain draws it about 9% wider and 11% taller than the
+         bottle it hands over to, and the reveal read as the lamp changing size
+         at the exact moment it should be settling.
+
+         Measured from the two alpha channels: bottle silhouette spans
+         (84,295)-(1182,948), sand spans (30,274)-(1227,1007). This transform
+         maps the second box onto the first exactly, which takes the silhouette
+         mismatch from 50.5% of the lamp's area down to 14.9%. The artwork is
+         untouched — this is only how it is placed.
+
+         The 14.9% that remains is real difference in the drawing itself (the
+         handle curl and the spout are not the same shape), and no placement
+         can remove it. That needs the sand lamp regenerated from the bottle's
+         own alpha, which is a separate decision about the asset. */
+      sandLamp.style.transform = 'translate(0.369%, -1.398%) scale(0.9173, 0.8909)'
       // the metal's own colour, the way AnimatedLamp does it: a second copy of
       // the same image, hue-shifted, over the natural gold
       warmLamp = mk('/images/bottle.png?v=3', 'hue-rotate(-9deg) saturate(1.4) brightness(0.9)', 3)
