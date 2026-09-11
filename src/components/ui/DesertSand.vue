@@ -362,24 +362,14 @@ export default {
       // the SPA's index.html with a 200, and Cloudflare cached that HTML under
       // the .png URL for 4 hours. A version query is a fresh cache key, so the
       // poisoned entry can never be served again — bump it if it ever recurs.
-      sandLamp = mk('/images/sand-lamp.png?v=1', null, 2)
-      /* The two PNGs are both 1254 square, but the lamp fills a different
-         fraction of each one — the sand lamp carries less transparent padding,
-         so object-fit: contain draws it about 9% wider and 11% taller than the
-         bottle it hands over to, and the reveal read as the lamp changing size
-         at the exact moment it should be settling.
-
-         Measured from the two alpha channels: bottle silhouette spans
-         (84,295)-(1182,948), sand spans (30,274)-(1227,1007). This transform
-         maps the second box onto the first exactly, which takes the silhouette
-         mismatch from 50.5% of the lamp's area down to 14.9%. The artwork is
-         untouched — this is only how it is placed.
-
-         The 14.9% that remains is real difference in the drawing itself (the
-         handle curl and the spout are not the same shape), and no placement
-         can remove it. That needs the sand lamp regenerated from the bottle's
-         own alpha, which is a separate decision about the asset. */
-      sandLamp.style.transform = 'translate(0.369%, -1.398%) scale(0.9173, 0.8909)'
+      sandLamp = mk('/images/sand-lamp.png?v=2', null, 2)
+      /* No transform any more: sand-lamp.png is now generated FROM bottle.png's
+         own alpha, so the two silhouettes are the same shape to within
+         anti-aliasing (16px of 219,378 — 0.01%). The handover is a pure
+         cross-fade with nothing moving. The transform that used to sit here
+         mapped one bounding box onto the other and got the mismatch from
+         50.5% to 14.9%; regenerating the asset took it to zero, so aligning
+         it again would now push it back OUT of place. */
       // the metal's own colour, the way AnimatedLamp does it: a second copy of
       // the same image, hue-shifted, over the natural gold
       warmLamp = mk('/images/bottle.png?v=3', 'hue-rotate(-9deg) saturate(1.4) brightness(0.9)', 3)
