@@ -103,6 +103,10 @@ export default {
          smear. The span has to open up as the screen narrows, not hold a
          constant fraction of it. */
       cfg.ventSpread = 96
+      /* A phone sits closer to the eye than a monitor, so a grain that reads
+         as grit at arm's length reads as a pebble at 30cm. */
+      cfg.sizeMin *= 0.8
+      cfg.sizeSpread *= 0.8
     }
 
     function buildPuff() {
@@ -171,7 +175,25 @@ export default {
     function resize() {
       if (!cv.value || !ctx) return
       const host = cv.value.parentElement
-      RS = Math.max(0.25, cfg.renderScale / 100)
+      /* devicePixelRatio was missing here, and it is the whole reason the sand
+         looked coarse on a phone. The canvas backing store was renderScale of
+         the CSS size — 55% on a phone — and the browser then stretched that up
+         to the DEVICE pixels, 3x on a modern handset. A 1.2px grain therefore
+         arrived on screen as a soft blob about six device pixels across: not
+         bigger by design, just magnified 5.5x from too few pixels.
+
+         It also cost the columns their tip. A grain fades over the last 6% of
+         its life, which is exactly when it arrives at the lamp, and a fade
+         blurred 5.5x washes out well before the grain gets there — so the
+         column appeared to stop short of the lamp on phones and reach it on
+         desktop, where the same stretch was only 2.9x.
+
+         DPR is capped at 2 and the product at 1.25 so this cannot run away on
+         a 3x screen: fill cost is the square of this number, and fill rate is
+         the entire budget of this layer. It is affordable here only because
+         the animation stops for good once the lamp forms. */
+      const DPR = Math.min(window.devicePixelRatio || 1, 2)
+      RS = Math.min(1.25, Math.max(0.25, cfg.renderScale / 100) * DPR)
       W = host.clientWidth; H = host.clientHeight
       cv.value.width = Math.round(W * RS); cv.value.height = Math.round(H * RS)
       cv.value.style.width = W + 'px'; cv.value.style.height = H + 'px'

@@ -318,15 +318,21 @@ export default {
 .wish-item h3 { font-family: 'Cinzel', serif; font-size: 1.4rem; margin-bottom: 10px }
 .wish-item p { font-size: 1.02rem; line-height: 1.55; text-wrap: pretty }
 .demo h2 { font-size: 2.5rem; margin-bottom: 2rem; color: #D4AF37 }
-.header-container { position: absolute; top: 0; left: 0; padding: 27px; z-index: 1000 }
+/* The wordmark and the language row are set from the same top and given the
+   same height, then each centres its own contents — so what lines up is their
+   CENTRES, not their top edges. Matching top edges is what made them look off:
+   a 2rem serif line box and a 40px flag button are different heights, so equal
+   tops put the wordmark's centre about 7px below the flag's. */
+.header-container { position: absolute; top: 20px; left: 20px; padding: 0; height: 40px; display: flex; align-items: center; z-index: 1000 }
 /* The two pinned corners are the only things on these pages that a logical
    property cannot flip for us: they are positioned, not laid out. In Arabic
    the wordmark takes the right corner and the language row the left, the way
    every other element already mirrors. */
-[dir="rtl"] .header-container { left: auto; right: 0 }
+[dir="rtl"] .header-container { left: auto; right: 20px }
 [dir="rtl"] .language-selector-container { right: auto; left: 20px }
 @media (max-width: 768px) {
   [dir="rtl"] .language-selector-container { right: auto; left: 10px }
+  [dir="rtl"] .header-container { left: auto; right: 10px }
 }
 
 .app-name { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
@@ -728,7 +734,7 @@ export default {
   .hero p { font-size: 1.1rem }
   .features h2, .demo h2 { font-size: 2rem }
   .language-selector-container { top: 10px; right: 10px }
-  .header-container { padding: 25px }
+  .header-container { top: 10px; left: 10px; padding: 0 }
   .app-name { font-size: 1.5rem }
   .language-selector { gap: 6px }
   .language-selector button { width: 40px; height: 40px; font-size: 20px }
