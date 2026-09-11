@@ -19,13 +19,17 @@ import { onMounted, onBeforeUnmount, ref } from 'vue'
    ═══════════════════════════════════════════════════════════════════════════ */
 
 export const SAND_DEFAULTS = {
-  // the vents, and how hard each one breathes
-  ventCount: 6, ventSpread: 84, ventDrift: 4,
-  emitPerSec: 480, life: 0.85, lifeSpread: 0.4,
+  // the vents, and how hard each one breathes. Spread 84 -> 70 and the
+  // birth line dropped further below the fold (see startY), so the sand is
+  // born lower and closer to the middle rather than across the whole width.
+  ventCount: 6, ventSpread: 70, ventDrift: 4,
+  emitPerSec: 680, life: 0.85, lifeSpread: 0.4,
   // the serpent: one shared channel per vent, widening low, narrowing high
   snakeAmp: 46, snakeWaves: 2.2, snakeWiden: 70, snakePhase: 22, personal: 34,
-  // the climb, leaning into the lamp
-  converge: 98, rise: 140, riseEase: 22, reach: 34,
+  // the climb, leaning into the lamp. reach 34 -> 21 (founder 2026-09-11):
+  // the columns met low on the body; they now converge about half a
+  // centimetre higher, centred behind the lamp instead of under it.
+  converge: 98, rise: 140, riseEase: 22, reach: 21,
   // the grains
   sizeMin: 1.3, sizeSpread: 2.2, squash: 94, alpha: 100, fadeIn: 3, fadeOut: 6,
   depthSpread: 70, spin: 26, wobble: 26, wobbleRate: 42, flicker: 30, grow: 35,
@@ -39,7 +43,7 @@ export const SAND_DEFAULTS = {
   stopWhenFormed: 1,
   // performance: the canvas renders small and is scaled up, because dust is
   // blurry by nature and fill rate is the whole cost of this layer
-  renderScale: 70, maxPuffs: 4500,
+  renderScale: 70, maxPuffs: 6200,
 }
 
 /* Every colour the sand lamp is made of, read from the PNG by coverage. One
@@ -76,8 +80,8 @@ export default {
        fill rate. */
     const phone = () => window.innerWidth < 760 || window.matchMedia?.('(pointer: coarse)').matches
     if (phone()) {
-      cfg.emitPerSec = Math.round(cfg.emitPerSec * 0.4)
-      cfg.maxPuffs = Math.round(cfg.maxPuffs * 0.35)
+      cfg.emitPerSec = Math.round(cfg.emitPerSec * 0.5)
+      cfg.maxPuffs = Math.round(cfg.maxPuffs * 0.4)
       cfg.renderScale = 55
       cfg.ventCount = 4
     }
@@ -175,7 +179,7 @@ export default {
       const lampCx = lampBox.x + lampBox.w / 2
       const lampCy = lampBox.y + lampBox.h * (cfg.reach / 100)
       const eased = t + (1 - t) * t * (cfg.riseEase / 100)
-      const startY = H + 10
+      const startY = H + 34
       const y = startY + (lampCy - startY) * eased
       const pull = Math.pow(t, 1.6) * (cfg.converge / 100)
       const baseX = v.x + (lampCx - v.x) * pull

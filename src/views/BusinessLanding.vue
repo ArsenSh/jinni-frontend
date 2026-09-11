@@ -340,9 +340,18 @@ export default {
    and the buttons still hold still — but as a solid colour now, because the
    label left the gradient clip and a clip shows nothing through an opaque
    -webkit-text-fill-color. */
-.day-mode .tier-cta--verified:hover .wish-label { color: #2F7D38 }
-.day-mode .tier-cta--spotlight:hover .wish-label { color: #1F6F9C }
+/* Founder 2026-09-11: the green and the blue read far darker than the gold.
+   They were, measurably — the signature sits at 0.18 relative luminance and
+   those two at 0.16 and 0.14. All three now match the gold, so the row reads
+   as one family answering the pointer rather than one lit and two muddy.
+   The rule beneath takes the tier's colour too, so the whole control answers
+   rather than just its word. */
+.day-mode .tier-cta--verified:hover .wish-label { color: #35853C }
+.day-mode .tier-cta--spotlight:hover .wish-label { color: #2A7DA8 }
 .day-mode .tier-cta--signature:hover .wish-label { color: #A8660F }
+.day-mode .tier-cta--verified:hover::after { background: #35853C; box-shadow: 0 0 12px rgba(53,133,60,0.45) }
+.day-mode .tier-cta--spotlight:hover::after { background: #2A7DA8; box-shadow: 0 0 12px rgba(42,125,168,0.45) }
+.day-mode .tier-cta--signature:hover::after { background: #A8660F; box-shadow: 0 0 12px rgba(168,102,15,0.45) }
 .day-mode .wish-item { border-left: 1px solid rgba(150,100,55,0.28) }
 .day-mode .wish-item:first-child { border-left: none; padding-left: 0 }
 .day-mode .wish-item:last-child { padding-right: 0 }
@@ -362,10 +371,16 @@ export default {
 .day-mode .language-selector button { color: #732F06 }
 .day-mode .language-selector button:hover::after { background: rgba(115,47,6,0.35) }
 .day-mode .language-selector button.active::after { background: rgba(115,47,6,0.85); box-shadow: 0 0 12px rgba(214,120,40,0.5) }
+/* The 44px glow drew a RECTANGLE around the lamp (founder 2026-09-11). Not a
+   filter bug: .lamp::after blends with mix-blend-mode, which forces this whole
+   subtree into its own blending group, and that group is the 150x150 .lamp box
+   — so a glow wider than the box is clipped to it and the clip is a straight
+   edge. Measured: with these radii the falloff completes inside the box and
+   the edge reads 0,0,0 against the sky on all three sides. The 0 3px offset
+   went too: shadows here are even on all sides, never dropped down. */
 .day-mode .static-bottle {
-  filter: drop-shadow(0 3px 6px rgba(150,62,12,0.32))
-          drop-shadow(0 0 16px rgba(255,170,80,0.5))
-          drop-shadow(0 0 44px rgba(206,96,26,0.34));
+  filter: drop-shadow(0 0 8px rgba(255,170,80,0.45))
+          drop-shadow(0 0 18px rgba(206,96,26,0.22));
 }
 .day-mode .button-glow-wrapper { filter: none }
 /* The switch takes the wish button's glacier glass (founder 2026-09-10), so
@@ -443,12 +458,27 @@ export default {
    sand — with a 1px ink shadow to seat them, and no blur at all. */
 .day-mode .app-name,
 .day-mode .magic-title :deep(.brand-grad),
-.day-mode .features-heading :deep(.brand-grad),
-.day-mode .magic-subtitle :deep(.brand-grad) {
-  background: linear-gradient(45deg, #C08512, #B4540A);
+.day-mode .features-heading :deep(.brand-grad) {
+  /* Founder 2026-09-11: closer to the bottle's own tone. The gradient now
+     opens on the lamp's lit gold and lands on its burnt base, so the word is
+     the metal rather than a brown that merely lives near it. It cannot go
+     brighter than this: pure lamp gold measures 1.6:1 on the sand, and even
+     display type needs 3:1. */
+  background: linear-gradient(45deg, #E39A16, #A8460A);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
   filter: drop-shadow(0 1px 1px rgba(110,45,6,0.34));
+}
+/* The subtitle's brand word leaves the gradient (founder 2026-09-11: "Jinni
+   there is hard to see"). The same gold that carries a 4rem headline is body
+   text here, and it lands near 1.9:1 on the sand — a gradient cannot be read
+   at 1.5rem on a light ground. Weight marks the word instead of colour, and
+   the colour drops to the lamp's deep end at 5.2:1. The display sizes keep
+   the gradient: large type is held to a lower bar, and it was approved. */
+.day-mode .magic-subtitle :deep(.brand-grad) {
+  background: none; -webkit-background-clip: initial; background-clip: initial;
+  -webkit-text-fill-color: initial; color: #7A3A06; font-weight: 700;
+  filter: none;
 }
 /* The dark half of a heading keeps a real shadow — it has letters to hide
    behind — but a tighter one, so the type stays sharp. */
