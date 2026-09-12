@@ -2017,9 +2017,30 @@
                 <button class="map-link" @click="mapSelectBlind">Add them to the selection</button>
               </p>
 
+              <!-- ── THE WHOLE WORLD ── one copy of the planet file instead of an
+                   extract. A copy indexes nothing, so the memory that put Russia
+                   out of reach never enters into it — only disk does (~138 GB). -->
+              <div class="map-world" :class="{ on: mapT.mode === 'planet' }">
+                <div class="map-world-text">
+                  <template v-if="mapT.mode === 'planet'">
+                    <strong>The whole world is on the server</strong> · every country draws · copied {{ mapWhen(mapT.installedAt) }}<template v-if="mapT.planet && mapT.planet.includes('/')"> from build {{ mapT.planet.split('/').pop().replace('.pmtiles', '') }}</template>. Ticking countries below and applying would replace it with only those.
+                  </template>
+                  <template v-else>
+                    <strong>Or download the whole world</strong> · one copy of the planet file, roughly 140 GB, every country at once, nothing to rebuild when Jinni expands. Needs the disk, not the memory a big extract needs.
+                  </template>
+                </div>
+                <div class="provider-actions" style="margin-top: 8px">
+                  <button class="action-btn" @click="mapEstimateWorld" :disabled="mapBusy">{{ mapEstimating ? 'Measuring…' : 'Check size first' }}</button>
+                  <button class="action-btn btn-accent" @click="mapBuildWorld" :disabled="mapBusy">
+                    {{ mapRunning ? 'Building…' : (mapT.mode === 'planet' ? 'Re-download the newest planet' : 'Download the whole world') }}
+                  </button>
+                </div>
+              </div>
+
               <div class="loc-section-label" style="margin-top: 14px">
                 On the server now:
                 <template v-if="mapT.unmanaged">unknown — built before this panel</template>
+                <template v-else-if="mapT.mode === 'planet'">the whole world</template>
                 <template v-else-if="!mapT.installed.length">nothing</template>
                 <template v-else>{{ mapInstalledNames }}</template>
               </div>
@@ -2065,8 +2086,9 @@
 
               <template v-if="mapJob">
                 <div class="loc-section-label" style="margin-top: 14px">
-                  {{ mapJob.state === 'running' ? 'Building the map…' : (mapJob.state === 'failed' ? 'The build failed' : 'Last build') }}
-                  <template v-if="mapJob.codes.length"> — {{ mapJob.codes.join(', ') }}</template>
+                  {{ mapJob.state === 'running' ? (mapJob.world ? 'Copying the whole planet…' : 'Building the map…') : (mapJob.state === 'failed' ? 'The build failed' : 'Last build') }}
+                  <template v-if="mapJob.world"> — the whole world</template>
+                  <template v-else-if="mapJob.codes.length"> — {{ mapJob.codes.join(', ') }}</template>
                 </div>
                 <div class="map-bar" v-if="mapJob.state === 'running'"><span :style="{ width: (mapJob.percent || 0) + '%' }"></span></div>
                 <p v-if="mapJob.error" class="cov-meta map-warn">{{ mapJob.error }}</p>
@@ -7328,13 +7350,42 @@ export default {
       // Armenia's map out with no error visible anywhere.
       const byCode = Object.fromEntries((mapT.value?.catalog || []).map(c => [c.code, c]))
       const dropped = (mapT.value?.installed || []).filter(c => !mapSelected.value.includes(c))
-      if (dropped.length && mapSelected.value.length) {
+      if (mapT.value?.mode === 'planet' && mapSelected.value.length) {
+        // Every country is installed, so naming the dropped ones would list
+        // most of the planet. Say what actually happens instead.
+        const n = mapSelected.value.length
+        if (!confirm(`The whole world is on the server. Rebuilding for ${n === 1 ? 'one country' : n + ' countries'} REMOVES every other map. Continue?`)) return
+      } else if (dropped.length && mapSelected.value.length) {
         const names = dropped.map(c => byCode[c]?.name || c).join(', ')
         if (!confirm(`Rebuilding will REMOVE the map for ${names}. Maps there go blank. Continue?`)) return
       }
       if (!mapSelected.value.length && !confirm('Remove the map archive? Every map in the app goes blank until one is built again.')) return
       try {
         const res = await apiFetch('/map-tiles/build', { method: 'POST', body: JSON.stringify({ codes: mapSelected.value }) })
+        if (res.success) { mapJob.value = res.data; mapEst.value = null; mapWatchJob() }
+      } catch (e) { showToast(e.message, 'error') }
+    }
+
+    // The whole planet: priced as one file against the free disk, copied as
+    // one file. It replaces whatever is installed — the archive is one file
+    // either way — so the confirm says so before ~140 GB starts moving.
+    const mapEstimateWorld = async () => {
+      mapEstimating.value = true
+      mapEst.value = null
+      try {
+        const res = await apiFetch('/map-tiles/estimate', { method: 'POST', body: JSON.stringify({ world: true }) })
+        if (res.success) mapEst.value = res.data
+      } catch (e) { showToast(e.message, 'error') }
+      finally { mapEstimating.value = false }
+    }
+    const mapBuildWorld = async () => {
+      const again = mapT.value?.mode === 'planet'
+      const msg = again
+        ? 'Download the newest planet build again (roughly 140 GB) and replace the one on the server?'
+        : 'Download the whole world? Roughly 140 GB lands on the server and replaces the country archive. Maps keep working until the swap.'
+      if (!confirm(msg)) return
+      try {
+        const res = await apiFetch('/map-tiles/build', { method: 'POST', body: JSON.stringify({ world: true }) })
         if (res.success) { mapJob.value = res.data; mapEst.value = null; mapWatchJob() }
       } catch (e) { showToast(e.message, 'error') }
     }
@@ -7753,6 +7804,7 @@ export default {
       covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState,
       mapT, mapSelected, mapSearch, mapEst, mapEstimating, mapJob, mapRunning, mapBusy, mapChanged,
       mapBlind, mapBlindNames, mapCountries, mapBytes, mapWhen, mapSelectBlind, mapEstimate, mapBuild,
+      mapEstimateWorld, mapBuildWorld,
       mapInstalledNames, mapPending, mapRowState, mapRowClass, mapApplyLabel,
       adminSources, filteredSources, srcSearch, discForm, discBusy, discResult, discWhy, runDiscover, addDiscovered, srcLoaded, srcSaving, srcError, srcForm,
       srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
@@ -9947,6 +9999,9 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .map-country.adding .map-state { color: #34c778; }
 .map-country.removing .map-state { color: #e85454; }
 .map-pending { font-weight: 600; }
+.map-world { margin-top: 12px; padding: 12px 14px; border: 1px solid rgba(128,128,128,0.22); border-radius: 10px; }
+.map-world.on { border-color: rgba(212,175,55,0.5); }
+.map-world-text { font-size: 13px; line-height: 1.5; opacity: 0.92; }
 .map-warn { color: #e8894a; opacity: 0.95; }
 .map-link { background: none; border: none; padding: 0 0 0 6px; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
 .map-bar { height: 6px; border-radius: 3px; overflow: hidden; margin-top: 8px; background: rgba(128,128,128,0.18); }
