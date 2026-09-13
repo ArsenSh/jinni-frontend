@@ -2023,20 +2023,26 @@
               <div class="map-world" :class="{ on: mapT.mode === 'planet' }">
                 <div class="map-world-text">
                   <template v-if="mapT.mode === 'planet'">
-                    <strong>The whole world is on the server</strong> · every country draws · copied {{ mapWhen(mapT.installedAt) }}<template v-if="mapT.planet && mapT.planet.includes('/')"> from build {{ mapT.planet.split('/').pop().replace('.pmtiles', '') }}</template>. Ticking countries below and applying would replace it with only those.
+                    <strong>The whole world is on the server</strong> · every country draws · {{ mapBytes(mapT.archive.bytes) }}<template v-if="mapT.planet && mapT.planet.includes('/')"> · build {{ mapBuildName(mapT.planet) }}</template> · copied {{ mapWhen(mapT.installedAt) }}. Protomaps publishes a fresh planet daily; an update is a new 138 GB copy, so once a month or two is plenty.
                   </template>
                   <template v-else>
                     <strong>Or download the whole world</strong> · one copy of the planet file, roughly 140 GB, every country at once, nothing to rebuild when Jinni expands. Needs the disk, not the memory a big extract needs.
                   </template>
                 </div>
                 <div class="provider-actions" style="margin-top: 8px">
-                  <button class="action-btn" @click="mapEstimateWorld" :disabled="mapBusy">{{ mapEstimating ? 'Measuring…' : 'Check size first' }}</button>
+                  <button class="action-btn" @click="mapEstimateWorld" :disabled="mapBusy">{{ mapEstimating ? 'Checking…' : (mapT.mode === 'planet' ? 'Check for a newer build' : 'Check size first') }}</button>
                   <button class="action-btn btn-accent" @click="mapBuildWorld" :disabled="mapBusy">
-                    {{ mapRunning ? 'Building…' : (mapT.mode === 'planet' ? 'Re-download the newest planet' : 'Download the whole world') }}
+                    {{ mapRunning ? 'Copying…' : (mapT.mode === 'planet' ? 'Update to the newest planet' : 'Download the whole world') }}
                   </button>
+                  <button class="map-link" v-if="mapT.mode === 'planet' && !mapShowCountries" @click="mapShowCountries = true">Pick countries instead…</button>
+                  <button class="map-link" v-else-if="mapT.mode === 'planet'" @click="mapShowCountries = false; mapSelected = [...mapT.installed]">Hide the country list</button>
                 </div>
               </div>
 
+              <!-- With the whole world installed, two hundred rows all marked
+                   "on server" say nothing — the grid is folded away unless
+                   staff deliberately want to go back to picking countries. -->
+              <template v-if="mapT.mode !== 'planet' || mapShowCountries">
               <div class="loc-section-label" style="margin-top: 14px">
                 On the server now:
                 <template v-if="mapT.unmanaged">unknown — built before this panel</template>
@@ -2072,6 +2078,7 @@
                 </button>
                 <button class="action-btn" v-if="mapChanged && !mapBusy" @click="mapSelected = [...mapT.installed]">Cancel changes</button>
               </div>
+              </template>
 
               <!-- The server answers two different questions. When a selection
                    does not fit this box it reports no size at all, so showing
@@ -2079,6 +2086,12 @@
                    glitch rather than an answer — one or the other, never both. -->
               <p v-if="mapEst && mapEst.wontFit" class="cov-meta map-warn">
                 {{ mapEst.countries.join(', ') }} — {{ mapEst.wontFit }}
+              </p>
+              <p v-else-if="mapEst && mapEst.world && mapEst.upToDate" class="cov-meta">
+                Already on the newest planet build ({{ mapBuildName(mapEst.planet) }}) — nothing to download.
+              </p>
+              <p v-else-if="mapEst && mapEst.world && mapEst.installedPlanet" class="cov-meta">
+                A newer planet build exists ({{ mapBuildName(mapEst.planet) }}, installed is {{ mapBuildName(mapEst.installedPlanet) }}) — updating downloads <strong>{{ mapEst.bytes ? mapBytes(mapEst.bytes) : 'an unknown amount' }}</strong>.
               </p>
               <p v-else-if="mapEst" class="cov-meta">
                 {{ mapEst.countries.join(', ') }} would take <strong>{{ mapEst.bytes ? mapBytes(mapEst.bytes) : 'an unknown amount of' }}</strong> disk<template v-if="mapEst.transferBytes"> and download {{ mapBytes(mapEst.transferBytes) }}</template><template v-if="mapEst.tiles"> · {{ fmt(mapEst.tiles) }} tiles</template>.
@@ -7369,6 +7382,8 @@ export default {
     // The whole planet: priced as one file against the free disk, copied as
     // one file. It replaces whatever is installed — the archive is one file
     // either way — so the confirm says so before ~140 GB starts moving.
+    const mapShowCountries = ref(false)
+    const mapBuildName = (url) => String(url || '').split('/').pop().replace('.pmtiles', '')
     const mapEstimateWorld = async () => {
       mapEstimating.value = true
       mapEst.value = null
@@ -7381,7 +7396,7 @@ export default {
     const mapBuildWorld = async () => {
       const again = mapT.value?.mode === 'planet'
       const msg = again
-        ? 'Download the newest planet build again (roughly 140 GB) and replace the one on the server?'
+        ? 'Update to the newest planet build? If a newer one exists this copies roughly 140 GB and replaces the one on the server; if not, nothing is downloaded.'
         : 'Download the whole world? Roughly 140 GB lands on the server and replaces the country archive. Maps keep working until the swap.'
       if (!confirm(msg)) return
       try {
@@ -7804,7 +7819,7 @@ export default {
       covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState,
       mapT, mapSelected, mapSearch, mapEst, mapEstimating, mapJob, mapRunning, mapBusy, mapChanged,
       mapBlind, mapBlindNames, mapCountries, mapBytes, mapWhen, mapSelectBlind, mapEstimate, mapBuild,
-      mapEstimateWorld, mapBuildWorld,
+      mapEstimateWorld, mapBuildWorld, mapShowCountries, mapBuildName,
       mapInstalledNames, mapPending, mapRowState, mapRowClass, mapApplyLabel,
       adminSources, filteredSources, srcSearch, discForm, discBusy, discResult, discWhy, runDiscover, addDiscovered, srcLoaded, srcSaving, srcError, srcForm,
       srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
