@@ -1413,11 +1413,12 @@
         </div>
         <div class="settings-section">
           <h4>Chat engine</h4>
-          <p class="settings-description">V2 is the new engine being built in parallel (beta). Applies to chat messages; quick actions stay on V1.</p>
+          <p class="settings-description">V2 is the default. V3 is V2 plus a conversation controller that decides what each message means (testing). Applies to chat messages; quick actions stay on V1.</p>
           <div class="setting-item">
             <div class="theme-buttons">
               <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v1' }" @click="setChatEngine('v1')">V1 · stable</button>
-              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v2' }" @click="setChatEngine('v2')">V2 · beta</button>
+              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v2' }" @click="setChatEngine('v2')">V2 · default</button>
+              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v3' }" @click="setChatEngine('v3')">V3 · controller</button>
             </div>
           </div>
         </div>
@@ -3615,7 +3616,7 @@ export default {
     },
     closeSettings() { this.showSettingsModal = false },
     setChatEngine(engine) {
-      this.chatEngine = engine === 'v2' ? 'v2' : 'v1';
+      this.chatEngine = ['v2', 'v3'].includes(engine) ? engine : 'v1';
       localStorage.setItem('jinni_chat_engine', this.chatEngine);
     },
     loadSettings() {
@@ -4671,7 +4672,7 @@ export default {
         if (location) { requestBody.location = { lat: parseFloat(location.lat), lng: parseFloat(location.lng), radius: this.getSearchRadius(), source: location.source || 'unknown' } }
         // Engine pick (admin toggle in settings): v2 = the parallel new engine.
         // Same SSE dialect by contract, so everything below renders unchanged.
-        const chatEndpoint = this.chatEngine === 'v2' ? 'chat-stream-v2' : 'chat-stream';
+        const chatEndpoint = this.chatEngine === 'v3' ? 'chat-stream-v3' : (this.chatEngine === 'v2' ? 'chat-stream-v2' : 'chat-stream');
         const response = await fetch(`${API_BASE_URL}/api/ai/${chatEndpoint}`, {method: 'POST',headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('authToken')}` },body: JSON.stringify(requestBody),signal: reqController.signal });
         this.applyUsageHeaders(response.headers);    
         if (response.status === 400) {
