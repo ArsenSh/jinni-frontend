@@ -4346,6 +4346,18 @@ export default {
       // prose is not a place to tap.
       formatted = formatted.replace(/\b(Settings)\b/g, '<button class="inline-preference-btn" onclick="window.openJinniSettings()">$1</button>');
       formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Links are lifted out BEFORE any emphasis rule runs. A URL is full of
+      // underscores and asterisks that mean nothing, and the `_x_` → <em> rule
+      // below chewed straight through a booking link's tracking key (live
+      // 2026-09-13: "[FLYONE Armenia](…)" rendered as a broken italic mess).
+      // Each anchor is parked under an inert marker and restored at the end.
+      // rel: target="_blank" alone lets the opened page reach back through
+      // window.opener. Every anchor we emit carries it.
+      const parkedLinks = [];
+      const park = (html) => { parkedLinks.push(html); return `\uE000L${parkedLinks.length - 1}\uE000`; };
+      formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)|]+)\)/g, (m, text, url) => park(`<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`));
+      formatted = formatted.replace(/\[(https?:\/\/[^\s\]|]+)\]/g, (m, url) => park(`<a class="raw-url" href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`));
+      formatted = formatted.replace(/(?<!href="|">|<code>)(https?:\/\/[^\s<>"()|]+)(?!<\/a>|<\/code>)/g, (url) => park(`<a class="raw-url" href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`));
       formatted = formatted.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
       formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       formatted = this.linkifyPlaceNames(formatted);
@@ -4355,11 +4367,7 @@ export default {
       // NOTE: '|' is excluded from every URL class — newlines are still the
       // |||NL||| marker at this stage, and letting '|' into a URL swallowed
       // the marker into the href (rendered as a literal <br> inside the link).
-      // rel: target="_blank" alone lets the opened page reach back through
-      // window.opener. Every anchor we emit carries it.
-      formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)|]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-      formatted = formatted.replace(/\[(https?:\/\/[^\s\]|]+)\]/g, '<a class="raw-url" href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-      formatted = formatted.replace(/(?<!href="|">|<code>)(https?:\/\/[^\s<>"()|]+)(?!<\/a>|<\/code>)/g, (match) => { return `<a class="raw-url" href="${match}" target="_blank" rel="noopener noreferrer">${match}</a>` });
+      formatted = formatted.replace(/\uE000L(\d+)\uE000/g, (m, i) => parkedLinks[Number(i)] || '');
       formatted = formatted.replace(/\|\|\|NL\|\|\|/g, '<br>');
       formatted = formatted.replace(/(<br>){3,}/g, '<br><br>');
       return formatted;
