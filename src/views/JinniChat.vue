@@ -1533,6 +1533,10 @@
             <div class="pd-fact-body">{{ placeDetails?.address || selectedPlace?.address }}</div>
           </div>
 
+          <div class="pd-fact pd-fact--closed" v-if="placeDetails?.businessStatus && placeDetails.businessStatus !== 'OPERATIONAL'">
+            <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span>
+            <div class="pd-fact-body">{{ placeDetails.businessStatus === 'CLOSED_PERMANENTLY' ? t('place.closed_permanently') : t('place.closed_temporarily') }}</div>
+          </div>
           <div class="pd-fact" v-if="placeDetails?.hours?.length">
             <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
             <div class="pd-fact-body pd-hours">
@@ -3216,6 +3220,7 @@ export default {
                 highlights: result.data.highlights,
                 socialMedia: result.data.socialMedia,
                 hours: result.data.hours,
+                businessStatus: result.data.businessStatus || null,
                 description: result.data.description || rec.description,
                 rating: result.data.rating || rec.rating,
                 address: result.data.address || rec.address,
@@ -3349,6 +3354,7 @@ export default {
               highlights: details.highlights || null,
               socialMedia: details.socialMedia || null,
               hours: details.hours || null,
+              businessStatus: details.businessStatus || null,
               description: details.description || recData.description,
               rating: details.rating || recData.rating,
               // Prefer the freshly-fetched event schedule (it is the most

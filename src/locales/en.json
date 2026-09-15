@@ -1293,5 +1293,9 @@
     "direct": "direct",
     "book": "See flights",
     "caveat": "Recently seen fares from Yerevan — the final price is confirmed at booking."
+  },
+  "place": {
+    "closed_temporarily": "Temporarily closed",
+    "closed_permanently": "Permanently closed"
   }
 }

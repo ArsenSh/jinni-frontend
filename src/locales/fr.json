@@ -1293,5 +1293,9 @@
     "direct": "direct",
     "book": "Voir les vols",
     "caveat": "Tarifs récemment relevés depuis Erevan — le prix final est confirmé à la réservation."
+  },
+  "place": {
+    "closed_temporarily": "Fermé temporairement",
+    "closed_permanently": "Fermé définitivement"
   }
 }

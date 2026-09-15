@@ -1293,5 +1293,9 @@
     "direct": "直飞",
     "book": "查看航班",
     "caveat": "从埃里温出发的近期票价 — 最终价格以预订时为准。"
+  },
+  "place": {
+    "closed_temporarily": "暂时关闭",
+    "closed_permanently": "永久关闭"
   }
 }
