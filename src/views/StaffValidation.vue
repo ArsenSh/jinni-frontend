@@ -1956,9 +1956,61 @@
               <template v-if="expSelected.explore?.reviewedAt"><dt>Reviewed</dt><dd>{{ fmtD(expSelected.explore.reviewedAt) }}</dd></template>
             </dl>
 
-            <div v-if="expSelected.opening_hours?.weekday_text?.length" class="exp-modal-hours">
-              <div class="exp-modal-hours-title">Opening hours</div>
-              <div v-for="line in expSelected.opening_hours.weekday_text" :key="line" class="exp-modal-hours-line">{{ line }}</div>
+            <!-- Opening hours: Google's lines, or the staff's own (2026-09-16).
+                 The editor is the Destination one, bound to expHours. -->
+            <div class="exp-modal-hours">
+              <div class="exp-modal-hours-title">
+                Opening hours
+                <span v-if="expSelected.hoursCurated" class="exp-hours-badge">set by staff</span>
+                <span v-else-if="expSelected.opening_hours?.weekday_text?.length" class="exp-hours-badge exp-hours-badge--google">from Google</span>
+                <span v-if="expSelected.business_status && expSelected.business_status !== 'OPERATIONAL'" class="exp-hours-badge exp-hours-badge--closed">{{ expSelected.business_status === 'CLOSED_PERMANENTLY' ? 'permanently closed' : 'temporarily closed' }}</span>
+              </div>
+              <template v-if="!expHours">
+                <div v-if="expSelected.opening_hours?.weekday_text?.length">
+                  <div v-for="line in expSelected.opening_hours.weekday_text" :key="line" class="exp-modal-hours-line">{{ line }}</div>
+                </div>
+                <div v-else class="edit-help-sub">No hours on file — the open-now check cannot judge this place, so it trails every confirmed-open one.</div>
+                <div class="exp-hours-actions">
+                  <button class="action-btn btn-muted" :disabled="expBusy === expSelected.placeId" @click="openExpHoursEditor">{{ expSelected.opening_hours?.weekday_text?.length ? 'Edit hours' : 'Add hours' }}</button>
+                  <button v-if="expSelected.hoursCurated" class="action-btn btn-muted" :disabled="expBusy === expSelected.placeId" @click="clearExpHours" title="Drop the staff hours; Google's lines return on the next refresh">Back to Google's</button>
+                </div>
+              </template>
+              <template v-else>
+                <div class="edit-field" style="margin: 6px 0 10px">
+                  <button type="button" class="edit-free-btn" :class="{ 'edit-free-btn--active': expHours.is24Hours }" @click="expHours.is24Hours = !expHours.is24Hours">
+                    <svg v-if="expHours.is24Hours" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+                    Open 24/7
+                  </button>
+                </div>
+                <div v-if="!expHours.is24Hours" class="edit-hours-list">
+                  <div v-for="(d, di) in expHours.days" :key="d.day" class="edit-hours-row">
+                    <span class="edit-hours-day"><span class="edit-hours-day-full">{{ d.day }}</span><span class="edit-hours-day-short">{{ d.day.slice(0, 3) }}</span></span>
+                    <div class="edit-hours-pills">
+                      <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': !d.closed && !isDay24h(d) }" @click="d.closed = false; if (isDay24h(d)) { d.open = '09:00'; d.close = '18:00' }">Open</button>
+                      <button type="button" class="edit-hours-pill" :class="{ 'edit-hours-pill--active': isDay24h(d) }" @click="setDay24h(d)" title="Open around the clock on this day">24h</button>
+                      <button type="button" class="edit-hours-pill edit-hours-pill--close" :class="{ 'edit-hours-pill--active': d.closed }" @click="d.closed = true">Closed</button>
+                    </div>
+                    <template v-if="!d.closed && !isDay24h(d)">
+                      <input type="time" v-model="d.open"  class="edit-hours-time" />
+                      <span class="edit-hours-sep">–</span>
+                      <input type="time" v-model="d.close" class="edit-hours-time" />
+                    </template>
+                    <span v-else-if="isDay24h(d)" class="edit-hours-closed-text">Open 24 hours</span>
+                    <span v-else class="edit-hours-closed-text">Closed all day</span>
+                    <button v-if="di === 0 && !d.closed" type="button" class="edit-hours-all-btn" @click="applyExpHoursToAllDays" title="Copy these hours to every day of the week">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      Apply to all days
+                    </button>
+                  </div>
+                </div>
+                <div v-else class="edit-help-sub">Open 24 hours a day, every day.</div>
+                <div class="edit-help-sub" style="margin-top:6px">Closing past midnight is fine — 8:00 PM to 2:00 AM is read as overnight. A day with two ranges (lunch and dinner) is kept as one range here.</div>
+                <div class="exp-hours-actions">
+                  <button class="action-btn exp-btn-verify" :disabled="expBusy === expSelected.placeId" @click="saveExpHours">{{ expBusy === expSelected.placeId ? 'Saving…' : 'Save hours' }}</button>
+                  <button class="action-btn btn-muted" :disabled="expBusy === expSelected.placeId" @click="expHours = null">Cancel</button>
+                </div>
+              </template>
             </div>
 
             <div class="exp-modal-actions">
@@ -2651,6 +2703,59 @@ export default {
         showToast(err.response?.data?.error || 'Failed to update categories', 'error')
       } finally { expBusy.value = null }
     }
+    // ── Explore hours editor (2026-09-16) ──
+    // Seeds the Destination-style day schedule from the cached periods (Google's
+    // or the staff's own); saves both forms through one route.
+    const expHours = ref(null)
+    const EXP_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    const hhmm = (t) => `${String(t || '0000').slice(0, 2)}:${String(t || '0000').slice(2, 4)}`
+    function openExpHoursEditor() {
+      const periods = expSelected.value?.opening_hours?.periods || []
+      const allDay = periods.length === 1 && periods[0]?.open?.time === '0000' && !periods[0]?.close
+      const days = EXP_DAYS.map((day, i) => {
+        const gDay = (i + 1) % 7                                   // Google: 0 = Sunday
+        const ps = periods.filter(p => p?.open?.day === gDay)
+        if (!ps.length) return { day, closed: true, open: '09:00', close: '18:00' }
+        const p = ps[0]
+        const is24 = p.open.time === '0000' && (!p.close || (p.close.time === '0000' && p.close.day !== gDay))
+        if (is24) return { day, closed: false, open: '00:00', close: '23:59' }
+        return { day, closed: false, open: hhmm(p.open.time), close: hhmm(p.close?.time || '1800') }
+      })
+      expHours.value = { is24Hours: allDay, days }
+    }
+    function applyExpHoursToAllDays() {
+      const days = expHours.value?.days
+      if (!Array.isArray(days) || !days.length) return
+      const first = days[0]
+      days.forEach(d => { d.closed = first.closed; d.open = first.open; d.close = first.close })
+    }
+    async function saveExpHours() {
+      const place = expSelected.value
+      if (!place || !expHours.value) return
+      expBusy.value = place.placeId
+      try {
+        const { data } = await axios.patch(`${API_URL}/staff/explore-places/${place.placeId}/hours`, { openingHours: expHours.value }, { headers: authHeader() })
+        place.opening_hours = data?.place?.opening_hours || place.opening_hours
+        place.hoursCurated = true
+        expHours.value = null
+        showToast(data?.message || 'Hours saved')
+      } catch (err) {
+        showToast(err.response?.data?.error || 'Failed to save hours', 'error')
+      } finally { expBusy.value = null }
+    }
+    async function clearExpHours() {
+      const place = expSelected.value
+      if (!place) return
+      expBusy.value = place.placeId
+      try {
+        const { data } = await axios.patch(`${API_URL}/staff/explore-places/${place.placeId}/hours`, { clear: true }, { headers: authHeader() })
+        place.hoursCurated = false
+        showToast(data?.message || 'Hours back to Google\'s')
+      } catch (err) {
+        showToast(err.response?.data?.error || 'Failed to update hours', 'error')
+      } finally { expBusy.value = null }
+    }
+
     async function setExpStatus(place, status) {
       expBusy.value = place.placeId
       try {
@@ -4182,7 +4287,7 @@ export default {
     const onKey = (e) => {
       if (e.key === 'Escape') {
         if (destModal.value.lightboxOpen) { destModal.value.lightboxOpen = false; return }
-        if (expSelected.value)             { expSelected.value = null; return }
+        if (expSelected.value)             { expSelected.value = null; expHours.value = null; return }
         if (confirmLogout.value)           { confirmLogout.value = false; return }
         if (confirmingAction.value)        { confirmingAction.value = null; return }
         if (destDeleteTarget.value)        { destDeleteTarget.value = null; return }
@@ -4234,6 +4339,7 @@ export default {
       ALL_DEST_TYPES, PRICING_CURRENCIES, fmt, tabCount, svAccOpen, svToggleAcc, svAccTapExp,
       destModal, destGalleryImages, openDestCreate, openDestEdit, openDestView, closeDestModal,
       toggleDestType, destFormValid, applyHoursToAllDays, applyManualCoords, isDay24h, setDay24h,
+      expHours, openExpHoursEditor, applyExpHoursToAllDays, saveExpHours, clearExpHours,
       destIsEvent, destIsOneTimeEvent, destEventEndsInPast, destTimezoneOptions, tzShortLabel, eventScheduleSummary,
       // Map (Leaflet)
       destMap, reGeocodeDestination,
@@ -5103,6 +5209,10 @@ textarea.dest-input{resize:vertical;min-height:60px;font-family:inherit}
 .exp-modal-types { color: var(--text-mute); font-size: 12px; }
 .exp-modal-hours { margin-bottom: 14px; font-size: 12.5px; }
 .exp-modal-hours-title { font-weight: 700; color: var(--text-mute); margin-bottom: 4px; }
+.exp-hours-badge { margin-left: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: rgba(212,175,55,0.18); }
+.exp-hours-badge--google { background: rgba(128,128,128,0.16); }
+.exp-hours-badge--closed { background: rgba(232,137,74,0.22); }
+.exp-hours-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .exp-modal-hours-line { color: var(--text-mute); line-height: 1.5; }
 .exp-modal-actions { display: flex; gap: 8px; align-items: center; border-top: 1px solid var(--line-soft); padding-top: 14px; }
 .exp-modal-actions .action-btn { text-decoration: none; }
