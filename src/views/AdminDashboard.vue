@@ -25,6 +25,7 @@
           <svg v-else-if="tab.icon === 'prices'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           <svg v-else-if="tab.icon === 'limits'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
           <svg v-else-if="tab.icon === 'coverage'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          <svg v-else-if="tab.icon === 'sessions'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/></svg>
           <svg v-else-if="tab.icon === 'links'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           <svg v-else-if="tab.icon === 'staff'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
           <span class="nav-label">{{ tab.label }}</span>
@@ -2108,6 +2109,68 @@
                 <pre class="map-log" v-if="mapJob.log && mapJob.log.length">{{ mapJob.log.slice(-8).join('\n') }}</pre>
               </template>
             </template>
+          </div>
+        </section>
+
+        <!-- ── SESSIONS ── what each traveler typed, what Jinni answered, and what
+             the engine printed while deciding (founder 2026-09-16). Read-only. -->
+        <section v-if="activeTab === 'sessions'" class="tab-section">
+          <div class="card" style="padding: 18px 20px">
+            <div class="card-head" style="padding: 0 0 10px">
+              <h2>Sessions</h2>
+              <span class="card-sub">Newest chats across every user · open one to read it turn by turn with the engine's own reasoning · export as text to hand to a debugging session</span>
+            </div>
+            <div class="provider-row" style="align-items: center; gap: 10px">
+              <input class="limit-input" style="max-width: 280px" v-model="sesSearch" placeholder="Filter by user name or email…" @keyup.enter="fetchSessions" />
+              <button class="action-btn" @click="fetchSessions" :disabled="sesLoading">{{ sesLoading ? 'Loading…' : 'Refresh' }}</button>
+            </div>
+            <p v-if="!sesList.length && !sesLoading" class="empty-state">No sessions yet.</p>
+            <div class="ses-list" v-else>
+              <button v-for="s in sesList" :key="s._id" class="ses-row" :class="{ active: sesOpen && sesOpen._id === s._id }" @click="openSession(s)">
+                <span class="ses-user">{{ s.user?.name || s.user?.email || 'unknown' }}</span>
+                <span class="ses-title">{{ s.title || 'Untitled' }}</span>
+                <span class="ses-meta">{{ s.messageCount }} msg · {{ mapWhen(s.updatedAt) }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card" style="padding: 18px 20px; margin-top: 14px" v-if="sesOpen">
+            <div class="card-head" style="padding: 0 0 10px">
+              <h2>{{ sesOpen.title || 'Untitled' }}</h2>
+              <span class="card-sub">{{ sesOpen.user?.name || '' }} · {{ sesOpen.user?.email || '' }} · {{ mapWhen(sesOpen.createdAt) }}</span>
+            </div>
+            <div class="provider-actions" style="margin-bottom: 10px">
+              <a class="action-btn" :href="sesExportUrl(sesOpen)" @click.prevent="exportSession(sesOpen)">Export as text</a>
+              <button class="action-btn" @click="sesShowLogs = !sesShowLogs">{{ sesShowLogs ? 'Hide engine logs' : 'Show engine logs' }}</button>
+            </div>
+            <p v-if="sesDetailLoading" class="empty-state">Loading transcript…</p>
+            <div v-else class="ses-transcript">
+              <template v-for="(m, i) in sesMessages" :key="m.id || i">
+                <div class="ses-msg" :class="m.sender">
+                  <div class="ses-msg-head">{{ m.sender === 'user' ? 'Traveler' : 'Jinni' }} <span class="ses-msg-time">{{ mapWhen(m.timestamp) }}</span></div>
+                  <div class="ses-msg-text">{{ m.text }}</div>
+                  <div v-if="m.recommendations && m.recommendations.length" class="ses-cards">
+                    <span v-for="r in m.recommendations" :key="r.placeId || r.name" class="ses-card">{{ r.name }}<small v-if="r.category"> · {{ r.category }}</small></span>
+                  </div>
+                </div>
+                <div v-if="m.sender === 'user' && m._turn" class="ses-turn">
+                  <div class="ses-turn-line">
+                    <span class="ses-chip">{{ m._turn.engine || '?' }}</span>
+                    <span class="ses-chip">{{ m._turn.branch }}</span>
+                    <span class="ses-chip" v-if="m._turn.controllerLane">controller: {{ m._turn.controllerLane }} ({{ m._turn.controllerSource }})</span>
+                    <span class="ses-chip" v-if="m._turn.category">{{ m._turn.category }}</span>
+                    <span class="ses-chip">{{ m._turn.ms }} ms</span>
+                    <span class="ses-chip">{{ m._turn.tokensActual || m._turn.tokensEst }} tok</span>
+                    <span class="ses-chip" v-if="m._turn.candidateCount">{{ m._turn.shown }}/{{ m._turn.candidateCount }} shown</span>
+                    <span class="ses-chip" v-if="m._turn.googleCalls">google ×{{ m._turn.googleCalls }}</span>
+                    <span class="ses-chip" v-if="m._turn.radiusKm">{{ m._turn.radiusKm }} km</span>
+                    <span class="ses-chip" v-if="m._turn.city">{{ m._turn.city }}</span>
+                  </div>
+                  <pre v-if="sesShowLogs && m._turn.log && m._turn.log.length" class="map-log ses-log">{{ m._turn.log.join('\n') }}</pre>
+                </div>
+              </template>
+              <p v-if="sesTurnsUnmatched" class="cov-meta map-warn">{{ sesTurnsUnmatched }} engine turn(s) could not be lined up with a message — the export lists them in order.</p>
+            </div>
           </div>
         </section>
 
@@ -4988,6 +5051,7 @@ export default {
       { id: 'event-sources', label: 'Links', icon: 'links', badge: adminSources.value.length || null },
       { id: 'limits', label: 'Limits', icon: 'limits' },
       { id: 'coverage', label: 'Coverage', icon: 'coverage' },
+      { id: 'sessions', label: 'Sessions', icon: 'sessions' },
       { id: 'prices', label: 'Prices', icon: 'prices' }
     ])
 
@@ -6927,6 +6991,7 @@ export default {
       if (tab === 'limits' && !limitsData.value) fetchLimits()
       if (tab === 'coverage' && !covData.value) fetchCoverage()
       if (tab === 'coverage' && !mapT.value) fetchMapTiles()
+      if (tab === 'sessions' && !sesList.value.length) fetchSessions()
       if (tab === 'event-sources' && !srcLoaded.value) loadAdminSources()
       if (tab === 'places' && !aiEvents.value.length) fetchAiEvents()
       if (tab === 'places' && !places.value.length) fetchPlaces()
@@ -7382,6 +7447,59 @@ export default {
     // The whole planet: priced as one file against the free disk, copied as
     // one file. It replaces whatever is installed — the archive is one file
     // either way — so the confirm says so before ~140 GB starts moving.
+    // ── Sessions tab (founder 2026-09-16) ──
+    const sesSearch = ref('')
+    const sesList = ref([])
+    const sesLoading = ref(false)
+    const sesOpen = ref(null)
+    const sesMessages = ref([])
+    const sesDetailLoading = ref(false)
+    const sesShowLogs = ref(true)
+    const sesTurnsUnmatched = ref(0)
+    const fetchSessions = async () => {
+      sesLoading.value = true
+      try {
+        const q = new URLSearchParams({ limit: 60, search: sesSearch.value.trim() })
+        const res = await apiFetch(`/chat-sessions?${q}`)
+        sesList.value = res.data.sessions || []
+      } catch (e) { showToast(e.message, 'error') } finally { sesLoading.value = false }
+    }
+    // Turn records line up with the traveler's messages in order: the i-th
+    // user message is the i-th turn. The ask text is checked too, so a
+    // mismatch (a turn the frontend never saved, or vice versa) is counted
+    // rather than silently attached to the wrong message.
+    const openSession = async (s) => {
+      sesOpen.value = s
+      sesDetailLoading.value = true
+      try {
+        const [full, turns] = await Promise.all([apiFetch(`/chat-sessions/${s._id}`), apiFetch(`/chat-sessions/${s._id}/turns`)])
+        const msgs = (full.data?.messages || []).map(m => ({ ...m }))
+        const list = turns.data?.turns || []
+        let ti = 0, unmatched = 0
+        for (const m of msgs) {
+          if (m.sender !== 'user') continue
+          const t = list[ti]
+          if (!t) continue
+          const same = !t.ask || String(m.text || '').slice(0, 60) === String(t.ask).slice(0, 60)
+          if (same) { m._turn = t; ti++ } else { unmatched++; ti++ }
+        }
+        sesTurnsUnmatched.value = unmatched + Math.max(0, list.length - ti)
+        sesMessages.value = msgs
+      } catch (e) { showToast(e.message, 'error') } finally { sesDetailLoading.value = false }
+    }
+    const sesExportUrl = (s) => `${API}/admin/chat-sessions/${s._id}/export`
+    const exportSession = async (s) => {
+      try {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token')
+        const res = await fetch(sesExportUrl(s), { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const text = await res.text()
+        const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }))
+        const a = document.createElement('a'); a.href = url; a.download = `jinni-session-${s._id}.txt`; a.click()
+        setTimeout(() => URL.revokeObjectURL(url), 2000)
+      } catch (e) { showToast(e.message, 'error') }
+    }
+
     const mapShowCountries = ref(false)
     const mapBuildName = (url) => String(url || '').split('/').pop().replace('.pmtiles', '')
     const mapEstimateWorld = async () => {
@@ -7820,6 +7938,8 @@ export default {
       mapT, mapSelected, mapSearch, mapEst, mapEstimating, mapJob, mapRunning, mapBusy, mapChanged,
       mapBlind, mapBlindNames, mapCountries, mapBytes, mapWhen, mapSelectBlind, mapEstimate, mapBuild,
       mapEstimateWorld, mapBuildWorld, mapShowCountries, mapBuildName,
+      sesSearch, sesList, sesLoading, sesOpen, sesMessages, sesDetailLoading, sesShowLogs, sesTurnsUnmatched,
+      fetchSessions, openSession, sesExportUrl, exportSession,
       mapInstalledNames, mapPending, mapRowState, mapRowClass, mapApplyLabel,
       adminSources, filteredSources, srcSearch, discForm, discBusy, discResult, discWhy, runDiscover, addDiscovered, srcLoaded, srcSaving, srcError, srcForm,
       srcOriginFilter, srcEnabledFilter, srcOriginOpts, srcEnabledOpts,
@@ -10015,6 +10135,26 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .map-country.removing .map-state { color: #e85454; }
 .map-pending { font-weight: 600; }
 .map-world { margin-top: 12px; padding: 12px 14px; border: 1px solid rgba(128,128,128,0.22); border-radius: 10px; }
+.ses-list { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; max-height: 340px; overflow-y: auto; }
+.ses-row { display: grid; grid-template-columns: 180px 1fr auto; gap: 12px; align-items: center; text-align: left; padding: 8px 10px; border: 1px solid rgba(128,128,128,0.18); border-radius: 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.ses-row.active { border-color: rgba(212,175,55,0.6); }
+.ses-user { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ses-title { opacity: 0.85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ses-meta { font-size: 12px; opacity: 0.65; white-space: nowrap; }
+.ses-transcript { display: flex; flex-direction: column; gap: 8px; }
+.ses-msg { padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(128,128,128,0.16); }
+.ses-msg.user { border-color: rgba(212,175,55,0.35); }
+.ses-msg-head { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.6; margin-bottom: 4px; }
+.ses-msg-time { text-transform: none; letter-spacing: 0; margin-left: 8px; }
+.ses-msg-text { white-space: pre-wrap; line-height: 1.45; }
+.ses-cards { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ses-card { font-size: 12px; padding: 3px 8px; border-radius: 999px; background: rgba(128,128,128,0.12); }
+.ses-card small { opacity: 0.65; }
+.ses-turn { margin: -2px 0 0 18px; padding: 6px 10px; border-left: 2px solid rgba(139,92,246,0.45); }
+.ses-turn-line { display: flex; flex-wrap: wrap; gap: 6px; }
+.ses-chip { font-size: 11px; font-family: 'DM Mono', monospace; padding: 2px 7px; border-radius: 6px; background: rgba(139,92,246,0.12); }
+.ses-log { max-height: 260px; margin-top: 6px; }
+@media (max-width: 720px) { .ses-row { grid-template-columns: 1fr; gap: 2px; } .ses-turn { margin-left: 6px; } }
 .map-world.on { border-color: rgba(212,175,55,0.5); }
 .map-world-text { font-size: 13px; line-height: 1.5; opacity: 0.92; }
 .map-warn { color: #e8894a; opacity: 0.95; }
