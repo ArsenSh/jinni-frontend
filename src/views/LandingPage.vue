@@ -66,7 +66,7 @@
         <div v-for="g in cityGroups" :key="g.code || g.name" class="cities-country">
           <h3 class="cities-country-name">{{ g.name }}</h3>
           <div class="cities-grid">
-            <router-link v-for="c in g.cities" :key="c.slug" :to="`/discover/${c.slug}`" class="city-card">
+            <router-link v-for="c in g.cities" :key="c.slug" :to="{ path: `/discover/${c.slug}`, query: { from: 'landing' } }" class="city-card">
               <div class="city-card-body">
                 <span class="city-card-name">{{ c.name }}</span>
                 <span class="city-card-meta">{{ $t('landing.cities.places', { count: c.count }) }}</span>

@@ -1309,6 +1309,7 @@
     "not_found": "Jinni n’a pas encore de page publique pour cette ville.",
     "not_found_sub": "Demandez à Jinni dans le chat — les adresses trouvées apparaîtront ici au fil du remplissage.",
     "footer_line": "Voici ce que Jinni connaît déjà ici — dans le chat, il trouve ce qui vous correspond.",
-    "no_match": "Aucune adresse vérifiée ne correspond à ces filtres — retirez-en un pour en voir plus."
+    "no_match": "Aucune adresse vérifiée ne correspond à ces filtres — retirez-en un pour en voir plus.",
+    "skip": "Passer pour l’instant"
   }
 }

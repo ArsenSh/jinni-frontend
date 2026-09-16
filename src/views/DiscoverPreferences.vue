@@ -148,6 +148,8 @@
             <div v-else class="completion-required">
               {{ $t('onboarding.complete_warning') }}
             </div>
+            <!-- Public page only: the city is one tap away even without choosing. -->
+            <button type="button" class="dp-skip" @click="skip">{{ $t('discover.skip') }}</button>
           </div>
 
           <div class="progress-container">
@@ -261,6 +263,10 @@ export default {
           },
         };
       } catch (e) { /* storage unavailable → defaults */ }
+    },
+    skip() {
+      try { if (!localStorage.getItem(STORE_KEY)) localStorage.setItem(STORE_KEY, JSON.stringify({ travelStyle: '', interests: [], budget: { min: 0, max: 0, currency: 'USD' } })); } catch (e) { /* ignore */ }
+      this.$router.push(this.returnTo);
     },
     savePreferences() {
       if (this.isSaving) return;
@@ -497,4 +503,8 @@ export default {
 @keyframes gps-glow{0%{box-shadow:0 0 0 0 rgba(212,175,55,0.55)}100%{box-shadow:0 0 14px 6px rgba(212,175,55,0)}}
 .fade-enter-active,.fade-leave-active{transition:opacity 0.3s ease}
 .fade-enter-from,.fade-leave-to{opacity:0}
+.dp-skip { display: block; margin: 14px auto 0; background: none; border: none; cursor: pointer; font: inherit; font-size: 0.92rem; text-decoration: underline; text-underline-offset: 3px; opacity: 0.75; color: inherit }
+.dp-skip:hover { opacity: 1 }
+.day-mode .dp-skip { color: #5c3f2e }
+.night-mode .dp-skip { color: #e2e8f0 }
 </style>

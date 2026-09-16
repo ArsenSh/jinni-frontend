@@ -295,7 +295,25 @@ export default {
       });
     },
   },
-  created() { this.theme = this.resolveTheme(); this.loadPrefs(); },
+  created() {
+    this.theme = this.resolveTheme();
+    this.loadPrefs();
+    // Founder 2026-09-17: a first-time visitor arriving from the landing's
+    // city cards goes through the short preferences page first (interests +
+    // style), then lands here. Only on that path — a search-engine visitor
+    // or a shared link opens the city directly, so crawlers index the city,
+    // not the form. "First time" = nothing saved yet; the preferences page
+    // saves even an empty choice, so this happens once per browser.
+    if (this.$route.query.from === 'landing') {
+      let seen = false;
+      try { seen = !!localStorage.getItem('jinni_public_prefs'); } catch (e) { seen = true; }
+      if (!seen) {
+        this.$router.replace({ path: '/discover/preferences', query: { returnTo: `/discover/${this.$route.params.slug}` } });
+        return;
+      }
+      this.$router.replace({ path: `/discover/${this.$route.params.slug}` });
+    }
+  },
   watch: { '$route.params.slug'() { this.load(); } },
   mounted() {
     this.load();
