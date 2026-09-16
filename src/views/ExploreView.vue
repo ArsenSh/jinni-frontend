@@ -1205,7 +1205,9 @@ export default {
 
 /* Rail position dots — iPhone-home pattern, mobile only */
 .ex-dots { display: none; align-items: center; justify-content: center; gap: 6px; margin: 10px 0 2px; }
-@media (max-width: 768px) { .ex-dots { display: flex; } }
+/* Phones show the dots and hide the desktop's slim thumb — one position
+   indicator per rail, not two (founder 2026-09-17). */
+@media (max-width: 768px) { .ex-dots { display: flex; } .ex-rail-scroll { display: none; } }
 .ex-dot { position: relative; width: 6px; height: 6px; padding: 0; border: none; border-radius: 99px; cursor: pointer;
   /* Same palette as the desktop rail scrollbar: track tone idle, accent active. */
   background: color-mix(in srgb, var(--ex-line) 55%, transparent); opacity: 0.9;
