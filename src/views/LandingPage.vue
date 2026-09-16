@@ -40,26 +40,6 @@
         </div>
       </div>
     </section>
-    <!-- Cities Jinni has filled (founder 2026-09-16): the public /discover
-         pages, linked from here so search engines and visitors find them.
-         Derived from the data — a city appears once it has enough places.
-         Hidden entirely while there are none, so the landing never shows an
-         empty section. -->
-    <section v-if="cities.length" class="cities">
-      <div class="features-container">
-        <h2 class="features-heading cities-heading">{{ $t('landing.cities.title') }}</h2>
-        <p class="cities-sub">{{ $t('landing.cities.subtitle') }}</p>
-        <div class="cities-grid">
-          <router-link v-for="c in cities" :key="c.slug" :to="`/discover/${c.slug}`" class="city-card">
-            <img v-if="c.image" :src="cityImg(c.image)" :alt="`${c.name} — ${$t('landing.cities.alt')}`" loading="lazy" decoding="async" @error="$event.target.style.display='none'"/>
-            <div class="city-card-body">
-              <span class="city-card-name">{{ c.name }}</span>
-              <span class="city-card-meta">{{ c.country }} · {{ $t('landing.cities.places', { count: c.count }) }}</span>
-            </div>
-          </router-link>
-        </div>
-      </div>
-    </section>
     <div class="mode-switch-wrapper">
       <div class="mode-switch-pill">
         <button class="mode-switch-btn mode-switch-btn--active">
@@ -72,6 +52,25 @@
         </button>
       </div>
     </div>
+    <!-- Cities Jinni has filled (founder 2026-09-16): the public /discover
+         pages, linked from here so search engines and visitors find them.
+         Derived from the data — a city appears once it has enough places.
+         Hidden entirely while there are none, so the landing never shows an
+         empty section. -->
+    <section v-if="cities.length" class="cities">
+      <div class="features-container">
+        <h2 class="features-heading cities-heading">{{ $t('landing.cities.title') }}</h2>
+        <p class="cities-sub">{{ $t('landing.cities.subtitle') }}</p>
+        <div class="cities-grid">
+          <router-link v-for="c in cities" :key="c.slug" :to="`/discover/${c.slug}`" class="city-card">
+            <div class="city-card-body">
+              <span class="city-card-name">{{ c.name }}</span>
+              <span class="city-card-meta">{{ c.country }} · {{ $t('landing.cities.places', { count: c.count }) }}</span>
+            </div>
+          </router-link>
+        </div>
+      </div>
+    </section>
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-links">
@@ -442,16 +441,15 @@ export default {
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
 /* Cities — same container/heading as the features; cards use the landing's
    glass, no hover motion (Arsen's rule), light feedback only. */
-.cities { padding: 0 1rem 3.5rem; position: relative; z-index: 2 }
+.cities { padding: 0 1rem 3.5rem; margin-top: -1.5rem; position: relative; z-index: 2 }
 .cities-heading { margin-bottom: 0.6rem }
 .cities-sub { text-align: center; opacity: 0.8; margin: 0 auto 2rem; max-width: 640px; line-height: 1.55 }
-.cities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; max-width: 1000px; margin: 0 auto }
-.city-card { display: block; border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit;
+.cities-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; max-width: 1000px; margin: 0 auto }
+.city-card { display: block; min-width: 200px; border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit;
   background: rgba(255,255,255,0.06); box-shadow: 0 0 18px -2px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12);
   transition: border-color 0.25s, box-shadow 0.25s }
 .city-card:hover { border-color: rgba(212,175,55,0.55); box-shadow: 0 0 22px -2px rgba(212,175,55,0.35) }
-.city-card img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover }
-.city-card-body { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 14px }
+.city-card-body { display: flex; flex-direction: column; gap: 4px; padding: 14px 20px; text-align: center }
 .city-card-name { font-family: var(--brand-serif); font-size: 1.25rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .city-card-meta { font-size: 0.9rem; opacity: 0.78 }
 .day-mode .city-card { background: rgba(255,251,245,0.7); border-color: rgba(150,100,55,0.25); box-shadow: 0 0 18px -2px rgba(120,80,30,0.14) }

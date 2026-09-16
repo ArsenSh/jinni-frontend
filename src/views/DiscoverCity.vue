@@ -17,6 +17,37 @@
       </div>
     </header>
 
+    <!-- Filters (founder 2026-09-17): the onboarding preferences minus the
+         location step — interests, travel style, budget — applied on the
+         client to the verified set. Nothing is stored or sent anywhere. -->
+    <div v-if="hasAnyRaw" class="dc-filters">
+      <div class="dc-filter-row">
+        <span class="dc-filter-label">{{ t('onboarding.interests_title') || 'Interests' }}</span>
+        <div class="dc-chips">
+          <button v-for="(label, key) in interestOptions" :key="key" type="button" class="ex-chip dc-chip"
+                  :class="{ active: fInterests.includes(key) }" @click="toggleInterest(key)">{{ label }}</button>
+        </div>
+      </div>
+      <div class="dc-filter-row">
+        <span class="dc-filter-label">{{ t('onboarding.style_title') || 'Travel style' }}</span>
+        <div class="dc-chips">
+          <button v-for="(label, key) in styleOptions" :key="key" type="button" class="ex-chip dc-chip"
+                  :class="{ active: fStyle === key }" @click="fStyle = fStyle === key ? '' : key">{{ label }}</button>
+        </div>
+      </div>
+      <div class="dc-filter-row">
+        <span class="dc-filter-label">{{ t('onboarding.budget_title') || 'Budget' }} <small>USD</small></span>
+        <div class="dc-chips dc-budget">
+          <input v-model.number="fBudgetMin" type="number" min="0" inputmode="numeric" class="dc-input" :placeholder="t('onboarding.min_budget') || 'Minimum'"/>
+          <span class="dc-dash">–</span>
+          <input v-model.number="fBudgetMax" type="number" min="0" inputmode="numeric" class="dc-input" :placeholder="t('onboarding.max_budget') || 'Maximum'"/>
+          <button v-if="filtersActive" type="button" class="ex-chip dc-chip dc-clear" @click="clearFilters">✕ {{ t('map.clear_route') || 'Clear' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <p v-if="hasAnyRaw && !hasAny && !loading" class="dc-nomatch">{{ t('discover.no_match') || 'No verified places match these filters — clear one to see more.' }}</p>
+
     <nav v-if="hasAny" class="ex-nav" :class="{ 'is-stuck': navStuck }" ref="navEl">
       <div class="ex-nav-inner">
         <button v-for="c in orderedCategories" :key="c" :ref="el => chipEls[c] = el"
@@ -37,7 +68,7 @@
       </div>
     </div>
 
-    <div v-else-if="!hasAny" class="ex-empty">
+    <div v-else-if="!hasAnyRaw" class="ex-empty">
       <div class="ex-empty-icon">✨</div>
       <p class="ex-empty-title">{{ t('discover.not_found') || 'Jinni has no public page for this city yet.' }}</p>
       <p class="ex-empty-sub">{{ t('discover.not_found_sub') || 'Ask Jinni in chat — the places it finds appear here as the city fills in.' }}</p>
@@ -190,7 +221,8 @@ export default {
   name: 'DiscoverCity',
   data() {
     return {
-      loading: true, categories: {}, city: null, serverOrder: null,
+      loading: true, rawCategories: {}, city: null, serverOrder: null,
+      fInterests: [], fStyle: '', fBudgetMin: null, fBudgetMax: null,
       activeCat: null, navStuck: false, catEls: {}, railEls: {}, chipEls: {}, railIx: {}, railBar: {}, _railTimers: {},
       theme: 'night-mode',
       gallery: { open: false, images: [], idx: 0, name: '' },
@@ -202,12 +234,41 @@ export default {
       const base = this.t('explore.title') || "Jinni's Discoveries";
       return this.city ? `${base} — ${this.city.name}` : base;
     },
+    interestOptions() { const m = this.$tm ? this.$tm('onboarding.interests') : null; return (m && typeof m === 'object' && Object.keys(m).length) ? m : { family: 'Family', romantic: 'Romantic', nature: 'Nature', adventure: 'Adventure', cultural: 'Cultural', history: 'History', art: 'Art', food_drink: 'Cuisine', nightlife: 'Nightlife', relaxation: 'Relaxation' }; },
+    styleOptions() { const m = this.$tm ? this.$tm('onboarding.styles') : null; return (m && typeof m === 'object' && Object.keys(m).length) ? m : { luxury: 'Luxury', budget: 'Budget' }; },
+    filtersActive() { return this.fInterests.length > 0 || !!this.fStyle || Number.isFinite(this.fBudgetMin) || Number.isFinite(this.fBudgetMax); },
+    // Same rules the Discoveries page applies server-side to a signed-in
+    // user's preferences: an interest tag must match when the place carries
+    // tags (untagged places stay); a style drops the opposite price tier;
+    // a budget of ≤ $15 drops upscale, ≥ $60 drops budget places.
+    categories() {
+      const want = new Set(this.fInterests.map(i => i === 'food_drink' ? 'food&drink' : i));
+      const min = Number.isFinite(this.fBudgetMin) ? this.fBudgetMin : null;
+      const max = Number.isFinite(this.fBudgetMax) ? this.fBudgetMax : null;
+      const keep = (p) => {
+        if (want.size && (p.interests || []).length && !(p.interests || []).some(t => want.has(t))) return false;
+        if (p.priced && p.tier) {
+          if (this.fStyle === 'luxury' && p.tier <= 2) return false;
+          if (this.fStyle === 'budget' && p.tier >= 3) return false;
+          if (max != null && max <= 15 && p.tier >= 3) return false;
+          if (min != null && min >= 60 && p.tier === 1) return false;
+        }
+        return true;
+      };
+      const out = {};
+      for (const c of Object.keys(this.rawCategories)) {
+        const list = (this.rawCategories[c] || []).filter(keep);
+        if (list.length) out[c] = list;
+      }
+      return out;
+    },
     orderedCategories() {
       const order = (Array.isArray(this.serverOrder) && this.serverOrder.length) ? this.serverOrder
         : ['restaurants', 'historical', 'hidden_gems', 'activities', 'photo_spots', 'shopping', 'hotels'];
       return order.filter(c => this.categories[c] && this.categories[c].length);
     },
     hasAny() { return this.orderedCategories.length > 0; },
+    hasAnyRaw() { return Object.values(this.rawCategories).some(l => l && l.length); },
     hoursParsed() {
       const hrs = this.info.data?.hours;
       if (!Array.isArray(hrs)) return [];
@@ -279,13 +340,13 @@ export default {
     catLabel(c) { const key = 'explore.cat.' + c; const s = this.$t ? this.$t(key) : null; return (s && s !== key) ? s : (CAT_LABELS[c] || c); },
     async load() {
       this.loading = true;
-      this.categories = {}; this.city = null;
+      this.rawCategories = {}; this.city = null;
       try {
         const slug = String(this.$route.params.slug || '').toLowerCase();
         const res = await fetch(`${API_BASE}/api/public/discover/${encodeURIComponent(slug)}`);
         const data = await res.json().catch(() => ({}));
         if (data.success) {
-          this.categories = data.categories || {};
+          this.rawCategories = data.categories || {};
           this.city = data.city || null;
           this.serverOrder = Array.isArray(data.order) ? data.order : null;
         }
@@ -423,6 +484,8 @@ export default {
       a.href = `https://www.google.com/maps/search/?api=1&query=${q}`; a.target = '_blank'; a.rel = 'noopener noreferrer';
       document.body.appendChild(a); a.click(); a.remove();
     },
+    toggleInterest(k) { this.fInterests = this.fInterests.includes(k) ? this.fInterests.filter(x => x !== k) : [...this.fInterests, k]; },
+    clearFilters() { this.fInterests = []; this.fStyle = ''; this.fBudgetMin = null; this.fBudgetMax = null; },
     goAuth() { this.$router.push('/auth'); },
   },
 };
@@ -917,6 +980,20 @@ export default {
 .explore.night-mode .ex-save svg path { stroke: rgba(216,180,254,0.8); }
 .ex-pref { color: #D4AF37; }
 
+/* Filters — onboarding's three preference steps, in the page's chip dress. */
+.dc-filters { width: min(980px, calc(100% - 36px)); margin: 14px auto 0; display: flex; flex-direction: column; gap: 8px; }
+.dc-filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.dc-filter-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ex-heading); min-width: 92px; }
+.dc-filter-label small { font-weight: 500; opacity: 0.7; margin-left: 4px; }
+.dc-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.dc-chip { padding: 6px 12px; font-size: 0.82rem; }
+.dc-budget { gap: 8px; }
+.dc-input { width: 104px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--ex-line); background: var(--ex-search-bg, var(--ex-chip)); color: var(--ex-text); font: inherit; font-size: 0.85rem; outline: none; }
+.dc-input:focus { border-color: var(--ex-accent); }
+.dc-dash { opacity: 0.6; }
+.dc-clear { opacity: 0.85; }
+.dc-nomatch { text-align: center; margin: 22px auto 0; padding: 0 18px; color: var(--ex-muted); }
+@media (max-width: 520px) { .dc-filter-label { min-width: 100%; } .dc-input { width: 44%; } }
 /* Public page only: the lamp is a link home; the More window's Ask Jinni
    action reuses the lamp glyph at button size. */
 .ex-app-link { display: inline-block; line-height: 0; }

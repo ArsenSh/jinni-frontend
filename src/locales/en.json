@@ -1308,6 +1308,7 @@
     "intro": "Places Jinni has verified in {city} — open to everyone, no account needed.",
     "not_found": "Jinni has no public page for this city yet.",
     "not_found_sub": "Ask Jinni in chat — the places it finds appear here as the city fills in.",
-    "footer_line": "This is what Jinni already knows here — in chat it finds what fits you."
+    "footer_line": "This is what Jinni already knows here — in chat it finds what fits you.",
+    "no_match": "No verified places match these filters — clear one to see more."
   }
 }
