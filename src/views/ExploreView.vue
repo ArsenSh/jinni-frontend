@@ -202,7 +202,8 @@
     </template>
 
     <!-- ═══ Fullscreen gallery ═══ -->
-    <div v-if="gallery.open" class="ex-gallery" @click.self="closeGallery">
+    <div v-if="gallery.open" class="ex-gallery" @click.self="closeGallery"
+         @touchstart.passive="galleryTouchStart" @touchend.passive="galleryTouchEnd">
       <button class="ex-gallery-close" @click="closeGallery">✕</button>
       <button v-if="gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--prev" @click="galleryStep(-1)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -457,6 +458,7 @@ export default {
     window.removeEventListener('scroll', this.onWinScroll);
     window.removeEventListener('resize', this.computeRailN);
     if (this._spy) this._spy.disconnect();
+    this.lockScroll(false);
   },
   methods: {
     // vue-i18n returns the KEY ITSELF for a missing message (a truthy string),
@@ -732,6 +734,7 @@ export default {
     // ── Gallery ──
     async openGallery(p) {
       this.gallery = { open: true, images: p.image ? [this.imgUrl(p.image)] : [], idx: 0, name: p.name };
+      this.lockScroll(true);
       try {
         const res = await fetch(`${API_BASE}/api/ai/place-images/${p.placeId}`, { headers: this.authHeaders() });
         const data = await res.json().catch(() => ({}));
@@ -739,11 +742,22 @@ export default {
         if (stored.length) this.gallery = { ...this.gallery, images: stored, idx: 0 };
       } catch (e) { /* keep the card image */ }
     },
+    // Phone comfort (founder 2026-09-17): swipe to step, and the page behind
+    // the overlay must not scroll while it is open.
+    galleryTouchStart(e) { const t = e.changedTouches && e.changedTouches[0]; this._gx = t ? t.clientX : null; this._gy = t ? t.clientY : null; },
+    galleryTouchEnd(e) {
+      const t = e.changedTouches && e.changedTouches[0];
+      if (!t || this._gx == null) return;
+      const dx = t.clientX - this._gx, dy = t.clientY - this._gy;
+      this._gx = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) this.galleryStep(dx < 0 ? 1 : -1);
+    },
+    lockScroll(on) { try { document.documentElement.style.overflow = on ? 'hidden' : ''; } catch (e) { /* ignore */ } },
     galleryStep(dir) {
       const n = this.gallery.images.length;
       if (n) this.gallery.idx = (this.gallery.idx + dir + n) % n;
     },
-    closeGallery() { this.gallery = { open: false, images: [], idx: 0, name: '' }; },
+    closeGallery() { this.gallery = { open: false, images: [], idx: 0, name: '' }; this.lockScroll(false); },
     // ── Info ──
     async openInfo(p, cat) {
       this.info = { open: true, loading: true, data: null, place: p, cat: cat || null };
@@ -1208,6 +1222,14 @@ export default {
 /* Phones show the dots and hide the desktop's slim thumb — one position
    indicator per rail, not two (founder 2026-09-17). */
 @media (max-width: 768px) { .ex-dots { display: flex; } .ex-rail-scroll { display: none; } }
+/* Gallery on phones: swipe replaces the arrows (they sat on the photo's
+   edges), the photo leaves room for the caption bar, the close target grows. */
+@media (max-width: 768px) {
+  .ex-gallery-nav { display: none; }
+  .ex-gallery-img { max-width: 94vw; max-height: 72vh; border-radius: 10px; }
+  .ex-gallery-close { top: 14px; right: 14px; width: 44px; height: 44px; }
+  .ex-gallery-bar { bottom: max(16px, env(safe-area-inset-bottom)); max-width: 92vw; }
+}
 .ex-dot { position: relative; width: 6px; height: 6px; padding: 0; border: none; border-radius: 99px; cursor: pointer;
   /* Same palette as the desktop rail scrollbar: track tone idle, accent active. */
   background: color-mix(in srgb, var(--ex-line) 55%, transparent); opacity: 0.9;
