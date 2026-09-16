@@ -25,7 +25,7 @@ export const SKY_DEFAULTS = {
   starWarmChance: 0.22, starWarmHueMin: 34, starWarmHueSpread: 14,
   starEmberChance: 0.05, starEmberHueMin: 18, starEmberHueSpread: 10,
   twinkleChance: 0.12, twinkleMin: 10, twinkleSpread: 10,
-  cometDelayMin: 3500, cometDelaySpread: 3500, cometChance: 0.8,
+  cometDelayMin: 5000, cometDelaySpread: 2000, cometChance: 0.8,
   cometDurMin: 1.0, cometDurSpread: 0.9,
   cometWidthMin: 1.6, cometWidthSpread: 1.4,
   cometLenMin: 160, cometLenSpread: 220,
