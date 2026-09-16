@@ -8,7 +8,7 @@
       <!-- Way back to the landing (founder 2026-09-17): the lamp already
            links home, but nothing says so — this pill does. -->
       <button type="button" class="back-btn dc-back" @click="$router.push('/')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :stroke="theme === 'night-mode' ? '#c084fc' : '#8B4513'" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         {{ t('legal.back_to_home') || 'Back' }}
       </button>
       <router-link to="/" class="ex-app-link"><img src="/images/bottle.png?v=3" class="ex-app-icon" alt="Jinni"/></router-link>
@@ -139,19 +139,30 @@
       </footer>
     </template>
 
-    <div v-if="gallery.open" class="ex-gallery" @click.self="closeGallery"
-         @touchstart.passive="galleryTouchStart" @touchend.passive="galleryTouchEnd">
+    <div v-if="gallery.open" class="ex-gallery" @click.self="closeGallery">
       <button class="ex-gallery-close" @click="closeGallery">✕</button>
-      <button v-if="gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--prev" @click="galleryStep(-1)">
+      <!-- Phones (founder 2026-09-17): a native swipe strip with snap and
+           position dots instead of arrows. Rendered only on narrow screens
+           so desktop never loads every photo twice. -->
+      <div v-if="galleryMobile" class="ex-gallery-strip" ref="galleryStrip" @scroll.passive="onGalleryScroll" @click.self="closeGallery">
+        <div v-for="(img, i) in gallery.images" :key="i" class="ex-gallery-slide" @click.self="closeGallery">
+          <img :src="img" :alt="gallery.name" :loading="Math.abs(i - gallery.idx) <= 1 ? 'eager' : 'lazy'" decoding="async"/>
+        </div>
+      </div>
+      <button v-if="!galleryMobile && gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--prev" @click="galleryStep(-1)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <img class="ex-gallery-img" :src="gallery.images[gallery.idx]" :alt="gallery.name"/>
-      <button v-if="gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--next" @click="galleryStep(1)">
+      <img v-if="!galleryMobile" class="ex-gallery-img" :src="gallery.images[gallery.idx]" :alt="gallery.name"/>
+      <button v-if="!galleryMobile && gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--next" @click="galleryStep(1)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
+      <div v-if="galleryMobile && gallery.images.length > 1" class="ex-gallery-dots">
+        <button v-for="(img, i) in gallery.images" :key="'d' + i" type="button" class="ex-gallery-dot" :class="{ 'is-on': gallery.idx === i }"
+                :aria-label="`${i + 1} / ${gallery.images.length}`" @click.stop="galleryGo(i)"></button>
+      </div>
       <div class="ex-gallery-bar">
         <span class="ex-gallery-name">{{ gallery.name }}</span>
-        <span v-if="gallery.images.length > 1" class="ex-gallery-count">{{ gallery.idx + 1 }} / {{ gallery.images.length }}</span>
+        <span v-if="!galleryMobile && gallery.images.length > 1" class="ex-gallery-count">{{ gallery.idx + 1 }} / {{ gallery.images.length }}</span>
       </div>
     </div>
 
@@ -227,6 +238,7 @@ export default {
       activeCat: null, navStuck: false, catEls: {}, railEls: {}, chipEls: {}, railIx: {}, railBar: {}, _railTimers: {},
       theme: 'night-mode',
       gallery: { open: false, images: [], idx: 0, name: '' },
+      galleryMobile: false,
       info: { open: false, loading: false, data: null, place: null, cat: null },
     };
   },
@@ -516,19 +528,28 @@ export default {
         : Array.from({ length: n }, (_, i) => this.imgUrl(`/api/ai/place-image/${p.placeId}/${i}`));
       this.gallery = { open: true, images, idx: 0, name: p.name };
       this.lockScroll(true);
+      try { this.galleryMobile = window.matchMedia('(max-width: 768px)').matches; } catch (e) { this.galleryMobile = false; }
     },
     // Phone comfort (founder 2026-09-17): swipe to step, and the page behind
     // the overlay must not scroll while it is open.
-    galleryTouchStart(e) { const t = e.changedTouches && e.changedTouches[0]; this._gx = t ? t.clientX : null; this._gy = t ? t.clientY : null; },
-    galleryTouchEnd(e) {
-      const t = e.changedTouches && e.changedTouches[0];
-      if (!t || this._gx == null) return;
-      const dx = t.clientX - this._gx, dy = t.clientY - this._gy;
-      this._gx = null;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) this.galleryStep(dx < 0 ? 1 : -1);
+    onGalleryScroll(e) {
+      const el = e.target;
+      if (!el || !el.clientWidth) return;
+      const i = Math.round(el.scrollLeft / el.clientWidth);
+      if (i !== this.gallery.idx && i >= 0 && i < this.gallery.images.length) this.gallery.idx = i;
+    },
+    galleryGo(i) {
+      this.gallery.idx = i;
+      const el = this.$refs.galleryStrip;
+      if (el) el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
     },
     lockScroll(on) { try { document.documentElement.style.overflow = on ? 'hidden' : ''; } catch (e) { /* ignore */ } },
-    galleryStep(dir) { const n = this.gallery.images.length; if (n) this.gallery.idx = (this.gallery.idx + dir + n) % n; },
+    galleryStep(dir) {
+      const n = this.gallery.images.length;
+      if (!n) return;
+      const next = (this.gallery.idx + dir + n) % n;
+      if (this.galleryMobile) this.galleryGo(next); else this.gallery.idx = next;
+    },
     closeGallery() { this.gallery = { open: false, images: [], idx: 0, name: '' }; this.lockScroll(false); },
     async openInfo(p, cat) {
       this.info = { open: true, loading: true, data: null, place: p, cat: cat || null };
@@ -992,11 +1013,17 @@ export default {
 /* Gallery on phones: swipe replaces the arrows (they sat on the photo's
    edges), the photo leaves room for the caption bar, the close target grows. */
 @media (max-width: 768px) {
-  .ex-gallery-nav { display: none; }
-  .ex-gallery-img { max-width: 94vw; max-height: 72vh; border-radius: 10px; }
-  .ex-gallery-close { top: 14px; right: 14px; width: 44px; height: 44px; }
+  .ex-gallery-close { top: 14px; right: 14px; width: 44px; height: 44px; z-index: 2; }
   .ex-gallery-bar { bottom: max(16px, env(safe-area-inset-bottom)); max-width: 92vw; }
 }
+/* Phone strip: one snap point per photo, native momentum, no scrollbar. */
+.ex-gallery-strip { display: flex; width: 100vw; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; align-items: center; scrollbar-width: none; }
+.ex-gallery-strip::-webkit-scrollbar { display: none; }
+.ex-gallery-slide { flex: 0 0 100vw; height: 100%; scroll-snap-align: center; scroll-snap-stop: always; display: flex; align-items: center; justify-content: center; padding: 0 3vw; box-sizing: border-box; }
+.ex-gallery-slide img { max-width: 94vw; max-height: 72vh; object-fit: contain; border-radius: 10px; box-shadow: 0 18px 60px rgba(0,0,0,0.55); }
+.ex-gallery-dots { position: absolute; left: 0; right: 0; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 40px); display: flex; justify-content: center; gap: 7px; pointer-events: none; }
+.ex-gallery-dot { width: 7px; height: 7px; border-radius: 999px; border: none; padding: 0; background: rgba(255,255,255,0.4); pointer-events: auto; transition: background 0.2s, transform 0.2s; }
+.ex-gallery-dot.is-on { background: #fff; transform: scale(1.25); }
 .ex-dot { position: relative; width: 6px; height: 6px; padding: 0; border: none; border-radius: 99px; cursor: pointer;
   /* Same palette as the desktop rail scrollbar: track tone idle, accent active. */
   background: color-mix(in srgb, var(--ex-line) 55%, transparent); opacity: 0.9;
@@ -1065,12 +1092,19 @@ export default {
 .ex-pref { color: #D4AF37; }
 
 .dc-nomatch { text-align: center; margin: 22px auto 0; padding: 0 18px; color: var(--ex-muted); }
-/* Same back button as the legal pages (founder 2026-09-17), centred above the lamp. */
-.dc-back { display: flex; align-items: center; gap: 6px; padding: 8px 16px; margin: 0 auto 2px; border-radius: 8px; border: none; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; background: transparent; color: var(--ex-text); transition: background 0.2s ease; }
-.explore.night-mode .dc-back { color: #c084fc; }
-.explore.day-mode .dc-back { color: #8B4513; }
-.explore.night-mode .dc-back:hover { background: rgba(139,92,246,0.12); }
-.explore.day-mode .dc-back:hover { background: rgba(212,175,55,0.12); }
+/* Back button in the landing's underlined dress (founder 2026-09-17): no
+   box, the word rests at half strength with a hairline beneath, and both
+   come to full on hover — the same trip the day wish label makes. */
+.dc-back { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 8px 6px 14px; margin: 0 auto 2px; border: none; font-family: var(--brand-serif, inherit); font-size: 15px; font-weight: 600; cursor: pointer; background: transparent; transition: color 0.3s ease, text-shadow 0.3s ease; }
+.dc-back::after { content: ''; position: absolute; left: 0; right: 0; bottom: 7px; height: 1.5px; transition: background 0.3s ease, box-shadow 0.3s ease; }
+.explore.day-mode .dc-back { color: rgba(115,47,6,0.58); }
+.explore.day-mode .dc-back::after { background: rgba(115,47,6,0.5); box-shadow: 0 0 10px rgba(214,120,40,0.22); }
+.explore.day-mode .dc-back:hover { color: #732F06; text-shadow: 0 0 14px rgba(255,224,176,1); }
+.explore.day-mode .dc-back:hover::after { background: rgba(115,47,6,0.95); box-shadow: 0 0 14px rgba(214,120,40,0.6); }
+.explore.night-mode .dc-back { color: rgba(244,231,201,0.7); }
+.explore.night-mode .dc-back::after { background: rgba(233,196,124,0.45); box-shadow: 0 0 10px rgba(255,190,110,0.25); }
+.explore.night-mode .dc-back:hover { color: #fff6e6; text-shadow: 0 0 20px rgba(255,190,110,0.55); }
+.explore.night-mode .dc-back:hover::after { background: rgba(255,224,176,0.95); box-shadow: 0 0 16px rgba(255,190,110,0.7); }
 /* Public page only: the lamp is a link home; the More window's Ask Jinni
    action reuses the lamp glyph at button size. */
 .ex-app-link { display: inline-block; line-height: 0; }
