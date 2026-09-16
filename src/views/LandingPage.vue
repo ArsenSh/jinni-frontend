@@ -362,7 +362,9 @@ export default {
     rgba(255,244,214,0.85) 0%, rgba(255,178,96,0.28) 38%,
     rgba(120,70,170,0.42) 72%, rgba(48,22,86,0.62) 100%);
 }
-.hero h1 { font-size: 3.5rem; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+/* Size lives on .magic-title only (founder 2026-09-17: this fixed 3.5rem
+   outranked the responsive clamp below and the title wrapped on desktop). */
+.hero h1 { margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .hero p { font-size: 1.3rem; margin-bottom: 2rem; color: #e0e0e0 }
 .features { padding: 2rem 1rem 4rem 1rem; position: relative; z-index: 2 }
 .features-container { max-width: 1200px; margin: 0 auto }
@@ -442,7 +444,10 @@ export default {
    screen — and the longest translation decides, not English. clamp lets the
    line find one row wherever it can and shrink instead of wrapping where it
    cannot; 5.4vw is the same curve the business hero uses. */
-.magic-title { font-family: var(--brand-serif); font-size: clamp(2.1rem, 5.4vw, 4rem); letter-spacing: 1px; text-wrap: balance }
+/* Pixels, not rem: the in-app text-size setting scales the root to 112.5% /
+   125% and survives logout, so a rem title grew to ~4.4rem for a Large user
+   (founder 2026-09-17). The hero must read the same for every visitor. */
+.hero .magic-title { font-family: var(--brand-serif); font-size: clamp(34px, 5vw, 48px); letter-spacing: 1px; text-wrap: balance }
 .magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
 /* Cities — a row of underlined text links in the Make a Wish dress (founder
@@ -834,7 +839,7 @@ export default {
   .landing-container:not(.day-mode) .wish-item { border-top-color: rgba(212,175,55,0.2) }
   .day-mode .wish-item:first-child, .landing-container:not(.day-mode) .wish-item:first-child { border-top: none; padding-top: 0 }
   .wish-num { font-size: 2.1rem; margin-bottom: 8px }
-  .hero h1 { font-size: 2.5rem }
+  .hero .magic-title { font-size: clamp(30px, 8vw, 40px) }
   .hero p { font-size: 1.1rem }
   .features h2, .demo h2 { font-size: 2rem }
   .language-selector-container { top: 10px; right: 10px }

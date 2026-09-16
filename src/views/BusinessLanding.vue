@@ -297,7 +297,8 @@ export default {
 /* The sentence used to break with one word stranded on the second line: an
    800px box at a fixed 4rem. It now scales with the window and balances, so
    longer translations split evenly instead of orphaning a word. */
-.magic-title { font-family: var(--brand-serif); font-size: clamp(2.4rem, 5.4vw, 4rem); text-wrap: balance; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+/* Pixels, not rem — see LandingPage: the text-size setting must not resize the hero. */
+.magic-title { font-family: var(--brand-serif); font-size: clamp(34px, 5vw, 48px); text-wrap: balance; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* v-html content carries NO scope attribute — a plain scoped descendant rule
    would never match this span. */
@@ -714,7 +715,7 @@ export default {
   .day-mode .wish-item:first-child, .night-mode .wish-item:first-child { border-top: none; padding-top: 0 }
   .tier-price { font-size: 2.1rem; margin-bottom: 8px }
   .tier-mark svg { width: 21px; height: 21px }
-  .magic-title { font-size: 2.5rem }
+  .magic-title { font-size: clamp(30px, 8vw, 40px) }
   .magic-subtitle { font-size: 1.1rem }
   .features-heading { font-size: 2rem }
   .language-selector-container { top: 10px; right: 10px }
