@@ -442,7 +442,10 @@ export default {
 /* Cities — a row of underlined text links in the Make a Wish dress (founder
    2026-09-17): no box, no image, gradient word with a hairline beneath that
    strengthens on hover. Same colours as the hero button in each theme. */
-.cities { padding: 0 1rem 3.5rem; margin-top: -1.5rem; position: relative; z-index: 2 }
+/* Same breathing room above and below the switch pill (founder 2026-09-17):
+   the pill's wrapper keeps its 4rem below; the section adds nothing on top
+   and matches that 4rem underneath before the footer. */
+.cities { padding: 0 1rem 4rem; margin-top: 0; position: relative; z-index: 2 }
 .cities-heading { margin-bottom: 0.6rem }
 .cities-sub { text-align: center; opacity: 0.8; margin: 0 auto 1.6rem; max-width: 640px; line-height: 1.55 }
 .cities-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 28px; max-width: 1000px; margin: 0 auto }
