@@ -46,6 +46,14 @@ const routes = [
         meta: { title: "Jinni's Discoveries", requiresAuth: true }
     },
     {
+        // Public preferences (founder 2026-09-17): the onboarding page minus
+        // location, saved in the browser only; returns to the city page.
+        path: '/discover/preferences',
+        name: 'DiscoverPreferences',
+        component: () => import('@/views/DiscoverPreferences.vue'),
+        meta: { title: 'Preferences — Jinni', requiresAuth: false, public: true }
+    },
+    {
         // Login-free city page (founder 2026-09-16) — Jinni's Discoveries as a
         // shop window for search engines and shared links. The component
         // sets the real per-city title/description after it loads.
