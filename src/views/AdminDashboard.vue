@@ -4239,7 +4239,8 @@
               <div v-if="chatLog.msgLoading" class="chatlog-empty">Loading transcript…</div>
               <div v-else-if="!chatLog.messages.length" class="chatlog-empty">Select a session to read its transcript.</div>
               <template v-else>
-                <div v-for="(m, i) in chatLog.messages" :key="m.id || i" class="cl-msg" :class="m.sender === 'user' ? 'cl-msg--user' : 'cl-msg--ai'">
+                <template v-for="(m, i) in chatLog.messages" :key="m.id || i">
+                <div class="cl-msg" :class="m.sender === 'user' ? 'cl-msg--user' : 'cl-msg--ai'">
                   <div class="cl-msg-head">
                     <span class="cl-msg-who">{{ m.sender === 'user' ? (chatLog.user?.name || 'User') : 'Jinni' }}</span>
                     <span class="cl-msg-time">{{ shortDate(m.timestamp) }}</span>
@@ -4324,6 +4325,7 @@
                   <pre v-if="chatLog.showLogs && m._turn.log && m._turn.log.length" class="map-log ses-log">{{ m._turn.log.join('\n') }}</pre>
                   <p v-else-if="chatLog.showLogs" class="cl-turn-nolog">No log lines were captured for this turn.</p>
                 </div>
+                </template>
                 <p v-if="chatLog.turnsUnmatched" class="cov-meta map-warn">{{ chatLog.turnsUnmatched }} engine turn(s) could not be lined up with a message — Copy all lists them in order.</p>
               </template>
             </section>
