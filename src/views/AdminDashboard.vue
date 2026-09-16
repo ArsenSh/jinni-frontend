@@ -10251,14 +10251,14 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
    the middle of the Coverage tab (Arsen, 2026-09-12). Same 5px treatment as
    .edit-body, themed per mode. scrollbar-width/-color covers Firefox and
    Chrome 121+; the ::-webkit- rules cover Safari and older Chrome. */
-.map-grid, .map-log { scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.35) transparent; }
+@supports not selector(::-webkit-scrollbar) { .map-grid, .map-log { scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.35) transparent; } }
 .map-grid::-webkit-scrollbar, .map-log::-webkit-scrollbar { width: 5px; }
 .map-grid::-webkit-scrollbar-track, .map-log::-webkit-scrollbar-track { background: transparent; }
 .admin-shell.night-mode .map-grid::-webkit-scrollbar-thumb,
 .admin-shell.night-mode .map-log::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.30); border-radius: 3px; }
 .admin-shell.night-mode .map-grid::-webkit-scrollbar-thumb:hover,
 .admin-shell.night-mode .map-log::-webkit-scrollbar-thumb:hover { background: rgba(168,85,247,0.50); }
-.admin-shell.day-mode .map-grid, .admin-shell.day-mode .map-log { scrollbar-color: rgba(212,175,55,0.45) transparent; }
+@supports not selector(::-webkit-scrollbar) { .admin-shell.day-mode .map-grid, .admin-shell.day-mode .map-log { scrollbar-color: rgba(212,175,55,0.45) transparent; } }
 .admin-shell.day-mode .map-grid::-webkit-scrollbar-thumb,
 .admin-shell.day-mode .map-log::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.40); border-radius: 3px; }
 .admin-shell.day-mode .map-grid::-webkit-scrollbar-thumb:hover,
