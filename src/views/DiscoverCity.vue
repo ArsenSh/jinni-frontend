@@ -428,7 +428,7 @@ export default {
         ? `${name}: ${count} places to eat, see and discover — Jinni's Discoveries`
         : "Jinni's Discoveries";
       const desc = name
-        ? `${count} restaurants, sights, hidden gems and activities in ${name}, checked by Jinni's local validators. Free to browse — ask Jinni for what fits you.`
+        ? `${count} restaurants, sights, hidden gems and activities in ${name} that Jinni knows and trusts. Free to browse — ask Jinni for what fits you.`
         : 'Places Jinni has discovered, open to everyone.';
       this._setMeta('description', desc);
       this._setLink('canonical', `${window.location.origin}/discover/${this.$route.params.slug}`);

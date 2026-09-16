@@ -290,7 +290,7 @@
     },
     "cities": {
       "title": "Where Jinni has been",
-      "subtitle": "Cities with places checked by local validators — open to everyone, no account needed.",
+      "subtitle": "Cities with places Jinni already knows and trusts — open to everyone, no account needed.",
       "places": "{count} places",
       "alt": "places Jinni discovered"
     }
