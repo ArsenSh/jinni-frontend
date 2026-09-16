@@ -46,6 +46,15 @@ const routes = [
         meta: { title: "Jinni's Discoveries", requiresAuth: true }
     },
     {
+        // Login-free city page (founder 2026-09-16) — Jinni's Discoveries as a
+        // shop window for search engines and shared links. The component
+        // sets the real per-city title/description after it loads.
+        path: '/discover/:slug',
+        name: 'DiscoverCity',
+        component: () => import('@/views/DiscoverCity.vue'),
+        meta: { title: "Jinni's Discoveries", requiresAuth: false, public: true }
+    },
+    {
         path: '/map-selector',
         name: 'MapSelector',
         component: () => import('@/views/MapSelector.vue'),

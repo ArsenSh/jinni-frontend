@@ -287,6 +287,12 @@
     "mode_switch": {
       "explore": "Explore",
       "for_business": "For Business"
+    },
+    "cities": {
+      "title": "Where Jinni has been",
+      "subtitle": "Cities with places checked by local validators — open to everyone, no account needed.",
+      "places": "{count} places",
+      "alt": "places Jinni discovered"
     }
   },
   "auth": {
@@ -1297,5 +1303,11 @@
   "place": {
     "closed_temporarily": "Temporarily closed",
     "closed_permanently": "Permanently closed"
+  },
+  "discover": {
+    "intro": "Places Jinni has verified in {city} — open to everyone, no account needed.",
+    "not_found": "Jinni has no public page for this city yet.",
+    "not_found_sub": "Ask Jinni in chat — the places it finds appear here as the city fills in.",
+    "footer_line": "This is what Jinni already knows here — in chat it finds what fits you."
   }
 }

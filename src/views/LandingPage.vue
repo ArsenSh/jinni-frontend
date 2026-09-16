@@ -40,6 +40,26 @@
         </div>
       </div>
     </section>
+    <!-- Cities Jinni has filled (founder 2026-09-16): the public /discover
+         pages, linked from here so search engines and visitors find them.
+         Derived from the data — a city appears once it has enough places.
+         Hidden entirely while there are none, so the landing never shows an
+         empty section. -->
+    <section v-if="cities.length" class="cities">
+      <div class="features-container">
+        <h2 class="features-heading cities-heading">{{ $t('landing.cities.title') }}</h2>
+        <p class="cities-sub">{{ $t('landing.cities.subtitle') }}</p>
+        <div class="cities-grid">
+          <router-link v-for="c in cities" :key="c.slug" :to="`/discover/${c.slug}`" class="city-card">
+            <img v-if="c.image" :src="cityImg(c.image)" :alt="`${c.name} — ${$t('landing.cities.alt')}`" loading="lazy" decoding="async" @error="$event.target.style.display='none'"/>
+            <div class="city-card-body">
+              <span class="city-card-name">{{ c.name }}</span>
+              <span class="city-card-meta">{{ c.country }} · {{ $t('landing.cities.places', { count: c.count }) }}</span>
+            </div>
+          </router-link>
+        </div>
+      </div>
+    </section>
     <div class="mode-switch-wrapper">
       <div class="mode-switch-pill">
         <button class="mode-switch-btn mode-switch-btn--active">
@@ -158,6 +178,17 @@ export default {
         description: 'landing.features.business.description'
       }
     ]
+    // Public city pages, cache-only on the backend (never a Google call).
+    const cities = ref([])
+    const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || ''
+    const cityImg = (u) => (u && u.startsWith('/api/') ? `${API_BASE}${u}` : u)
+    const loadCities = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/public/discover/cities`)
+        const data = await res.json().catch(() => ({}))
+        cities.value = Array.isArray(data.cities) ? data.cities.slice(0, 12) : []
+      } catch (e) { cities.value = [] }
+    }
     const openAuthModal = () => {router.push('/auth')}
     const goBusinessLanding = () => {router.push('/business')}
     const selectLanguage = (lang) => {
@@ -183,6 +214,7 @@ export default {
     onMounted(() => {
       if (store.state.i18n?.locale) {selectedLanguage.value = store.state.i18n.locale}
       showAllLanguages.value = false
+      loadCities()
     })
     onBeforeUnmount(() => {clearAutoCloseTimer()})
     return {
@@ -199,7 +231,9 @@ export default {
       languageSelectorRef,
       isNightMode,
       isDayMode,
-      lampEl
+      lampEl,
+      cities,
+      cityImg
     }
   }
 }
@@ -406,6 +440,21 @@ export default {
 .magic-title { font-family: var(--brand-serif); font-size: clamp(2.1rem, 5.4vw, 4rem); letter-spacing: 1px; text-wrap: balance }
 .magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
+/* Cities — same container/heading as the features; cards use the landing's
+   glass, no hover motion (Arsen's rule), light feedback only. */
+.cities { padding: 0 1rem 3.5rem; position: relative; z-index: 2 }
+.cities-heading { margin-bottom: 0.6rem }
+.cities-sub { text-align: center; opacity: 0.8; margin: 0 auto 2rem; max-width: 640px; line-height: 1.55 }
+.cities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; max-width: 1000px; margin: 0 auto }
+.city-card { display: block; border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit;
+  background: rgba(255,255,255,0.06); box-shadow: 0 0 18px -2px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12);
+  transition: border-color 0.25s, box-shadow 0.25s }
+.city-card:hover { border-color: rgba(212,175,55,0.55); box-shadow: 0 0 22px -2px rgba(212,175,55,0.35) }
+.city-card img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover }
+.city-card-body { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 14px }
+.city-card-name { font-family: var(--brand-serif); font-size: 1.25rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+.city-card-meta { font-size: 0.9rem; opacity: 0.78 }
+.day-mode .city-card { background: rgba(255,251,245,0.7); border-color: rgba(150,100,55,0.25); box-shadow: 0 0 18px -2px rgba(120,80,30,0.14) }
 .mode-switch-wrapper { display: flex; justify-content: center; padding: 0 0 4rem; position: relative; z-index: 2 }
 .mode-switch-pill { display: inline-flex; align-items: center; gap: 2px; background: rgba(26,9,51,0.8); border-radius: 50px; padding: 4px; backdrop-filter: blur(10px); box-shadow: 0 0 12px rgba(212,175,55,0.1), 0 0 24px rgba(0,0,0,0.35) }
 .mode-switch-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 20px; border-radius: 40px; border: none; background: transparent; font-family: var(--brand-serif); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; color: rgba(212,175,55,0.45); transition: all 0.25s ease; white-space: nowrap }

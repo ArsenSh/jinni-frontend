@@ -287,6 +287,12 @@
     "mode_switch": {
       "explore": "Explorer",
       "for_business": "Pour les entreprises"
+    },
+    "cities": {
+      "title": "Où Jinni est déjà passé",
+      "subtitle": "Des villes aux adresses vérifiées par des validateurs locaux — ouvertes à tous, sans compte.",
+      "places": "{count} adresses",
+      "alt": "adresses découvertes par Jinni"
     }
   },
   "auth": {
@@ -1297,5 +1303,11 @@
   "place": {
     "closed_temporarily": "Fermé temporairement",
     "closed_permanently": "Fermé définitivement"
+  },
+  "discover": {
+    "intro": "Les adresses vérifiées par Jinni à {city} — ouvertes à tous, sans compte.",
+    "not_found": "Jinni n’a pas encore de page publique pour cette ville.",
+    "not_found_sub": "Demandez à Jinni dans le chat — les adresses trouvées apparaîtront ici au fil du remplissage.",
+    "footer_line": "Voici ce que Jinni connaît déjà ici — dans le chat, il trouve ce qui vous correspond."
   }
 }

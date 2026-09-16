@@ -14,3 +14,5 @@ Disallow: /marketing
 Disallow: /share/
 
 Sitemap: https://jinni.travel/sitemap.xml
+# Public city pages (/discover/<city>) — generated from the data on the API host.
+Sitemap: https://api.jinni.travel/api/public/sitemap.xml

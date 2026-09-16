@@ -287,6 +287,12 @@
     "mode_switch": {
       "explore": "探索",
       "for_business": "商家入驻"
+    },
+    "cities": {
+      "title": "Jinni 去过的城市",
+      "subtitle": "由本地审核员核实的地点 — 对所有人开放，无需账号。",
+      "places": "{count} 个地点",
+      "alt": "Jinni 发现的地点"
     }
   },
   "auth": {
@@ -1297,5 +1303,11 @@
   "place": {
     "closed_temporarily": "暂时关闭",
     "closed_permanently": "永久关闭"
+  },
+  "discover": {
+    "intro": "Jinni 在{city}核实过的地点 — 对所有人开放，无需账号。",
+    "not_found": "Jinni 暂时没有这座城市的公开页面。",
+    "not_found_sub": "在聊天中问问 Jinni — 它发现的地点会随着城市的完善出现在这里。",
+    "footer_line": "这是 Jinni 已经了解的地方 — 在聊天中它会为你找到最合适的。"
   }
 }
