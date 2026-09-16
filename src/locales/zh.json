@@ -289,8 +289,8 @@
       "for_business": "商家入驻"
     },
     "cities": {
-      "title": "Jinni 去过的城市",
-      "subtitle": "由本地审核员核实的地点 — 对所有人开放，无需账号。",
+      "title": "Jinni 去过的地方",
+      "subtitle": "经过当地验证员核实的城市和地点 — 所有人均可查看，无需注册账号。",
       "places": "{count} 个地点",
       "alt": "Jinni 发现的地点"
     }

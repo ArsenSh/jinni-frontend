@@ -289,8 +289,8 @@
       "for_business": "Pour les entreprises"
     },
     "cities": {
-      "title": "Où Jinni est déjà passé",
-      "subtitle": "Des villes aux adresses vérifiées par des validateurs locaux — ouvertes à tous, sans compte.",
+      "title": "Où Jinni est passé",
+      "subtitle": "Villes avec des lieux vérifiés par des validateurs locaux — accessibles à tous, sans inscription.",
       "places": "{count} adresses",
       "alt": "adresses découvertes par Jinni"
     }
