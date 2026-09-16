@@ -465,7 +465,7 @@ export default {
 /* Pixels, not rem: the in-app text-size setting scales the root to 112.5% /
    125% and survives logout, so a rem title grew to ~4.4rem for a Large user
    (founder 2026-09-17). The hero must read the same for every visitor. */
-.hero .magic-title { font-family: var(--brand-serif); font-size: clamp(34px, 5vw, 48px); letter-spacing: 1px; text-wrap: balance }
+.hero .magic-title { font-family: var(--brand-serif); font-size: clamp(34px, 5.4vw, 56px); letter-spacing: 1px; text-wrap: balance }
 .magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
 /* Cities — a row of underlined text links in the Make a Wish dress (founder
@@ -725,8 +725,11 @@ export default {
   /* Founder 2026-09-17, second pass: no bloom at all by day — the lit halo
      read wrong in every tone tried. Only the 1px warm seat remains, so the
      gradient word sits crisply on the paper and still touches it. */
-  filter: drop-shadow(0 0 0 transparent)
-          drop-shadow(0 0 0 transparent)
+  /* Third pass (founder 2026-09-17): an ORANGE bloom — the text's own end
+     colour, so it belongs to both the gold-orange word and the peach sky.
+     Kept light so it reads as warmth around the letters, not a smear. */
+  filter: drop-shadow(0 0 6px rgba(255,140,0,0.32))
+          drop-shadow(0 0 14px rgba(232,134,12,0.2))
           drop-shadow(0 1px 1px rgba(110,45,6,0.22));
 }
 /* The subtitle's brand word leaves the gradient (founder 2026-09-11: "Jinni

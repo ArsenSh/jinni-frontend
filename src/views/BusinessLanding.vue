@@ -298,7 +298,7 @@ export default {
    800px box at a fixed 4rem. It now scales with the window and balances, so
    longer translations split evenly instead of orphaning a word. */
 /* Pixels, not rem — see LandingPage: the text-size setting must not resize the hero. */
-.magic-title { font-family: var(--brand-serif); font-size: clamp(34px, 5vw, 48px); text-wrap: balance; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+.magic-title { font-family: var(--brand-serif); font-size: clamp(34px, 5.4vw, 56px); text-wrap: balance; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
 .magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* v-html content carries NO scope attribute — a plain scoped descendant rule
    would never match this span. */
@@ -570,8 +570,11 @@ export default {
   /* Founder 2026-09-17, second pass: no bloom at all by day — the lit halo
      read wrong in every tone tried. Only the 1px warm seat remains, so the
      gradient word sits crisply on the paper and still touches it. */
-  filter: drop-shadow(0 0 0 transparent)
-          drop-shadow(0 0 0 transparent)
+  /* Third pass (founder 2026-09-17): an ORANGE bloom — the text's own end
+     colour, so it belongs to both the gold-orange word and the peach sky.
+     Kept light so it reads as warmth around the letters, not a smear. */
+  filter: drop-shadow(0 0 6px rgba(255,140,0,0.32))
+          drop-shadow(0 0 14px rgba(232,134,12,0.2))
           drop-shadow(0 1px 1px rgba(110,45,6,0.22));
 }
 /* The subtitle keeps the icon gradient but not the halo. That bloom is sized
