@@ -473,10 +473,14 @@ export default {
 .landing-container:not(.day-mode) .city-card-name { background: none; -webkit-text-fill-color: initial; color: #f4e7c9 }
 .landing-container:not(.day-mode) .city-card:hover .city-card-name { color: #fff6e6; text-shadow: 0 0 20px rgba(255,190,110,0.55) }
 .city-card-meta { font-size: 0.86rem; color: rgba(224,224,224,0.7) }
-.day-mode .city-card-name { background: none; -webkit-text-fill-color: initial; color: #732F06 }
+/* Day (founder 2026-09-17): rest at half strength, full brown on hover — the
+   same trip the day wish label makes, so the link visibly answers the cursor. */
+.day-mode .city-card-name { background: none; -webkit-text-fill-color: initial; color: rgba(115,47,6,0.58); transition: color 0.3s ease, text-shadow 0.3s ease }
+.day-mode .city-card:hover .city-card-name { color: #732F06; text-shadow: 0 0 14px rgba(255,224,176,1) }
 .day-mode .city-card::after { background: rgba(115,47,6,0.5); box-shadow: 0 0 10px rgba(214,120,40,0.22) }
 .day-mode .city-card:hover::after { background: rgba(115,47,6,0.95); box-shadow: 0 0 14px rgba(214,120,40,0.6) }
-.day-mode .city-card-meta { color: #5a3c2e }
+.day-mode .city-card-meta { color: rgba(90,60,46,0.7); transition: color 0.3s ease }
+.day-mode .city-card:hover .city-card-meta { color: #5a3c2e }
 .mode-switch-wrapper { display: flex; justify-content: center; padding: 4rem 0 8rem 0; position: relative; z-index: 2 }
 .mode-switch-pill { display: inline-flex; align-items: center; gap: 2px; background: rgba(26,9,51,0.8); border-radius: 50px; padding: 4px; backdrop-filter: blur(10px); box-shadow: 0 0 12px rgba(212,175,55,0.1), 0 0 24px rgba(0,0,0,0.35) }
 .mode-switch-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 20px; border-radius: 40px; border: none; background: transparent; font-family: var(--brand-serif); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; color: rgba(212,175,55,0.45); transition: all 0.25s ease; white-space: nowrap }
