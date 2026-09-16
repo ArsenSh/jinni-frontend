@@ -1599,7 +1599,10 @@
     </div>
 
     <div class="filter-bar">
-      <div class="filter-group">
+      <!-- Status applies to cache rows only: the Jinni events queue and the
+           Links registry have their own review states, so the chips would
+           show numbers about a different table (founder 2026-09-17). -->
+      <div v-if="expCategory !== 'jinni_events' && expCategory !== 'links'" class="filter-group">
         <label class="filter-label">Status</label>
         <div class="filter-chips">
           <button v-for="opt in expStatusOpts" :key="opt.value"
