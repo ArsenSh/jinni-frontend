@@ -243,9 +243,13 @@ export default {
         }
         return true;
       };
+      // Interest matches lead each rail, as on the Discoveries page; the
+      // server's verified-then-rating order holds within each group.
+      const matches = (p) => want.size ? (p.interests || []).filter(t => want.has(t)).length : 0;
       const out = {};
       for (const c of Object.keys(this.rawCategories)) {
         const list = (this.rawCategories[c] || []).filter(keep);
+        if (want.size) list.sort((a, b) => matches(b) - matches(a));
         if (list.length) out[c] = list;
       }
       return out;
