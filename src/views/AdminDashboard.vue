@@ -8576,14 +8576,27 @@ export default {
 .chatlog-item-title { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chatlog-item-meta { display: block; font-size: 11px; opacity: 0.6; margin-top: 2px; }
 .chatlog-transcript { flex: 1; min-width: 0; overflow-y: auto; padding: 16px 20px; }
-/* Founder 2026-09-16: the transcript's scrollbar was the browser default —
-   a bright white track in night mode. Same thin themed bar as .edit-body. */
-.chatlog-transcript, .chatlog-list, .ses-log { scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.28) transparent; }
-.chatlog-transcript::-webkit-scrollbar, .chatlog-list::-webkit-scrollbar, .ses-log::-webkit-scrollbar { width: 5px; height: 5px; }
-.chatlog-transcript::-webkit-scrollbar-track, .chatlog-list::-webkit-scrollbar-track, .ses-log::-webkit-scrollbar-track { background: transparent; }
-.chatlog-transcript::-webkit-scrollbar-thumb, .chatlog-list::-webkit-scrollbar-thumb, .ses-log::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.28); border-radius: 3px; }
-.edit-panel.day-mode .chatlog-transcript, .edit-panel.day-mode .chatlog-list { scrollbar-color: rgba(160,82,45,0.18) transparent; }
-.edit-panel.day-mode .chatlog-transcript::-webkit-scrollbar-thumb, .edit-panel.day-mode .chatlog-list::-webkit-scrollbar-thumb { background: rgba(160,82,45,0.18); }
+/* ── THEMED SCROLLBARS for the chat panel, Sessions tab and logs ──
+   Founder 2026-09-16: "very awful to see white or gray, no matter narrow or not".
+   In Safari and Chrome, setting `scrollbar-width` makes the browser IGNORE the
+   ::-webkit-scrollbar rules and draw its native gray bar — that is what was
+   showing. The standard properties are now Firefox-only (@supports guard);
+   WebKit/Blink get the pseudo-element bar in the theme's colour. */
+.chatlog-transcript::-webkit-scrollbar, .chatlog-list::-webkit-scrollbar, .cl-prefs::-webkit-scrollbar, .cl-itinerary::-webkit-scrollbar,
+.ses-log::-webkit-scrollbar, .ses-list::-webkit-scrollbar, .map-log::-webkit-scrollbar { width: 7px; height: 7px; background: transparent; }
+.chatlog-transcript::-webkit-scrollbar-track, .chatlog-list::-webkit-scrollbar-track, .cl-prefs::-webkit-scrollbar-track, .cl-itinerary::-webkit-scrollbar-track,
+.ses-log::-webkit-scrollbar-track, .ses-list::-webkit-scrollbar-track, .map-log::-webkit-scrollbar-track { background: transparent; }
+.chatlog-transcript::-webkit-scrollbar-corner, .chatlog-list::-webkit-scrollbar-corner, .ses-log::-webkit-scrollbar-corner, .map-log::-webkit-scrollbar-corner { background: transparent; }
+.chatlog-transcript::-webkit-scrollbar-thumb, .chatlog-list::-webkit-scrollbar-thumb, .cl-prefs::-webkit-scrollbar-thumb, .cl-itinerary::-webkit-scrollbar-thumb,
+.ses-log::-webkit-scrollbar-thumb, .ses-list::-webkit-scrollbar-thumb, .map-log::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.45); border-radius: 4px; border: 1px solid transparent; background-clip: padding-box; }
+.admin-shell.day-mode .chatlog-transcript::-webkit-scrollbar-thumb, .admin-shell.day-mode .chatlog-list::-webkit-scrollbar-thumb, .admin-shell.day-mode .cl-prefs::-webkit-scrollbar-thumb, .admin-shell.day-mode .cl-itinerary::-webkit-scrollbar-thumb,
+.admin-shell.day-mode .ses-log::-webkit-scrollbar-thumb, .admin-shell.day-mode .ses-list::-webkit-scrollbar-thumb, .admin-shell.day-mode .map-log::-webkit-scrollbar-thumb,
+.edit-panel.day-mode .chatlog-transcript::-webkit-scrollbar-thumb, .edit-panel.day-mode .chatlog-list::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.5); }
+@supports not selector(::-webkit-scrollbar) {
+  .chatlog-transcript, .chatlog-list, .cl-prefs, .cl-itinerary, .ses-log, .ses-list, .map-log { scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.45) transparent; }
+  .admin-shell.day-mode .chatlog-transcript, .admin-shell.day-mode .chatlog-list, .admin-shell.day-mode .ses-log, .admin-shell.day-mode .ses-list, .admin-shell.day-mode .map-log,
+  .edit-panel.day-mode .chatlog-transcript, .edit-panel.day-mode .chatlog-list { scrollbar-color: rgba(212,175,55,0.5) transparent; }
+}
 .chatlog-empty { padding: 24px; font-size: 13px; opacity: 0.6; text-align: center; }
 .cl-msg { margin-bottom: 18px; max-width: 760px; }
 .cl-msg--user { margin-left: auto; }
@@ -10060,7 +10073,7 @@ select.edit-input { cursor: pointer; }
   .pref-completion-num { font-size: 16px; }
 }
 /* ── GLOBAL PAGE SCROLLBAR (theme-aware) ── */
-.admin-shell {scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.35) transparent}
+@supports not selector(::-webkit-scrollbar) { .admin-shell {scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.35) transparent} }
 .admin-shell::-webkit-scrollbar,
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {width: 8px; height: 8px}
@@ -10071,7 +10084,7 @@ body::-webkit-scrollbar-track {background: transparent}
 html::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {border-radius: 8px; border: 2px solid transparent; background-clip: padding-box}
 /* Night mode — purple, matches sidebar accents */
-.admin-shell.night-mode { scrollbar-color: rgba(139,92,246,0.40) transparent; }
+@supports not selector(::-webkit-scrollbar) { .admin-shell.night-mode { scrollbar-color: rgba(139,92,246,0.40) transparent; } }
 .admin-shell.night-mode::-webkit-scrollbar-thumb,
 html:has(.admin-shell.night-mode)::-webkit-scrollbar-thumb,
 body:has(.admin-shell.night-mode)::-webkit-scrollbar-thumb {background-color: rgba(139,92,246,0.35)}
@@ -10079,7 +10092,7 @@ body:has(.admin-shell.night-mode)::-webkit-scrollbar-thumb {background-color: rg
 html:has(.admin-shell.night-mode)::-webkit-scrollbar-thumb:hover,
 body:has(.admin-shell.night-mode)::-webkit-scrollbar-thumb:hover {background-color: rgba(168,85,247,0.55)}
 /* Day mode — gold, matches cream background */
-.admin-shell.day-mode { scrollbar-color: rgba(212,175,55,0.45) transparent; }
+@supports not selector(::-webkit-scrollbar) { .admin-shell.day-mode { scrollbar-color: rgba(212,175,55,0.45) transparent; } }
 .admin-shell.day-mode::-webkit-scrollbar-thumb,
 html:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb,
 body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb {background-color: rgba(212,175,55,0.40)}
