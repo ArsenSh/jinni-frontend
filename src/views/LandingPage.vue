@@ -439,20 +439,28 @@ export default {
 .magic-title { font-family: var(--brand-serif); font-size: clamp(2.1rem, 5.4vw, 4rem); letter-spacing: 1px; text-wrap: balance }
 .magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
 /* ── Mode switch pill ──────────────────────────────────────────────────────── */
-/* Cities — same container/heading as the features; cards use the landing's
-   glass, no hover motion (Arsen's rule), light feedback only. */
+/* Cities — a row of underlined text links in the Make a Wish dress (founder
+   2026-09-17): no box, no image, gradient word with a hairline beneath that
+   strengthens on hover. Same colours as the hero button in each theme. */
 .cities { padding: 0 1rem 3.5rem; margin-top: -1.5rem; position: relative; z-index: 2 }
 .cities-heading { margin-bottom: 0.6rem }
-.cities-sub { text-align: center; opacity: 0.8; margin: 0 auto 2rem; max-width: 640px; line-height: 1.55 }
-.cities-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; max-width: 1000px; margin: 0 auto }
-.city-card { display: block; min-width: 200px; border-radius: 16px; overflow: hidden; text-decoration: none; color: inherit;
-  background: rgba(255,255,255,0.06); box-shadow: 0 0 18px -2px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12);
-  transition: border-color 0.25s, box-shadow 0.25s }
-.city-card:hover { border-color: rgba(212,175,55,0.55); box-shadow: 0 0 22px -2px rgba(212,175,55,0.35) }
-.city-card-body { display: flex; flex-direction: column; gap: 4px; padding: 14px 20px; text-align: center }
-.city-card-name { font-family: var(--brand-serif); font-size: 1.25rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
-.city-card-meta { font-size: 0.9rem; opacity: 0.78 }
-.day-mode .city-card { background: rgba(255,251,245,0.7); border-color: rgba(150,100,55,0.25); box-shadow: 0 0 18px -2px rgba(120,80,30,0.14) }
+.cities-sub { text-align: center; opacity: 0.8; margin: 0 auto 1.6rem; max-width: 640px; line-height: 1.55 }
+.cities-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 28px; max-width: 1000px; margin: 0 auto }
+.city-card { position: relative; display: inline-block; padding: 10px 6px 16px; text-decoration: none; color: inherit; background: transparent }
+.city-card::after { content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 1.5px;
+  background: rgba(233,196,124,0.45); box-shadow: 0 0 10px rgba(255,190,110,0.25);
+  transition: background 0.3s ease, box-shadow 0.3s ease }
+.city-card:hover::after { background: rgba(255,224,176,0.95); box-shadow: 0 0 16px rgba(255,190,110,0.7) }
+.city-card-body { display: flex; flex-direction: column; align-items: center; gap: 2px }
+.city-card-name { font-family: var(--brand-serif); font-size: 1.3rem; font-weight: 600;
+  background: linear-gradient(45deg, #D4AF37 0%, #E8860C 38%, #B4540A 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+.landing-container:not(.day-mode) .city-card-name { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text }
+.landing-container:not(.day-mode) .city-card:hover .city-card-name { text-shadow: 0 0 20px rgba(255,190,110,0.55) }
+.city-card-meta { font-size: 0.86rem; opacity: 0.75 }
+.day-mode .city-card-name { background: none; -webkit-text-fill-color: initial; color: #732F06 }
+.day-mode .city-card::after { background: rgba(115,47,6,0.5); box-shadow: 0 0 10px rgba(214,120,40,0.22) }
+.day-mode .city-card:hover::after { background: rgba(115,47,6,0.95); box-shadow: 0 0 14px rgba(214,120,40,0.6) }
+.day-mode .city-card-meta { color: #5a3c2e }
 .mode-switch-wrapper { display: flex; justify-content: center; padding: 0 0 4rem; position: relative; z-index: 2 }
 .mode-switch-pill { display: inline-flex; align-items: center; gap: 2px; background: rgba(26,9,51,0.8); border-radius: 50px; padding: 4px; backdrop-filter: blur(10px); box-shadow: 0 0 12px rgba(212,175,55,0.1), 0 0 24px rgba(0,0,0,0.35) }
 .mode-switch-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 20px; border-radius: 40px; border: none; background: transparent; font-family: var(--brand-serif); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; color: rgba(212,175,55,0.45); transition: all 0.25s ease; white-space: nowrap }
