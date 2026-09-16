@@ -61,13 +61,18 @@
       <div class="features-container">
         <h2 class="features-heading cities-heading" v-html="citiesTitleHtml"></h2>
         <p class="cities-sub">{{ $t('landing.cities.subtitle') }}</p>
-        <div class="cities-grid">
-          <router-link v-for="c in cities" :key="c.slug" :to="`/discover/${c.slug}`" class="city-card">
-            <div class="city-card-body">
-              <span class="city-card-name">{{ c.name }}</span>
-              <span class="city-card-meta">{{ c.country }} · {{ $t('landing.cities.places', { count: c.count }) }}</span>
-            </div>
-          </router-link>
+        <!-- Grouped by country, the visitor's own country first (Cloudflare's
+             country header via the API), then by how much Jinni knows there. -->
+        <div v-for="g in cityGroups" :key="g.code || g.name" class="cities-country">
+          <h3 class="cities-country-name">{{ g.name }}</h3>
+          <div class="cities-grid">
+            <router-link v-for="c in g.cities" :key="c.slug" :to="`/discover/${c.slug}`" class="city-card">
+              <div class="city-card-body">
+                <span class="city-card-name">{{ c.name }}</span>
+                <span class="city-card-meta">{{ $t('landing.cities.places', { count: c.count }) }}</span>
+              </div>
+            </router-link>
+          </div>
         </div>
       </div>
     </section>
@@ -185,13 +190,25 @@ export default {
     ]
     // Public city pages, cache-only on the backend (never a Google call).
     const cities = ref([])
+    const visitorCountry = ref(null)
+    const cityGroups = computed(() => {
+      const groups = new Map()
+      for (const c of cities.value) {
+        const code = c.countryCode || ''
+        if (!groups.has(code)) groups.set(code, { code, name: c.country || code, cities: [], total: 0 })
+        const g = groups.get(code); g.cities.push(c); g.total += c.count || 0
+      }
+      const mine = visitorCountry.value
+      return [...groups.values()].sort((a, b) => (Number(b.code === mine) - Number(a.code === mine)) || (b.total - a.total))
+    })
     const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || ''
     const cityImg = (u) => (u && u.startsWith('/api/') ? `${API_BASE}${u}` : u)
     const loadCities = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/public/discover/cities`)
         const data = await res.json().catch(() => ({}))
-        cities.value = Array.isArray(data.cities) ? data.cities.slice(0, 12) : []
+        cities.value = Array.isArray(data.cities) ? data.cities : []
+        visitorCountry.value = data.visitorCountry || null
       } catch (e) { cities.value = [] }
     }
     const openAuthModal = () => {router.push('/auth')}
@@ -238,6 +255,7 @@ export default {
       isDayMode,
       lampEl,
       cities,
+      cityGroups,
       cityImg
     }
   }
@@ -459,6 +477,9 @@ export default {
 .cities { padding: 0 1rem 4rem; margin-top: 0; position: relative; z-index: 2 }
 .cities-heading { margin-bottom: 0.6rem }
 .cities-sub { text-align: center; opacity: 0.8; margin: 0 auto 1.6rem; max-width: 640px; line-height: 1.55 }
+.cities-country { margin: 0 auto 1.4rem; max-width: 1000px }
+.cities-country-name { text-align: center; font-family: var(--brand-serif); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.04em; margin: 0 0 4px; color: #f4e7c9; opacity: 0.85 }
+.day-mode .cities-country-name { color: #5a3c2e }
 .cities-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 28px; max-width: 1000px; margin: 0 auto }
 .city-card { position: relative; display: inline-block; padding: 10px 6px 16px; text-decoration: none; color: inherit; background: transparent }
 .city-card::after { content: ''; position: absolute; left: 0; right: 0; bottom: 8px; height: 1.5px;
