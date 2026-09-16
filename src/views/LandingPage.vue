@@ -59,7 +59,7 @@
          empty section. -->
     <section v-if="cities.length" class="cities">
       <div class="features-container">
-        <h2 class="features-heading cities-heading">{{ $t('landing.cities.title') }}</h2>
+        <h2 class="features-heading cities-heading" v-html="citiesTitleHtml"></h2>
         <p class="cities-sub">{{ $t('landing.cities.subtitle') }}</p>
         <div class="cities-grid">
           <router-link v-for="c in cities" :key="c.slug" :to="`/discover/${c.slug}`" class="city-card">
@@ -108,6 +108,12 @@ export default {
       const esc = raw.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
       const m = esc.match(/^(.*?[,—،，])\s*(.+)$/);
       return m ? `${m[1]} <span class="brand-grad">${m[2]}</span>` : esc;
+    },
+    // Cities heading: same brand-word treatment as the hero (founder 2026-09-17).
+    citiesTitleHtml() {
+      const raw = String(this.$t('landing.cities.title') || '');
+      const esc = raw.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      return esc.replace(/Jinni/g, '<span class="brand-grad" translate="no">Jinni</span>');
     },
     heroTitleHtml() {
       const raw = String(this.$t('landing.hero.title') || '');
