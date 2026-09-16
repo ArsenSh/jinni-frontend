@@ -2140,6 +2140,7 @@
               <span class="card-sub">{{ sesOpen.user?.name || '' }} · {{ sesOpen.user?.email || '' }} · {{ mapWhen(sesOpen.createdAt) }}</span>
             </div>
             <div class="provider-actions" style="margin-bottom: 10px">
+              <button class="action-btn" @click="copySessionText(sesOpen._id)" :disabled="chatLog.copying">{{ chatLog.copying ? 'Copying…' : 'Copy all' }}</button>
               <a class="action-btn" :href="sesExportUrl(sesOpen)" @click.prevent="exportSession(sesOpen)">Export as text</a>
               <button class="action-btn" @click="sesShowLogs = !sesShowLogs">{{ sesShowLogs ? 'Hide engine logs' : 'Show engine logs' }}</button>
             </div>
@@ -4201,6 +4202,11 @@
               <div class="edit-sub">Read-only transcript · {{ chatLog.total }} session{{ chatLog.total === 1 ? '' : 's' }}</div>
             </div>
             <div class="edit-header-actions">
+              <!-- Founder 2026-09-16: "backend logs, or copy button to copy all
+                   correctly" — the whole session (transcript + engine turn
+                   records + log lines) as one text, ready to paste. -->
+              <button v-if="chatLog.sessionId" class="action-btn" @click="copySessionText(chatLog.sessionId)" :disabled="chatLog.copying">{{ chatLog.copying ? 'Copying…' : 'Copy all' }}</button>
+              <button v-if="chatLog.sessionId" class="action-btn" @click="chatLog.showLogs = !chatLog.showLogs">{{ chatLog.showLogs ? 'Hide engine logs' : 'Show engine logs' }}</button>
               <button class="edit-close-btn" @click="closeChatLog" title="Close">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
@@ -4298,6 +4304,27 @@
                     <ItineraryView :itinerary-id="m.itineraryId" :theme="theme" />
                   </div>
                 </div>
+                <!-- Engine turn record for the traveler's message above: what
+                     the backend decided and its captured console lines. Same
+                     alignment rule as the Sessions tab (i-th user message ↔
+                     i-th turn, ask text checked). -->
+                <div v-if="m.sender === 'user' && m._turn" class="ses-turn cl-turn">
+                  <div class="ses-turn-line">
+                    <span class="ses-chip">{{ m._turn.engine || '?' }}</span>
+                    <span class="ses-chip">{{ m._turn.branch }}</span>
+                    <span class="ses-chip" v-if="m._turn.controllerLane">controller: {{ m._turn.controllerLane }} ({{ m._turn.controllerSource }})</span>
+                    <span class="ses-chip" v-if="m._turn.category">{{ m._turn.category }}</span>
+                    <span class="ses-chip">{{ m._turn.ms }} ms</span>
+                    <span class="ses-chip">{{ m._turn.tokensActual || m._turn.tokensEst }} tok</span>
+                    <span class="ses-chip" v-if="m._turn.candidateCount">{{ m._turn.shown }}/{{ m._turn.candidateCount }} shown</span>
+                    <span class="ses-chip" v-if="m._turn.googleCalls">google ×{{ m._turn.googleCalls }}</span>
+                    <span class="ses-chip" v-if="m._turn.radiusKm">{{ m._turn.radiusKm }} km</span>
+                    <span class="ses-chip" v-if="m._turn.city">{{ m._turn.city }}</span>
+                  </div>
+                  <pre v-if="chatLog.showLogs && m._turn.log && m._turn.log.length" class="map-log ses-log">{{ m._turn.log.join('\n') }}</pre>
+                  <p v-else-if="chatLog.showLogs" class="cl-turn-nolog">No log lines were captured for this turn.</p>
+                </div>
+                <p v-if="chatLog.turnsUnmatched" class="cov-meta map-warn">{{ chatLog.turnsUnmatched }} engine turn(s) could not be lined up with a message — Copy all lists them in order.</p>
               </template>
             </section>
           </div>
@@ -5876,7 +5903,23 @@ export default {
     }
 
     // ── Chat transcript viewer (read-only) ──────────────────────────────
-    const chatLog = ref({ open: false, user: null, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false })
+    const chatLog = ref({ open: false, user: null, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false, showLogs: true, copying: false, turnsUnmatched: 0 })
+    // Turn records line up with the traveler's messages in order: the i-th
+    // user message is the i-th turn. The ask text is checked too, so a
+    // mismatch (a turn the frontend never saved, or vice versa) is counted
+    // rather than silently attached to the wrong message.
+    const alignTurns = (messages, turns) => {
+      const msgs = messages.map(m => ({ ...m }))
+      let ti = 0, unmatched = 0
+      for (const m of msgs) {
+        if (m.sender !== 'user') continue
+        const t = turns[ti]
+        if (!t) continue
+        const same = !t.ask || String(m.text || '').slice(0, 60) === String(t.ask).slice(0, 60)
+        if (same) { m._turn = t; ti++ } else { unmatched++; ti++ }
+      }
+      return { messages: msgs, unmatched: unmatched + Math.max(0, turns.length - ti) }
+    }
     // Flatten the user's Preferences-page choices + resolved location into
     // simple label/value chips for the transcript header.
     const buildPrefChips = (u) => {
@@ -5898,7 +5941,7 @@ export default {
     }
 
     const openChatLog = async (user) => {
-      chatLog.value = { open: true, user, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: true, msgLoading: false }
+      chatLog.value = { open: true, user, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: true, msgLoading: false, showLogs: true, copying: false, turnsUnmatched: 0 }
       // Full user doc — the list payload omits preferences/settings.
       apiFetch(`/users/${user._id}`)
         .then(r => { chatLog.value.prefs = buildPrefChips(r.data || user) })
@@ -5915,12 +5958,35 @@ export default {
       chatLog.value.sessionId = id
       chatLog.value.msgLoading = true
       chatLog.value.messages = []
+      chatLog.value.turnsUnmatched = 0
       try {
-        const res = await apiFetch(`/chat-sessions/${id}`)
-        chatLog.value.messages = res.data?.messages || []
+        // Turn records are a separate read so an old session with no records
+        // still shows its transcript if that call fails.
+        const [full, turns] = await Promise.all([
+          apiFetch(`/chat-sessions/${id}`),
+          apiFetch(`/chat-sessions/${id}/turns`).catch(() => ({ data: { turns: [] } })),
+        ])
+        const aligned = alignTurns(full.data?.messages || [], turns.data?.turns || [])
+        chatLog.value.messages = aligned.messages
+        chatLog.value.turnsUnmatched = aligned.unmatched
       } catch (e) { showToast(e.message, 'error') } finally { chatLog.value.msgLoading = false }
     }
-    const closeChatLog = () => { chatLog.value = { open: false, user: null, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false } }
+    const closeChatLog = () => { chatLog.value = { open: false, user: null, prefs: null, sessions: [], total: 0, sessionId: null, messages: [], loading: false, msgLoading: false, showLogs: true, copying: false, turnsUnmatched: 0 } }
+
+    // Whole session as one text on the clipboard — the backend export
+    // (transcript + turn records + log lines), the shape the founder pastes.
+    // Same helper serves the per-user panel and the Sessions tab.
+    const copySessionText = async (id) => {
+      chatLog.value.copying = true
+      try {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token')
+        const res = await fetch(`${API}/admin/chat-sessions/${id}/export`, { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const text = await res.text()
+        await navigator.clipboard.writeText(text)
+        showToast(`Copied ${text.split('\n').length} lines`)
+      } catch (e) { showToast(`Copy failed: ${e.message}`, 'error') } finally { chatLog.value.copying = false }
+    }
 
     const togglePremium = async (user) => {
       try { await apiFetch(`/users/${user._id}/premium`, { method: 'PATCH', body: JSON.stringify({ isPremium: !user.isPremium }) }); user.isPremium = !user.isPremium; showToast(`${user.name} ${user.isPremium ? 'upgraded to Premium' : 'downgraded to Free'}`) }
@@ -7464,27 +7530,15 @@ export default {
         sesList.value = res.data.sessions || []
       } catch (e) { showToast(e.message, 'error') } finally { sesLoading.value = false }
     }
-    // Turn records line up with the traveler's messages in order: the i-th
-    // user message is the i-th turn. The ask text is checked too, so a
-    // mismatch (a turn the frontend never saved, or vice versa) is counted
-    // rather than silently attached to the wrong message.
+    // Alignment rule lives in alignTurns (shared with the per-user panel).
     const openSession = async (s) => {
       sesOpen.value = s
       sesDetailLoading.value = true
       try {
         const [full, turns] = await Promise.all([apiFetch(`/chat-sessions/${s._id}`), apiFetch(`/chat-sessions/${s._id}/turns`)])
-        const msgs = (full.data?.messages || []).map(m => ({ ...m }))
-        const list = turns.data?.turns || []
-        let ti = 0, unmatched = 0
-        for (const m of msgs) {
-          if (m.sender !== 'user') continue
-          const t = list[ti]
-          if (!t) continue
-          const same = !t.ask || String(m.text || '').slice(0, 60) === String(t.ask).slice(0, 60)
-          if (same) { m._turn = t; ti++ } else { unmatched++; ti++ }
-        }
-        sesTurnsUnmatched.value = unmatched + Math.max(0, list.length - ti)
-        sesMessages.value = msgs
+        const aligned = alignTurns(full.data?.messages || [], turns.data?.turns || [])
+        sesTurnsUnmatched.value = aligned.unmatched
+        sesMessages.value = aligned.messages
       } catch (e) { showToast(e.message, 'error') } finally { sesDetailLoading.value = false }
     }
     const sesExportUrl = (s) => `${API}/admin/chat-sessions/${s._id}/export`
@@ -7963,7 +8017,7 @@ export default {
       fetchUsers, fetchUserLocations, fetchAIUsage, fetchBusinesses, fetchDestinations, fetchPlaces, fetchGoogleUsage,
       toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, accOpen, toggleAccRow, accRowTap, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
       deletePlace, setExploreStatus, placesExploreFilter, placesExploreOpts, backfillRegions, backfillBusy, purgeStale, onImgError,
-      chatLog, openChatLog, openChatSession, closeChatLog, resolveImage, fmtMsg,
+      chatLog, openChatLog, openChatSession, closeChatLog, copySessionText, resolveImage, fmtMsg,
       purgeOpts, purgeDays, purgeDropdownOpen, purgeNeverUsed, selectedPurgeOpt,
       userFilterOpts, destFilterOpts, bizPartnerFilterOpts, bizStatusFilterOpts, placesImageFilterOpts, placesActionOpts, placesSortOpts,
       apiBase: API_BASE,
@@ -8520,6 +8574,14 @@ export default {
 .chatlog-item-title { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chatlog-item-meta { display: block; font-size: 11px; opacity: 0.6; margin-top: 2px; }
 .chatlog-transcript { flex: 1; min-width: 0; overflow-y: auto; padding: 16px 20px; }
+/* Founder 2026-09-16: the transcript's scrollbar was the browser default —
+   a bright white track in night mode. Same thin themed bar as .edit-body. */
+.chatlog-transcript, .chatlog-list, .ses-log { scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.28) transparent; }
+.chatlog-transcript::-webkit-scrollbar, .chatlog-list::-webkit-scrollbar, .ses-log::-webkit-scrollbar { width: 5px; height: 5px; }
+.chatlog-transcript::-webkit-scrollbar-track, .chatlog-list::-webkit-scrollbar-track, .ses-log::-webkit-scrollbar-track { background: transparent; }
+.chatlog-transcript::-webkit-scrollbar-thumb, .chatlog-list::-webkit-scrollbar-thumb, .ses-log::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.28); border-radius: 3px; }
+.edit-panel.day-mode .chatlog-transcript, .edit-panel.day-mode .chatlog-list { scrollbar-color: rgba(160,82,45,0.18) transparent; }
+.edit-panel.day-mode .chatlog-transcript::-webkit-scrollbar-thumb, .edit-panel.day-mode .chatlog-list::-webkit-scrollbar-thumb { background: rgba(160,82,45,0.18); }
 .chatlog-empty { padding: 24px; font-size: 13px; opacity: 0.6; text-align: center; }
 .cl-msg { margin-bottom: 18px; max-width: 760px; }
 .cl-msg--user { margin-left: auto; }
@@ -10154,6 +10216,10 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
 .ses-turn-line { display: flex; flex-wrap: wrap; gap: 6px; }
 .ses-chip { font-size: 11px; font-family: 'DM Mono', monospace; padding: 2px 7px; border-radius: 6px; background: rgba(139,92,246,0.12); }
 .ses-log { max-height: 260px; margin-top: 6px; }
+.cl-turn { max-width: 88%; margin: 2px 0 12px auto; }
+.cl-turn .ses-log { max-height: 320px; }
+.cl-turn-nolog { font-size: 11px; opacity: 0.55; margin: 4px 0 0; }
+.chatlog-panel .edit-header-actions { display: flex; align-items: center; gap: 8px; }
 @media (max-width: 720px) { .ses-row { grid-template-columns: 1fr; gap: 2px; } .ses-turn { margin-left: 6px; } }
 .map-world.on { border-color: rgba(212,175,55,0.5); }
 .map-world-text { font-size: 13px; line-height: 1.5; opacity: 0.92; }
