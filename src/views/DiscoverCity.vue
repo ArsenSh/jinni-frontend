@@ -74,7 +74,7 @@
           </button>
           <div class="ex-rail" :ref="el => railEls[c] = el" @scroll.passive="onRailScroll(c, $event)">
             <div v-for="(p, pi) in categories[c]" :key="c + p.placeId"
-                 class="ex-card" :class="{ 'is-center': (railIx[c] || 0) === pi }"
+                 class="ex-card" :class="[p.tier ? 'ex-card--' + p.tier : '', { 'is-center': (railIx[c] || 0) === pi }]"
                  @click="openPlace(p)" @touchstart.passive="cardTouchStart">
               <div class="ex-card-imgwrap">
                 <img v-if="p.image" class="ex-card-img" :src="imgUrl(p.image)" :alt="`${p.name} — ${catLabelOne(c)} in ${city ? city.name : ''}`"
@@ -83,9 +83,12 @@
                 <div v-else class="ex-card-imgless">
                   <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
                 </div>
+                <!-- Partner tier chip — businesses only, the three tones the
+                     Discoveries cards use (verified / spotlight / signature). -->
+                <span v-if="p.tier" class="ex-tier" :class="'ex-tier--' + p.tier">✦ {{ tierLabel(p.tier) }}</span>
                 <div class="ex-card-acts ex-card-acts--bottom" @click.stop>
                   <button class="ex-act-more" @click="openInfo(p, c)">{{ t('chat.recommendations.more') || 'More' }}</button>
-                  <button v-if="p.photoCount > 1" class="ex-act ex-act--photo" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
+                  <button v-if="(p.photos && p.photos.length > 1) || p.photoCount > 1" class="ex-act ex-act--photo" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
                   </button>
                 </div>
@@ -147,7 +150,7 @@
 
     <!-- More window: stored facts only (address, hours, website, phone). -->
     <div v-if="info.open" class="info-modal-overlay" @click.self="closeInfo">
-      <div class="info-modal" :class="[theme === 'night-mode' ? 'night' : 'day', info.place?.verified ? 'info-modal--verified' : '']">
+      <div class="info-modal" :class="[theme === 'night-mode' ? 'night' : 'day', infoTierClass]">
         <div class="modal-header"><h3>{{ info.data?.name || info.place?.name }}</h3></div>
         <div class="modal-body">
           <div v-if="info.loading" class="loading-container"><p>{{ t('place_info.loading') || 'Loading…' }}</p></div>
@@ -179,6 +182,10 @@
             <div class="pd-fact" v-if="info.data?.address || info.place?.region">
               <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
               <div class="pd-fact-body">{{ info.data?.address || info.place?.region }}</div>
+            </div>
+            <div class="pd-fact pd-fact--desc" v-if="info.data?.description">
+              <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+              <div class="pd-fact-body">{{ info.data.description }}</div>
             </div>
             <div class="pd-fact" v-if="info.data?.hours?.length">
               <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
@@ -244,11 +251,12 @@ export default {
       const style = this.prefs.travelStyle, nb = this.budgetUsd;
       const keep = (p) => {
         if (want.size && (p.interests || []).length && !(p.interests || []).some(t => want.has(t))) return false;
-        if (p.priced && p.tier) {
-          if (style === 'luxury' && p.tier <= 2) return false;
-          if (style === 'budget' && p.tier >= 3) return false;
-          if (nb && nb.max <= 15 && p.tier >= 3) return false;
-          if (nb && nb.min >= 60 && p.tier === 1) return false;
+        const pt = p.priceTier;
+        if (p.priced && pt) {
+          if (style === 'luxury' && pt <= 2) return false;
+          if (style === 'budget' && pt >= 3) return false;
+          if (nb && nb.max <= 15 && pt >= 3) return false;
+          if (nb && nb.min >= 60 && pt === 1) return false;
         }
         return true;
       };
@@ -270,6 +278,13 @@ export default {
     },
     hasAny() { return this.orderedCategories.length > 0; },
     hasAnyRaw() { return Object.values(this.rawCategories).some(l => l && l.length); },
+    infoTierClass() {
+      const tier = this.info.place?.tier;
+      if (tier === 'signature') return 'info-modal--signature';
+      if (tier === 'spotlight') return 'info-modal--spotlight';
+      if (tier === 'verified') return 'info-modal--verified';
+      return '';
+    },
     hoursParsed() {
       const hrs = this.info.data?.hours;
       if (!Array.isArray(hrs)) return [];
@@ -464,9 +479,15 @@ export default {
     },
     // Stored photos only: /api/ai/place-image/:placeId/:i is public and
     // serves what Jinni already keeps. photoCount comes from the list.
+    tierLabel(tier) {
+      return this.t('map.tier_' + tier)
+        || ({ signature: "Jinni's Signature", spotlight: "Jinni's Spotlight", verified: 'Jinni Verified' })[tier] || tier;
+    },
     openGallery(p) {
       const n = Math.max(1, p.photoCount || 1);
-      const images = Array.from({ length: n }, (_, i) => this.imgUrl(`/api/ai/place-image/${p.placeId}/${i}`));
+      const images = (Array.isArray(p.photos) && p.photos.length)
+        ? p.photos.map(u => this.imgUrl(u))                                    // owned rows: their own photos
+        : Array.from({ length: n }, (_, i) => this.imgUrl(`/api/ai/place-image/${p.placeId}/${i}`));
       this.gallery = { open: true, images, idx: 0, name: p.name };
     },
     galleryStep(dir) { const n = this.gallery.images.length; if (n) this.gallery.idx = (this.gallery.idx + dir + n) % n; },
