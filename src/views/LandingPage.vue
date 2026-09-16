@@ -701,8 +701,11 @@ export default {
      peach sky. Lit PEACH now — the sky's own upper tones (#f2e3d3 / #ebc4a6)
      pushed a step brighter — so the glow reads as sun on the paper, not
      paint. Same two radii, same warm seat below. */
-  filter: drop-shadow(0 0 5px rgba(255,240,222,0.95))
-          drop-shadow(0 0 13px rgba(250,214,180,0.7))
+  /* Founder 2026-09-17, second pass: no bloom at all by day — the lit halo
+     read wrong in every tone tried. Only the 1px warm seat remains, so the
+     gradient word sits crisply on the paper and still touches it. */
+  filter: drop-shadow(0 0 0 transparent)
+          drop-shadow(0 0 0 transparent)
           drop-shadow(0 1px 1px rgba(110,45,6,0.22));
 }
 /* The subtitle's brand word leaves the gradient (founder 2026-09-11: "Jinni
