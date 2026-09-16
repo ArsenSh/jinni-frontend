@@ -17,34 +17,78 @@
       </div>
     </header>
 
-    <!-- Filters (founder 2026-09-17): the onboarding preferences minus the
-         location step — interests, travel style, budget — applied on the
-         client to the verified set. Nothing is stored or sent anywhere. -->
-    <div v-if="hasAnyRaw" class="dc-filters">
-      <div class="dc-filter-row">
-        <span class="dc-filter-label">{{ t('onboarding.interests_title') || 'Interests' }}</span>
-        <div class="dc-chips">
-          <button v-for="(label, key) in interestOptions" :key="key" type="button" class="ex-chip dc-chip"
-                  :class="{ active: fInterests.includes(key) }" @click="toggleInterest(key)">{{ label }}</button>
-        </div>
-      </div>
-      <div class="dc-filter-row">
-        <span class="dc-filter-label">{{ t('onboarding.style_title') || 'Travel style' }}</span>
-        <div class="dc-chips">
-          <button v-for="(label, key) in styleOptions" :key="key" type="button" class="ex-chip dc-chip"
-                  :class="{ active: fStyle === key }" @click="fStyle = fStyle === key ? '' : key">{{ label }}</button>
-        </div>
-      </div>
-      <div class="dc-filter-row">
-        <span class="dc-filter-label">{{ t('onboarding.budget_title') || 'Budget' }} <small>USD</small></span>
-        <div class="dc-chips dc-budget">
-          <input v-model.number="fBudgetMin" type="number" min="0" inputmode="numeric" class="dc-input" :placeholder="t('onboarding.min_budget') || 'Minimum'"/>
-          <span class="dc-dash">–</span>
-          <input v-model.number="fBudgetMax" type="number" min="0" inputmode="numeric" class="dc-input" :placeholder="t('onboarding.max_budget') || 'Maximum'"/>
-          <button v-if="filtersActive" type="button" class="ex-chip dc-chip dc-clear" @click="clearFilters">✕ {{ t('map.clear_route') || 'Clear' }}</button>
-        </div>
-      </div>
+    <!-- Preferences (founder 2026-09-17): the real onboarding page's
+         interests / travel style / budget sections, minus location, in the
+         same dress. Choices live in this browser only (localStorage) and
+         personalise the verified set the way a signed-in user's saved
+         preferences do on the Discoveries page. Collapsed behind one button
+         so the place rails stay first. -->
+    <div v-if="hasAnyRaw" class="dc-prefs-bar">
+      <button type="button" class="ex-chip dc-prefs-toggle" :class="{ active: prefsOpen || filtersActive }" @click="prefsOpen = !prefsOpen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 9 4-18 3 9h4"/></svg>
+        {{ t('explore.preferences') || 'Preferences' }}<span v-if="filtersActive" class="ex-chip-count">{{ activeCount }}</span>
+      </button>
+      <button v-if="filtersActive" type="button" class="ex-chip dc-prefs-toggle" @click="clearFilters">✕ {{ t('map.clear_route') || 'Clear' }}</button>
     </div>
+    <transition name="budget-expand">
+      <form v-if="prefsOpen && hasAnyRaw" @submit.prevent class="onboarding-form dc-onb">
+        <div class="preference-section active">
+          <div class="card">
+            <div class="section-header">
+              <h3>{{ t('onboarding.interests_title') || 'Your Interests' }}</h3>
+              <p class="section-description">{{ t('onboarding.interests_desc') || 'Pick what you enjoy most' }}</p>
+            </div>
+            <div class="interests-grid">
+              <div v-for="(label, key) in interestOptions" :key="key" class="interest-card"
+                   :class="{ 'selected': prefs.interests.includes(key) }" @click="toggleInterest(key)">
+                <span>{{ label }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preference-section active">
+          <div class="card">
+            <div class="section-header">
+              <h3>{{ t('onboarding.style_title') || 'Travel Style' }}</h3>
+              <p class="section-description">{{ t('onboarding.style_desc') || 'How do you like to travel?' }}</p>
+            </div>
+            <div class="travel-styles-grid">
+              <div v-for="(label, key) in styleOptions" :key="key" class="style-card"
+                   :class="{ 'selected': prefs.travelStyle === key }" @click="selectStyle(key)">
+                <span>{{ label }}</span>
+              </div>
+            </div>
+            <transition name="budget-expand">
+              <div class="budget-embed" v-if="prefs.travelStyle === 'budget'">
+                <div class="budget-embed-header">
+                  <h4>{{ t('onboarding.budget_title') || 'Your Budget' }}</h4>
+                  <p class="section-description">{{ t('onboarding.budget_desc') || 'Set your preferred spending range' }}</p>
+                </div>
+                <div class="budget-fields">
+                  <div class="budget-display">
+                    <div class="budget-input">
+                      <label>{{ t('onboarding.min_budget') || 'Minimum' }}</label>
+                      <input type="number" v-model.number="prefs.budget.min" min="0" max="100000000" placeholder="..." inputmode="numeric">
+                    </div>
+                    <div class="budget-input">
+                      <label>{{ t('onboarding.currency') || 'Currency' }}</label>
+                      <select v-model="prefs.budget.currency" class="dc-currency">
+                        <option v-for="(name, code) in currencyOptions" :key="code" :value="code">{{ code }}</option>
+                      </select>
+                    </div>
+                    <div class="budget-input">
+                      <label>{{ t('onboarding.max_budget') || 'Maximum' }}</label>
+                      <input type="number" v-model.number="prefs.budget.max" min="0" max="100000000" placeholder="..." inputmode="numeric">
+                    </div>
+                  </div>
+                  <div v-if="budgetInvalid" class="budget-validation-error">{{ t('onboarding.budget_validation_error') || 'Enter a valid budget range (min ≤ max)' }}</div>
+                </div>
+              </div>
+            </transition>
+          </div>
+        </div>
+      </form>
+    </transition>
 
     <p v-if="hasAnyRaw && !hasAny && !loading" class="dc-nomatch">{{ t('discover.no_match') || 'No verified places match these filters — clear one to see more.' }}</p>
 
@@ -221,8 +265,9 @@ export default {
   name: 'DiscoverCity',
   data() {
     return {
-      loading: true, rawCategories: {}, city: null, serverOrder: null,
-      fInterests: [], fStyle: '', fBudgetMin: null, fBudgetMax: null,
+      loading: true, rawCategories: {}, city: null, serverOrder: null, rates: null,
+      prefsOpen: false,
+      prefs: { interests: [], travelStyle: '', budget: { min: null, max: null, currency: 'USD' } },
       activeCat: null, navStuck: false, catEls: {}, railEls: {}, chipEls: {}, railIx: {}, railBar: {}, _railTimers: {},
       theme: 'night-mode',
       gallery: { open: false, images: [], idx: 0, name: '' },
@@ -236,22 +281,34 @@ export default {
     },
     interestOptions() { const m = this.$tm ? this.$tm('onboarding.interests') : null; return (m && typeof m === 'object' && Object.keys(m).length) ? m : { family: 'Family', romantic: 'Romantic', nature: 'Nature', adventure: 'Adventure', cultural: 'Cultural', history: 'History', art: 'Art', food_drink: 'Cuisine', nightlife: 'Nightlife', relaxation: 'Relaxation' }; },
     styleOptions() { const m = this.$tm ? this.$tm('onboarding.styles') : null; return (m && typeof m === 'object' && Object.keys(m).length) ? m : { luxury: 'Luxury', budget: 'Budget' }; },
-    filtersActive() { return this.fInterests.length > 0 || !!this.fStyle || Number.isFinite(this.fBudgetMin) || Number.isFinite(this.fBudgetMax); },
+    currencyOptions() { const m = this.$tm ? this.$tm('onboarding.currencies') : null; return (m && typeof m === 'object' && Object.keys(m).length) ? m : { USD: 'US Dollar', EUR: 'Euro', AMD: 'Armenian Dram', RUB: 'Russian Ruble', AED: 'UAE Dirham', GBP: 'British Pound' }; },
+    budgetSet() { const b = this.prefs.budget; return this.prefs.travelStyle === 'budget' && Number.isFinite(b.min) && Number.isFinite(b.max) && b.min > 0 && b.max > 0; },
+    budgetInvalid() { const b = this.prefs.budget; return Number.isFinite(b.min) && Number.isFinite(b.max) && b.min > b.max; },
+    filtersActive() { return this.prefs.interests.length > 0 || !!this.prefs.travelStyle || this.budgetSet; },
+    activeCount() { return this.prefs.interests.length + (this.prefs.travelStyle ? 1 : 0) + (this.budgetSet && !this.budgetInvalid ? 1 : 0); },
+    // Budget bounds in USD — the server's live rates (USD-based) when the
+    // page carries them, else the bounds are used only when already in USD.
+    budgetUsd() {
+      if (!this.budgetSet || this.budgetInvalid) return null;
+      const b = this.prefs.budget, cur = String(b.currency || 'USD').toUpperCase();
+      if (cur === 'USD') return { min: b.min, max: b.max };
+      const rate = this.rates && Number(this.rates[cur]);
+      return rate > 0 ? { min: b.min / rate, max: b.max / rate } : null;
+    },
     // Same rules the Discoveries page applies server-side to a signed-in
     // user's preferences: an interest tag must match when the place carries
     // tags (untagged places stay); a style drops the opposite price tier;
     // a budget of ≤ $15 drops upscale, ≥ $60 drops budget places.
     categories() {
-      const want = new Set(this.fInterests.map(i => i === 'food_drink' ? 'food&drink' : i));
-      const min = Number.isFinite(this.fBudgetMin) ? this.fBudgetMin : null;
-      const max = Number.isFinite(this.fBudgetMax) ? this.fBudgetMax : null;
+      const want = new Set(this.prefs.interests.map(i => i === 'food_drink' ? 'food&drink' : i));
+      const style = this.prefs.travelStyle, nb = this.budgetUsd;
       const keep = (p) => {
         if (want.size && (p.interests || []).length && !(p.interests || []).some(t => want.has(t))) return false;
         if (p.priced && p.tier) {
-          if (this.fStyle === 'luxury' && p.tier <= 2) return false;
-          if (this.fStyle === 'budget' && p.tier >= 3) return false;
-          if (max != null && max <= 15 && p.tier >= 3) return false;
-          if (min != null && min >= 60 && p.tier === 1) return false;
+          if (style === 'luxury' && p.tier <= 2) return false;
+          if (style === 'budget' && p.tier >= 3) return false;
+          if (nb && nb.max <= 15 && p.tier >= 3) return false;
+          if (nb && nb.min >= 60 && p.tier === 1) return false;
         }
         return true;
       };
@@ -279,7 +336,11 @@ export default {
       });
     },
   },
-  created() { this.theme = this.resolveTheme(); },
+  created() { this.theme = this.resolveTheme(); this.loadPrefs(); },
+  watch: {
+    '$route.params.slug'() { this.load(); },
+    prefs: { deep: true, handler() { this.savePrefs(); } },
+  },
   mounted() {
     this.load();
     this._onKey = (e) => {
@@ -299,7 +360,6 @@ export default {
     if (this._spy) this._spy.disconnect();
     this.clearSeo();
   },
-  watch: { '$route.params.slug'() { this.load(); } },
   methods: {
     t(key, params) {
       if (!this.$t) return null;
@@ -349,6 +409,7 @@ export default {
           this.rawCategories = data.categories || {};
           this.city = data.city || null;
           this.serverOrder = Array.isArray(data.order) ? data.order : null;
+          this.rates = (data.rates && typeof data.rates === 'object') ? data.rates : null;
         }
         this.activeCat = this.orderedCategories[0] || null;
       } catch (e) {
@@ -484,8 +545,23 @@ export default {
       a.href = `https://www.google.com/maps/search/?api=1&query=${q}`; a.target = '_blank'; a.rel = 'noopener noreferrer';
       document.body.appendChild(a); a.click(); a.remove();
     },
-    toggleInterest(k) { this.fInterests = this.fInterests.includes(k) ? this.fInterests.filter(x => x !== k) : [...this.fInterests, k]; },
-    clearFilters() { this.fInterests = []; this.fStyle = ''; this.fBudgetMin = null; this.fBudgetMax = null; },
+    toggleInterest(k) { const cur = this.prefs.interests; this.prefs.interests = cur.includes(k) ? cur.filter(x => x !== k) : [...cur, k]; },
+    selectStyle(k) { this.prefs.travelStyle = this.prefs.travelStyle === k ? '' : k; },
+    clearFilters() { this.prefs = { interests: [], travelStyle: '', budget: { min: null, max: null, currency: this.prefs.budget.currency || 'USD' } }; },
+    // Browser-only memory of the visitor's choices (no account, nothing sent).
+    loadPrefs() {
+      try {
+        const p = JSON.parse(localStorage.getItem('jinni_public_prefs') || 'null');
+        if (p && typeof p === 'object') {
+          this.prefs = {
+            interests: Array.isArray(p.interests) ? p.interests.filter(x => typeof x === 'string') : [],
+            travelStyle: p.travelStyle === 'luxury' || p.travelStyle === 'budget' ? p.travelStyle : '',
+            budget: { min: Number.isFinite(p.budget?.min) ? p.budget.min : null, max: Number.isFinite(p.budget?.max) ? p.budget.max : null, currency: typeof p.budget?.currency === 'string' ? p.budget.currency : 'USD' },
+          };
+        }
+      } catch (e) { /* storage unavailable → defaults */ }
+    },
+    savePrefs() { try { localStorage.setItem('jinni_public_prefs', JSON.stringify(this.prefs)); } catch (e) { /* ignore */ } },
     goAuth() { this.$router.push('/auth'); },
   },
 };
@@ -980,20 +1056,90 @@ export default {
 .explore.night-mode .ex-save svg path { stroke: rgba(216,180,254,0.8); }
 .ex-pref { color: #D4AF37; }
 
-/* Filters — onboarding's three preference steps, in the page's chip dress. */
-.dc-filters { width: min(980px, calc(100% - 36px)); margin: 14px auto 0; display: flex; flex-direction: column; gap: 8px; }
-.dc-filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.dc-filter-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ex-heading); min-width: 92px; }
-.dc-filter-label small { font-weight: 500; opacity: 0.7; margin-left: 4px; }
-.dc-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.dc-chip { padding: 6px 12px; font-size: 0.82rem; }
-.dc-budget { gap: 8px; }
-.dc-input { width: 104px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--ex-line); background: var(--ex-search-bg, var(--ex-chip)); color: var(--ex-text); font: inherit; font-size: 0.85rem; outline: none; }
-.dc-input:focus { border-color: var(--ex-accent); }
-.dc-dash { opacity: 0.6; }
-.dc-clear { opacity: 0.85; }
+/* ── Preferences panel: the onboarding page's own rules, copied verbatim
+   (founder 2026-09-17: "copying design from real onboarding page"). Theme
+   selectors resolve on this page's .day-mode/.night-mode root. ── */
+.dc-prefs-bar { display: flex; justify-content: center; gap: 8px; margin: 14px auto 0; }
+.dc-prefs-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.dc-onb { width: min(647px, calc(100% - 36px)); margin: 16px auto 0; }
 .dc-nomatch { text-align: center; margin: 22px auto 0; padding: 0 18px; color: var(--ex-muted); }
-@media (max-width: 520px) { .dc-filter-label { min-width: 100%; } .dc-input { width: 44%; } }
+.dc-currency { border: none; padding: 12px 16px; border-radius: 12px; width: 100%; box-sizing: border-box; min-height: 44px; font: inherit; text-align: center; cursor: pointer; }
+.day-mode .dc-currency { background: rgba(255,255,255,0.5); color: #3c2a1e; }
+.night-mode .dc-currency { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+.night-mode .dc-currency option { color: #1a1030; }
+.onboarding-container.fade-in{opacity:1;}
+.preference-section{margin-bottom:25px;}
+.preference-section.active{opacity:1;}
+.card{border-radius:12px;padding:25px;position:relative;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);}
+.card:hover{box-shadow:0 0 35px rgba(0,0,0,0.3)}
+.section-header{margin-bottom:25px}
+.section-header h3{font-size:1.4rem;margin:0 0 8px 0;font-weight:600}
+.section-description{font-size:0.95rem;margin:0}
+.interests-grid,.travel-styles-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.interest-card,.style-card{flex:0 1 140px;border-radius:14px;padding:15px 10px;text-align:center;cursor:pointer;transition:all 0.2s ease;font-weight:500;position:relative;overflow:hidden;display:flex;justify-content:center;align-items:center;gap:8px;border:none;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+.interest-card.selected,.style-card.selected{background:linear-gradient(45deg,#D4AF37,#FF8C00);color:white;border-color:transparent;box-shadow:0 0 15px rgba(212,175,55,0.5)}
+.budget-input{display:flex;flex-direction:column;align-items:center;flex:1;max-width:180px}
+.budget-input label{margin-bottom:8px;font-weight:500;font-size:0.95rem}
+.budget-input input{border:none;padding:12px 16px;border-radius:12px;width:100%;box-sizing:border-box;min-height:44px;text-align:center;font-size:1rem;max-width:200px;transition:box-shadow 0.25s ease;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);}
+.budget-input input::-webkit-outer-spin-button, .budget-input input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.budget-input input:focus{outline:none}
+.budget-toggle-container{display:flex;justify-content:center;margin-top:-20px;}
+.budget-toggle-btn{color:white;border:none;padding:12px 24px;border-radius:20px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.3s ease;font-size:0.95rem}
+.budget-validation-error{font-size:0.9rem;margin-top: 5px;margin-bottom: -15px;text-align:center}
+.budget-fields{width:100%;display:flex;flex-direction:column;align-items:center}
+.budget-embed{margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08)}
+.budget-embed-header{text-align:center;margin-bottom:14px}
+.budget-embed-header h4{font-size:1.1rem;margin:0 0 6px 0;font-weight:600}
+.budget-expand-enter-active{transition:all 0.3s ease-out}
+.budget-expand-leave-active{transition:all 0.3s ease-in}
+.budget-expand-enter-from{max-height:0;opacity:0;overflow:hidden}
+.budget-expand-enter-to{max-height:460px;opacity:1;overflow:visible}
+.budget-expand-leave-from{max-height:460px;opacity:1;overflow:visible}
+.budget-expand-leave-to{max-height:0;opacity:0;overflow:hidden}
+.budget-display{display:grid;grid-template-columns:0.6fr 0.2fr 0.6fr;width:100%;max-width:650px;margin-top:10px}
+.budget-row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.budget-input{max-width:none}
+@media (max-width:768px){
+.budget-display{grid-template-columns:1fr 0.5fr 1fr;gap:15px}
+.budget-input{max-width:100%}
+.interests-grid,.travel-styles-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.interest-card,.style-card{flex:initial;width:auto;min-height:56px;padding:16px 12px;font-size:0.95rem}
+.card{padding:20px 15px}
+}
+.day-mode .card{background:rgba(255,255,255,0.5);box-shadow:0 2px 10px rgba(139,69,19,0.05),inset 0 1px 0 rgba(255,255,255,0.6)}
+.day-mode .card:hover{box-shadow:0 4px 16px rgba(139,69,19,0.08),inset 0 1px 0 rgba(255,255,255,0.6)}
+.day-mode .section-header h3{color:#A0522D}
+.day-mode .section-description{color:#5c3f2e}
+.day-mode .interest-card,.day-mode .style-card{background:rgba(255,255,255,0.45);color:#3c2a1e;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
+.day-mode .interest-card:hover,.day-mode .style-card:hover{background:rgba(212,175,55,0.16);box-shadow:0 2px 8px rgba(139,69,19,0.08),inset 0 1px 0 rgba(255,255,255,0.6)}
+.day-mode .interest-card.selected,.day-mode .style-card.selected{background: linear-gradient(45deg, #D4AF37, #C19A6B) !important;color:white!important;box-shadow:0 2px 10px rgba(212,175,55,0.28),inset 0 1px 0 rgba(255,255,255,0.45)!important}
+.day-mode .budget-input label{color:#A0522D;font-weight:600}
+.day-mode .budget-embed{border-top-color:rgba(212,175,55,0.25)}
+.day-mode .budget-embed-header h4{color:#A0522D}
+.day-mode .budget-input input{background:rgba(255,255,255,0.5);color:#3c2a1e;box-shadow:inset 0 1px 0 rgba(255,255,255,0.55)}
+.day-mode .budget-input input:focus{background:rgba(255,255,255,0.62);box-shadow:inset 0 1px 0 rgba(255,255,255,0.55)}
+.day-mode .budget-input input::placeholder{color:rgba(92,74,66,0.7)}
+.day-mode .budget-toggle-btn{background:rgba(255,255,255,0.9);border:1px solid rgba(212,175,55,0.3);color:#3c2a1e}
+.day-mode .budget-toggle-btn:hover{background:rgba(212,175,55,0.1);}
+.day-mode .budget-validation-error{color:#e53e3e}
+@media (max-width:768px){
+.day-mode .card{background:rgba(255,255,255,0.62);box-shadow:0 2px 10px rgba(139,69,19,0.07),inset 0 1px 0 rgba(255,255,255,0.6)}
+}
+.night-mode .card{background:rgba(139,92,246,0.07);box-shadow:0 0 3px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.10)}
+.night-mode .section-header h3{color:#c084fc}
+.night-mode .section-description{color:#e2e8f0}
+.night-mode .interest-card,.night-mode .style-card,.night-mode .language-card{background:rgba(255,255,255,0.05);color:#e2e8f0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
+.night-mode .interest-card:hover,.night-mode .style-card:hover,.night-mode .language-card:hover{background:rgba(139,92,246,0.18);box-shadow:0 0 7px rgba(139,92,246,0.28),inset 0 1px 0 rgba(255,255,255,0.10)}
+.night-mode .interest-card.selected,.night-mode .style-card.selected,.night-mode .language-card.selected{background:linear-gradient(135deg,#8b5cf6,#a855f7)!important;color:white!important;box-shadow:0 0 6px rgba(139,92,246,0.5),inset 0 1px 0 rgba(255,255,255,0.30)!important}
+.night-mode .budget-input label{color:#c084fc;font-weight:600}
+.night-mode .budget-embed{border-top-color:rgba(139,92,246,0.25)}
+.night-mode .budget-embed-header h4{color:#c084fc}
+.night-mode .budget-input input{background:rgba(255,255,255,0.05);color:#e2e8f0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
+.night-mode .budget-input input:focus{background:rgba(255,255,255,0.09);box-shadow:inset 0 1px 0 rgba(255,255,255,0.08)}
+.night-mode .budget-input input::placeholder{color:rgba(226,232,240,0.5)}
+.night-mode .budget-toggle-btn{background:#241845;border:1px solid rgba(139,92,246,0.3);color:#e2e8f0}
+.night-mode .budget-toggle-btn:hover{background:rgba(139,92,246,0.1);}
+.night-mode .budget-validation-error{color:#ff6b6b;opacity:0.8}
 /* Public page only: the lamp is a link home; the More window's Ask Jinni
    action reuses the lamp glyph at button size. */
 .ex-app-link { display: inline-block; line-height: 0; }

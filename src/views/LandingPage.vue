@@ -454,9 +454,11 @@ export default {
 .city-card-body { display: flex; flex-direction: column; align-items: center; gap: 2px }
 .city-card-name { font-family: var(--brand-serif); font-size: 1.3rem; font-weight: 600;
   background: linear-gradient(45deg, #D4AF37 0%, #E8860C 38%, #B4540A 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
-.landing-container:not(.day-mode) .city-card-name { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text }
-.landing-container:not(.day-mode) .city-card:hover .city-card-name { text-shadow: 0 0 20px rgba(255,190,110,0.55) }
-.city-card-meta { font-size: 0.86rem; opacity: 0.75 }
+/* Night: the same cream the headings use (founder 2026-09-17: the gold
+   gradient read wrong beside them), warming on hover like the wish label. */
+.landing-container:not(.day-mode) .city-card-name { background: none; -webkit-text-fill-color: initial; color: #f4e7c9 }
+.landing-container:not(.day-mode) .city-card:hover .city-card-name { color: #fff6e6; text-shadow: 0 0 20px rgba(255,190,110,0.55) }
+.city-card-meta { font-size: 0.86rem; color: rgba(224,224,224,0.7) }
 .day-mode .city-card-name { background: none; -webkit-text-fill-color: initial; color: #732F06 }
 .day-mode .city-card::after { background: rgba(115,47,6,0.5); box-shadow: 0 0 10px rgba(214,120,40,0.22) }
 .day-mode .city-card:hover::after { background: rgba(115,47,6,0.95); box-shadow: 0 0 14px rgba(214,120,40,0.6) }
