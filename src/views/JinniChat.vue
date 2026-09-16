@@ -9038,16 +9038,9 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 html[data-text-size="normal"] .input-wrapper textarea{padding-top:12px;padding-bottom:12px;line-height:26px}
 html[data-text-size="big"] .input-wrapper textarea{padding-top:10px;padding-bottom:10px;line-height:30px}
 
-/* Optical correction (founder 2026-09-01): serif faces (Palatino/Georgia)
-   sit their word-mass lower than the sans, so the geometric icon reads
-   high beside the label. Nudge the icon down to the serif's optical line.
-   SVGs cannot inherit a font — the correction is positional by design. */
-html[data-font-style="elegant"] .mode-toggle-inline svg,
-html[data-font-style="elegant"] .mode-toggle svg,
-html[data-font-style="classic"] .mode-toggle-inline svg,
-html[data-font-style="classic"] .mode-toggle svg,
-html[data-font-style="elegant"] .new-chat-btn svg,
-html[data-font-style="classic"] .new-chat-btn svg{transform:translateY(1px)}
+/* The 2026-09-01 optical nudge for Palatino/Georgia icons is gone with those
+   faces (2026-09-16): Lora and Source Serif 4 sit on the same line as the
+   sans, so icons and labels align without a positional correction. */
 
 /* Save ribbon: white hairline like the More button (founder 2026-09-08) */
 .rec-image-save-btn svg path{stroke:rgba(255,255,255,0.75);stroke-width:2}

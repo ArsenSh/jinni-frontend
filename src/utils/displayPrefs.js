@@ -22,17 +22,23 @@
 // the Palatino behind 'elegant'. The key stays 'modern' because it is
 // persisted in localStorage and server-side settings; only the label changed
 // (settings.display.font_modern -> "Warm").
+//
+// 2026-09-16 (founder): the system serifs behind Classic (Georgia) and Elegant
+// (Palatino) "behave incorrectly with svg" — their vertical metrics sit the
+// word-mass low beside icons and inside buttons, and Georgia's old-style
+// numerals "may not match with text". Both are now webfonts with ordinary
+// metrics and lining figures, in the same spirit: Source Serif 4 is the
+// clean transitional (the Georgia role), Lora the calligraphic one (the
+// Palatino role — same brushed-pen logic). Keys unchanged (persisted).
+// Journal (slab) was replaced on the same day by Comfortaa — a rounded
+// geometric, the friendly/playful axis the other four miss; label "Rounded".
+// All three carry Cyrillic; Armenian rides on the Noto pair as before.
 export const FONT_STACKS = {
   standard: '',
-  classic: "Georgia, 'Times New Roman', 'Noto Serif Armenian', serif",
-  elegant: "'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Noto Serif Armenian', serif",
+  classic: "'Source Serif 4', Georgia, 'Noto Serif Armenian', serif",
+  elegant: "Lora, 'Palatino Linotype', Palatino, 'Noto Serif Armenian', serif",
   modern: "Optima, Candara, 'Gill Sans', 'Gill Sans MT', 'Segoe UI', 'Noto Sans Armenian', sans-serif",
-  // Slab: the axis the other four miss (neutral sans / two old-style serifs /
-  // humanist sans). Reads like a field guide or a stamped travel journal, which
-  // suits the app better than a third calligraphic face. Zilla Slab is webfont-
-  // loaded so this is a real choice on Android too, where American Typewriter
-  // and Rockwell do not exist and every other option collapses to Standard.
-  journal: "'American Typewriter', Rockwell, 'Zilla Slab', 'Noto Serif Armenian', Georgia, serif",
+  journal: "Comfortaa, 'Noto Sans Armenian', 'Segoe UI', sans-serif",
 };
 
 export function applyDisplayPrefs(settings = null) {

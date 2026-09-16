@@ -83,11 +83,14 @@
     <!-- Noto Sans Armenian: the Armenian face for the sans stacks (see displayPrefs).
          Noto Serif Armenian: same job for the SERIF options — Georgia/Palatino/slab
          carry no Armenian, and falling back to a sans mixed two styles inside one
-         sentence. Zilla Slab: so the Journal option is not a no-op on Android, which
-         ships neither American Typewriter nor Rockwell.
+         sentence. Lora / Source Serif 4 / Comfortaa: the Elegant / Classic / Rounded
+         options (founder 2026-09-16: the system Palatino and Georgia sat wrong beside
+         icons and inside buttons, and Georgia's old-style numerals did not match the
+         text — webfonts with normal metrics and lining figures replace them; Zilla
+         Slab left with the Journal option).
          Listing a family here costs one CSS request (already being made); the .woff2
          binaries are fetched lazily, only if a user actually selects that option. -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@300..700&family=Noto+Serif+Armenian:wght@300..700&family=Zilla+Slab:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@300..700&family=Noto+Serif+Armenian:wght@300..700&family=Lora:ital,wght@0,400..700;1,400..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=Comfortaa:wght@400..700&display=swap">
     <!-- Pre-paint theme. The JS bundle is large, so the first paint happens
          long before Vue mounts — with no background here the page (and the
          iOS Safari chrome/canvas, which derives its tint from that FIRST
