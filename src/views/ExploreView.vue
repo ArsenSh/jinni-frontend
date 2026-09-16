@@ -202,19 +202,30 @@
     </template>
 
     <!-- ═══ Fullscreen gallery ═══ -->
-    <div v-if="gallery.open" class="ex-gallery" @click.self="closeGallery"
-         @touchstart.passive="galleryTouchStart" @touchend.passive="galleryTouchEnd">
+    <div v-if="gallery.open" class="ex-gallery" @click.self="closeGallery">
       <button class="ex-gallery-close" @click="closeGallery">✕</button>
-      <button v-if="gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--prev" @click="galleryStep(-1)">
+      <!-- Phones (founder 2026-09-17): a native swipe strip with snap and
+           position dots instead of arrows. Rendered only on narrow screens
+           so desktop never loads every photo twice. -->
+      <div v-if="galleryMobile" class="ex-gallery-strip" ref="galleryStrip" @scroll.passive="onGalleryScroll" @click.self="closeGallery">
+        <div v-for="(img, i) in gallery.images" :key="i" class="ex-gallery-slide" @click.self="closeGallery">
+          <img :src="img" :alt="gallery.name" :loading="Math.abs(i - gallery.idx) <= 1 ? 'eager' : 'lazy'" decoding="async"/>
+        </div>
+      </div>
+      <button v-if="!galleryMobile && gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--prev" @click="galleryStep(-1)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <img class="ex-gallery-img" :src="gallery.images[gallery.idx]" :alt="gallery.name"/>
-      <button v-if="gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--next" @click="galleryStep(1)">
+      <img v-if="!galleryMobile" class="ex-gallery-img" :src="gallery.images[gallery.idx]" :alt="gallery.name"/>
+      <button v-if="!galleryMobile && gallery.images.length > 1" class="ex-gallery-nav ex-gallery-nav--next" @click="galleryStep(1)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
+      <div v-if="galleryMobile && gallery.images.length > 1" class="ex-gallery-dots">
+        <button v-for="(img, i) in gallery.images" :key="'d' + i" type="button" class="ex-gallery-dot" :class="{ 'is-on': gallery.idx === i }"
+                :aria-label="`${i + 1} / ${gallery.images.length}`" @click.stop="galleryGo(i)"></button>
+      </div>
       <div class="ex-gallery-bar">
         <span class="ex-gallery-name">{{ gallery.name }}</span>
-        <span v-if="gallery.images.length > 1" class="ex-gallery-count">{{ gallery.idx + 1 }} / {{ gallery.images.length }}</span>
+        <span v-if="!galleryMobile && gallery.images.length > 1" class="ex-gallery-count">{{ gallery.idx + 1 }} / {{ gallery.images.length }}</span>
       </div>
     </div>
 
@@ -373,6 +384,7 @@ export default {
       searchMiss: false,
       override: null,   // { lat, lng, label } — explore a searched place instead of the user's area
       gallery: { open: false, images: [], idx: 0, name: '' },
+      galleryMobile: false,
       // cat = the rail the card was opened from; drives the modal's subtitle
       // and the restaurants/hotels-only rating rule (same as the chat modal).
       info: { open: false, loading: false, data: null, place: null, cat: null },
@@ -735,6 +747,7 @@ export default {
     async openGallery(p) {
       this.gallery = { open: true, images: p.image ? [this.imgUrl(p.image)] : [], idx: 0, name: p.name };
       this.lockScroll(true);
+      try { this.galleryMobile = window.matchMedia('(max-width: 768px)').matches; } catch (e) { this.galleryMobile = false; }
       try {
         const res = await fetch(`${API_BASE}/api/ai/place-images/${p.placeId}`, { headers: this.authHeaders() });
         const data = await res.json().catch(() => ({}));
@@ -744,18 +757,23 @@ export default {
     },
     // Phone comfort (founder 2026-09-17): swipe to step, and the page behind
     // the overlay must not scroll while it is open.
-    galleryTouchStart(e) { const t = e.changedTouches && e.changedTouches[0]; this._gx = t ? t.clientX : null; this._gy = t ? t.clientY : null; },
-    galleryTouchEnd(e) {
-      const t = e.changedTouches && e.changedTouches[0];
-      if (!t || this._gx == null) return;
-      const dx = t.clientX - this._gx, dy = t.clientY - this._gy;
-      this._gx = null;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) this.galleryStep(dx < 0 ? 1 : -1);
+    onGalleryScroll(e) {
+      const el = e.target;
+      if (!el || !el.clientWidth) return;
+      const i = Math.round(el.scrollLeft / el.clientWidth);
+      if (i !== this.gallery.idx && i >= 0 && i < this.gallery.images.length) this.gallery.idx = i;
+    },
+    galleryGo(i) {
+      this.gallery.idx = i;
+      const el = this.$refs.galleryStrip;
+      if (el) el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
     },
     lockScroll(on) { try { document.documentElement.style.overflow = on ? 'hidden' : ''; } catch (e) { /* ignore */ } },
     galleryStep(dir) {
       const n = this.gallery.images.length;
-      if (n) this.gallery.idx = (this.gallery.idx + dir + n) % n;
+      if (!n) return;
+      const next = (this.gallery.idx + dir + n) % n;
+      if (this.galleryMobile) this.galleryGo(next); else this.gallery.idx = next;
     },
     closeGallery() { this.gallery = { open: false, images: [], idx: 0, name: '' }; this.lockScroll(false); },
     // ── Info ──
@@ -1225,11 +1243,17 @@ export default {
 /* Gallery on phones: swipe replaces the arrows (they sat on the photo's
    edges), the photo leaves room for the caption bar, the close target grows. */
 @media (max-width: 768px) {
-  .ex-gallery-nav { display: none; }
-  .ex-gallery-img { max-width: 94vw; max-height: 72vh; border-radius: 10px; }
-  .ex-gallery-close { top: 14px; right: 14px; width: 44px; height: 44px; }
+  .ex-gallery-close { top: 14px; right: 14px; width: 44px; height: 44px; z-index: 2; }
   .ex-gallery-bar { bottom: max(16px, env(safe-area-inset-bottom)); max-width: 92vw; }
 }
+/* Phone strip: one snap point per photo, native momentum, no scrollbar. */
+.ex-gallery-strip { display: flex; width: 100vw; height: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; align-items: center; scrollbar-width: none; }
+.ex-gallery-strip::-webkit-scrollbar { display: none; }
+.ex-gallery-slide { flex: 0 0 100vw; height: 100%; scroll-snap-align: center; scroll-snap-stop: always; display: flex; align-items: center; justify-content: center; padding: 0 3vw; box-sizing: border-box; }
+.ex-gallery-slide img { max-width: 94vw; max-height: 72vh; object-fit: contain; border-radius: 10px; box-shadow: 0 18px 60px rgba(0,0,0,0.55); }
+.ex-gallery-dots { position: absolute; left: 0; right: 0; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 40px); display: flex; justify-content: center; gap: 7px; pointer-events: none; }
+.ex-gallery-dot { width: 7px; height: 7px; border-radius: 999px; border: none; padding: 0; background: rgba(255,255,255,0.4); pointer-events: auto; transition: background 0.2s, transform 0.2s; }
+.ex-gallery-dot.is-on { background: #fff; transform: scale(1.25); }
 .ex-dot { position: relative; width: 6px; height: 6px; padding: 0; border: none; border-radius: 99px; cursor: pointer;
   /* Same palette as the desktop rail scrollbar: track tone idle, accent active. */
   background: color-mix(in srgb, var(--ex-line) 55%, transparent); opacity: 0.9;
