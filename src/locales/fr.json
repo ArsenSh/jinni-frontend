@@ -290,7 +290,7 @@
     },
     "cities": {
       "title": "Où Jinni est passé",
-      "subtitle": "Villes avec des lieux que Jinni connaît déjà et recommande — accessibles à tous, sans inscription.",
+      "subtitle": "Les villes où Jinni revient sans cesse — des lieux qui méritent une seconde visite, accessibles à tous, sans inscription.",
       "places": "{count} adresses",
       "alt": "adresses découvertes par Jinni"
     }

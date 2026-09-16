@@ -290,7 +290,7 @@
     },
     "cities": {
       "title": "Jinni 去过的地方",
-      "subtitle": "Jinni 已了解并信赖的城市和地点 — 所有人均可查看，无需注册账号。",
+      "subtitle": "Jinni 一再回访的城市 — 值得再去一次的地方，所有人均可查看，无需注册账号。",
       "places": "{count} 个地点",
       "alt": "Jinni 发现的地点"
     }
