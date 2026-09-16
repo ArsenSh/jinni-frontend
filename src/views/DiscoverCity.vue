@@ -65,7 +65,6 @@
                 <div v-else class="ex-card-imgless">
                   <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
                 </div>
-                <span v-if="p.verified" class="ex-tier ex-tier--verified">✦ {{ t('map.tier_verified') || 'Jinni Verified' }}</span>
                 <div class="ex-card-acts ex-card-acts--bottom" @click.stop>
                   <button class="ex-act-more" @click="openInfo(p, c)">{{ t('chat.recommendations.more') || 'More' }}</button>
                   <button v-if="p.photoCount > 1" class="ex-act ex-act--photo" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
