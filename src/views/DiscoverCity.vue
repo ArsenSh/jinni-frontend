@@ -7,10 +7,10 @@
     <header class="ex-head">
       <!-- Way back to the landing (founder 2026-09-17): the lamp already
            links home, but nothing says so — this pill does. -->
-      <router-link to="/" class="dc-topback" aria-label="Back to Jinni">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        <span translate="no">Jinni</span>
-      </router-link>
+      <button type="button" class="back-btn dc-back" @click="$router.push('/')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" :stroke="theme === 'night-mode' ? '#c084fc' : '#8B4513'" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        {{ t('legal.back_to_home') || 'Back' }}
+      </button>
       <router-link to="/" class="ex-app-link"><img src="/images/bottle.png?v=3" class="ex-app-icon" alt="Jinni"/></router-link>
       <h1 class="ex-title">{{ pageTitle }}</h1>
       <p class="ex-sub" v-if="city">{{ [city.name, city.country].filter(Boolean).join(', ') }}</p>
@@ -1043,10 +1043,12 @@ export default {
 .ex-pref { color: #D4AF37; }
 
 .dc-nomatch { text-align: center; margin: 22px auto 0; padding: 0 18px; color: var(--ex-muted); }
-.ex-head { position: relative; }
-.dc-topback { position: absolute; top: 12px; left: 14px; display: inline-flex; align-items: center; gap: 4px; padding: 7px 12px 7px 9px; border-radius: 999px;
-  background: var(--ex-chip); color: var(--ex-chip-text); box-shadow: var(--ex-ring); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: background 0.25s, color 0.25s; }
-.dc-topback:hover { background: var(--ex-chip-active-bg); color: var(--ex-chip-active-fg); }
+/* Same back button as the legal pages (founder 2026-09-17), centred above the lamp. */
+.dc-back { display: flex; align-items: center; gap: 6px; padding: 8px 16px; margin: 0 auto 2px; border-radius: 8px; border: none; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; background: transparent; color: var(--ex-text); transition: background 0.2s ease; }
+.explore.night-mode .dc-back { color: #c084fc; }
+.explore.day-mode .dc-back { color: #8B4513; }
+.explore.night-mode .dc-back:hover { background: rgba(139,92,246,0.12); }
+.explore.day-mode .dc-back:hover { background: rgba(212,175,55,0.12); }
 /* Public page only: the lamp is a link home; the More window's Ask Jinni
    action reuses the lamp glyph at button size. */
 .ex-app-link { display: inline-block; line-height: 0; }
