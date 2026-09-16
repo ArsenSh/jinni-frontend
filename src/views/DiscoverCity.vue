@@ -24,6 +24,15 @@
       </div>
     </header>
 
+    <!-- Same one-liner Jinni's Discoveries shows under its search: the page
+         is shaped by the visitor's saved preferences (founder 2026-09-17). -->
+    <div v-if="hasAnyRaw && filtersActive" class="ex-pref-row">
+      <span class="ex-pref-lead">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9l-5.6 1.9L12 16.5l-1.9-5.6L4.5 9l5.6-1.4L12 2zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z"/></svg>
+        {{ t('explore.based_on') || 'Curated to your taste' }}
+      </span>
+    </div>
+
     <p v-if="hasAnyRaw && !hasAny && !loading" class="dc-nomatch">{{ t('discover.no_match') || 'No verified places match these filters — clear one to see more.' }}</p>
 
     <nav v-if="hasAny" class="ex-nav" :class="{ 'is-stuck': navStuck }" ref="navEl">
