@@ -693,8 +693,12 @@ export default {
      lit paper. A gradient clip paints over a transparent fill, so it has to
      be drop-shadow on the rendered pixels; text-shadow would show nothing.
      The last one is a 1px warm seat so the word still touches the page. */
-  filter: drop-shadow(0 0 5px rgba(255,252,245,0.95))
-          drop-shadow(0 0 13px rgba(255,247,230,0.6))
+  /* Founder 2026-09-17: the near-white bloom read as a white smear on the
+     peach sky. Lit PEACH now — the sky's own upper tones (#f2e3d3 / #ebc4a6)
+     pushed a step brighter — so the glow reads as sun on the paper, not
+     paint. Same two radii, same warm seat below. */
+  filter: drop-shadow(0 0 5px rgba(255,240,222,0.95))
+          drop-shadow(0 0 13px rgba(250,214,180,0.7))
           drop-shadow(0 1px 1px rgba(110,45,6,0.22));
 }
 /* The subtitle's brand word leaves the gradient (founder 2026-09-11: "Jinni
