@@ -32,16 +32,35 @@ export function captureAcquisition() {
   } catch (e) { /* storage unavailable → no attribution */ }
 }
 
+// Which account a token belongs to — the "sent" mark is per account, not
+// per browser. Founder 2026-09-18: a tagged link opened while an older
+// login was still in the browser posted the source for THAT account (the
+// server rightly refused it) and marked the whole browser as sent, so the
+// new Google account created minutes later recorded "direct".
+function userIdOf(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return String(payload.userId || payload.id || payload.sub || '');
+  } catch (e) { return ''; }
+}
+
 export async function sendAcquisition() {
   try {
     const token = localStorage.getItem('authToken');
     const raw = localStorage.getItem(KEY);
-    if (!token || !raw || localStorage.getItem(SENT)) return;
-    localStorage.setItem(SENT, '1');                             // once per browser, even if the call fails
-    await fetch(`${API}/api/auth/acquisition`, {
+    if (!token || !raw) return;
+    const uid = userIdOf(token);
+    const sentKey = uid ? `${SENT}:${uid}` : SENT;
+    if (localStorage.getItem(sentKey)) return;
+    localStorage.setItem(sentKey, '1');                          // once per account, even if the call fails
+    const res = await fetch(`${API}/api/auth/acquisition`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ acquisition: JSON.parse(raw) }),
     });
+    const data = await res.json().catch(() => ({}));
+    // Consumed only when a fresh account took it; an old account leaves the
+    // source in place for the sign-up that may follow in this browser.
+    if (data && data.attached) localStorage.removeItem(KEY);
   } catch (e) { /* attribution is best-effort */ }
 }
