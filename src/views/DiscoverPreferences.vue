@@ -231,6 +231,7 @@ export default {
       return r.startsWith('/discover/') ? r : '/';
     },
   },
+  beforeUnmount() { try { document.querySelector('meta[name="robots"][data-discover]')?.remove(); } catch (e) { /* ignore */ } },
   methods: {
     toggleInterest(key) {
       const index = this.preferences.interests.indexOf(key)
@@ -276,6 +277,8 @@ export default {
     },
   },
   mounted() {
+    // Search engines must index the city pages, never this form.
+    try { let m = document.querySelector('meta[name="robots"][data-discover]'); if (!m) { m = document.createElement('meta'); m.name = 'robots'; m.setAttribute('data-discover', '1'); document.head.appendChild(m); } m.content = 'noindex,follow'; } catch (e) { /* ignore */ }
     this.loadPreferences()
     setTimeout(() => { this.isVisible = true }, 500)
   },

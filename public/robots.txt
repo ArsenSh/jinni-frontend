@@ -14,5 +14,7 @@ Disallow: /marketing
 Disallow: /share/
 
 Sitemap: https://jinni.travel/sitemap.xml
-# Public city pages (/discover/<city>) — generated from the data on the API host.
+# City pages are also in the same-host sitemap above (generated at build); the API copy is live.
 Sitemap: https://api.jinni.travel/api/public/sitemap.xml
+# The preferences form is not a landing page for search.
+Disallow: /discover/preferences
