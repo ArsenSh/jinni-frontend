@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
+import { sendAcquisition } from '@/utils/acquisition'
 import AuthPage from '@/views/AuthPage.vue'
 
 const routes = [
@@ -190,6 +191,9 @@ const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent)
 
 router.beforeEach(async (to, from, next) => {
     document.title = to.meta.title || 'Jinni';
+    // Sign-up attribution: posts the stored first-landing source once a token
+    // exists (any login path), then never again in this browser.
+    sendAcquisition();
     if (to.meta.public) return next();
     if (to.name && from.name && to.name === from.name) {
         console.warn('⚠️ Preventing redirect loop:', to.name);

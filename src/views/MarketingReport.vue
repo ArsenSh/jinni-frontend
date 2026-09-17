@@ -217,6 +217,17 @@
       </section>
 
       <!-- Splits -->
+      <section class="mr-card" v-if="report.acquisition">
+        <h2>Where sign-ups came from ({{ report.windowDays }}d)</h2>
+        <p class="mr-desc-sm">Accounts created in the window, by the utm source and campaign of their first visit. "Returned" = came back on a second day — the number an ad campaign is judged by.</p>
+        <p v-if="!report.acquisition.length" class="mr-note-sm">No sign-ups in this window.</p>
+        <div v-for="a in report.acquisition" :key="'acq' + a.key" class="hbar-row">
+          <span class="hbar-label" :title="a.key">{{ a.key }}</span>
+          <div class="hbar-track"><div class="hbar-fill" :style="{ width: rowW({ users: a.signups }, acqRows) }"></div></div>
+          <span class="hbar-val">{{ a.signups }} · {{ a.returned }} returned{{ a.returnPct != null ? ` (${a.returnPct}%)` : '' }}</span>
+        </div>
+      </section>
+
       <section class="mr-split">
         <div class="mr-card">
           <h2>What people ask for ({{ report.windowDays }}d)</h2>
@@ -371,6 +382,7 @@ export default {
     qaRows() {
       return (this.report.quickActions || []).map(q => ({ key: q.key, label: q.label, users: q.n }));
     },
+    acqRows() { return (this.report.acquisition || []).map(a => ({ key: a.key, users: a.signups })); },
     modeRows() {
       const m = this.report.searchModes || { nearby: 0, discovery: 0 };
       return [

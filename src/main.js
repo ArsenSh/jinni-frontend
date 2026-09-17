@@ -6,6 +6,7 @@ import store from './store'
 import messages from './locales'
 import './assets/styles/genie-theme.css'
 import { applyDisplayPrefs } from './utils/displayPrefs'
+import { captureAcquisition } from './utils/acquisition'
 import './assets/styles/animations.css'
 
 // The app persists the chosen language as 'jinni_language' (and inside
@@ -45,4 +46,5 @@ document.documentElement.setAttribute('lang', i18n.global.locale.value || 'en')
 document.documentElement.setAttribute('dir', RTL_LOCALES.has(i18n.global.locale.value) ? 'rtl' : 'ltr')
 
 applyDisplayPrefs()   // font style + text size, before first paint
+captureAcquisition()  // utm_* / referrer of the first landing, kept for sign-up attribution
 createApp(App).use(i18n).use(store).use(router).mount('#app')

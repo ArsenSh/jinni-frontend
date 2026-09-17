@@ -437,7 +437,7 @@
               <span class="card-sub">{{ users.length }} results</span>
             </div>
             <table class="data-table data-table--acc">
-              <thead><tr><th>User</th><th>Joined</th><th>Last Active</th><th>Today Tokens</th><th>Today Places</th><th>Total Tokens</th><th>Total Places</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>User</th><th>Joined</th><th>Source</th><th>Last Active</th><th>Today Tokens</th><th>Today Places</th><th>Total Tokens</th><th>Total Places</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr v-if="usersLoading"><td colspan="9" class="loading-cell"><div class="loader-ring loader-ring--sm"></div> Loading…</td></tr>
                 <tr v-else-if="!users.length"><td colspan="9" class="empty-cell">No users found.</td></tr>
@@ -451,6 +451,7 @@
                     </div>
                   </td>
                   <td class="dim-cell" data-label="Joined">{{ shortDate(u.createdAt) }}</td>
+                  <td class="dim-cell" data-label="Source" :title="u.acquisition?.landing ? `landed on ${u.acquisition.landing}` : ''">{{ u.acquisition?.source ? (u.acquisition.campaign ? `${u.acquisition.source} / ${u.acquisition.campaign}` : u.acquisition.source) : 'direct' }}</td>
                   <td class="dim-cell acc-visible" data-label="Last Active">{{ relativeTime(u.analytics?.lastActive) }}</td>
                   <td data-label="Today Tokens">
                     <div class="usage-bar-wrap">
