@@ -228,7 +228,7 @@ export default {
     },
     returnTo() {
       const r = String(this.$route.query.returnTo || '');
-      return r.startsWith('/discover/') ? r : '/';
+      return (r.startsWith('/discover/') || r.startsWith('/ru/discover/')) ? r : '/';
     },
   },
   beforeUnmount() { try { document.querySelector('meta[name="robots"][data-discover]')?.remove(); } catch (e) { /* ignore */ } },
@@ -277,6 +277,9 @@ export default {
     },
   },
   mounted() {
+    if (this.$route.params.lang === 'ru') {
+      try { if (this.$i18n && this.$i18n.locale !== 'ru') this.$i18n.locale = 'ru'; if (this.$store && this.$store.state.i18n?.locale !== 'ru') this.$store.commit('i18n/SET_LANGUAGE', 'ru'); document.documentElement.lang = 'ru'; } catch (e) { /* ignore */ }
+    }
     // Search engines must index the city pages, never this form.
     try { let m = document.querySelector('meta[name="robots"][data-discover]'); if (!m) { m = document.createElement('meta'); m.name = 'robots'; m.setAttribute('data-discover', '1'); document.head.appendChild(m); } m.content = 'noindex,follow'; } catch (e) { /* ignore */ }
     this.loadPreferences()

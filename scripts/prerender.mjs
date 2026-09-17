@@ -74,16 +74,23 @@ function withBody(shell, inner) {
 }
 
 const CAT_LABELS = { restaurants: 'Restaurants', hotels: 'Hotels', historical: 'Historical sites', photo_spots: 'Photo spots', hidden_gems: 'Hidden gems', shopping: 'Shops', activities: 'Activities' };
+// Languages served as URLs (founder 2026-09-18: English and Russian only).
+// '' = English at /discover/<slug>; 'ru' = Russian at /ru/discover/<slug>.
+const LANGS = [{ code: 'en', prefix: '' }, { code: 'ru', prefix: '/ru' }];
+const fill = (tpl, vars) => String(tpl || '').replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
 
-function cityHtml(shell, page, en) {
+function cityHtml(shell, page, L, lang) {
     const { city, categories, order } = page;
     const cats = (order && order.length ? order : Object.keys(categories)).filter(c => categories[c] && categories[c].length);
     const all = cats.flatMap(c => categories[c]);
     const count = all.length;
-    const title = `${city.name}: ${count} places to eat, see and discover — Jinni's Discoveries`;
-    const description = `${count} restaurants, sights, hidden gems and activities in ${city.name} that Jinni knows and trusts. Free to browse — ask Jinni for what fits you.`;
-    const canonical = `${SITE}/discover/${city.slug}`;
-    const intro = String(en.discover?.intro || 'Places Jinni has verified in {city} — open to everyone, no account needed.').replace('{city}', city.name);
+    const catLabel = (c) => L.explore?.cat?.[c] || CAT_LABELS[c] || c;
+    const title = fill(L.discover?.seo_title || "{city}: {count} places to eat, see and discover — Jinni's Discoveries", { city: city.name, count });
+    const description = fill(L.discover?.seo_desc || '{count} restaurants, sights, hidden gems and activities in {city} that Jinni knows and trusts. Free to browse — ask Jinni for what fits you.', { city: city.name, count });
+    const canonical = `${SITE}${lang.prefix}/discover/${city.slug}`;
+    const intro = fill(L.discover?.intro || 'Places Jinni has verified in {city} — open to everyone, no account needed.', { city: city.name });
+    const alternates = LANGS.map(l => `    <link rel="alternate" hreflang="${l.code}" href="${SITE}${l.prefix}/discover/${city.slug}">`).join('\n')
+        + `\n    <link rel="alternate" hreflang="x-default" href="${SITE}/discover/${city.slug}">`;
     const ld = {
         '@context': 'https://schema.org', '@type': 'ItemList', name: title, url: canonical, numberOfItems: count,
         itemListElement: all.slice(0, 50).map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, ...(p.image ? { image: abs(p.image) } : {}) })),
@@ -95,26 +102,28 @@ function cityHtml(shell, page, en) {
             { '@type': 'ListItem', position: 2, name: city.name, item: canonical },
         ],
     };
-    const extraHead = `    <script type="application/ld+json">${JSON.stringify(ld)}</script>\n    <script type="application/ld+json">${JSON.stringify(breadcrumbs)}</script>`;
+    const extraHead = `${alternates}\n    <script type="application/ld+json">${JSON.stringify(ld)}</script>\n    <script type="application/ld+json">${JSON.stringify(breadcrumbs)}</script>`;
     const sections = cats.map(c => `
       <section>
-        <h2>${esc(CAT_LABELS[c] || c)}</h2>
+        <h2>${esc(catLabel(c))}</h2>
         <ul>
-${categories[c].map(p => `          <li>${p.image ? `<img src="${esc(abs(p.image))}" alt="${esc(p.name)} — ${esc(CAT_LABELS[c] || c)} in ${esc(city.name)}" width="380" height="253" loading="lazy"> ` : ''}<strong>${esc(p.name)}</strong>${p.region ? ` <span>${esc(p.region)}</span>` : ''}${Number.isFinite(p.rating) ? ` <span>★ ${esc(p.rating)}</span>` : ''}</li>`).join('\n')}
+${categories[c].map(p => `          <li>${p.image ? `<img src="${esc(abs(p.image))}" alt="${esc(p.name)} — ${esc(catLabel(c))}, ${esc(city.name)}" width="380" height="253" loading="lazy"> ` : ''}<strong>${esc(p.name)}</strong>${p.region ? ` <span>${esc(p.region)}</span>` : ''}${Number.isFinite(p.rating) ? ` <span>★ ${esc(p.rating)}</span>` : ''}</li>`).join('\n')}
         </ul>
       </section>`).join('\n');
     const body = `
     <main>
       <nav><a href="/">Jinni</a> › ${esc(city.name)}</nav>
-      <h1>Jinni's Discoveries — ${esc(city.name)}${city.country ? `, ${esc(city.country)}` : ''}</h1>
+      <h1>${esc(L.explore?.title || "Jinni's Discoveries")} — ${esc(city.name)}${city.country ? `, ${esc(city.country)}` : ''}</h1>
       <p>${esc(intro)}</p>
-      <p><a href="/auth">Meet Jinni</a></p>
+      <p><a href="/auth">${esc(L.explore?.back_chat || 'Meet Jinni')}</a></p>
 ${sections}
-      <footer><a href="/">Jinni</a> · <a href="/business">For Business</a> · <a href="/terms">Terms of Service</a> · <a href="/privacy">Privacy Policy</a></footer>
+      <footer><a href="/">Jinni</a> · <a href="/business">${esc(L.landing?.mode_switch?.for_business || 'For Business')}</a> · <a href="/terms">${esc(L.terms?.title || 'Terms of Service')}</a> · <a href="/privacy">${esc(L.privacy?.title || 'Privacy Policy')}</a></footer>
     </main>`;
     const first = all.find(p => p.image);
     const ogImage = first ? abs(first.image) : null;
-    return withBody(withHead(shell, { title, description, canonical, ogImage, extraHead }), body);
+    let html = withBody(withHead(shell, { title, description, canonical, ogImage, extraHead }), body);
+    if (lang.code !== 'en') html = html.replace('<html lang="en">', `<html lang="${lang.code}">`);
+    return html;
 }
 
 function landingHtml(shell, en, cities) {
@@ -170,7 +179,7 @@ function sitemapXml(cities, day) {
     const fixed = ['/', '/business', '/business/apply', '/terms', '/privacy', '/business/terms', '/business/privacy'];
     const urls = [
         ...fixed.map(p => `  <url><loc>${SITE}${p}</loc><changefreq>monthly</changefreq></url>`),
-        ...cities.map(c => `  <url><loc>${SITE}/discover/${c.slug}</loc><lastmod>${day}</lastmod><changefreq>weekly</changefreq></url>`),
+        ...cities.flatMap(c => LANGS.map(l => `  <url><loc>${SITE}${l.prefix}/discover/${c.slug}</loc><lastmod>${day}</lastmod><changefreq>weekly</changefreq></url>`)),
     ];
     return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 }
@@ -184,6 +193,8 @@ function write(rel, html) {
 (async () => {
     const shell = loadShell();
     const en = JSON.parse(readFileSync(resolve(ROOT, 'src/locales/en.json'), 'utf8'));
+    const locales = { en };
+    for (const l of LANGS) if (!locales[l.code]) locales[l.code] = JSON.parse(readFileSync(resolve(ROOT, `src/locales/${l.code}.json`), 'utf8'));
     let cities = [];
     try {
         const data = await getJson(`${API}/api/public/discover/cities`);
@@ -199,10 +210,10 @@ function write(rel, html) {
         try {
             const page = await getJson(`${API}/api/public/discover/${encodeURIComponent(c.slug)}`);
             if (!page.success) continue;
-            write(`discover/${c.slug}/index.html`, cityHtml(shell, page, en));
+            for (const l of LANGS) write(`${l.prefix.replace(/^\//, '')}${l.prefix ? '/' : ''}discover/${c.slug}/index.html`, cityHtml(shell, page, locales[l.code], l));
             written.push(c);
         } catch (err) { console.warn(`[prerender] ${c.slug} skipped: ${err.message}`); }
     }
     write('sitemap.xml', sitemapXml(written, new Date().toISOString().slice(0, 10)));
-    console.log(`[prerender] landing + business written · ${written.length}/${cities.length} city page(s) · sitemap with ${7 + written.length} URL(s) · API ${API}`);
+    console.log(`[prerender] landing + business written · ${written.length}/${cities.length} city page(s) × ${LANGS.length} language(s) · sitemap with ${7 + written.length * LANGS.length} URL(s) · API ${API}`);
 })().catch(err => { console.warn(`[prerender] skipped: ${err.message}`); process.exit(0); });

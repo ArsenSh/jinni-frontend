@@ -243,6 +243,9 @@ export default {
     };
   },
   computed: {
+    // '/ru' on Russian URLs, '' on English ones — the only two languages
+    // served as URLs (founder 2026-09-18).
+    langPrefix() { return this.$route.params.lang === 'ru' ? '/ru' : ''; },
     pageTitle() {
       const base = this.t('explore.title') || "Jinni's Discoveries";
       return this.city ? `${base} — ${this.city.name}` : base;
@@ -323,14 +326,15 @@ export default {
     // or a shared link opens the city directly, so crawlers index the city,
     // not the form. "First time" = nothing saved yet; the preferences page
     // saves even an empty choice, so this happens once per browser.
+    this.applyUrlLang();
     if (this.$route.query.from === 'landing') {
       let seen = false;
       try { seen = !!localStorage.getItem('jinni_public_prefs'); } catch (e) { seen = true; }
       if (!seen) {
-        this.$router.replace({ path: '/discover/preferences', query: { returnTo: `/discover/${this.$route.params.slug}` } });
+        this.$router.replace({ path: `${this.langPrefix}/discover/preferences`, query: { returnTo: `${this.langPrefix}/discover/${this.$route.params.slug}` } });
         return;
       }
-      this.$router.replace({ path: `/discover/${this.$route.params.slug}` });
+      this.$router.replace({ path: `${this.langPrefix}/discover/${this.$route.params.slug}` });
     }
   },
   watch: { '$route.params.slug'() { this.load(); } },
@@ -414,18 +418,34 @@ export default {
         this.$nextTick(() => this.setupScrollSpy());
       }
     },
-    // ── Search-engine facing bits: title, description, canonical, ItemList ──
+    // A Russian URL switches the interface to Russian (persisted like the
+    // language picker does, without the picker's full reload).
+    applyUrlLang() {
+      const lang = this.$route.params.lang === 'ru' ? 'ru' : null;
+      if (!lang) return;
+      try {
+        if (this.$i18n && this.$i18n.locale !== lang) this.$i18n.locale = lang;
+        if (this.$store && this.$store.state.i18n?.locale !== lang) this.$store.commit('i18n/SET_LANGUAGE', lang);
+        document.documentElement.lang = lang;
+      } catch (e) { /* the page still works in the current language */ }
+    },
+    // ── Search-engine facing bits: title, description, canonical, hreflang, ItemList ──
     applySeo() {
       const name = this.city?.name;
-      const count = Object.values(this.categories).reduce((n, a) => n + a.length, 0);
+      const count = Object.values(this.rawCategories).reduce((n, a) => n + a.length, 0);
       document.title = name
-        ? `${name}: ${count} places to eat, see and discover — Jinni's Discoveries`
-        : "Jinni's Discoveries";
+        ? (this.t('discover.seo_title', { city: name, count }) || `${name}: ${count} places to eat, see and discover — Jinni's Discoveries`)
+        : (this.t('explore.title') || "Jinni's Discoveries");
       const desc = name
-        ? `${count} restaurants, sights, hidden gems and activities in ${name} that Jinni knows and trusts. Free to browse — ask Jinni for what fits you.`
+        ? (this.t('discover.seo_desc', { city: name, count }) || `${count} restaurants, sights, hidden gems and activities in ${name} that Jinni knows and trusts. Free to browse — ask Jinni for what fits you.`)
         : 'Places Jinni has discovered, open to everyone.';
       this._setMeta('description', desc);
-      this._setLink('canonical', `${window.location.origin}/discover/${this.$route.params.slug}`);
+      const slug = this.$route.params.slug, origin = window.location.origin;
+      this._setLink('canonical', `${origin}${this.langPrefix}/discover/${slug}`);
+      // The two language versions point at each other; English is the default.
+      this._setAlt('en', `${origin}/discover/${slug}`);
+      this._setAlt('ru', `${origin}/ru/discover/${slug}`);
+      this._setAlt('x-default', `${origin}/discover/${slug}`);
       if (name) this._setMeta('robots', 'index,follow'); else this._setMeta('robots', 'noindex,follow');
       const items = [];
       for (const c of this.orderedCategories) for (const p of this.categories[c]) items.push(p);
@@ -438,8 +458,14 @@ export default {
       if (!el) { el = document.createElement('script'); el.type = 'application/ld+json'; el.id = 'discover-ld'; document.head.appendChild(el); }
       el.textContent = ld ? JSON.stringify(ld) : '';
     },
+    _setAlt(lang, href) {
+      let l = document.querySelector(`link[rel="alternate"][hreflang="${lang}"][data-discover]`);
+      if (!l) { l = document.createElement('link'); l.rel = 'alternate'; l.hreflang = lang; l.setAttribute('data-discover', '1'); document.head.appendChild(l); }
+      l.href = href;
+    },
     clearSeo() {
       document.getElementById('discover-ld')?.remove();
+      document.querySelectorAll('link[rel="alternate"][data-discover]').forEach(el => el.remove());
       document.querySelector('link[rel="canonical"][data-discover]')?.remove();
       document.querySelector('meta[name="robots"][data-discover]')?.remove();
       document.querySelector('meta[name="description"][data-discover]')?.remove();
@@ -581,7 +607,7 @@ export default {
     },
 
     goAuth() { this.$router.push('/auth'); },
-    goPreferences() { this.$router.push({ path: '/discover/preferences', query: { returnTo: `/discover/${this.$route.params.slug}` } }); },
+    goPreferences() { this.$router.push({ path: `${this.langPrefix}/discover/preferences`, query: { returnTo: `${this.langPrefix}/discover/${this.$route.params.slug}` } }); },
   },
 };
 </script>

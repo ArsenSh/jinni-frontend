@@ -1310,6 +1310,8 @@
     "not_found_sub": "在聊天中问问 Jinni — 它发现的地点会随着城市的完善出现在这里。",
     "footer_line": "这是 Jinni 已经了解的地方 — 在聊天中它会为你找到最合适的。",
     "no_match": "没有符合这些筛选条件的已核实地点 — 取消一个筛选查看更多。",
-    "skip": "暂时跳过"
+    "skip": "暂时跳过",
+    "seo_title": "{city}：{count} 个吃喝、游览与探索之地 — Jinni 的探索",
+    "seo_desc": "{city}的 {count} 家餐厅、景点、隐秘去处和活动，Jinni 了解并信赖。免费浏览 — 问问 Jinni 什么最适合你。"
   }
 }

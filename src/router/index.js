@@ -45,6 +45,21 @@ const routes = [
         component: () => import('@/views/ExploreView.vue'),
         meta: { title: "Jinni's Discoveries", requiresAuth: true }
     },
+    // Russian copies of the public pages (founder 2026-09-18, SEO step 3):
+    // same components, the URL sets the language and the canonical/hreflang.
+    // English and Russian only — the founder's call.
+    {
+        path: '/:lang(ru)/discover/preferences',
+        name: 'DiscoverPreferencesRu',
+        component: () => import('@/views/DiscoverPreferences.vue'),
+        meta: { title: 'Предпочтения — Jinni', requiresAuth: false, public: true }
+    },
+    {
+        path: '/:lang(ru)/discover/:slug',
+        name: 'DiscoverCityRu',
+        component: () => import('@/views/DiscoverCity.vue'),
+        meta: { title: 'Открытия Jinni', requiresAuth: false, public: true }
+    },
     {
         // Public preferences (founder 2026-09-17): the onboarding page minus
         // location, saved in the browser only; returns to the city page.
