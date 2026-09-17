@@ -3929,15 +3929,34 @@ export default {
         return;
       }
       this.messages = [];
-      try {
-        const response = await axios.post(`${API_BASE_URL}/api/ai/chat-sessions`, { title: this.t('chat.header.new_chat_title'), messages: [] }, { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } });
-        const newSession = { ...response.data, id: response.data._id, title: this.t('chat.header.new_chat_title') };
-        this.chatSessions.unshift(newSession);
-        this.activeSessionId = response.data._id;
-        this.messages = [];
-        if (!this.isDesktop) { this.mobileSidebarOpen = false }
-        await this.saveCurrentSession();
-      } catch (error) { console.error('Error creating new chat session:', error) }
+      const created = await this.createSessionOnServer();
+      if (!created) return;
+      if (!this.isDesktop) { this.mobileSidebarOpen = false }
+      await this.saveCurrentSession();
+    },
+    // One place that talks to POST /chat-sessions. Founder 2026-09-18: a
+    // brand-new account landed in the chat with NO session — the sidebar
+    // stayed empty and the first conversation was never saved until a
+    // refresh. Creation now retries once, logs the real status, and the
+    // callers below (first message, first save) fall back to it, so a
+    // missing session can no longer swallow a conversation.
+    async createSessionOnServer() {
+      const title = this.t('chat.header.new_chat_title');
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const response = await axios.post(`${API_BASE_URL}/api/ai/chat-sessions`, { title, messages: [] }, { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } });
+          const newSession = { ...response.data, id: response.data._id, title };
+          this.chatSessions.unshift(newSession);
+          this.activeSessionId = response.data._id;
+          try { localStorage.setItem('lastActiveChatId', response.data._id); } catch (e) { /* ignore */ }
+          return newSession;
+        } catch (error) {
+          console.error(`[chat] session create failed (attempt ${attempt + 1}): ${error.response?.status || error.message}`);
+          if (error.response?.status === 401) return null;
+          await new Promise(r => setTimeout(r, 800));
+        }
+      }
+      return null;
     },
     async loadChatSession(sessionId) {
       if (this.activeSessionId) { await this.saveCurrentSession() }
@@ -4573,6 +4592,11 @@ export default {
       if (this.sessionHealth.shouldBlock) {
         this.showSessionLimitModal = true;
         return;
+      }
+      if (!this.activeSessionId) {
+        // No session to save into (fresh account, or creation failed on
+        // load) — make one now rather than lose this conversation.
+        await this.createSessionOnServer();
       }
       if (this.messages.length === 0 && this._greetText) {
         // hidden: the engine sees it in history (context for replies TO the
@@ -5319,6 +5343,9 @@ export default {
     // loaded from the server (its in-memory state == its persisted state).
     seedSavedSignature(sessionId, messages, title) {this._savedSignatures[sessionId] = this.computeSessionSignature(messages, title)},
     async saveCurrentSession() {
+      if (!this.activeSessionId && this.messages.some(m => m.sender === 'user')) {
+        await this.createSessionOnServer();
+      }
       if (!this.activeSessionId) return;
       const sessionIndex = this.chatSessions.findIndex(s => s.id === this.activeSessionId);
       if (sessionIndex !== -1) {
