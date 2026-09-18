@@ -301,7 +301,7 @@
                                 <div v-if="getRecommendationAtPosition(message, position).distance" class="rec-distance">
                                   {{ getRecommendationAtPosition(message, position).distance }}
                                 </div>
-                                <div v-if="hotelPriceText(getRecommendationAtPosition(message, position))" class="rec-hotel-price">{{ hotelPriceText(getRecommendationAtPosition(message, position)) }}</div>
+                                <div v-if="hotelPriceText(getRecommendationAtPosition(message, position))" class="rec-hotel-price"><span>{{ hotelPriceText(getRecommendationAtPosition(message, position)) }}</span><a v-if="getRecommendationAtPosition(message, position).bookingUrl" :href="getRecommendationAtPosition(message, position).bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop="trackInteraction(getRecommendationAtPosition(message, position), 'booking_click')">{{ t('chat.hotel.check_rates') }}</a></div>
                                 <div v-if="getRecommendationAtPosition(message, position).address || getRecommendationAtPosition(message, position).location" class="rec-location">
                                   {{ getRecommendationAtPosition(message, position).address || getRecommendationAtPosition(message, position).location }}
                                 </div>
@@ -425,7 +425,7 @@
                               <div v-if="message.recommendations[part.index].distance" class="rec-distance">
                                 {{ message.recommendations[part.index].distance }}
                               </div>
-                              <div v-if="hotelPriceText(message.recommendations[part.index])" class="rec-hotel-price">{{ hotelPriceText(message.recommendations[part.index]) }}</div>
+                              <div v-if="hotelPriceText(message.recommendations[part.index])" class="rec-hotel-price"><span>{{ hotelPriceText(message.recommendations[part.index]) }}</span><a v-if="message.recommendations[part.index].bookingUrl" :href="message.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop="trackInteraction(message.recommendations[part.index], 'booking_click')">{{ t('chat.hotel.check_rates') }}</a></div>
                               <div v-if="message.recommendations[part.index].address || message.recommendations[part.index].location" class="rec-location">
                                 {{ message.recommendations[part.index].address || message.recommendations[part.index].location }}
                               </div>
@@ -580,7 +580,7 @@
                                 <div v-if="rec.distance && rec.distance !== 'Near you km'" class="rec-distance">
                                   {{ rec.distance }}
                                 </div>
-                                <div v-if="hotelPriceText(rec)" class="rec-hotel-price">{{ hotelPriceText(rec) }}</div>
+                                <div v-if="hotelPriceText(rec)" class="rec-hotel-price"><span>{{ hotelPriceText(rec) }}</span><a v-if="rec.bookingUrl" :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop="trackInteraction(rec, 'booking_click')">{{ t('chat.hotel.check_rates') }}</a></div>
                                 <div v-if="rec.address || rec.location" class="rec-location">
                                   {{ rec.address || rec.location || rec.region }}
                                 </div>
@@ -592,12 +592,6 @@
                             <!-- Event source ("Check listing") — placed BELOW the card like the
                                  partner badge, so it reads as a footnote to the whole card, not
                                  a line inside the details. Only when a validated http(s) URL exists. -->
-                            <a v-if="rec.bookingUrl && !rec.sourceUrl" :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop="trackInteraction(rec, 'booking_click')">
-                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/>
-                              </svg>
-                              <span>{{ t('chat.hotel.check_rates') }}</span>
-                            </a>
                             <a v-if="rec.sourceUrl" :href="rec.sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -1513,6 +1507,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <span>{{ t('place_info.search_online') }}</span>
             </button>
+            <a v-if="selectedPlace?.bookingUrl" :href="selectedPlace.bookingUrl" target="_blank" rel="noopener noreferrer" @click="trackInteraction(selectedPlace, 'booking_click')" class="pd-action pd-action--primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg>
+              <span>{{ t('chat.hotel.check_rates') }}</span>
+            </a>
             <a v-if="placeDetails?.website" :href="placeDetails.website" target="_blank" @click="trackInteraction(selectedPlace, 'website_click')" class="pd-action">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
               <span>{{ t('place_info.website') }}</span>
@@ -1526,6 +1524,11 @@
           <!-- Ticket price, verbatim from the listing ("3000 AMD"). Events
                never carry Google's `pricing`, so without this row the price we
                DID read off the page never reached the traveler. -->
+          <!-- Live partner price / owner's listed price (hotel cards). -->
+          <div class="pd-fact" v-if="selectedPlace && hotelPriceText(selectedPlace)">
+            <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg></span>
+            <div class="pd-fact-body">{{ hotelPriceText(selectedPlace) }}</div>
+          </div>
           <div class="pd-fact" v-if="infoTicketPrice">
             <span class="pd-fact-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
             <div class="pd-fact-body">
@@ -7681,7 +7684,9 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .rec-image.loading-skeleton{background-size:200% 100%;animation:shimmer 2s infinite;position:relative;overflow:hidden}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
-.rec-hotel-price{font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
+.rec-hotel-price{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
+.rec-book-btn{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;letter-spacing:.02em;text-decoration:none;color:inherit;border:1px solid currentColor;opacity:.85}
+.rec-book-btn:hover{opacity:1;background:rgba(127,127,127,.12)}
 .large-card .rec-hotel-price{font-size:0.9rem}
 .rec-event-source{display:inline-flex;align-items:center;gap:4px;font-size:0.6875rem;margin:2px 0 4px;text-decoration:none;opacity:.72}
 /* Source moved BELOW the card (into .rec-card-bottom). Absolutely centered in
