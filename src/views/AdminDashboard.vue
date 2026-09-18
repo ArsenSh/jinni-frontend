@@ -2150,7 +2150,7 @@
               <template v-for="(m, i) in sesMessages" :key="m.id || i">
                 <div class="ses-msg" :class="m.sender">
                   <div class="ses-msg-head">{{ m.sender === 'user' ? 'Traveler' : 'Jinni' }} <span class="ses-msg-time">{{ mapWhen(m.timestamp) }}</span></div>
-                  <div class="ses-msg-text">{{ m.text }}</div>
+                  <div class="ses-msg-text">{{ msgText(m) }}</div>
                   <div v-if="m.recommendations && m.recommendations.length" class="ses-cards">
                     <span v-for="r in m.recommendations" :key="r.placeId || r.name" class="ses-card">{{ r.name }}<small v-if="r.category"> · {{ r.category }}</small></span>
                   </div>
@@ -5979,17 +5979,44 @@ export default {
     // Whole session as one text on the clipboard — the backend export
     // (transcript + turn records + log lines), the shape the founder pastes.
     // Same helper serves the per-user panel and the Sessions tab.
+    // Founder 2026-09-18: "could not copy the logs from admin page" — Safari
+    // refuses a clipboard write that happens after an await (the user gesture
+    // is gone by the time the export has downloaded). The fix is Safari's own
+    // pattern: hand the clipboard a PROMISE of the text inside the click.
+    // Browsers without ClipboardItem fall back to writeText; if both fail the
+    // export downloads as a file instead, so the logs always reach the founder.
     const copySessionText = async (id) => {
       chatLog.value.copying = true
-      try {
-        const token = localStorage.getItem('authToken') || localStorage.getItem('token')
-        const res = await fetch(`${API}/admin/chat-sessions/${id}/export`, { headers: { Authorization: `Bearer ${token}` } })
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token')
+      const url = `${API}/admin/chat-sessions/${id}/export`
+      const fetchText = async () => {
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const text = await res.text()
+        return res.text()
+      }
+      try {
+        if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+          const textPromise = fetchText()
+          await navigator.clipboard.write([new ClipboardItem({ 'text/plain': textPromise.then(t => new Blob([t], { type: 'text/plain' })) })])
+          const text = await textPromise
+          showToast(`Copied ${text.split('\n').length} lines`)
+          return
+        }
+        const text = await fetchText()
         await navigator.clipboard.writeText(text)
         showToast(`Copied ${text.split('\n').length} lines`)
-      } catch (e) { showToast(`Copy failed: ${e.message}`, 'error') } finally { chatLog.value.copying = false }
+      } catch (e) {
+        try {
+          const text = await fetchText()
+          const blobUrl = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }))
+          const a = document.createElement('a'); a.href = blobUrl; a.download = `jinni-session-${id}.txt`; a.click()
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 2000)
+          showToast('Clipboard blocked by the browser — downloaded the session as a file instead')
+        } catch (e2) { showToast(`Copy failed: ${e2.message}`, 'error') }
+      } finally { chatLog.value.copying = false }
     }
+    // A streamed reply is saved as contentParts; `text` can be empty.
+    const msgText = (m) => m?.text || (Array.isArray(m?.contentParts) ? m.contentParts.filter(p => p && p.type === 'text' && p.content).map(p => p.content).join('\n') : '')
 
     const togglePremium = async (user) => {
       try { await apiFetch(`/users/${user._id}/premium`, { method: 'PATCH', body: JSON.stringify({ isPremium: !user.isPremium }) }); user.isPremium = !user.isPremium; showToast(`${user.name} ${user.isPremium ? 'upgraded to Premium' : 'downgraded to Free'}`) }
@@ -8020,7 +8047,7 @@ export default {
       fetchUsers, fetchUserLocations, fetchAIUsage, fetchBusinesses, fetchDestinations, fetchPlaces, fetchGoogleUsage,
       toggleDestination, deleteDestination, toggleBusiness, deleteBusiness, expandedTypes, accOpen, toggleAccRow, accRowTap, debouncedUserFetch, debouncedBizFetch, debouncedPlacesFetch, debouncedDestFetch,
       deletePlace, setExploreStatus, placesExploreFilter, placesExploreOpts, backfillRegions, backfillBusy, purgeStale, onImgError,
-      chatLog, openChatLog, openChatSession, closeChatLog, copySessionText, resolveImage, fmtMsg,
+      chatLog, openChatLog, openChatSession, closeChatLog, copySessionText, msgText, resolveImage, fmtMsg,
       purgeOpts, purgeDays, purgeDropdownOpen, purgeNeverUsed, selectedPurgeOpt,
       userFilterOpts, destFilterOpts, bizPartnerFilterOpts, bizStatusFilterOpts, placesImageFilterOpts, placesActionOpts, placesSortOpts,
       apiBase: API_BASE,
