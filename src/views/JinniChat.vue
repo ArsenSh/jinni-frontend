@@ -1499,6 +1499,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
               <span>{{ t('place_info.get_directions') }}</span>
             </button>
+            <a v-if="selectedPlace?.bookingUrl" :href="selectedPlace.bookingUrl" target="_blank" rel="noopener noreferrer" @click.prevent="openBooking(selectedPlace)" class="pd-action pd-action--primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg>
+              <span>{{ t('chat.hotel.check_rates') }}</span>
+            </a>
             <a v-if="placeDetails?.phone" :href="`tel:${placeDetails.phone}`" @click="trackInteraction(selectedPlace, 'phone_click')" class="pd-action">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               <span>{{ t('place_info.phone') }}</span>
@@ -1507,10 +1511,6 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <span>{{ t('place_info.search_online') }}</span>
             </button>
-            <a v-if="selectedPlace?.bookingUrl" :href="selectedPlace.bookingUrl" target="_blank" rel="noopener noreferrer" @click.prevent="openBooking(selectedPlace)" class="pd-action pd-action--primary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg>
-              <span>{{ t('chat.hotel.check_rates') }}</span>
-            </a>
             <a v-if="placeDetails?.website" :href="placeDetails.website" target="_blank" @click="trackInteraction(selectedPlace, 'website_click')" class="pd-action">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
               <span>{{ t('place_info.website') }}</span>
@@ -5369,6 +5369,12 @@ export default {
             // schema stores it (recommendationSchema.sourceUrl) — it was this
             // whitelist that dropped it, killing the link on every reload.
             ...(rec.sourceUrl && { sourceUrl: rec.sourceUrl }),
+            // Live partner price + booking link and the owner's listed price —
+            // without these the "from $X / night" row and the Check-rates pill
+            // vanished on every reload (founder 2026-09-19).
+            ...(rec.hotelPrice && { hotelPrice: rec.hotelPrice }),
+            ...(rec.bookingUrl && { bookingUrl: rec.bookingUrl }),
+            ...(rec.listedPrice && { listedPrice: rec.listedPrice }),
             ...(rec._isExpired != null && { _isExpired: rec._isExpired }),
             ...(rec._action && { _action: rec._action }),
             feedback: rec.feedback || null
@@ -7700,8 +7706,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
 .rec-hotel-price{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
-.rec-book-btn{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;letter-spacing:.02em;text-decoration:none;color:inherit;border:1px solid currentColor;opacity:.85}
-.rec-book-btn:hover{opacity:1;background:rgba(127,127,127,.12)}
+.rec-book-btn{display:inline-flex;align-items:center;padding:5px 12px;border-radius:25px;font-size:0.72rem;font-weight:500;line-height:1.1;letter-spacing:.02em;text-decoration:none;color:#fff;border:none;transition:background 0.25s ease,box-shadow 0.25s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
+.genie-chat-container.day-mode .rec-book-btn{background:linear-gradient(45deg,rgba(212,175,55,0.5),rgba(255,140,0,0.5));box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.35)}
+.genie-chat-container.day-mode .rec-book-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.72),rgba(255,140,0,0.72));box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.4)}
+.genie-chat-container.night-mode .rec-book-btn{background:linear-gradient(45deg,rgba(212,175,55,0.6),rgba(255,140,0,0.6));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
+.genie-chat-container.night-mode .rec-book-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.8),rgba(255,140,0,0.8));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18)}
+.large-card .rec-book-btn{font-size:0.78rem;padding:6px 14px}
 .large-card .rec-hotel-price{font-size:0.9rem}
 .rec-event-source{display:inline-flex;align-items:center;gap:4px;font-size:0.6875rem;margin:2px 0 4px;text-decoration:none;opacity:.72}
 /* Source moved BELOW the card (into .rec-card-bottom). Absolutely centered in
