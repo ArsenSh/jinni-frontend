@@ -1420,8 +1420,8 @@
           <div class="setting-item">
             <div class="theme-buttons">
               <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v1' }" @click="setChatEngine('v1')">V1 · stable</button>
-              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v2' }" @click="setChatEngine('v2')">V2 · default</button>
-              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v3' }" @click="setChatEngine('v3')">V3 · controller</button>
+              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v2' }" @click="setChatEngine('v2')">V2 · classic</button>
+              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v3' }" @click="setChatEngine('v3')">V3 · default</button>
             </div>
           </div>
         </div>
@@ -1952,7 +1952,10 @@ export default {
       // the battery re-runs passed (vegan/rooftops/events full pass, uzbek
       // honest with a cosmetic deck-size miss). A stored explicit choice wins
       // — the settings toggle stays as the instant rollback to v1.
-      chatEngine: localStorage.getItem('jinni_chat_engine') || 'v2',
+      // V3 is the default since 2026-09-19 (founder: "make engine 3 default") —
+      // controller + deck agent + live hotel prices. A stored choice always wins,
+      // so anyone who picked V2 or V1 by hand keeps it (rollback = one tap).
+      chatEngine: localStorage.getItem('jinni_chat_engine') || 'v3',
       settingsSaved: false,
       settingsSaveTimeout: null,
       userSettings: {
