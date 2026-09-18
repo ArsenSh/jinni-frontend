@@ -900,6 +900,10 @@
       "button": "Switch to Listing",
       "switching": "Switching to Listing"
     },
+    "price": {
+      "from": "from {price}",
+      "approx": "≈ {price}"
+    },
     "hotel": {
       "from_per_night": "from {price} / night",
       "check_rates": "Check rates"

@@ -900,6 +900,10 @@
       "button": "Passer à l'établissement",
       "switching": "Passage à l'établissement…"
     },
+    "price": {
+      "from": "dès {price}",
+      "approx": "≈ {price}"
+    },
     "hotel": {
       "from_per_night": "dès {price} / nuit",
       "check_rates": "Voir les tarifs"

@@ -900,6 +900,10 @@
       "button": "切换到商家页面",
       "switching": "正在切换到商家页面…"
     },
+    "price": {
+      "from": "{price} 起",
+      "approx": "≈ {price}"
+    },
     "hotel": {
       "from_per_night": "{price} 起 / 晚",
       "check_rates": "查看房价"

@@ -900,6 +900,10 @@
       "button": "Перейти к заведению",
       "switching": "Переход к заведению…"
     },
+    "price": {
+      "from": "от {price}",
+      "approx": "≈ {price}"
+    },
     "hotel": {
       "from_per_night": "от {price} / ночь",
       "check_rates": "Посмотреть цены"

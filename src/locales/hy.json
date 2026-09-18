@@ -900,6 +900,10 @@
       "button": "Անցնել հաստատության էջ",
       "switching": "Անցում հաստատության էջին…"
     },
+    "price": {
+      "from": "{price}-ից",
+      "approx": "≈ {price}"
+    },
     "hotel": {
       "from_per_night": "{price}-ից / գիշեր",
       "check_rates": "Տեսնել գները"

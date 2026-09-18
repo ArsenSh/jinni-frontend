@@ -2568,12 +2568,17 @@ export default {
     // "from $85 / night" — only when the backend attached a REAL partner price
     // (rec.hotelPrice, Travelpayouts/Hotellook). No price ⇒ no line, never a guess.
     hotelPriceText(rec) {
+      const money = (n, cur) => {
+        try { return new Intl.NumberFormat(this.$i18n?.locale || 'en', { style: 'currency', currency: cur || 'USD', maximumFractionDigits: 0 }).format(n); }
+        catch { return `${Math.round(n)} ${cur || 'USD'}`; }
+      };
       const hp = rec && rec.hotelPrice;
-      if (!hp || !Number.isFinite(hp.perNight) || hp.perNight <= 0) return '';
-      let amount;
-      try { amount = new Intl.NumberFormat(this.$i18n?.locale || 'en', { style: 'currency', currency: hp.currency || 'USD', maximumFractionDigits: 0 }).format(hp.perNight); }
-      catch { amount = `${Math.round(hp.perNight)} ${hp.currency || 'USD'}`; }
-      return this.t('chat.hotel.from_per_night', { price: amount });
+      if (hp && Number.isFinite(hp.perNight) && hp.perNight > 0) return this.t('chat.hotel.from_per_night', { price: money(hp.perNight, hp.currency) });
+      // The owner's own listed price (Destination/Business pricing block).
+      const lp = rec && rec.listedPrice;
+      if (lp && Number.isFinite(lp.min) && lp.min > 0) return this.t('chat.price.from', { price: money(lp.min, lp.currency) });
+      if (lp && Number.isFinite(lp.average) && lp.average > 0) return this.t('chat.price.approx', { price: money(lp.average, lp.currency) });
+      return '';
     },
     isEventRec(rec) {
       if (!rec) return false;
