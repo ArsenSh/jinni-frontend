@@ -900,6 +900,10 @@
       "button": "Switch to Listing",
       "switching": "Switching to Listing"
     },
+    "hotel": {
+      "from_per_night": "from {price} / night",
+      "check_rates": "Check rates"
+    },
     "event": {
       "check_listing": "Check listing",
       "ended": "Ended",

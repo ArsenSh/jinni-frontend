@@ -900,6 +900,10 @@
       "button": "التبديل إلى صفحة النشاط",
       "switching": "جارٍ التبديل إلى صفحة النشاط…"
     },
+    "hotel": {
+      "from_per_night": "من {price} / ليلة",
+      "check_rates": "عرض الأسعار"
+    },
     "event": {
       "check_listing": "التحقق من المصدر",
       "ended": "انتهت",

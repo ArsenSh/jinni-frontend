@@ -301,6 +301,7 @@
                                 <div v-if="getRecommendationAtPosition(message, position).distance" class="rec-distance">
                                   {{ getRecommendationAtPosition(message, position).distance }}
                                 </div>
+                                <div v-if="hotelPriceText(getRecommendationAtPosition(message, position))" class="rec-hotel-price">{{ hotelPriceText(getRecommendationAtPosition(message, position)) }}</div>
                                 <div v-if="getRecommendationAtPosition(message, position).address || getRecommendationAtPosition(message, position).location" class="rec-location">
                                   {{ getRecommendationAtPosition(message, position).address || getRecommendationAtPosition(message, position).location }}
                                 </div>
@@ -424,6 +425,7 @@
                               <div v-if="message.recommendations[part.index].distance" class="rec-distance">
                                 {{ message.recommendations[part.index].distance }}
                               </div>
+                              <div v-if="hotelPriceText(message.recommendations[part.index])" class="rec-hotel-price">{{ hotelPriceText(message.recommendations[part.index]) }}</div>
                               <div v-if="message.recommendations[part.index].address || message.recommendations[part.index].location" class="rec-location">
                                 {{ message.recommendations[part.index].address || message.recommendations[part.index].location }}
                               </div>
@@ -578,6 +580,7 @@
                                 <div v-if="rec.distance && rec.distance !== 'Near you km'" class="rec-distance">
                                   {{ rec.distance }}
                                 </div>
+                                <div v-if="hotelPriceText(rec)" class="rec-hotel-price">{{ hotelPriceText(rec) }}</div>
                                 <div v-if="rec.address || rec.location" class="rec-location">
                                   {{ rec.address || rec.location || rec.region }}
                                 </div>
@@ -589,6 +592,12 @@
                             <!-- Event source ("Check listing") — placed BELOW the card like the
                                  partner badge, so it reads as a footnote to the whole card, not
                                  a line inside the details. Only when a validated http(s) URL exists. -->
+                            <a v-if="rec.bookingUrl && !rec.sourceUrl" :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop="trackInteraction(rec, 'booking_click')">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/>
+                              </svg>
+                              <span>{{ t('chat.hotel.check_rates') }}</span>
+                            </a>
                             <a v-if="rec.sourceUrl" :href="rec.sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -2556,6 +2565,16 @@ export default {
     //   expired events from new recs. The _isExpired flag is for old chat
     //   history (recs generated before the event ended) and is computed on
     //   the server by formatBusinessDetails / the /place-details handler.
+    // "from $85 / night" — only when the backend attached a REAL partner price
+    // (rec.hotelPrice, Travelpayouts/Hotellook). No price ⇒ no line, never a guess.
+    hotelPriceText(rec) {
+      const hp = rec && rec.hotelPrice;
+      if (!hp || !Number.isFinite(hp.perNight) || hp.perNight <= 0) return '';
+      let amount;
+      try { amount = new Intl.NumberFormat(this.$i18n?.locale || 'en', { style: 'currency', currency: hp.currency || 'USD', maximumFractionDigits: 0 }).format(hp.perNight); }
+      catch { amount = `${Math.round(hp.perNight)} ${hp.currency || 'USD'}`; }
+      return this.t('chat.hotel.from_per_night', { price: amount });
+    },
     isEventRec(rec) {
       if (!rec) return false;
       if (rec.eventSchedule) return true;
@@ -7657,6 +7676,8 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .rec-image.loading-skeleton{background-size:200% 100%;animation:shimmer 2s infinite;position:relative;overflow:hidden}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
+.rec-hotel-price{font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
+.large-card .rec-hotel-price{font-size:0.9rem}
 .rec-event-source{display:inline-flex;align-items:center;gap:4px;font-size:0.6875rem;margin:2px 0 4px;text-decoration:none;opacity:.72}
 /* Source moved BELOW the card (into .rec-card-bottom). Absolutely centered in
    that row so "Check listing" sits in the MIDDLE under the card, independent of
