@@ -301,7 +301,7 @@
                                 <div v-if="getRecommendationAtPosition(message, position).distance" class="rec-distance">
                                   {{ getRecommendationAtPosition(message, position).distance }}
                                 </div>
-                                <div v-if="hotelPriceText(getRecommendationAtPosition(message, position))" class="rec-hotel-price"><span>{{ hotelPriceText(getRecommendationAtPosition(message, position)) }}</span><a v-if="getRecommendationAtPosition(message, position).bookingUrl" :href="getRecommendationAtPosition(message, position).bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop="trackInteraction(getRecommendationAtPosition(message, position), 'booking_click')">{{ t('chat.hotel.check_rates') }}</a></div>
+                                <div v-if="hotelPriceText(getRecommendationAtPosition(message, position))" class="rec-hotel-price"><span>{{ hotelPriceText(getRecommendationAtPosition(message, position)) }}</span><a v-if="getRecommendationAtPosition(message, position).bookingUrl" :href="getRecommendationAtPosition(message, position).bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(getRecommendationAtPosition(message, position))">{{ t('chat.hotel.check_rates') }}</a></div>
                                 <div v-if="getRecommendationAtPosition(message, position).address || getRecommendationAtPosition(message, position).location" class="rec-location">
                                   {{ getRecommendationAtPosition(message, position).address || getRecommendationAtPosition(message, position).location }}
                                 </div>
@@ -425,7 +425,7 @@
                               <div v-if="message.recommendations[part.index].distance" class="rec-distance">
                                 {{ message.recommendations[part.index].distance }}
                               </div>
-                              <div v-if="hotelPriceText(message.recommendations[part.index])" class="rec-hotel-price"><span>{{ hotelPriceText(message.recommendations[part.index]) }}</span><a v-if="message.recommendations[part.index].bookingUrl" :href="message.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop="trackInteraction(message.recommendations[part.index], 'booking_click')">{{ t('chat.hotel.check_rates') }}</a></div>
+                              <div v-if="hotelPriceText(message.recommendations[part.index])" class="rec-hotel-price"><span>{{ hotelPriceText(message.recommendations[part.index]) }}</span><a v-if="message.recommendations[part.index].bookingUrl" :href="message.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(message.recommendations[part.index])">{{ t('chat.hotel.check_rates') }}</a></div>
                               <div v-if="message.recommendations[part.index].address || message.recommendations[part.index].location" class="rec-location">
                                 {{ message.recommendations[part.index].address || message.recommendations[part.index].location }}
                               </div>
@@ -580,7 +580,7 @@
                                 <div v-if="rec.distance && rec.distance !== 'Near you km'" class="rec-distance">
                                   {{ rec.distance }}
                                 </div>
-                                <div v-if="hotelPriceText(rec)" class="rec-hotel-price"><span>{{ hotelPriceText(rec) }}</span><a v-if="rec.bookingUrl" :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop="trackInteraction(rec, 'booking_click')">{{ t('chat.hotel.check_rates') }}</a></div>
+                                <div v-if="hotelPriceText(rec)" class="rec-hotel-price"><span>{{ hotelPriceText(rec) }}</span><a v-if="rec.bookingUrl" :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(rec)">{{ t('chat.hotel.check_rates') }}</a></div>
                                 <div v-if="rec.address || rec.location" class="rec-location">
                                   {{ rec.address || rec.location || rec.region }}
                                 </div>
@@ -1507,7 +1507,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <span>{{ t('place_info.search_online') }}</span>
             </button>
-            <a v-if="selectedPlace?.bookingUrl" :href="selectedPlace.bookingUrl" target="_blank" rel="noopener noreferrer" @click="trackInteraction(selectedPlace, 'booking_click')" class="pd-action pd-action--primary">
+            <a v-if="selectedPlace?.bookingUrl" :href="selectedPlace.bookingUrl" target="_blank" rel="noopener noreferrer" @click.prevent="openBooking(selectedPlace)" class="pd-action pd-action--primary">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg>
               <span>{{ t('chat.hotel.check_rates') }}</span>
             </a>
@@ -2570,6 +2570,18 @@ export default {
     //   the server by formatBusinessDetails / the /place-details handler.
     // "from $85 / night" — only when the backend attached a REAL partner price
     // (rec.hotelPrice, Travelpayouts/Hotellook). No price ⇒ no line, never a guess.
+    // Opens the partner booking page. A plain target=_blank anchor inside the
+    // card did nothing for the founder (2026-09-19) — standalone/PWA and some
+    // mobile browsers swallow it — so open explicitly and fall back to a
+    // same-tab navigation when the popup is blocked.
+    openBooking(rec) {
+      const url = rec && rec.bookingUrl;
+      if (!url) return;
+      try { this.trackInteraction(rec, 'booking_click'); } catch (e) {}
+      let w = null;
+      try { w = window.open(url, '_blank', 'noopener'); } catch (e) { w = null; }
+      if (!w) window.location.assign(url);
+    },
     hotelPriceText(rec) {
       const money = (n, cur) => {
         try { return new Intl.NumberFormat(this.$i18n?.locale || 'en', { style: 'currency', currency: cur || 'USD', maximumFractionDigits: 0 }).format(n); }
