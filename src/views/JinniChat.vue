@@ -1272,7 +1272,7 @@
               <transition name="expand">
                 <div v-if="showFontDropdown" class="selector-dropdown-inline">
                   <div class="dropdown-list">
-                    <div v-for="f in ['standard','classic','elegant','modern','journal']" :key="f" @click="setDisplayPref('fontStyle', f); showFontDropdown = false" class="dropdown-item" :class="{ 'selected': (userSettings.fontStyle || 'elegant') === f }">
+                    <div v-for="f in ['standard','classic','elegant','modern']" :key="f" @click="setDisplayPref('fontStyle', f); showFontDropdown = false" class="dropdown-item" :class="{ 'selected': (userSettings.fontStyle || 'elegant') === f }">
                       <span class="item-name">{{ t('settings.display.font_' + f) }}</span>
                       <svg v-if="(userSettings.fontStyle || 'elegant') === f" class="checkmark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
                     </div>

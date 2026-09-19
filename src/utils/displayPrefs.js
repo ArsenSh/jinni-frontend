@@ -38,7 +38,6 @@ export const FONT_STACKS = {
   classic: "'Source Serif 4', Georgia, 'Noto Serif Armenian', serif",
   elegant: "Lora, 'Palatino Linotype', Palatino, 'Noto Serif Armenian', serif",
   modern: "Optima, Candara, 'Gill Sans', 'Gill Sans MT', 'Segoe UI', 'Noto Sans Armenian', sans-serif",
-  journal: "Comfortaa, 'Noto Sans Armenian', 'Segoe UI', sans-serif",
 };
 
 export function applyDisplayPrefs(settings = null) {
@@ -64,8 +63,8 @@ export function applyDisplayPrefs(settings = null) {
     // Font stamp too: serif faces carry their optical mass differently, and
     // icon-beside-text controls want per-font sub-pixel nudges (SVGs cannot
     // take a font — they are drawings, so the correction is positional).
-    document.documentElement.setAttribute('data-font-style', s.fontStyle || 'elegant');
-    let stack = FONT_STACKS[s.fontStyle || 'elegant'] || '';
+    document.documentElement.setAttribute('data-font-style', (FONT_STACKS[s.fontStyle] != null ? s.fontStyle : 'elegant'));
+    let stack = FONT_STACKS[(FONT_STACKS[s.fontStyle] != null ? s.fontStyle : 'elegant')] || '';
     // Armenian-first UI (founder 2026-09-05): with the app language set to
     // Armenian, Noto Sans Armenian LEADS the default stack instead of trailing
     // it. Armenian glyphs were reaching Noto through fallback anyway; what this
