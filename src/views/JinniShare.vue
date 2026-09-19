@@ -1127,7 +1127,7 @@ export default {
 .message-rec-card { width: 100%; }
 .message-recs-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
 @media (min-width: 600px) { .message-recs-grid { grid-template-columns: repeat(2, 1fr); } .message-recs-grid .rec-card-wrapper:has(.large-card) { grid-column: 1 / -1; } }
-.inline-recommendation-wrapper { margin: 16px 0; display: flex; justify-content: flex-start; }
+.inline-recommendation-wrapper { margin: 20px 0; display: flex; justify-content: flex-start; }
 .recommendation-card.inline-card { width: 100%; border-radius: 12px; overflow: hidden; }
 /* Description sizing/colour comes from `.large-card .rec-description` above so
    it matches JinniChat exactly; only the ordinary-card spacing is share-local. */
