@@ -179,10 +179,15 @@ export default {
     this._appMo = new MutationObserver(() => this.queueSync());
     const app = document.getElementById('app');
     if (app) this._appMo.observe(app, { childList: true });
+    // Explicit trigger for changes the observers cannot see: the fullscreen map
+    // teleports itself to <body>, outside the watched page root (2026-09-20).
+    this._onChromeSync = () => this.queueSync();
+    window.addEventListener('jinni:chrome-sync', this._onChromeSync);
     this.applyGlobalTheme();
   },
   beforeUnmount() {
     this._unsub && this._unsub();
+    this._onChromeSync && window.removeEventListener('jinni:chrome-sync', this._onChromeSync);
     this._appMo && this._appMo.disconnect();
     this._rootMo && this._rootMo.disconnect();
     clearTimeout(this._resyncT);

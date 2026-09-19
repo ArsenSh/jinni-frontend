@@ -487,6 +487,7 @@ export default {
       document.addEventListener('keydown', this.onEsc);
       // Browser chrome: App.vue's chrome sync sees .rec-map.is-fullscreen and paints
       // both edges from the map canvas (one writer — a painter here lost to its observer).
+      this.$nextTick(() => setTimeout(() => window.dispatchEvent(new Event('jinni:chrome-sync')), 60));
       // Lock the page behind the fullscreen overlay (prevents scroll bleed on mobile).
       this._prevBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -505,6 +506,7 @@ export default {
     },
     exitFullscreen() {
       this.fullscreen = false;
+      this.$nextTick(() => setTimeout(() => window.dispatchEvent(new Event('jinni:chrome-sync')), 60));   // page colours back
       this.stopLiveTracking();          // drop the live GPS watch when the big map closes
       document.removeEventListener('keydown', this.onEsc);
       document.body.style.overflow = this._prevBodyOverflow || '';
