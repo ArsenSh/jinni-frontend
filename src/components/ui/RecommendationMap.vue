@@ -2155,7 +2155,7 @@ export default {
      of spilling out of a half-width button. */
   flex: 1 1 auto; min-width: calc(50% - 3.5px); max-width: 100%; justify-content: center;
 }
-:deep(.rec-pop-btn span) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }   /* last resort: never outside the button */
+:deep(.rec-pop-btn span) { min-width: 0; }   /* no overflow clipping: the cap-height box ends at the baseline, so clipping cut the tails of р / ղ (2026-09-20) */
 @keyframes rm-pop-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
 :deep(.rec-pop-dir) {
   flex: 1; min-width: 80px; justify-content: center; text-align: center; text-decoration: none;
