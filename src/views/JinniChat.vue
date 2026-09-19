@@ -3264,6 +3264,9 @@ export default {
         message: this.getMessagePlainText(message),
         contentParts: message.contentParts || null,
         recommendations: [],
+        // Large chat cards stay large on the share page (it reads this flag; without it
+        // every shared card fell back to the small 140 px image — founder 2026-09-19).
+        isChatRecommendation: message.isChatRecommendation === true,
         theme: this.currentTheme
       };
       // 2. Enrich each recommendation with full details using batches
