@@ -2623,9 +2623,13 @@ export default {
       const url = rec && rec.bookingUrl;
       if (!url) return;
       try { this.trackInteraction(rec, 'booking_click'); } catch (e) {}
+      // Open first, detach after: passing 'noopener' to window.open makes browsers
+      // return null even when the tab opened, and the null read as "blocked" sent
+      // the current tab to the booking page too (founder 2026-09-19).
       let w = null;
-      try { w = window.open(url, '_blank', 'noopener'); } catch (e) { w = null; }
-      if (!w) window.location.assign(url);
+      try { w = window.open(url, '_blank'); } catch (e) { w = null; }
+      if (w) { try { w.opener = null; } catch (e) {} }
+      else window.location.assign(url);   // only when the browser really refused a new tab
     },
     hotelPriceText(rec) {
       const money = (n, cur) => {
