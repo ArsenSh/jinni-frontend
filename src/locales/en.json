@@ -906,7 +906,7 @@
     },
     "hotel": {
       "from_per_night": "from {price} / night",
-      "check_rates": "Check rates"
+      "check_rates": "Book"
     },
     "event": {
       "check_listing": "Check listing",

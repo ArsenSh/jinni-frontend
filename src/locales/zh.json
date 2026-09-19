@@ -906,7 +906,7 @@
     },
     "hotel": {
       "from_per_night": "{price} 起 / 晚",
-      "check_rates": "查看房价"
+      "check_rates": "预订"
     },
     "event": {
       "check_listing": "查看来源",

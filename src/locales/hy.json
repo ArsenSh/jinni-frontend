@@ -906,7 +906,7 @@
     },
     "hotel": {
       "from_per_night": "{price}-ից / գիշեր",
-      "check_rates": "Տեսնել գները"
+      "check_rates": "Ամրագրել"
     },
     "event": {
       "check_listing": "Ստուգել աղբյուրը",

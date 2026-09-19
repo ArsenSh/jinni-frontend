@@ -906,7 +906,7 @@
     },
     "hotel": {
       "from_per_night": "dès {price} / nuit",
-      "check_rates": "Voir les tarifs"
+      "check_rates": "Réserver"
     },
     "event": {
       "check_listing": "Vérifier l'annonce",

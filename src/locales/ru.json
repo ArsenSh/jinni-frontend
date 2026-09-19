@@ -906,7 +906,7 @@
     },
     "hotel": {
       "from_per_night": "от {price} / ночь",
-      "check_rates": "Посмотреть цены"
+      "check_rates": "Забронировать"
     },
     "event": {
       "check_listing": "Проверить источник",
