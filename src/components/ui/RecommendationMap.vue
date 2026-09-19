@@ -2260,8 +2260,11 @@ export default {
 :deep(.rec-pop-actions) { display: flex; flex-wrap: wrap; gap: 7px; }
 :deep(.rec-pop-btn) {
   display: inline-flex; align-items: center; gap: 7px; box-sizing: border-box;
-  padding: 9px 14px; border: none; border-radius: 22px; text-decoration: none; white-space: nowrap;
-  font-family: inherit; font-size: 0.78125rem; font-weight: 600; line-height: 1; color: var(--rm-text);
+  /* Fixed height + the font's natural line box: with line-height 1, fonts with
+     tall ascenders (Lora, Source Serif) sat visibly low next to the icon, and
+     <a> and <button> boxed differently (founder 2026-09-20). */
+  height: 34px; padding: 0 14px; margin: 0; border: none; border-radius: 22px; text-decoration: none; white-space: nowrap;
+  font-family: inherit; font-size: 0.78125rem; font-weight: 600; line-height: normal; color: var(--rm-text);
   -webkit-appearance: none; appearance: none; cursor: pointer;
   background: var(--rm-glass); box-shadow: var(--rm-glass-ring);
   backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -2269,8 +2272,8 @@ export default {
 }
 :deep(.rec-pop-btn:hover) { background: var(--rm-glass-hover) }
 :deep(.rec-pop-btn:active) { transform: scale(0.96) }
-:deep(.rec-pop-btn span) { line-height: 1 }
-:deep(.rec-pop-btn svg) { width: 15px; height: 15px; flex-shrink: 0; display: block; }
+:deep(.rec-pop-btn span) { line-height: normal; display: block; }
+:deep(.rec-pop-btn svg) { width: 15px; height: 15px; flex-shrink: 0; display: block; vertical-align: middle; }
 /* Match JinniChat's info-modal action buttons (.pd-action) backgrounds, but keep
    the button text in the map's mode text colour (--rm-text) for day + night. */
 .rec-map.day-mode :deep(.rec-pop-btn),
