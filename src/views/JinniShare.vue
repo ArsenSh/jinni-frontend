@@ -1125,7 +1125,7 @@ export default {
 .message-text :deep(strong) { font-weight: 600; color: var(--text); }
 .message-recs-label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: -8px; }
 .message-rec-card { width: 100%; }
-.message-recs-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.message-recs-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
 @media (min-width: 600px) { .message-recs-grid { grid-template-columns: repeat(2, 1fr); } .message-recs-grid .rec-card-wrapper:has(.large-card) { grid-column: 1 / -1; } }
 .inline-recommendation-wrapper { margin: 16px 0; display: flex; justify-content: flex-start; }
 .recommendation-card.inline-card { width: 100%; border-radius: 12px; overflow: hidden; }
@@ -1157,7 +1157,6 @@ export default {
 .share-page.day-mode .text-action-btn.ask-btn:hover { background: linear-gradient(45deg, rgba(212,175,55,0.72), rgba(255,140,0,0.72)); box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.4); }
 .share-page.night-mode .text-action-btn.ask-btn { background: linear-gradient(45deg, rgba(212,175,55,0.6), rgba(255,140,0,0.6)); color: white; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
 .share-page.night-mode .text-action-btn.ask-btn:hover { background: linear-gradient(45deg, rgba(212,175,55,0.8), rgba(255,140,0,0.8)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18); }
-.overlay-actions { display: flex; gap: 8px; }
 .more-btn-no-img { border: none; border-radius: 20px; padding: 8px 14px; cursor: pointer; font-size: 0.8rem; font-weight: 500; backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: all 0.2s ease; }
 .share-page.night-mode .more-btn-no-img { color: #d5dce4; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 0.8px rgba(255,255,255,0.1); }
 .share-page.night-mode .more-btn-no-img:hover { background: rgba(255,255,255,0.14); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
@@ -1376,7 +1375,7 @@ export default {
   .recommendation-card.touch-active .image-overlay,
   .recommendation-card:active .image-overlay { opacity: 1; visibility: visible; z-index: 10; }
   .recommendation-card.touch-active { transform: scale(0.98); transition: transform 0.1s ease; }
-  .overlay-actions { flex-direction: column; gap: 8px; }
+  /* More + Book stay side by side on phones, as in the chat (founder 2026-09-20). */
   .text-action-btn { padding: 10px 14px; border-radius: 20px; }
   .modal-header h3 { font-size: 1rem; }
   .modal-actions { flex-direction: column; gap: 10px; }
