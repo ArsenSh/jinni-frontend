@@ -2147,6 +2147,9 @@ export default {
 :deep(.rec-pop.show-dirs .rec-pop-btn.rec-pop-dir) { display: inline-flex; animation: rm-pop-in 0.18s ease both; }
 :deep(.rec-pop:not(.show-dirs) .rec-pop-btn:not(.rec-pop-dir-toggle)) { animation: rm-pop-in 0.18s ease both; }
 :deep(.rec-pop.show-dirs .rec-pop-dir-toggle) { background: var(--rm-glass-hover); }
+/* Open state: Directions + three options as a 2×2 of equal buttons (the two on the
+   second row used to stretch wider than the first row's). */
+:deep(.rec-pop.show-dirs .rec-pop-dir-toggle), :deep(.rec-pop.show-dirs .rec-pop-btn.rec-pop-dir) { flex: 1 1 calc(50% - 3.5px); min-width: 0; justify-content: center; }
 @keyframes rm-pop-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
 :deep(.rec-pop-dir) {
   flex: 1; min-width: 80px; justify-content: center; text-align: center; text-decoration: none;
