@@ -38,7 +38,7 @@
               <div class="image-overlay">
                 <div class="overlay-actions">
                   <button @click.stop="openInfoModal(rec)" class="text-action-btn info-btn">
-                    {{ t('share.more_info') }}
+                    {{ t('chat.recommendations.more') }}
                   </button>
                 </div>
               </div>
@@ -61,7 +61,7 @@
               </div>
               <!-- Imageless cards have no overlay to host the action, so the
                    pill falls back inline. -->
-              <button v-if="!rec.image" @click.stop="openInfoModal(rec)" class="more-btn-no-img">{{ t('share.more_info') }}</button>
+              <button v-if="!rec.image" @click.stop="openInfoModal(rec)" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
               <div class="rec-metadata">
                 <div v-if="rec.address || rec.location" class="rec-location">{{ rec.address || rec.location }}</div>
                 <div v-if="hotelPriceText(rec)" class="rec-hotel-price">{{ hotelPriceText(rec) }}</div>
@@ -108,7 +108,7 @@
                         <div class="image-overlay">
                           <div class="overlay-actions">
                             <button @click.stop="openInfoModal(payload.recommendations[part.index])" class="text-action-btn info-btn">
-                              {{ t('share.more_info') }}
+                              {{ t('chat.recommendations.more') }}
                             </button>
                           </div>
                         </div>
@@ -131,7 +131,7 @@
                         <div v-if="payload.recommendations[part.index].description" class="rec-description">
                           {{ payload.recommendations[part.index].description }}
                         </div>
-                        <button v-if="!payload.recommendations[part.index].image" @click.stop="openInfoModal(payload.recommendations[part.index])" class="more-btn-no-img">{{ t('share.more_info') }}</button>
+                        <button v-if="!payload.recommendations[part.index].image" @click.stop="openInfoModal(payload.recommendations[part.index])" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
                         <div class="rec-metadata">
                           <div v-if="payload.recommendations[part.index].address || payload.recommendations[part.index].location" class="rec-location">
                             {{ payload.recommendations[part.index].address || payload.recommendations[part.index].location }}
@@ -165,7 +165,7 @@
                     <div class="image-overlay">
                       <div class="overlay-actions">
                         <button @click.stop="openInfoModal(r)" class="text-action-btn info-btn">
-                          {{ t('share.more_info') }}
+                          {{ t('chat.recommendations.more') }}
                         </button>
                       </div>
                     </div>
@@ -184,7 +184,7 @@
                       </div>
                       <span v-if="r._isExpired" class="rec-event-ended">{{ t('share.ended') }}</span>
                     </div>
-                    <button v-if="!r.image" @click.stop="openInfoModal(r)" class="more-btn-no-img">{{ t('share.more_info') }}</button>
+                    <button v-if="!r.image" @click.stop="openInfoModal(r)" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
                     <div class="rec-metadata">
                       <div v-if="r.address || r.location" class="rec-location">{{ r.address || r.location }}</div>
                       <div v-if="hotelPriceText(r)" class="rec-hotel-price">{{ hotelPriceText(r) }}</div>
@@ -1042,7 +1042,7 @@ export default {
 .share-page.night-mode .recommendation-card, .share-page.night-mode .large-card { background: rgba(139,92,246,0.10); box-shadow: 0 0 1px rgba(0,0,0,0.45), inset 0 0 0 0.7px rgba(255,255,255,0.1); }
 .share-page.day-mode .recommendation-card, .share-page.day-mode .large-card { background: rgba(255,255,255,0.5); box-shadow: 0 0 10px rgba(139,69,19,0.05), inset 0 0 0 1px rgba(255,255,255,0.6); }
 .large-card { display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); }
-.large-card .rec-image { height: 250px; }
+.large-card .rec-image { height: auto; aspect-ratio: 3 / 2; max-height: 380px; width: 100%; box-sizing: border-box; }   /* = JinniChat */
 .large-card .rec-details { padding: 16px; }
 .large-card .rec-name { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
 .large-card .rec-type { font-size: 1rem; margin-bottom: 5px; font-weight: 500; }
@@ -1357,7 +1357,7 @@ export default {
 @keyframes fadeIn { to { opacity: 1; } }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @media (max-width: 768px) {
-  .large-card .rec-image { height: 140px; }
+  .large-card .rec-image { height: auto; aspect-ratio: 3 / 2; max-height: 380px; }   /* = JinniChat: same 3:2 on phones */
   .large-card .rec-name { font-size: 1.1rem; }
   .rec-header { gap: 8px; }
   /* 20px horizontal, same as JinniChat's .chat-messages on mobile — 14px was
