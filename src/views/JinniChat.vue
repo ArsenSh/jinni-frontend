@@ -1059,11 +1059,7 @@
   <transition name="share-fade">
     <div v-if="shareProgress.active" class="share-progress-overlay">
       <div class="share-progress-card" :class="currentTheme">
-        <div class="share-progress-genie" aria-hidden="true">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 12h2a2 2 0 0 1 2 2v1"/><path d="M7 15c0-2.8 2.2-5 5-5h2.5c2.5 0 4.5 1.6 5.2 3.9L21 15H7z"/><path d="M9 15v2a3 3 0 0 0 3 3h0a3 3 0 0 0 3-3v-2"/><path d="M14.5 10V8.5"/><path d="M12 5.5l1 1.2 1.6.2-1.2 1.1.3 1.5-1.4-.8-1.4.8.3-1.5L10 6.9l1.6-.2z"/>
-          </svg>
-        </div>
+        <div class="share-progress-genie" aria-hidden="true"><img src="/images/bottle.png?v=3" alt="" class="share-progress-lamp"></div>
         <div class="share-progress-title">{{ t('chat.share.preparing') }}</div>
         <div class="share-progress-bar-wrap">
           <div class="share-progress-bar" :style="{ width: shareProgress.total > 0 ? (shareProgress.current / shareProgress.total * 100) + '%' : '0%' }"></div>
@@ -9011,6 +9007,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .share-progress-genie{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;animation:share-glow 1.6s ease-in-out infinite}
 .night-mode .share-progress-genie{color:#c084fc;background:rgba(192,132,252,0.12);box-shadow:inset 0 0 0 1px rgba(192,132,252,0.25)}
 .day-mode .share-progress-genie{color:#b87333;background:rgba(212,175,55,0.14);box-shadow:inset 0 0 0 1px rgba(212,175,55,0.35)}
+.share-progress-lamp{width:34px;height:34px;object-fit:contain;display:block}
 @keyframes share-glow{0%,100%{opacity:.7}50%{opacity:1}}
 .share-progress-title{font-size:1rem;font-weight:600;letter-spacing:0.01em}
 .night-mode .share-progress-title{color:#c084fc}
