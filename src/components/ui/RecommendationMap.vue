@@ -2272,7 +2272,13 @@ export default {
 }
 :deep(.rec-pop-btn:hover) { background: var(--rm-glass-hover) }
 :deep(.rec-pop-btn:active) { transform: scale(0.96) }
-:deep(.rec-pop-btn span) { line-height: normal; display: block; }
+:deep(.rec-pop-btn span) {
+  /* Centre on the LETTERS, not the line box: serif faces (Lora, Source Serif)
+     carry most of their height above the baseline, so a centred box still
+     reads low beside the icon. text-box trims the box to cap height
+     (Chrome 133+, Safari 18.2+); older browsers keep the natural box. */
+  display: block; line-height: 1; text-box: trim-both cap alphabetic;
+}
 :deep(.rec-pop-btn svg) { width: 15px; height: 15px; flex-shrink: 0; display: block; vertical-align: middle; }
 /* Match JinniChat's info-modal action buttons (.pd-action) backgrounds, but keep
    the button text in the map's mode text colour (--rm-text) for day + night. */
