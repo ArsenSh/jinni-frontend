@@ -7752,7 +7752,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
 .rec-hotel-price{display:flex;align-items:center;font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
-.rec-book-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 14px;border-radius:9px;font-size:0.72rem;font-weight:600;line-height:1;letter-spacing:.02em;text-decoration:none;border:none;--tone:238,160,58;color:rgb(var(--tone));backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);opacity:0;transition:opacity 0.2s ease,background 0.2s ease}
+.rec-book-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 14px;border-radius:9px;font-size:0.72rem;font-weight:600;line-height:1;letter-spacing:.02em;text-decoration:none;border:none;backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);opacity:0;transition:opacity 0.2s ease,background 0.2s ease}
 /* Appears exactly like the like/dislike pair: on card hover (desktop) or touch (mobile). */
 .rec-card-wrapper:hover .rec-book-btn,
 .rec-card-wrapper:has(.recommendation-card.touch-active) .rec-book-btn{opacity:1}
@@ -7761,9 +7761,15 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .day-mode .rec-book-btn:hover{background:rgba(255,255,255,0.75)}
 .night-mode .rec-book-btn{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
 .night-mode .rec-book-btn:hover{background:rgba(255,255,255,0.12)}
-.rec-book-btn--verified{--tone:34,197,94}
-.rec-book-btn--spotlight{--tone:59,159,221}
-.rec-book-btn--signature{--tone:212,175,55}
+/* Label = the card's category colour (rec-type), per mode and partner tier. */
+.genie-chat-container.day-mode .rec-book-btn{color:#A0522D}
+.genie-chat-container.night-mode .rec-book-btn{color:#c084fc}
+.genie-chat-container.day-mode .card-glow--verified .rec-book-btn{color:#22c556ea}
+.genie-chat-container.night-mode .card-glow--verified .rec-book-btn{color:#22c556b1}
+.genie-chat-container.day-mode .card-glow--spotlight .rec-book-btn{color:#3b9fdda2}
+.genie-chat-container.night-mode .card-glow--spotlight .rec-book-btn{color:#3b9fdda2}
+.genie-chat-container.day-mode .card-glow--signature .rec-book-btn{color:#d39510}
+.genie-chat-container.night-mode .card-glow--signature .rec-book-btn{color:#ffbf0085}
 .large-card .rec-book-btn{font-size:0.78rem;padding:0 16px}
 .rec-card-bottom:has(.rec-book-btn){min-height:28px}
 .large-card .rec-hotel-price{font-size:0.9rem}
