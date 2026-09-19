@@ -1485,7 +1485,7 @@ export default {
       // Plain text chips — clean and unambiguous across platforms.
       // The three route options live IN the action row: opening Directions swaps
       // the other buttons out and these in (founder 2026-09-20).
-      const dirLinks = `<a class="rec-pop-btn rec-pop-dir" href="${gUrl}" target="_blank" rel="noopener">Google</a>` + `<a class="rec-pop-btn rec-pop-dir" href="${yUrl}" target="_blank" rel="noopener">Yandex</a>` + `<a class="rec-pop-btn rec-pop-dir" href="${tUrl}" target="_blank" rel="noopener">${this.esc(this.transitLabel)}</a>`;
+      const dirLinks = `<a class="rec-pop-btn rec-pop-dir" href="${gUrl}" target="_blank" rel="noopener"><span>Google</span></a>` + `<a class="rec-pop-btn rec-pop-dir" href="${yUrl}" target="_blank" rel="noopener"><span>Yandex</span></a>` + `<a class="rec-pop-btn rec-pop-dir" href="${tUrl}" target="_blank" rel="noopener"><span>${this.esc(this.transitLabel)}</span></a>`;
       const dirMenu = '';
       const actions = detailsBtn + dirBtn + dirLinks + bookBtn + (phone   ? `<a class="rec-pop-btn rec-pop-call" href="${telHref}">${telIcon}<span>${this.esc(this.callLabel)}</span></a>` : '') + (website ? `<a class="rec-pop-btn rec-pop-web" href="${this.esc(website)}" target="_blank" rel="noopener">${webIcon}<span>${this.esc(this.websiteLabel)}</span></a>` : '');
       const tier = this.tierOf(rec);
