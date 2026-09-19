@@ -322,6 +322,7 @@ export default {
     // Popup action buttons (phone / website).
     callLabel: { type: String, default: 'Call' },
     websiteLabel: { type: String, default: 'Website' },
+    bookLabel: { type: String, default: 'Book' },
     // Previously hardcoded in the template / formatters — now translatable.
     openFullscreenLabel: { type: String, default: 'Open full screen' },
     closeLabel: { type: String, default: 'Close (Esc)' },
@@ -1474,6 +1475,9 @@ export default {
       const detailsBtn = this.isBusiness(rec) ? `<button type="button" class="rec-pop-btn rec-pop-details">${infoIcon}<span>${this.esc(this.detailsLabel)}</span></button>` : '';
       // Directions toggle reveals a provider chooser (Google / Yandex / Transit).
       const dirBtn = `<button type="button" class="rec-pop-btn rec-pop-dir-toggle">${navIcon}<span>${this.esc(this.directionsLabel)}</span></button>`;
+      // Live partner booking link (hotel cards carry rec.bookingUrl) — after Directions, same look as the other buttons.
+      const bookIcon = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg>';
+      const bookBtn = rec.bookingUrl && /^https:\/\//i.test(String(rec.bookingUrl)) ? `<a class="rec-pop-btn rec-pop-book" href="${this.esc(rec.bookingUrl)}" target="_blank" rel="noopener">${bookIcon}<span>${this.esc(this.bookLabel)}</span></a>` : '';
       const from = this.myCoords ? `${this.myCoords.lat},${this.myCoords.lng}` : '';
       const gUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
       const yUrl = `https://yandex.com/maps/?rtext=${from}~${lat},${lng}&rtt=auto`;
@@ -1484,7 +1488,7 @@ export default {
         + `<a class="rec-pop-dir" href="${yUrl}" target="_blank" rel="noopener">Yandex</a>`
         + `<a class="rec-pop-dir" href="${tUrl}" target="_blank" rel="noopener">${this.esc(this.transitLabel)}</a>`
         + `</div>`;
-      const actions = detailsBtn + dirBtn + (phone   ? `<a class="rec-pop-btn rec-pop-call" href="${telHref}">${telIcon}<span>${this.esc(this.callLabel)}</span></a>` : '') + (website ? `<a class="rec-pop-btn rec-pop-web" href="${this.esc(website)}" target="_blank" rel="noopener">${webIcon}<span>${this.esc(this.websiteLabel)}</span></a>` : '');
+      const actions = detailsBtn + dirBtn + bookBtn + (phone   ? `<a class="rec-pop-btn rec-pop-call" href="${telHref}">${telIcon}<span>${this.esc(this.callLabel)}</span></a>` : '') + (website ? `<a class="rec-pop-btn rec-pop-web" href="${this.esc(website)}" target="_blank" rel="noopener">${webIcon}<span>${this.esc(this.websiteLabel)}</span></a>` : '');
       const tier = this.tierOf(rec);
       // Match JinniChat's recommendation card: a soft tier-tinted fill (no left
       // accent border). tierTint mirrors the card backgrounds 1:1.

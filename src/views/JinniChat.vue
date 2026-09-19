@@ -2105,6 +2105,7 @@ export default {
         transitLabel: t('map.transit'),
         callLabel: t('map.call'),
         websiteLabel: t('map.website'),
+        bookLabel: t('chat.hotel.check_rates'),
         placeFallbackLabel: t('map.place_fallback'),
         unitKm: t('map.units.km'),
         unitMeter: t('map.units.m'),
@@ -3401,6 +3402,10 @@ export default {
         longitude: rec.longitude,
         verifiedId: rec.verifiedId,
         partnerTier: rec.partnerTier,
+        // Live price + Book link and the owner's listed price travel with the share (2026-09-19).
+        ...(rec.hotelPrice ? { hotelPrice: rec.hotelPrice } : {}),
+        ...(rec.bookingUrl ? { bookingUrl: rec.bookingUrl } : {}),
+        ...(rec.listedPrice ? { listedPrice: rec.listedPrice } : {}),
         // Event schedule travels with the share so the public share page can
         // show the event's date/time — the single most important fact for an
         // event. Carried as-is from the rec (it already includes the venue
