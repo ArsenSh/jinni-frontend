@@ -7752,23 +7752,15 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
 .rec-hotel-price{display:flex;align-items:center;font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
-.rec-book-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 14px;border-radius:14px;font-size:0.72rem;font-weight:500;line-height:1;letter-spacing:.02em;text-decoration:none;color:#fff;border:none;transition:background 0.25s ease,box-shadow 0.25s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
-.genie-chat-container.day-mode .rec-book-btn{background:linear-gradient(45deg,rgba(212,175,55,0.5),rgba(255,140,0,0.5));box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.35)}
-.genie-chat-container.day-mode .rec-book-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.72),rgba(255,140,0,0.72));box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.4)}
-.genie-chat-container.night-mode .rec-book-btn{background:linear-gradient(45deg,rgba(212,175,55,0.6),rgba(255,140,0,0.6));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
-.genie-chat-container.night-mode .rec-book-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.8),rgba(255,140,0,0.8));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18)}
+.rec-book-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 14px;border-radius:14px;font-size:0.72rem;font-weight:600;line-height:1;letter-spacing:.02em;text-decoration:none;border:none;--tone:238,160,58;color:rgb(var(--tone));background:rgba(var(--tone),0.10);box-shadow:inset 0 0 0 1px rgba(var(--tone),0.45);transition:background 0.2s ease,box-shadow 0.2s ease}
+.rec-book-btn:hover{background:rgba(var(--tone),0.22);box-shadow:inset 0 0 0 1px rgba(var(--tone),0.7)}
+.genie-chat-container.night-mode .rec-book-btn{background:rgba(var(--tone),0.14);box-shadow:inset 0 0 0 1px rgba(var(--tone),0.55)}
+.genie-chat-container.night-mode .rec-book-btn:hover{background:rgba(var(--tone),0.26);box-shadow:inset 0 0 0 1px rgba(var(--tone),0.8)}
+.rec-book-btn--verified{--tone:34,197,94}
+.rec-book-btn--spotlight{--tone:59,159,221}
+.rec-book-btn--signature{--tone:212,175,55}
 .large-card .rec-book-btn{font-size:0.78rem;padding:0 16px}
 .rec-card-bottom:has(.rec-book-btn){min-height:28px}
-.genie-chat-container.day-mode .rec-book-btn--verified{background:linear-gradient(45deg,rgba(34,197,94,0.5),rgba(16,185,129,0.5))}
-.genie-chat-container.day-mode .rec-book-btn--verified:hover{background:linear-gradient(45deg,rgba(34,197,94,0.72),rgba(16,185,129,0.72))}
-.genie-chat-container.night-mode .rec-book-btn--verified{background:linear-gradient(45deg,rgba(34,197,94,0.6),rgba(16,185,129,0.6))}
-.genie-chat-container.night-mode .rec-book-btn--verified:hover{background:linear-gradient(45deg,rgba(34,197,94,0.8),rgba(16,185,129,0.8))}
-.genie-chat-container.day-mode .rec-book-btn--spotlight{background:linear-gradient(45deg,rgba(59,158,221,0.5),rgba(37,99,235,0.5))}
-.genie-chat-container.day-mode .rec-book-btn--spotlight:hover{background:linear-gradient(45deg,rgba(59,158,221,0.72),rgba(37,99,235,0.72))}
-.genie-chat-container.night-mode .rec-book-btn--spotlight{background:linear-gradient(45deg,rgba(59,158,221,0.6),rgba(37,99,235,0.6))}
-.genie-chat-container.night-mode .rec-book-btn--spotlight:hover{background:linear-gradient(45deg,rgba(59,158,221,0.8),rgba(37,99,235,0.8))}
-.genie-chat-container.day-mode .rec-book-btn--signature{background:linear-gradient(45deg,rgba(212,175,55,0.55),rgba(255,140,0,0.55))}
-.genie-chat-container.night-mode .rec-book-btn--signature{background:linear-gradient(45deg,rgba(212,175,55,0.65),rgba(255,140,0,0.65))}
 .large-card .rec-hotel-price{font-size:0.9rem}
 .rec-event-source{display:inline-flex;align-items:center;gap:4px;font-size:0.6875rem;margin:2px 0 4px;text-decoration:none;opacity:.72}
 /* Source moved BELOW the card (into .rec-card-bottom). Absolutely centered in
