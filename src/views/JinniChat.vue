@@ -2590,6 +2590,35 @@ export default {
       if (t === 'spotlight') return 'rec-book-btn--spotlight';
       return 'rec-book-btn--verified';
     },
+    // Price + Book link for hotel cards that arrived without them (the v1 hotel
+    // quick action, older engines). One request per deck, after it renders;
+    // the session save keeps the result. Silent on failure — a card without
+    // a price is simply a card without a price.
+    async enrichHotelPrices(messageIndex) {
+      const msg = this.messages[messageIndex];
+      const recs = (msg && msg.recommendations) || [];
+      const isHotel = (r) => /hotel/i.test(String(r.category || r.type || '')) || r._action === 'hotels';
+      const want = recs.filter(r => isHotel(r) && !r.hotelPrice && Number.isFinite(r.latitude) && Number.isFinite(r.longitude)).slice(0, 8);
+      if (!want.length) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/ai/hotel-prices`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('authToken')}` },
+          body: JSON.stringify({ hotels: want.map(r => ({ name: r.name, latitude: r.latitude, longitude: r.longitude })), currency: this.userSettings?.currency || 'USD', language: this.$i18n?.locale || 'en' }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const prices = (data && data.prices) || {};
+        let changed = false;
+        for (const r of recs) {
+          const m = prices[r.name];
+          if (!m || !Number.isFinite(m.perNight)) continue;
+          r.hotelPrice = { perNight: m.perNight, currency: m.currency, nights: 1, checkIn: null, checkOut: null, stars: m.stars, url: m.url };
+          if (m.url) r.bookingUrl = m.url;
+          changed = true;
+        }
+        if (changed && typeof this.saveCurrentSession === 'function') { try { await this.saveCurrentSession(); } catch (e) {} }
+      } catch (e) { /* price is optional */ }
+    },
     openBooking(rec) {
       const url = rec && rec.bookingUrl;
       if (!url) return;
@@ -4959,6 +4988,8 @@ export default {
                     hasProcessedCompletion = true;
                     this.engineStage = '';
                     this.messages[messageIndex].engineDebug = data.metadata?.debug || null;
+                    // Hotel cards from any engine get a live price + Book link (v3 agent decks already carry them).
+                    this.enrichHotelPrices(messageIndex);
                     // Persist the chat→map bridge target — the "See route"
                     // CTA renders from message.metadata.routeTo (live
                     // 2026-08-31: the handler copied only selected fields,
