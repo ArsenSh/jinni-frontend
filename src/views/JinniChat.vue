@@ -7765,15 +7765,9 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .day-mode .rec-book-btn:hover{background:rgba(255,255,255,0.75)}
 .night-mode .rec-book-btn{background:rgba(255,255,255,0.06);box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.1)}
 .night-mode .rec-book-btn:hover{background:rgba(255,255,255,0.12)}
-/* Label = the card's category colour (rec-type), per mode and partner tier. */
-.genie-chat-container.day-mode .rec-book-btn{color:#A0522D}
-.genie-chat-container.night-mode .rec-book-btn{color:#c084fc}
-.genie-chat-container.day-mode .card-glow--verified .rec-book-btn{color:#22c556ea}
-.genie-chat-container.night-mode .card-glow--verified .rec-book-btn{color:#22c556b1}
-.genie-chat-container.day-mode .card-glow--spotlight .rec-book-btn{color:#3b9fdda2}
-.genie-chat-container.night-mode .card-glow--spotlight .rec-book-btn{color:#3b9fdda2}
-.genie-chat-container.day-mode .card-glow--signature .rec-book-btn{color:#d39510}
-.genie-chat-container.night-mode .card-glow--signature .rec-book-btn{color:#ffbf0085}
+/* Label = the like/dislike icon colour, per mode (their rules: day rgba(92,74,66,.85), night #94a3b8). */
+.day-mode .rec-book-btn{color:rgba(92,74,66,0.85)}
+.night-mode .rec-book-btn{color:#94a3b8}
 .large-card .rec-book-btn{font-size:0.78rem;padding:0 16px}
 .rec-card-bottom:has(.rec-book-btn){min-height:28px}
 .large-card .rec-hotel-price{font-size:0.9rem}
