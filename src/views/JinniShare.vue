@@ -1055,7 +1055,8 @@ export default {
 .large-card .rec-distance, .large-card .rec-location { font-size: 0.9rem; }
 .large-card .text-action-btn { padding: 10px 16px; }
 .large-card .overlay-actions { gap: 15px; }
-.rec-image { height: 140px; overflow: hidden; position: relative; flex-shrink: 0; }
+.rec-image { height: auto; aspect-ratio: 16 / 9; overflow: hidden; position: relative; flex-shrink: 0; }   /* = JinniChat's grid cards on phones */
+@media (min-width: 769px) { .rec-image { height: 200px; aspect-ratio: auto; } }                              /* = JinniChat's grid cards on desktop */
 .rec-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; opacity: 0; animation: fadeIn 0.5s ease-in forwards; }
 .rec-image-placeholder { display: flex; align-items: center; justify-content: center; background: var(--surface2); }
 .image-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3)); display: flex; align-items: center; justify-content: center; opacity: 0; z-index: 2; }
