@@ -301,7 +301,7 @@
                                 <div v-if="getRecommendationAtPosition(message, position).distance" class="rec-distance">
                                   {{ getRecommendationAtPosition(message, position).distance }}
                                 </div>
-                                <div v-if="hotelPriceText(getRecommendationAtPosition(message, position))" class="rec-hotel-price"><span>{{ hotelPriceText(getRecommendationAtPosition(message, position)) }}</span><a v-if="getRecommendationAtPosition(message, position).bookingUrl" :href="getRecommendationAtPosition(message, position).bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(getRecommendationAtPosition(message, position))">{{ t('chat.hotel.check_rates') }}</a></div>
+                                <div v-if="hotelPriceText(getRecommendationAtPosition(message, position))" class="rec-hotel-price"><span>{{ hotelPriceText(getRecommendationAtPosition(message, position)) }}</span></div>
                                 <div v-if="getRecommendationAtPosition(message, position).address || getRecommendationAtPosition(message, position).location" class="rec-location">
                                   {{ getRecommendationAtPosition(message, position).address || getRecommendationAtPosition(message, position).location }}
                                 </div>
@@ -316,6 +316,7 @@
                               </svg>
                               <span>{{ t('chat.event.check_listing') || 'Check listing' }}</span>
                             </a>
+                            <a v-if="getRecommendationAtPosition(message, position).bookingUrl" :href="getRecommendationAtPosition(message, position).bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" :class="bookBtnClass(getRecommendationAtPosition(message, position))" @click.stop.prevent="openBooking(getRecommendationAtPosition(message, position))"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a>
                             <div class="rec-card-footer">
                               <div class="rec-footer-actions">
                                 <button @click.stop="toggleRecFeedback(getRecommendationAtPosition(message, position), 'like', $event, message)" class="feedback-btn rec-footer-btn" :class="{ active: getRecFeedback(getRecommendationAtPosition(message, position)) === 'like' }" :title="t('chat.feedback.like')">
@@ -425,7 +426,7 @@
                               <div v-if="message.recommendations[part.index].distance" class="rec-distance">
                                 {{ message.recommendations[part.index].distance }}
                               </div>
-                              <div v-if="hotelPriceText(message.recommendations[part.index])" class="rec-hotel-price"><span>{{ hotelPriceText(message.recommendations[part.index]) }}</span><a v-if="message.recommendations[part.index].bookingUrl" :href="message.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(message.recommendations[part.index])">{{ t('chat.hotel.check_rates') }}</a></div>
+                              <div v-if="hotelPriceText(message.recommendations[part.index])" class="rec-hotel-price"><span>{{ hotelPriceText(message.recommendations[part.index]) }}</span></div>
                               <div v-if="message.recommendations[part.index].address || message.recommendations[part.index].location" class="rec-location">
                                 {{ message.recommendations[part.index].address || message.recommendations[part.index].location }}
                               </div>
@@ -440,6 +441,7 @@
                             </svg>
                             <span>{{ t('chat.event.check_listing') || 'Check listing' }}</span>
                           </a>
+                          <a v-if="message.recommendations[part.index].bookingUrl" :href="message.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" :class="bookBtnClass(message.recommendations[part.index])" @click.stop.prevent="openBooking(message.recommendations[part.index])"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a>
                           <div class="rec-card-footer">
                             <div class="rec-footer-actions">
                               <button @click.stop="toggleRecFeedback(message.recommendations[part.index], 'like', $event, message)" class="feedback-btn rec-footer-btn" :class="{ active: getRecFeedback(message.recommendations[part.index]) === 'like' }" :title="t('chat.feedback.like')">
@@ -580,7 +582,7 @@
                                 <div v-if="rec.distance && rec.distance !== 'Near you km'" class="rec-distance">
                                   {{ rec.distance }}
                                 </div>
-                                <div v-if="hotelPriceText(rec)" class="rec-hotel-price"><span>{{ hotelPriceText(rec) }}</span><a v-if="rec.bookingUrl" :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(rec)">{{ t('chat.hotel.check_rates') }}</a></div>
+                                <div v-if="hotelPriceText(rec)" class="rec-hotel-price"><span>{{ hotelPriceText(rec) }}</span></div>
                                 <div v-if="rec.address || rec.location" class="rec-location">
                                   {{ rec.address || rec.location || rec.region }}
                                 </div>
@@ -598,6 +600,7 @@
                               </svg>
                               <span>{{ t('chat.event.check_listing') || 'Check listing' }}</span>
                             </a>
+                            <a v-if="rec.bookingUrl" :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" :class="bookBtnClass(rec)" @click.stop.prevent="openBooking(rec)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a>
                             <div class="rec-card-footer">
                               <div class="rec-footer-actions">
                                 <button @click.stop="toggleRecFeedback(rec, 'like', $event, message)" class="feedback-btn rec-footer-btn" :class="{ active: getRecFeedback(rec) === 'like' }" :title="t('chat.feedback.like')">
@@ -2577,6 +2580,16 @@ export default {
     // card did nothing for the founder (2026-09-19) — standalone/PWA and some
     // mobile browsers swallow it — so open explicitly and fall back to a
     // same-tab navigation when the popup is blocked.
+    // Partner (business) hotels take their tier's tone — verified green, spotlight
+    // blue, signature gold — like the card glow; everyone else gets the Ask
+    // button's gold-orange.
+    bookBtnClass(rec) {
+      if (!rec || (!rec.verifiedId && !(typeof rec.id === 'string' && rec.id.startsWith('db-'))) || rec._verifiedModel === 'destination') return '';
+      const t = rec.partnerTier;
+      if (t === 'featured' || t === 'signature') return 'rec-book-btn--signature';
+      if (t === 'spotlight') return 'rec-book-btn--spotlight';
+      return 'rec-book-btn--verified';
+    },
     openBooking(rec) {
       const url = rec && rec.bookingUrl;
       if (!url) return;
@@ -7705,13 +7718,23 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .rec-image.loading-skeleton{background-size:200% 100%;animation:shimmer 2s infinite;position:relative;overflow:hidden}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
-.rec-hotel-price{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
-.rec-book-btn{display:inline-flex;align-items:center;padding:5px 12px;border-radius:25px;font-size:0.72rem;font-weight:500;line-height:1.1;letter-spacing:.02em;text-decoration:none;color:#fff;border:none;transition:background 0.25s ease,box-shadow 0.25s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
+.rec-hotel-price{display:flex;align-items:center;font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
+.rec-book-btn{display:inline-flex;align-items:center;gap:5px;margin:0 8px 0 2px;padding:5px 12px;border-radius:25px;font-size:0.72rem;font-weight:500;line-height:1.1;letter-spacing:.02em;text-decoration:none;color:#fff;border:none;transition:background 0.25s ease,box-shadow 0.25s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
 .genie-chat-container.day-mode .rec-book-btn{background:linear-gradient(45deg,rgba(212,175,55,0.5),rgba(255,140,0,0.5));box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.35)}
 .genie-chat-container.day-mode .rec-book-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.72),rgba(255,140,0,0.72));box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.4)}
 .genie-chat-container.night-mode .rec-book-btn{background:linear-gradient(45deg,rgba(212,175,55,0.6),rgba(255,140,0,0.6));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .rec-book-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.8),rgba(255,140,0,0.8));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18)}
 .large-card .rec-book-btn{font-size:0.78rem;padding:6px 14px}
+.genie-chat-container.day-mode .rec-book-btn--verified{background:linear-gradient(45deg,rgba(34,197,94,0.5),rgba(16,185,129,0.5))}
+.genie-chat-container.day-mode .rec-book-btn--verified:hover{background:linear-gradient(45deg,rgba(34,197,94,0.72),rgba(16,185,129,0.72))}
+.genie-chat-container.night-mode .rec-book-btn--verified{background:linear-gradient(45deg,rgba(34,197,94,0.6),rgba(16,185,129,0.6))}
+.genie-chat-container.night-mode .rec-book-btn--verified:hover{background:linear-gradient(45deg,rgba(34,197,94,0.8),rgba(16,185,129,0.8))}
+.genie-chat-container.day-mode .rec-book-btn--spotlight{background:linear-gradient(45deg,rgba(59,158,221,0.5),rgba(37,99,235,0.5))}
+.genie-chat-container.day-mode .rec-book-btn--spotlight:hover{background:linear-gradient(45deg,rgba(59,158,221,0.72),rgba(37,99,235,0.72))}
+.genie-chat-container.night-mode .rec-book-btn--spotlight{background:linear-gradient(45deg,rgba(59,158,221,0.6),rgba(37,99,235,0.6))}
+.genie-chat-container.night-mode .rec-book-btn--spotlight:hover{background:linear-gradient(45deg,rgba(59,158,221,0.8),rgba(37,99,235,0.8))}
+.genie-chat-container.day-mode .rec-book-btn--signature{background:linear-gradient(45deg,rgba(212,175,55,0.55),rgba(255,140,0,0.55))}
+.genie-chat-container.night-mode .rec-book-btn--signature{background:linear-gradient(45deg,rgba(212,175,55,0.65),rgba(255,140,0,0.65))}
 .large-card .rec-hotel-price{font-size:0.9rem}
 .rec-event-source{display:inline-flex;align-items:center;gap:4px;font-size:0.6875rem;margin:2px 0 4px;text-decoration:none;opacity:.72}
 /* Source moved BELOW the card (into .rec-card-bottom). Absolutely centered in
