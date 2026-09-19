@@ -480,14 +480,43 @@ export default {
       this.$emit('opened');
     },
     close() { this.expanded = false; },
+    // Dominant colour of the rendered basemap tiles (vector tiles draw into
+    // same-origin canvases, so pixels are readable; raster tiles taint and are
+    // skipped). Written on the Leaflet container so App.vue's chrome sync reads
+    // the real ground colour instead of Leaflet's default grey.
+    sampleGroundColour() {
+      try {
+        const canvases = [...(this.$el ? this.$el.querySelectorAll('.leaflet-tile-pane canvas') : [])].slice(0, 4);
+        if (!canvases.length) return null;
+        const counts = new Map();
+        for (const c of canvases) {
+          const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+          for (let i = 0; i < d.length; i += 4 * 101) { if (d[i + 3] < 200) continue; const k = (d[i] << 16) | (d[i + 1] << 8) | d[i + 2]; counts.set(k, (counts.get(k) || 0) + 1); }
+        }
+        let best = null, n = 0;
+        for (const [k, v] of counts) if (v > n) { n = v; best = k; }
+        if (best === null) return null;
+        return `rgb(${(best >> 16) & 255}, ${(best >> 8) & 255}, ${best & 255})`;
+      } catch (e) { return null; }   // tainted (raster) or not drawn yet
+    },
+    syncGroundColour() {
+      if (!this.fullscreen) return;
+      const colour = this.sampleGroundColour();
+      const c = this.$el && this.$el.querySelector('.leaflet-container');
+      if (colour && c && c.style.backgroundColor !== colour) c.style.backgroundColor = colour;
+      window.dispatchEvent(new Event('jinni:chrome-sync'));
+    },
     async enterFullscreen() {
       this.expanded = true;            // keep inline state coherent for when we exit
       if (!(await this.ensureMap())) return;
       this.fullscreen = true;
       document.addEventListener('keydown', this.onEsc);
-      // Browser chrome: App.vue's chrome sync sees .rec-map.is-fullscreen and paints
-      // both edges from the map canvas (one writer — a painter here lost to its observer).
-      this.$nextTick(() => setTimeout(() => window.dispatchEvent(new Event('jinni:chrome-sync')), 60));
+      // Browser chrome: App.vue's chrome sync (the only writer) reads the map
+      // container's colour while .rec-map.is-fullscreen exists. That colour is
+      // MEASURED off the rendered tiles here — no colour constants (founder:
+      // "i have not used color hints in any page"). Sampled a few times as tiles
+      // land, then the sync is asked to run.
+      this.$nextTick(() => { [120, 500, 1200].forEach(ms => setTimeout(() => this.syncGroundColour(), ms)); });
       // Lock the page behind the fullscreen overlay (prevents scroll bleed on mobile).
       this._prevBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -506,6 +535,7 @@ export default {
     },
     exitFullscreen() {
       this.fullscreen = false;
+      try { const c = this.$el && this.$el.querySelector('.leaflet-container'); if (c) c.style.backgroundColor = ''; } catch (e) {}
       this.$nextTick(() => setTimeout(() => window.dispatchEvent(new Event('jinni:chrome-sync')), 60));   // page colours back
       this.stopLiveTracking();          // drop the live GPS watch when the big map closes
       document.removeEventListener('keydown', this.onEsc);
@@ -2342,11 +2372,4 @@ export default {
    everything inside the map surface (popups, controls) ignored the user's
    font + text-size settings (founder 2026-09-01). Re-anchor to the app. */
 .rec-map :deep(.leaflet-container){font-family:var(--app-font, 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif);font-size:0.75rem}
-/* The map surface = the basemap's own ground colour, MEASURED off the rendered
-   tiles (2026-09-20: protomaps 'dark' ≈ rgb(31,31,31), 'light' ≈ rgb(226,223,218)).
-   Two jobs: no grey flash while tiles load, and App.vue's chrome sync reads this
-   colour for the browser bars when the map is fullscreen (Leaflet's own default
-   is #ddd, which painted light-grey bars over a dark night map). */
-.rec-map.night-mode :deep(.leaflet-container){background:#1f1f1f}
-.rec-map.day-mode :deep(.leaflet-container){background:#e2dfda}
 </style>
