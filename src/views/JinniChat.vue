@@ -3267,6 +3267,7 @@ export default {
         // Large chat cards stay large on the share page (it reads this flag; without it
         // every shared card fell back to the small 140 px image — founder 2026-09-19).
         isChatRecommendation: message.isChatRecommendation === true,
+        fontStyle: this.userSettings?.fontStyle || 'elegant',   // the share reads in the sharer's font (2026-09-20)
         theme: this.currentTheme
       };
       // 2. Enrich each recommendation with full details using batches
@@ -3473,7 +3474,7 @@ export default {
         } catch (err) {console.warn('Could not fetch details for share', err)}
       }
       // 4. Create the share snapshot
-      const payload = {type: 'recommendation', rec: {...recData, description: null}, theme: this.currentTheme};
+      const payload = {type: 'recommendation', rec: {...recData, description: null}, theme: this.currentTheme, fontStyle: this.userSettings?.fontStyle || 'elegant'};
       const shareUrl = await this.createShareSnapshot(payload);
       if (!shareUrl) return;
       // 5. Track the share interaction (non-blocking)

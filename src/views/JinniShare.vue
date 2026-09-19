@@ -460,6 +460,7 @@
 
 
 <script>
+import { applyDisplayPrefs } from '@/utils/displayPrefs';
 import RecommendationMap from '@/components/ui/RecommendationMap.vue';
 import ItineraryMap from '@/components/ui/ItineraryMap.vue';
 import DOMPurify from 'dompurify';
@@ -666,6 +667,7 @@ export default {
       if (!res.ok) throw new Error('not found');
       const data = await res.json();
       this.payload = data;
+      if (this.payload && this.payload.fontStyle) { try { applyDisplayPrefs({ fontStyle: this.payload.fontStyle }); } catch (e) {} }   // the sharer's font
       // NOTE: data.theme is deliberately ignored. It records the mode the
       // SENDER was in when they created the link, which says nothing about the
       // recipient's time of day.
