@@ -40,6 +40,7 @@
                   <button @click.stop="openInfoModal(rec)" class="text-action-btn info-btn">
                     {{ t('chat.recommendations.more') }}
                   </button>
+                  <button v-if="rec.bookingUrl" @click.stop="openBooking(rec)" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
                 </div>
               </div>
             </div>
@@ -62,6 +63,7 @@
               <!-- Imageless cards have no overlay to host the action, so the
                    pill falls back inline. -->
               <button v-if="!rec.image" @click.stop="openInfoModal(rec)" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
+              <button v-if="!rec.image && rec.bookingUrl" @click.stop="openBooking(rec)" class="more-btn-no-img book-btn-no-img">{{ t('chat.hotel.check_rates') }}</button>
               <div class="rec-metadata">
                 <div v-if="hotelPriceText(rec)" class="rec-hotel-price">{{ hotelPriceText(rec) }}</div>
                 <div v-if="rec.address || rec.location" class="rec-location">{{ rec.address || rec.location }}</div>
@@ -70,7 +72,6 @@
           </div>
           <!-- Partner label -->
           <div v-if="partnerLabel" :class="['partner-label', partnerLabelClass]" v-html="partnerIcon + ' ' + partnerLabel"></div>
-          <div v-if="rec.bookingUrl" class="rec-card-bottom"><a :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(rec)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
         </div>
         <!-- Map for the single shared place. Self-hides if the rec has no
              coordinates (RecommendationMap renders nothing when nothing is
@@ -110,6 +111,7 @@
                             <button @click.stop="openInfoModal(payload.recommendations[part.index])" class="text-action-btn info-btn">
                               {{ t('chat.recommendations.more') }}
                             </button>
+                            <button v-if="payload.recommendations[part.index].bookingUrl" @click.stop="openBooking(payload.recommendations[part.index])" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
                           </div>
                         </div>
                       </div>
@@ -132,6 +134,7 @@
                           {{ payload.recommendations[part.index].description }}
                         </div>
                         <button v-if="!payload.recommendations[part.index].image" @click.stop="openInfoModal(payload.recommendations[part.index])" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
+                        <button v-if="!payload.recommendations[part.index].image && payload.recommendations[part.index].bookingUrl" @click.stop="openBooking(payload.recommendations[part.index])" class="more-btn-no-img book-btn-no-img">{{ t('chat.hotel.check_rates') }}</button>
                         <div class="rec-metadata">
                           <div v-if="hotelPriceText(payload.recommendations[part.index])" class="rec-hotel-price">{{ hotelPriceText(payload.recommendations[part.index]) }}</div>
                           <div v-if="payload.recommendations[part.index].address || payload.recommendations[part.index].location" class="rec-location">
@@ -142,7 +145,6 @@
                     </div>
                     <!-- Partner label -->
                     <div v-if="getPartnerLabel(payload.recommendations[part.index])" :class="['partner-label', getPartnerLabelClass(payload.recommendations[part.index])]" v-html="getPartnerIcon(payload.recommendations[part.index]) + ' ' + getPartnerLabel(payload.recommendations[part.index])"></div>
-                    <div v-if="payload.recommendations[part.index].bookingUrl" class="rec-card-bottom"><a :href="payload.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(payload.recommendations[part.index])"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
                   </div>
                 </div>
               </template>
@@ -167,6 +169,7 @@
                         <button @click.stop="openInfoModal(r)" class="text-action-btn info-btn">
                           {{ t('chat.recommendations.more') }}
                         </button>
+                        <button v-if="r.bookingUrl" @click.stop="openBooking(r)" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
                       </div>
                     </div>
                   </div>
@@ -185,6 +188,7 @@
                       <span v-if="r._isExpired" class="rec-event-ended">{{ t('share.ended') }}</span>
                     </div>
                     <button v-if="!r.image" @click.stop="openInfoModal(r)" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
+                    <button v-if="!r.image && r.bookingUrl" @click.stop="openBooking(r)" class="more-btn-no-img book-btn-no-img">{{ t('chat.hotel.check_rates') }}</button>
                     <div class="rec-metadata">
                       <div v-if="hotelPriceText(r)" class="rec-hotel-price">{{ hotelPriceText(r) }}</div>
                       <div v-if="r.address || r.location" class="rec-location">{{ r.address || r.location }}</div>
@@ -192,7 +196,6 @@
                   </div>
                 </div>
                 <div v-if="getPartnerLabel(r)" :class="['partner-label', getPartnerLabelClass(r)]" v-html="getPartnerIcon(r) + ' ' + getPartnerLabel(r)"></div>
-                <div v-if="r.bookingUrl" class="rec-card-bottom"><a :href="r.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(r)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
               </div>
             </div>
           </template>
@@ -1150,18 +1153,11 @@ export default {
 .share-page.day-mode .card-glow--signature .text-action-btn.info-btn:hover { background: rgba(212,175,55,0.45); box-shadow: inset 0 0 0 0.8px rgba(212,175,55,0.6); }
 
 .rec-hotel-price { font-size: 0.8rem; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
-.rec-card-bottom { display: flex; justify-content: center; align-items: center; min-height: 28px; margin-top: 7px; }
-.rec-book-btn { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 14px; border-radius: 9px; font-size: 0.72rem; font-weight: 600; line-height: 1; letter-spacing: .02em; text-decoration: none; border: none; backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background 0.2s ease; }
-.share-page.day-mode .rec-book-btn { color: rgba(92,74,66,0.85); background: rgba(255,255,255,0.5); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6); }
-.share-page.day-mode .rec-book-btn:hover { background: rgba(255,255,255,0.75); }
-.share-page.night-mode .rec-book-btn { color: #94a3b8; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.1); }
-.share-page.night-mode .rec-book-btn:hover { background: rgba(255,255,255,0.13); }
-.share-page.day-mode .card-glow--verified .rec-book-btn { color: #22c556ea; }
-.share-page.day-mode .card-glow--spotlight .rec-book-btn { color: #3b9fdda2; }
-.share-page.day-mode .card-glow--signature .rec-book-btn { color: #d39510; }
-.share-page.night-mode .card-glow--verified .rec-book-btn { color: #22c556b1; }
-.share-page.night-mode .card-glow--spotlight .rec-book-btn { color: #3b9fdda2; }
-.share-page.night-mode .card-glow--signature .rec-book-btn { color: #ffbf0085; }
+.share-page.day-mode .text-action-btn.ask-btn { background: linear-gradient(45deg, rgba(212,175,55,0.5), rgba(255,140,0,0.5)); color: white; box-shadow: inset 0 0 0 0.6px rgba(255,255,255,0.35); }
+.share-page.day-mode .text-action-btn.ask-btn:hover { background: linear-gradient(45deg, rgba(212,175,55,0.72), rgba(255,140,0,0.72)); box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.4); }
+.share-page.night-mode .text-action-btn.ask-btn { background: linear-gradient(45deg, rgba(212,175,55,0.6), rgba(255,140,0,0.6)); color: white; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
+.share-page.night-mode .text-action-btn.ask-btn:hover { background: linear-gradient(45deg, rgba(212,175,55,0.8), rgba(255,140,0,0.8)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18); }
+.overlay-actions { display: flex; gap: 8px; }
 .more-btn-no-img { border: none; border-radius: 20px; padding: 8px 14px; cursor: pointer; font-size: 0.8rem; font-weight: 500; backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: all 0.2s ease; }
 .share-page.night-mode .more-btn-no-img { color: #d5dce4; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 0.8px rgba(255,255,255,0.1); }
 .share-page.night-mode .more-btn-no-img:hover { background: rgba(255,255,255,0.14); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
