@@ -2342,4 +2342,11 @@ export default {
    everything inside the map surface (popups, controls) ignored the user's
    font + text-size settings (founder 2026-09-01). Re-anchor to the app. */
 .rec-map :deep(.leaflet-container){font-family:var(--app-font, 'Segoe UI', Tahoma, Geneva, Verdana, 'Noto Sans Armenian', sans-serif);font-size:0.75rem}
+/* The map surface = the basemap's own ground colour, MEASURED off the rendered
+   tiles (2026-09-20: protomaps 'dark' ≈ rgb(31,31,31), 'light' ≈ rgb(226,223,218)).
+   Two jobs: no grey flash while tiles load, and App.vue's chrome sync reads this
+   colour for the browser bars when the map is fullscreen (Leaflet's own default
+   is #ddd, which painted light-grey bars over a dark night map). */
+.rec-map.night-mode :deep(.leaflet-container){background:#1f1f1f}
+.rec-map.day-mode :deep(.leaflet-container){background:#e2dfda}
 </style>
