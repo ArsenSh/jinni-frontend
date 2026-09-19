@@ -64,8 +64,8 @@ export function applyDisplayPrefs(settings = null) {
     // Font stamp too: serif faces carry their optical mass differently, and
     // icon-beside-text controls want per-font sub-pixel nudges (SVGs cannot
     // take a font — they are drawings, so the correction is positional).
-    document.documentElement.setAttribute('data-font-style', s.fontStyle || 'standard');
-    let stack = FONT_STACKS[s.fontStyle || 'standard'] || '';
+    document.documentElement.setAttribute('data-font-style', s.fontStyle || 'elegant');
+    let stack = FONT_STACKS[s.fontStyle || 'elegant'] || '';
     // Armenian-first UI (founder 2026-09-05): with the app language set to
     // Armenian, Noto Sans Armenian LEADS the default stack instead of trailing
     // it. Armenian glyphs were reaching Noto through fallback anyway; what this
