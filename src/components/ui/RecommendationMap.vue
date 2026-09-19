@@ -2142,9 +2142,9 @@ export default {
 /* Directions provider chooser (revealed by the Directions button) */
 /* Directions swap: closed = action buttons; open = Directions + the three route
    options, the rest gone. Whatever comes in fades in. */
-:deep(.rec-pop-dir) { display: none; }
+:deep(.rec-pop .rec-pop-btn.rec-pop-dir) { display: none; }   /* beats the later single-class .rec-pop-dir / .rec-pop-btn rules */
 :deep(.rec-pop.show-dirs .rec-pop-btn:not(.rec-pop-dir-toggle):not(.rec-pop-dir)) { display: none; }
-:deep(.rec-pop.show-dirs .rec-pop-dir) { display: inline-flex; animation: rm-pop-in 0.18s ease both; }
+:deep(.rec-pop.show-dirs .rec-pop-btn.rec-pop-dir) { display: inline-flex; animation: rm-pop-in 0.18s ease both; }
 :deep(.rec-pop:not(.show-dirs) .rec-pop-btn:not(.rec-pop-dir-toggle)) { animation: rm-pop-in 0.18s ease both; }
 :deep(.rec-pop.show-dirs .rec-pop-dir-toggle) { background: var(--rm-glass-hover); }
 @keyframes rm-pop-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
