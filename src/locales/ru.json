@@ -906,7 +906,7 @@
     },
     "hotel": {
       "from_per_night": "от {price} / ночь",
-      "check_rates": "Забронировать"
+      "check_rates": "Бронь"
     },
     "event": {
       "check_listing": "Проверить источник",
@@ -1206,7 +1206,7 @@
     "uturn": "Развернитесь",
     "wrong_way": "Вы движетесь не туда",
     "wrong_way_hint": "Вы удаляетесь от маршрута",
-    "directions": "Как добраться",
+    "directions": "Маршрут",
     "transit": "Транспорт",
     "call": "Позвонить",
     "website": "Сайт",
