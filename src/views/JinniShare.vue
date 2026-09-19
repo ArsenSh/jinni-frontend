@@ -64,7 +64,9 @@
               <button v-if="!rec.image" @click.stop="openInfoModal(rec)" class="more-btn-no-img">{{ t('share.more_info') }}</button>
               <div class="rec-metadata">
                 <div v-if="rec.address || rec.location" class="rec-location">{{ rec.address || rec.location }}</div>
+                <div v-if="hotelPriceText(rec)" class="rec-hotel-price">{{ hotelPriceText(rec) }}</div>
               </div>
+              <div v-if="rec.bookingUrl" class="rec-card-bottom"><a :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(rec)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
             </div>
           </div>
           <!-- Partner label -->
@@ -134,7 +136,9 @@
                           <div v-if="payload.recommendations[part.index].address || payload.recommendations[part.index].location" class="rec-location">
                             {{ payload.recommendations[part.index].address || payload.recommendations[part.index].location }}
                           </div>
+                          <div v-if="hotelPriceText(payload.recommendations[part.index])" class="rec-hotel-price">{{ hotelPriceText(payload.recommendations[part.index]) }}</div>
                         </div>
+                        <div v-if="payload.recommendations[part.index].bookingUrl" class="rec-card-bottom"><a :href="payload.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(payload.recommendations[part.index])"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
                       </div>
                     </div>
                     <!-- Partner label -->
@@ -183,7 +187,9 @@
                     <button v-if="!r.image" @click.stop="openInfoModal(r)" class="more-btn-no-img">{{ t('share.more_info') }}</button>
                     <div class="rec-metadata">
                       <div v-if="r.address || r.location" class="rec-location">{{ r.address || r.location }}</div>
+                      <div v-if="hotelPriceText(r)" class="rec-hotel-price">{{ hotelPriceText(r) }}</div>
                     </div>
+                    <div v-if="r.bookingUrl" class="rec-card-bottom"><a :href="r.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(r)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
                   </div>
                 </div>
                 <div v-if="getPartnerLabel(r)" :class="['partner-label', getPartnerLabelClass(r)]" v-html="getPartnerIcon(r) + ' ' + getPartnerLabel(r)"></div>
@@ -534,6 +540,7 @@ export default {
       return {
         routeLanguage: ORS_ROUTE_LANG[this.locale] || 'en',
         openFullscreenLabel: t('map.open_fullscreen'),
+        bookLabel: t('chat.hotel.check_rates'),
         closeLabel: t('map.close'),
         locateTitle: t('map.my_location'),
         youAreHereLabel: t('map.you_are_here'),
@@ -673,6 +680,23 @@ export default {
     this.restoreChrome();
   },
   methods: {
+    // Same as JinniChat: partner price row and Book link on hotel cards.
+    hotelPriceText(rec) {
+      const money = (n, cur) => { try { return new Intl.NumberFormat(this.$i18n?.locale || 'en', { style: 'currency', currency: cur || 'USD', maximumFractionDigits: 0 }).format(n); } catch (e) { return `${Math.round(n)} ${cur || 'USD'}`; } };
+      const hp = rec && rec.hotelPrice;
+      if (hp && Number.isFinite(hp.perNight) && hp.perNight > 0) return this.t('chat.hotel.from_per_night', { price: money(hp.perNight, hp.currency) });
+      const lp = rec && rec.listedPrice;
+      if (lp && Number.isFinite(lp.min) && lp.min > 0) return this.t('chat.price.from', { price: money(lp.min, lp.currency) });
+      if (lp && Number.isFinite(lp.average) && lp.average > 0) return this.t('chat.price.approx', { price: money(lp.average, lp.currency) });
+      return '';
+    },
+    openBooking(rec) {
+      const url = rec && rec.bookingUrl;
+      if (!url) return;
+      let w = null;
+      try { w = window.open(url, '_blank'); } catch (e) { w = null; }
+      if (w) { try { w.opener = null; } catch (e) {} } else window.location.assign(url);
+    },
     // ── Theme (viewer's device clock) ─────────────────────────────────────────
     refreshTheme() {
       const next = isNightTime() ? 'night-mode' : 'day-mode';
@@ -1120,6 +1144,13 @@ export default {
 .share-page.day-mode .card-glow--signature .text-action-btn.info-btn { background: rgba(212,175,55,0.3); color: white; box-shadow: inset 0 0 0 0.7px rgba(212,175,55,0.3); }
 .share-page.day-mode .card-glow--signature .text-action-btn.info-btn:hover { background: rgba(212,175,55,0.45); box-shadow: inset 0 0 0 0.8px rgba(212,175,55,0.6); }
 
+.rec-hotel-price { font-size: 0.8rem; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.rec-card-bottom { display: flex; justify-content: center; align-items: center; min-height: 28px; margin-top: 7px; }
+.rec-book-btn { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 14px; border-radius: 9px; font-size: 0.72rem; font-weight: 600; line-height: 1; letter-spacing: .02em; text-decoration: none; border: none; backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: background 0.2s ease; }
+.share-page.day-mode .rec-book-btn { color: rgba(92,74,66,0.85); background: rgba(255,255,255,0.5); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6); }
+.share-page.day-mode .rec-book-btn:hover { background: rgba(255,255,255,0.75); }
+.share-page.night-mode .rec-book-btn { color: #94a3b8; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.1); }
+.share-page.night-mode .rec-book-btn:hover { background: rgba(255,255,255,0.13); }
 .more-btn-no-img { border: none; border-radius: 20px; padding: 8px 14px; cursor: pointer; font-size: 0.8rem; font-weight: 500; backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); transition: all 0.2s ease; }
 .share-page.night-mode .more-btn-no-img { color: #d5dce4; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 0.8px rgba(255,255,255,0.1); }
 .share-page.night-mode .more-btn-no-img:hover { background: rgba(255,255,255,0.14); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
