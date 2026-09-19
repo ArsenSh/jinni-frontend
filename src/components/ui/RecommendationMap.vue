@@ -2149,7 +2149,13 @@ export default {
 :deep(.rec-pop.show-dirs .rec-pop-dir-toggle) { background: var(--rm-glass-hover); }
 /* Open state: Directions + three options as a 2×2 of equal buttons (the two on the
    second row used to stretch wider than the first row's). */
-:deep(.rec-pop.show-dirs .rec-pop-dir-toggle), :deep(.rec-pop.show-dirs .rec-pop-btn.rec-pop-dir) { flex: 1 1 calc(50% - 3.5px); min-width: 0; justify-content: center; }
+:deep(.rec-pop.show-dirs .rec-pop-dir-toggle), :deep(.rec-pop.show-dirs .rec-pop-btn.rec-pop-dir) {
+  /* At least half the row each, so pairs come out equal — but a long label
+     ("Как добраться", "Ինչպես հասնել") is allowed to take the whole row instead
+     of spilling out of a half-width button. */
+  flex: 1 1 auto; min-width: calc(50% - 3.5px); max-width: 100%; justify-content: center;
+}
+:deep(.rec-pop-btn span) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }   /* last resort: never outside the button */
 @keyframes rm-pop-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
 :deep(.rec-pop-dir) {
   flex: 1; min-width: 80px; justify-content: center; text-align: center; text-decoration: none;
