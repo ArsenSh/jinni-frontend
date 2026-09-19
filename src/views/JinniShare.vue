@@ -63,8 +63,8 @@
                    pill falls back inline. -->
               <button v-if="!rec.image" @click.stop="openInfoModal(rec)" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
               <div class="rec-metadata">
-                <div v-if="rec.address || rec.location" class="rec-location">{{ rec.address || rec.location }}</div>
                 <div v-if="hotelPriceText(rec)" class="rec-hotel-price">{{ hotelPriceText(rec) }}</div>
+                <div v-if="rec.address || rec.location" class="rec-location">{{ rec.address || rec.location }}</div>
               </div>
             </div>
           </div>
@@ -133,10 +133,10 @@
                         </div>
                         <button v-if="!payload.recommendations[part.index].image" @click.stop="openInfoModal(payload.recommendations[part.index])" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
                         <div class="rec-metadata">
+                          <div v-if="hotelPriceText(payload.recommendations[part.index])" class="rec-hotel-price">{{ hotelPriceText(payload.recommendations[part.index]) }}</div>
                           <div v-if="payload.recommendations[part.index].address || payload.recommendations[part.index].location" class="rec-location">
                             {{ payload.recommendations[part.index].address || payload.recommendations[part.index].location }}
                           </div>
-                          <div v-if="hotelPriceText(payload.recommendations[part.index])" class="rec-hotel-price">{{ hotelPriceText(payload.recommendations[part.index]) }}</div>
                         </div>
                       </div>
                     </div>
@@ -186,8 +186,8 @@
                     </div>
                     <button v-if="!r.image" @click.stop="openInfoModal(r)" class="more-btn-no-img">{{ t('chat.recommendations.more') }}</button>
                     <div class="rec-metadata">
-                      <div v-if="r.address || r.location" class="rec-location">{{ r.address || r.location }}</div>
                       <div v-if="hotelPriceText(r)" class="rec-hotel-price">{{ hotelPriceText(r) }}</div>
+                      <div v-if="r.address || r.location" class="rec-location">{{ r.address || r.location }}</div>
                     </div>
                   </div>
                 </div>
@@ -628,7 +628,7 @@ export default {
     infoModalTierClass() {
       const rec = this.selectedRec;
       if (!rec) return '';
-      const isPartner = rec.verifiedId || (rec.id && String(rec.id).startsWith('db-'));
+      const isPartner = (rec.verifiedId || (rec.id && String(rec.id).startsWith('db-'))) && rec._verifiedModel !== 'destination';
       if (!isPartner) return '';
       const tier = rec.partnerTier;
       if (tier === 'featured' || tier === 'signature') return 'info-modal--signature';
@@ -930,28 +930,28 @@ export default {
     },
     // Partner helpers
     getPartnerLabel(rec) {
-      if (!rec?.verifiedId && !rec?.id?.startsWith('db-')) return '';
+      if ((!rec?.verifiedId && !rec?.id?.startsWith('db-')) || rec?._verifiedModel === 'destination') return '';
       const tier = rec.partnerTier;
       if (tier === 'featured' || tier === 'signature') return this.t('map.tier_signature');
       if (tier === 'spotlight') return this.t('map.tier_spotlight');
       return this.t('map.tier_verified');
     },
     getPartnerIcon(rec) {
-      if (!rec?.verifiedId && !rec?.id?.startsWith('db-')) return '';
+      if ((!rec?.verifiedId && !rec?.id?.startsWith('db-')) || rec?._verifiedModel === 'destination') return '';
       const tier = rec.partnerTier;
       if (tier === 'featured' || tier === 'signature') return `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
       if (tier === 'spotlight') return `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"/></svg>`;
       return `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
     },
     getPartnerLabelClass(rec) {
-      if (!rec?.verifiedId && !rec?.id?.startsWith('db-')) return '';
+      if ((!rec?.verifiedId && !rec?.id?.startsWith('db-')) || rec?._verifiedModel === 'destination') return '';
       const tier = rec.partnerTier;
       if (tier === 'featured' || tier === 'signature') return 'partner-label--signature';
       if (tier === 'spotlight') return 'partner-label--spotlight';
       return 'partner-label--verified';
     },
     getPartnerWrapperClass(rec) {
-      if (!rec?.verifiedId && !rec?.id?.startsWith('db-')) return '';
+      if ((!rec?.verifiedId && !rec?.id?.startsWith('db-')) || rec?._verifiedModel === 'destination') return '';
       const tier = rec.partnerTier;
       if (tier === 'featured' || tier === 'signature') return 'card-glow--signature';
       if (tier === 'spotlight') return 'card-glow--spotlight';
