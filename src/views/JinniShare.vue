@@ -66,9 +66,9 @@
                 <div v-if="rec.address || rec.location" class="rec-location">{{ rec.address || rec.location }}</div>
                 <div v-if="hotelPriceText(rec)" class="rec-hotel-price">{{ hotelPriceText(rec) }}</div>
               </div>
-              <div v-if="rec.bookingUrl" class="rec-card-bottom"><a :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(rec)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
             </div>
           </div>
+          <div v-if="rec.bookingUrl" class="rec-card-bottom"><a :href="rec.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(rec)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
           <!-- Partner label -->
           <div v-if="partnerLabel" :class="['partner-label', partnerLabelClass]" v-html="partnerIcon + ' ' + partnerLabel"></div>
         </div>
@@ -138,9 +138,9 @@
                           </div>
                           <div v-if="hotelPriceText(payload.recommendations[part.index])" class="rec-hotel-price">{{ hotelPriceText(payload.recommendations[part.index]) }}</div>
                         </div>
-                        <div v-if="payload.recommendations[part.index].bookingUrl" class="rec-card-bottom"><a :href="payload.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(payload.recommendations[part.index])"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
                       </div>
                     </div>
+                    <div v-if="payload.recommendations[part.index].bookingUrl" class="rec-card-bottom"><a :href="payload.recommendations[part.index].bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(payload.recommendations[part.index])"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
                     <!-- Partner label -->
                     <div v-if="getPartnerLabel(payload.recommendations[part.index])" :class="['partner-label', getPartnerLabelClass(payload.recommendations[part.index])]" v-html="getPartnerIcon(payload.recommendations[part.index]) + ' ' + getPartnerLabel(payload.recommendations[part.index])"></div>
                   </div>
@@ -189,9 +189,9 @@
                       <div v-if="r.address || r.location" class="rec-location">{{ r.address || r.location }}</div>
                       <div v-if="hotelPriceText(r)" class="rec-hotel-price">{{ hotelPriceText(r) }}</div>
                     </div>
-                    <div v-if="r.bookingUrl" class="rec-card-bottom"><a :href="r.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(r)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
                   </div>
                 </div>
+                <div v-if="r.bookingUrl" class="rec-card-bottom"><a :href="r.bookingUrl" target="_blank" rel="noopener noreferrer" class="rec-book-btn" @click.stop.prevent="openBooking(r)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14"/><path d="M3 11h18"/><path d="M8 5V3M16 5V3"/></svg><span>{{ t('chat.hotel.check_rates') }}</span></a></div>
                 <div v-if="getPartnerLabel(r)" :class="['partner-label', getPartnerLabelClass(r)]" v-html="getPartnerIcon(r) + ' ' + getPartnerLabel(r)"></div>
               </div>
             </div>
@@ -757,9 +757,9 @@ export default {
       return d.toLocaleDateString(this.localeTag, { month: 'short', day: 'numeric' });
     },
     // Tapping a map pin opens the same info modal as the card's "More info".
-    onMapMarkerClick({ rec }) {
-      if (rec) this.openInfoModal(rec);
-    },
+    // The map's own popup is the answer to a marker tap; the info modal on top of
+    // it hid the popup until closed (founder 2026-09-19).
+    onMapMarkerClick() {},
     // Touch devices have no hover, so a tap on the card reveals .image-overlay
     // for a beat — identical to JinniChat's handleCardTouchStart/End.
     handleCardTouchStart(event) {

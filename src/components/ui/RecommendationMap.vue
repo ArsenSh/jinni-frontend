@@ -1415,7 +1415,7 @@ export default {
       // nudges, and its _adjustPan handler is what throws "_panAnim of null" when
       // invalidateSize/zoom fires on a detached popup. The route fitBounds frames
       // the destination anyway, so we don't need it.
-      marker.bindPopup(this.popupHtml(rec, lat, lng), { closeButton: true, className: 'rec-map-popup', minWidth: 300, maxWidth: 320, keepInView: false, autoPan: false });
+      marker.bindPopup(this.popupHtml(rec, lat, lng), { closeButton: true, className: 'rec-map-popup', minWidth: 300, maxWidth: 320, keepInView: false, autoPan: true, autoPanPadding: [18, 18] });   // pan so the popup is fully visible — cut off in the share page's small map (2026-09-19)
         marker.on('click', () => this.$emit('marker-click', { rec, index }));
         marker.addTo(this.markerLayer);
         this._markers.push(marker);
