@@ -7753,9 +7753,9 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    affordance rather than a call to action. */
 .rec-hotel-price{display:flex;align-items:center;font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
 .rec-book-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 14px;border-radius:9px;font-size:0.72rem;font-weight:600;line-height:1;letter-spacing:.02em;text-decoration:none;border:none;--tone:238,160,58;color:rgb(var(--tone));background:rgba(var(--tone),0.10);box-shadow:inset 0 0 0 1px rgba(var(--tone),0.45);transition:background 0.2s ease,box-shadow 0.2s ease}
-.rec-book-btn:hover{background:rgba(var(--tone),0.22);box-shadow:inset 0 0 0 1px rgba(var(--tone),0.7)}
+.rec-book-btn:hover{box-shadow:inset 0 0 0 1px rgba(var(--tone),0.85);color:rgb(var(--tone))}   /* like the like/dislike pair: the tone brightens, no fill change */
 .genie-chat-container.night-mode .rec-book-btn{background:rgba(var(--tone),0.14);box-shadow:inset 0 0 0 1px rgba(var(--tone),0.55)}
-.genie-chat-container.night-mode .rec-book-btn:hover{background:rgba(var(--tone),0.26);box-shadow:inset 0 0 0 1px rgba(var(--tone),0.8)}
+.genie-chat-container.night-mode .rec-book-btn:hover{box-shadow:inset 0 0 0 1px rgba(var(--tone),0.95)}
 .rec-book-btn--verified{--tone:34,197,94}
 .rec-book-btn--spotlight{--tone:59,159,221}
 .rec-book-btn--signature{--tone:212,175,55}
