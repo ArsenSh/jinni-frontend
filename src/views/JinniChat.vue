@@ -6848,6 +6848,8 @@ export default {
                     }
                     return processedRec;
                   });
+                  // Price + Book link for hotel cards (v1 quick action carries none) — after this tick, once the deck is on the message.
+                  setTimeout(() => { try { this.enrichHotelPrices(messageIndex); } catch (e) {} }, 0);
                   
                   if (aiMessage.isViewMore) {
                     const existingRecs = this.messages[messageIndex].recommendations || [];
@@ -7750,12 +7752,13 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 /* Source link on an AI-found event — quiet by default, since it is a verification
    affordance rather than a call to action. */
 .rec-hotel-price{display:flex;align-items:center;font-size:0.8rem;font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
-.rec-book-btn{display:inline-flex;align-items:center;gap:5px;margin:0 8px 0 2px;padding:5px 12px;border-radius:25px;font-size:0.72rem;font-weight:500;line-height:1.1;letter-spacing:.02em;text-decoration:none;color:#fff;border:none;transition:background 0.25s ease,box-shadow 0.25s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
+.rec-book-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 14px;border-radius:14px;font-size:0.72rem;font-weight:500;line-height:1;letter-spacing:.02em;text-decoration:none;color:#fff;border:none;transition:background 0.25s ease,box-shadow 0.25s ease;backdrop-filter:blur(1px) saturate(160%);-webkit-backdrop-filter:blur(1px) saturate(160%)}
 .genie-chat-container.day-mode .rec-book-btn{background:linear-gradient(45deg,rgba(212,175,55,0.5),rgba(255,140,0,0.5));box-shadow:inset 0 0 0 0.6px rgba(255,255,255,0.35)}
 .genie-chat-container.day-mode .rec-book-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.72),rgba(255,140,0,0.72));box-shadow:inset 0 0 0 0.7px rgba(255,255,255,0.4)}
 .genie-chat-container.night-mode .rec-book-btn{background:linear-gradient(45deg,rgba(212,175,55,0.6),rgba(255,140,0,0.6));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
 .genie-chat-container.night-mode .rec-book-btn:hover{background:linear-gradient(45deg,rgba(212,175,55,0.8),rgba(255,140,0,0.8));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18)}
-.large-card .rec-book-btn{font-size:0.78rem;padding:6px 14px}
+.large-card .rec-book-btn{font-size:0.78rem;padding:0 16px}
+.rec-card-bottom:has(.rec-book-btn){min-height:28px}
 .genie-chat-container.day-mode .rec-book-btn--verified{background:linear-gradient(45deg,rgba(34,197,94,0.5),rgba(16,185,129,0.5))}
 .genie-chat-container.day-mode .rec-book-btn--verified:hover{background:linear-gradient(45deg,rgba(34,197,94,0.72),rgba(16,185,129,0.72))}
 .genie-chat-container.night-mode .rec-book-btn--verified{background:linear-gradient(45deg,rgba(34,197,94,0.6),rgba(16,185,129,0.6))}
