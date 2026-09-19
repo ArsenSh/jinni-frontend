@@ -3310,7 +3310,8 @@ export default {
                 socialMedia: result.data.socialMedia,
                 hours: result.data.hours,
                 businessStatus: result.data.businessStatus || null,
-                description: result.data.description || rec.description,
+                description: rec.description || result.data.description,   // Jinni's blurb first; the owner's text only fills a gap
+                ownerDescription: result.data.description || null,
                 rating: result.data.rating || rec.rating,
                 address: result.data.address || rec.address,
                 // Keep the event schedule on shared event cards. Prefer the
@@ -3448,7 +3449,10 @@ export default {
               socialMedia: details.socialMedia || null,
               hours: details.hours || null,
               businessStatus: details.businessStatus || null,
-              description: details.description || recData.description,
+              // Jinni's own blurb first — the owner's listing text only fills a gap
+              // (founder 2026-09-19: a shared business card showed the owner's description).
+              description: recData.description || details.description,
+              ownerDescription: details.description || null,
               rating: details.rating || recData.rating,
               // Prefer the freshly-fetched event schedule (it is the most
               // current and carries the venue timezone); keep the rec's copy
