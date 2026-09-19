@@ -3314,6 +3314,7 @@ export default {
                 hours: result.data.hours,
                 businessStatus: result.data.businessStatus || null,
                 description: rec.description || result.data.description,   // Jinni's blurb first; the owner's text only fills a gap
+                isLargeCard: rec.isLargeCard === true,
                 ownerDescription: result.data.description || null,
                 rating: result.data.rating || rec.rating,
                 address: result.data.address || rec.address,

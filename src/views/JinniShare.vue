@@ -619,7 +619,9 @@ export default {
     // NOTE: the backend that builds the share payload must forward
     // `isChatRecommendation` for this to be faithful.
     useLargeCards() {
-      return this.payload?.isChatRecommendation === true;
+      // The message flag, or the cards' own flag (each chat card carries isLargeCard) — either says "large".
+      if (this.payload?.isChatRecommendation === true) return true;
+      return (this.payload?.recommendations || []).some(r => r && r.isLargeCard === true);
     },
 
     // ── Info modal (place details) ───────────────────────────────────────────
