@@ -1349,7 +1349,7 @@ export default {
 .hours-list div { padding: 2px 0; }
 .see-more-btn { background: none; border: none; color: #D4AF37; cursor: pointer; font-size: 0.875rem; padding: 4px 0; text-decoration: underline; }
 .see-more-btn:hover { color: #FF8C00; }
-.share-cta-block { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 20px 10px 20px; text-align: center; }
+.share-cta-block { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 5px 10px; text-align: center; }
 .share-cta-text { font-size: 1rem; color: var(--text-muted); margin: 0; }
 /* Glacier CTA — glass gradient primary, mirroring JinniChat's branded buttons
    (session-limit / warning primary recipe): themed gradient + frosted
