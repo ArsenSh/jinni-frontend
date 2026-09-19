@@ -1483,12 +1483,11 @@ export default {
       const yUrl = `https://yandex.com/maps/?rtext=${from}~${lat},${lng}&rtt=auto`;
       const tUrl = `https://yandex.com/maps/?rtext=${from}~${lat},${lng}&rtt=mt`;
       // Plain text chips — clean and unambiguous across platforms.
-      const dirMenu = `<div class="rec-pop-dirs">`
-        + `<a class="rec-pop-dir" href="${gUrl}" target="_blank" rel="noopener">Google</a>`
-        + `<a class="rec-pop-dir" href="${yUrl}" target="_blank" rel="noopener">Yandex</a>`
-        + `<a class="rec-pop-dir" href="${tUrl}" target="_blank" rel="noopener">${this.esc(this.transitLabel)}</a>`
-        + `</div>`;
-      const actions = detailsBtn + dirBtn + bookBtn + (phone   ? `<a class="rec-pop-btn rec-pop-call" href="${telHref}">${telIcon}<span>${this.esc(this.callLabel)}</span></a>` : '') + (website ? `<a class="rec-pop-btn rec-pop-web" href="${this.esc(website)}" target="_blank" rel="noopener">${webIcon}<span>${this.esc(this.websiteLabel)}</span></a>` : '');
+      // The three route options live IN the action row: opening Directions swaps
+      // the other buttons out and these in (founder 2026-09-20).
+      const dirLinks = `<a class="rec-pop-btn rec-pop-dir" href="${gUrl}" target="_blank" rel="noopener">Google</a>` + `<a class="rec-pop-btn rec-pop-dir" href="${yUrl}" target="_blank" rel="noopener">Yandex</a>` + `<a class="rec-pop-btn rec-pop-dir" href="${tUrl}" target="_blank" rel="noopener">${this.esc(this.transitLabel)}</a>`;
+      const dirMenu = '';
+      const actions = detailsBtn + dirBtn + dirLinks + bookBtn + (phone   ? `<a class="rec-pop-btn rec-pop-call" href="${telHref}">${telIcon}<span>${this.esc(this.callLabel)}</span></a>` : '') + (website ? `<a class="rec-pop-btn rec-pop-web" href="${this.esc(website)}" target="_blank" rel="noopener">${webIcon}<span>${this.esc(this.websiteLabel)}</span></a>` : '');
       const tier = this.tierOf(rec);
       // Match JinniChat's recommendation card: a soft tier-tinted fill (no left
       // accent border). tierTint mirrors the card backgrounds 1:1.
@@ -2141,8 +2140,14 @@ export default {
   .rec-map-card-spinner { animation: none; }
 }
 /* Directions provider chooser (revealed by the Directions button) */
-:deep(.rec-pop-dirs) { display: none; gap: 7px; margin-top: 8px; }
-:deep(.rec-pop.show-dirs .rec-pop-dirs) { display: flex; flex-wrap: wrap; }
+/* Directions swap: closed = action buttons; open = Directions + the three route
+   options, the rest gone. Whatever comes in fades in. */
+:deep(.rec-pop-dir) { display: none; }
+:deep(.rec-pop.show-dirs .rec-pop-btn:not(.rec-pop-dir-toggle):not(.rec-pop-dir)) { display: none; }
+:deep(.rec-pop.show-dirs .rec-pop-dir) { display: inline-flex; animation: rm-pop-in 0.18s ease both; }
+:deep(.rec-pop:not(.show-dirs) .rec-pop-btn:not(.rec-pop-dir-toggle)) { animation: rm-pop-in 0.18s ease both; }
+:deep(.rec-pop.show-dirs .rec-pop-dir-toggle) { background: var(--rm-glass-hover); }
+@keyframes rm-pop-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
 :deep(.rec-pop-dir) {
   flex: 1; min-width: 80px; text-align: center; text-decoration: none;
   padding: 10px 12px; border-radius: 22px; font-size: 0.78125rem; font-weight: 600;
