@@ -1503,7 +1503,7 @@ export default {
           <div class="rec-pop-body${tier ? ' rec-pop-body--' + tier : ''}"${bodyStyle}>
             <div class="rec-pop-name">${name}</div>
             ${cat ? `<div class="rec-pop-cat">${cat}</div>` : ''}
-            ${rating || addr ? `<div class="rec-pop-meta">${rating ? `<span class="rec-pop-rating">★ ${rating}</span>` : ''}${addr ? `<span class="rec-pop-addr">${addr}</span>` : ''}</div>` : ''}
+            <!-- No rating/address line: the chat's cards never carried them, the share page's did — one popup for both (founder 2026-09-19). -->
             ${tierLbl}
             <div class="rec-pop-actions">${actions}</div>
             ${dirMenu}
