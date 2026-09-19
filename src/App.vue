@@ -217,8 +217,18 @@ export default {
       const app = document.getElementById('app');
       const paint = app ? findPagePaint(app) : null;
       const [fbTop, fbBottom] = FALLBACK_EDGES[theme];
-      const top = paint ? paint.top : fbTop;
-      const bottom = paint ? paint.bottom : fbBottom;
+      let top = paint ? paint.top : fbTop;
+      let bottom = paint ? paint.bottom : fbBottom;
+      // A fullscreen map covers the whole viewport: both chrome edges take the
+      // map's own rendered colour (read off the canvas, like every other page
+      // paint). Founder 2026-09-20: the bars kept the page's tones over a dark
+      // map. The observer re-runs this on exit, so the page colours return.
+      const fsMap = document.querySelector('.rec-map.is-fullscreen');
+      if (fsMap) {
+        const canvas = fsMap.querySelector('.leaflet-container') || fsMap.querySelector('.rec-map-stage') || fsMap;
+        const c = getComputedStyle(canvas).backgroundColor;
+        if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') { top = c; bottom = c; }
+      }
 
       // <html> canvas: the area beyond the page at top and bottom. Safari
       // TILES (repeats) this gradient beyond the document — the original
@@ -260,7 +270,7 @@ export default {
       // the same engine capability the sky-shift fix needs (scroll timeline);
       // old engines keep a solid body — the rule device-proven 2026-08-21.
       const modernChrome = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('animation-timeline: scroll()');
-      document.body.style.backgroundImage = (modernChrome && paint && paint.image) ? paint.image : 'none';
+      document.body.style.backgroundImage = (modernChrome && paint && paint.image && !fsMap) ? paint.image : 'none';
       document.body.style.backgroundColor = top;
       // <meta theme-color> — SPLIT by pointer type (2026-08-22): iPhone
       // Safari's URL bar sits at the BOTTOM (coarse pointer → bottom edge,

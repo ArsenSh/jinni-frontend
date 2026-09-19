@@ -160,7 +160,6 @@
 
 
 <script>
-import { setThemeColorMeta, getThemeColorMeta } from '@/utils/themeColorMeta';
 // Leaflet is loaded from a CDN at runtime (same approach as MapSelector.vue) —
 // NOT an npm package. The shared promise injects the script/CSS only once.
 let leafletPromise = null;
@@ -481,40 +480,13 @@ export default {
       this.$emit('opened');
     },
     close() { this.expanded = false; },
-    applyFullscreenChrome() {
-      try {
-        const el = this.$el && (this.$el.querySelector('.leaflet-container') || this.$el.querySelector('.rec-map-stage') || this.$el);
-        let color = el ? getComputedStyle(el).backgroundColor : '';
-        if (!color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent') color = this.theme === 'night-mode' ? '#0f0d1a' : '#eae6de';
-        if (!this._chromeSaved) {
-          this._chromeSaved = { htmlBg: document.documentElement.style.backgroundColor, bodyBg: document.body.style.backgroundColor, meta: getThemeColorMeta() };
-        }
-        document.documentElement.style.backgroundColor = color;
-        document.body.style.backgroundColor = color;
-        setThemeColorMeta({ top: color, bottom: color });
-      } catch (e) { /* chrome tint is cosmetic */ }
-    },
-    restoreFullscreenChrome() {
-      const s = this._chromeSaved;
-      if (!s) return;
-      try {
-        document.documentElement.style.backgroundColor = s.htmlBg;
-        document.body.style.backgroundColor = s.bodyBg;
-        if (s.meta && (s.meta.top !== null || s.meta.bottom !== null)) setThemeColorMeta({ top: s.meta.top, bottom: s.meta.bottom });
-      } catch (e) {}
-      this._chromeSaved = null;
-    },
     async enterFullscreen() {
       this.expanded = true;            // keep inline state coherent for when we exit
       if (!(await this.ensureMap())) return;
       this.fullscreen = true;
       document.addEventListener('keydown', this.onEsc);
-      // Browser chrome follows the map while it covers the screen (founder 2026-09-20:
-      // the bars kept the page's tones over a dark map). Same recipe as the share page
-      // and the iOS notes: iOS 26 paints the bars from body's SOLID background; old
-      // iOS reads theme-color. The colour is read off the rendered map, never a map
-      // of constants. Restored on exit.
-      this.$nextTick(() => this.applyFullscreenChrome());
+      // Browser chrome: App.vue's chrome sync sees .rec-map.is-fullscreen and paints
+      // both edges from the map canvas (one writer — a painter here lost to its observer).
       // Lock the page behind the fullscreen overlay (prevents scroll bleed on mobile).
       this._prevBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -533,7 +505,6 @@ export default {
     },
     exitFullscreen() {
       this.fullscreen = false;
-      this.restoreFullscreenChrome();
       this.stopLiveTracking();          // drop the live GPS watch when the big map closes
       document.removeEventListener('keydown', this.onEsc);
       document.body.style.overflow = this._prevBodyOverflow || '';
