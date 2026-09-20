@@ -1837,7 +1837,11 @@ export default {
 .rec-map-canvas { width: 100%; height: 450px; }
 @media (max-width: 600px) { .rec-map-canvas { height: 360px } }
 /* Fullscreen */
-.rec-map.is-fullscreen { position: fixed; inset: 0; height: 100dvh; z-index: 99999; margin: 0; border-radius: 0; border: none; }
+.rec-map.is-fullscreen { position: fixed; inset: 0; height: 100vh; height: 100lvh; z-index: 99999; margin: 0; border-radius: 0; border: none; }
+/* 100lvh (large viewport), not 100dvh: like the chat's 100vh shell, the map runs
+   under iOS 26's floating bottom bar, so the bar's glass sits over map pixels
+   instead of a painted strip (founder 2026-09-21). The cards strip and the
+   controls already keep clear of it through env(safe-area-inset-bottom). */
 .rec-map.is-fullscreen .rec-map-body { max-height: none; height: 100%; opacity: 1; }
 .rec-map.is-fullscreen .rec-map-stage, .rec-map.is-fullscreen .rec-map-canvas { height: 100%; }
 .rec-map-close-fs {
