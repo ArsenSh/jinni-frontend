@@ -41,7 +41,7 @@
                     {{ t('chat.recommendations.more') }}
                   </button>
                   <button v-if="rec.bookingUrl" @click.stop="openBooking(rec)" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
-                  <button v-if="rec.sourceUrl" @click.stop="openListing(rec)" class="text-action-btn info-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
+                  <button v-if="rec.sourceUrl" @click.stop="openListing(rec)" class="text-action-btn ask-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
                 </div>
               </div>
             </div>
@@ -113,7 +113,7 @@
                               {{ t('chat.recommendations.more') }}
                             </button>
                             <button v-if="payload.recommendations[part.index].bookingUrl" @click.stop="openBooking(payload.recommendations[part.index])" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
-                            <button v-if="payload.recommendations[part.index].sourceUrl" @click.stop="openListing(payload.recommendations[part.index])" class="text-action-btn info-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
+                            <button v-if="payload.recommendations[part.index].sourceUrl" @click.stop="openListing(payload.recommendations[part.index])" class="text-action-btn ask-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
                           </div>
                         </div>
                       </div>
@@ -172,7 +172,7 @@
                           {{ t('chat.recommendations.more') }}
                         </button>
                         <button v-if="r.bookingUrl" @click.stop="openBooking(r)" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
-                        <button v-if="r.sourceUrl" @click.stop="openListing(r)" class="text-action-btn info-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
+                        <button v-if="r.sourceUrl" @click.stop="openListing(r)" class="text-action-btn ask-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
                       </div>
                     </div>
                   </div>
