@@ -916,7 +916,8 @@
       "weekly": "每周",
       "every_day": "每{day}",
       "all_day": "全天",
-      "starting": "自 {date} 起"
+      "starting": "自 {date} 起",
+      "listing_short": "活动页"
     },
     "quick_actions": {
       "open_settings": "打开设置",

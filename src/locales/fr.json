@@ -916,7 +916,8 @@
       "weekly": "Hebdomadaire",
       "every_day": "tous les {day}",
       "all_day": "Toute la journée",
-      "starting": "à partir du {date}"
+      "starting": "à partir du {date}",
+      "listing_short": "Fiche"
     },
     "quick_actions": {
       "open_settings": "Ouvrir les paramètres",

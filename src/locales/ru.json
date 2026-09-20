@@ -916,7 +916,8 @@
       "weekly": "Еженедельно",
       "every_day": "каждый {day}",
       "all_day": "Весь день",
-      "starting": "начиная с {date}"
+      "starting": "начиная с {date}",
+      "listing_short": "Афиша"
     },
     "quick_actions": {
       "open_settings": "Открыть настройки",

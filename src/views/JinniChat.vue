@@ -3317,6 +3317,7 @@ export default {
                 description: rec.description || result.data.description,   // Jinni's blurb first; the owner's text only fills a gap
                 isLargeCard: rec.isLargeCard === true,
                 _verifiedModel: rec._verifiedModel || null,
+                ...(rec.sourceUrl ? { sourceUrl: rec.sourceUrl } : {}),
                 ownerDescription: result.data.description || null,
                 rating: result.data.rating || rec.rating,
                 address: result.data.address || rec.address,
@@ -3410,6 +3411,7 @@ export default {
         verifiedId: rec.verifiedId,
         partnerTier: rec.partnerTier,
         _verifiedModel: rec._verifiedModel || null,   // destination ≠ partner: no badge on the share page
+        ...(rec.sourceUrl ? { sourceUrl: rec.sourceUrl } : {}),   // the event's listing page
         // Live price + Book link and the owner's listed price travel with the share (2026-09-19).
         ...(rec.hotelPrice ? { hotelPrice: rec.hotelPrice } : {}),
         ...(rec.bookingUrl ? { bookingUrl: rec.bookingUrl } : {}),

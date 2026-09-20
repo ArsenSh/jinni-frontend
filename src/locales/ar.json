@@ -916,7 +916,8 @@
       "weekly": "أسبوعيًا",
       "every_day": "كل {day}",
       "all_day": "طوال اليوم",
-      "starting": "ابتداءً من {date}"
+      "starting": "ابتداءً من {date}",
+      "listing_short": "الإعلان"
     },
     "quick_actions": {
       "open_settings": "فتح الإعدادات",

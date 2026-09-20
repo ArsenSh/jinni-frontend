@@ -41,6 +41,7 @@
                     {{ t('chat.recommendations.more') }}
                   </button>
                   <button v-if="rec.bookingUrl" @click.stop="openBooking(rec)" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
+                  <button v-if="rec.sourceUrl" @click.stop="openListing(rec)" class="text-action-btn info-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
                 </div>
               </div>
             </div>
@@ -112,6 +113,7 @@
                               {{ t('chat.recommendations.more') }}
                             </button>
                             <button v-if="payload.recommendations[part.index].bookingUrl" @click.stop="openBooking(payload.recommendations[part.index])" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
+                            <button v-if="payload.recommendations[part.index].sourceUrl" @click.stop="openListing(payload.recommendations[part.index])" class="text-action-btn info-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
                           </div>
                         </div>
                       </div>
@@ -170,6 +172,7 @@
                           {{ t('chat.recommendations.more') }}
                         </button>
                         <button v-if="r.bookingUrl" @click.stop="openBooking(r)" class="text-action-btn ask-btn book-btn">{{ t('chat.hotel.check_rates') }}</button>
+                        <button v-if="r.sourceUrl" @click.stop="openListing(r)" class="text-action-btn info-btn listing-btn">{{ t('chat.event.listing_short') }}</button>
                       </div>
                     </div>
                   </div>
@@ -696,6 +699,13 @@ export default {
       if (lp && Number.isFinite(lp.min) && lp.min > 0) return this.t('chat.price.from', { price: money(lp.min, lp.currency) });
       if (lp && Number.isFinite(lp.average) && lp.average > 0) return this.t('chat.price.approx', { price: money(lp.average, lp.currency) });
       return '';
+    },
+    openListing(rec) {
+      const url = rec && rec.sourceUrl;
+      if (!url || !/^https?:\/\//i.test(url)) return;
+      let w = null;
+      try { w = window.open(url, '_blank'); } catch (e) { w = null; }
+      if (w) { try { w.opener = null; } catch (e) {} } else window.location.assign(url);
     },
     openBooking(rec) {
       const url = rec && rec.bookingUrl;

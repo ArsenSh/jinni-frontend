@@ -916,7 +916,8 @@
       "weekly": "Weekly",
       "every_day": "every {day}",
       "all_day": "All day",
-      "starting": "starting {date}"
+      "starting": "starting {date}",
+      "listing_short": "Listing"
     },
     "quick_actions": {
       "open_settings": "Open Settings",

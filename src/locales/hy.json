@@ -916,7 +916,8 @@
       "weekly": "Ամեն շաբաթ",
       "every_day": "ամեն {day}",
       "all_day": "Ամբողջ օրը",
-      "starting": "սկսած {date}-ից"
+      "starting": "սկսած {date}-ից",
+      "listing_short": "Աֆիշա"
     },
     "quick_actions": {
       "open_settings": "Բացել կարգավորումները",
