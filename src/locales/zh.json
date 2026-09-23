@@ -902,11 +902,14 @@
     },
     "price": {
       "from": "{price} 起",
-      "approx": "≈ {price}"
+      "from_listed": "{price} 起 · 登记价",
+      "approx": "≈ {price}",
+      "approx_listed": "≈ {price} · 登记价"
     },
     "hotel": {
       "from_per_night": "{price} 起 / 晚",
       "from_per_night_group": "{price} 起 / 晚，{rooms} 间房",
+      "from_per_night_per_room": "{price} 起 / 晚，每间房",
       "check_rates": "预订"
     },
     "event": {

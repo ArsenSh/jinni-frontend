@@ -902,11 +902,14 @@
     },
     "price": {
       "from": "{price}-ից",
-      "approx": "≈ {price}"
+      "from_listed": "{price}-ից · ըստ գրանցման",
+      "approx": "≈ {price}",
+      "approx_listed": "≈ {price} · ըստ գրանցման"
     },
     "hotel": {
       "from_per_night": "{price}-ից / գիշեր",
       "from_per_night_group": "{price}-ից / գիշեր {rooms} սենյակի համար",
+      "from_per_night_per_room": "{price}-ից / գիշեր մեկ սենյակի համար",
       "check_rates": "Ամրագրել"
     },
     "event": {

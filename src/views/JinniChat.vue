@@ -2645,14 +2645,21 @@ export default {
       // would be read as the price of one (honesty: a number means what it
       // says). When the partner priced N rooms, the line says N rooms.
       if (hp && Number.isFinite(hp.perNight) && hp.perNight > 0) {
-        return hp.rooms > 1
-          ? this.t('chat.hotel.from_per_night_group', { price: money(hp.perNight, hp.currency), rooms: hp.rooms })
-          : this.t('chat.hotel.from_per_night', { price: money(hp.perNight, hp.currency) });
+        const p = money(hp.perNight, hp.currency);
+        // Three different numbers, three different lines. A group rate covers
+        // N rooms; a per-room rate appears when no single booking could hold
+        // the party; anything else is one room for two (2026-09-23).
+        if (hp.rooms > 1) return this.t('chat.hotel.from_per_night_group', { price: p, rooms: hp.rooms });
+        if (hp.groupUnavailable || hp.perRoom) return this.t('chat.hotel.from_per_night_per_room', { price: p });
+        return this.t('chat.hotel.from_per_night', { price: p });
       }
-      // The owner's own listed price (Destination/Business pricing block).
+      // A price from OUR records, not from the partner: the venue typed it in
+      // its dashboard, or Jinni recorded it when curating the place. Either
+      // way it is a listing, not a live bookable rate, and the card says so —
+      // it used to render identically to a live price (founder 2026-09-23).
       const lp = rec && rec.listedPrice;
-      if (lp && Number.isFinite(lp.min) && lp.min > 0) return this.t('chat.price.from', { price: money(lp.min, lp.currency) });
-      if (lp && Number.isFinite(lp.average) && lp.average > 0) return this.t('chat.price.approx', { price: money(lp.average, lp.currency) });
+      if (lp && Number.isFinite(lp.min) && lp.min > 0) return this.t('chat.price.from_listed', { price: money(lp.min, lp.currency) });
+      if (lp && Number.isFinite(lp.average) && lp.average > 0) return this.t('chat.price.approx_listed', { price: money(lp.average, lp.currency) });
       return '';
     },
     isEventRec(rec) {

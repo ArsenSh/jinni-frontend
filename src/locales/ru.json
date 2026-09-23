@@ -902,11 +902,14 @@
     },
     "price": {
       "from": "от {price}",
-      "approx": "≈ {price}"
+      "from_listed": "от {price} · по данным листинга",
+      "approx": "≈ {price}",
+      "approx_listed": "≈ {price} · по данным листинга"
     },
     "hotel": {
       "from_per_night": "от {price} / ночь",
       "from_per_night_group": "от {price} / ночь за {rooms} номеров",
+      "from_per_night_per_room": "от {price} / ночь за номер",
       "check_rates": "Бронь"
     },
     "event": {

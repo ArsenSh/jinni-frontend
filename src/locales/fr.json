@@ -902,11 +902,14 @@
     },
     "price": {
       "from": "dès {price}",
-      "approx": "≈ {price}"
+      "from_listed": "dès {price} · indiqué",
+      "approx": "≈ {price}",
+      "approx_listed": "≈ {price} · indiqué"
     },
     "hotel": {
       "from_per_night": "dès {price} / nuit",
       "from_per_night_group": "dès {price} / nuit pour {rooms} chambres",
+      "from_per_night_per_room": "dès {price} / nuit par chambre",
       "check_rates": "Réserver"
     },
     "event": {

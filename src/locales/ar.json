@@ -902,11 +902,14 @@
     },
     "price": {
       "from": "من {price}",
-      "approx": "≈ {price}"
+      "from_listed": "من {price} · حسب البيان",
+      "approx": "≈ {price}",
+      "approx_listed": "≈ {price} · حسب البيان"
     },
     "hotel": {
       "from_per_night": "من {price} / ليلة",
       "from_per_night_group": "من {price} / ليلة لـ {rooms} غرف",
+      "from_per_night_per_room": "من {price} / ليلة للغرفة",
       "check_rates": "احجز"
     },
     "event": {
