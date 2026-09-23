@@ -906,6 +906,7 @@
     },
     "hotel": {
       "from_per_night": "от {price} / ночь",
+      "from_per_night_group": "от {price} / ночь за {rooms} номеров",
       "check_rates": "Бронь"
     },
     "event": {

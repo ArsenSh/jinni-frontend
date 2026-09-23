@@ -2638,7 +2638,14 @@ export default {
         catch { return `${Math.round(n)} ${cur || 'USD'}`; }
       };
       const hp = rec && rec.hotelPrice;
-      if (hp && Number.isFinite(hp.perNight) && hp.perNight > 0) return this.t('chat.hotel.from_per_night', { price: money(hp.perNight, hp.currency) });
+      // A group stay is priced for SEVERAL rooms, and "from $420 / night"
+      // would be read as the price of one (honesty: a number means what it
+      // says). When the partner priced N rooms, the line says N rooms.
+      if (hp && Number.isFinite(hp.perNight) && hp.perNight > 0) {
+        return hp.rooms > 1
+          ? this.t('chat.hotel.from_per_night_group', { price: money(hp.perNight, hp.currency), rooms: hp.rooms })
+          : this.t('chat.hotel.from_per_night', { price: money(hp.perNight, hp.currency) });
+      }
       // The owner's own listed price (Destination/Business pricing block).
       const lp = rec && rec.listedPrice;
       if (lp && Number.isFinite(lp.min) && lp.min > 0) return this.t('chat.price.from', { price: money(lp.min, lp.currency) });

@@ -906,6 +906,7 @@
     },
     "hotel": {
       "from_per_night": "{price}-ից / գիշեր",
+      "from_per_night_group": "{price}-ից / գիշեր {rooms} սենյակի համար",
       "check_rates": "Ամրագրել"
     },
     "event": {

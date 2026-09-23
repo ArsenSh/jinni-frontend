@@ -906,6 +906,7 @@
     },
     "hotel": {
       "from_per_night": "{price} 起 / 晚",
+      "from_per_night_group": "{price} 起 / 晚，{rooms} 间房",
       "check_rates": "预订"
     },
     "event": {

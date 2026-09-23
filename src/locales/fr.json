@@ -906,6 +906,7 @@
     },
     "hotel": {
       "from_per_night": "dès {price} / nuit",
+      "from_per_night_group": "dès {price} / nuit pour {rooms} chambres",
       "check_rates": "Réserver"
     },
     "event": {
