@@ -1423,7 +1423,7 @@
           <div class="setting-item">
             <div class="theme-buttons">
               <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v1' }" @click="setChatEngine('v1')">V1 · stable</button>
-              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v2' }" @click="setChatEngine('v2')">V2 · classic</button>
+              <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v2' }" @click="setChatEngine('v2')">V2 · legacy</button>
               <button type="button" class="theme-btn" :class="{ active: chatEngine === 'v3' }" @click="setChatEngine('v3')">V3 · default</button>
             </div>
           </div>
@@ -4329,6 +4329,16 @@ export default {
     },
     formatTextSegment(text) {
       if (!text) return '';
+      // Model prose, place names and review snippets reach v-html through this
+      // builder, and it used to concatenate them into markup unescaped — an
+      // "<img onerror=…>" inside a reply or a venue name would have run
+      // (audit 2026-09-23). The share page sanitises the same content with
+      // DOMPurify; here the fix is earlier and cheaper: neutralise the three
+      // characters that can open a tag or break out of an attribute BEFORE
+      // any markup is generated. '>' stays raw because '> quote' is markdown
+      // this builder reads. Every tag below is then ours by construction, and
+      // the inline Preferences/Settings buttons keep their handlers.
+      text = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
       let cleanedText = text.replace(/\*\*([^*]+)\*\*\s*→\s*([^←]+)←/g, '');
       const lines = cleanedText.split('\n');
       let result = [];
