@@ -2604,7 +2604,10 @@ export default {
       try {
         const res = await fetch(`${API_BASE_URL}/api/ai/hotel-prices`, {
           method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('authToken')}` },
-          body: JSON.stringify({ hotels: want.map(r => ({ name: r.name, latitude: r.latitude, longitude: r.longitude })), currency: this.userSettings?.currency || 'USD', language: this.$i18n?.locale || 'en' }),
+          // The session id carries the GROUP: without it this call priced one
+          // room while the deck had priced the whole party, and the two
+          // numbers landed side by side (live 2026-09-23).
+          body: JSON.stringify({ hotels: want.map(r => ({ name: r.name, latitude: r.latitude, longitude: r.longitude })), currency: this.userSettings?.currency || 'USD', language: this.$i18n?.locale || 'en', sessionId: this.activeSessionId || null }),
         });
         if (!res.ok) return;
         const data = await res.json();
@@ -2613,7 +2616,7 @@ export default {
         for (const r of recs) {
           const m = prices[r.name];
           if (!m || !Number.isFinite(m.perNight)) continue;
-          r.hotelPrice = { perNight: m.perNight, currency: m.currency, nights: 1, checkIn: null, checkOut: null, stars: m.stars, url: m.url };
+          r.hotelPrice = { perNight: m.perNight, currency: m.currency, nights: 1, rooms: m.rooms || 1, checkIn: null, checkOut: null, stars: m.stars, url: m.url };
           if (m.url) r.bookingUrl = m.url;
           changed = true;
         }
