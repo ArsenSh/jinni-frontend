@@ -209,6 +209,7 @@
 
 <script>
 import axios from 'axios'
+import { track } from '@/utils/funnel'
 
 export default {
   props: { show: {type: Boolean, default: false} },
@@ -246,6 +247,12 @@ export default {
     }
   },
   mounted() {
+    // The landing's "Make a Wish" CTA links /auth?mode=signup (founder
+    // 2026-09-30): an ad visitor has no account, so open on Create account.
+    // Every other entry (session expiry, redirects) keeps the Sign In default.
+    if (this.$route?.query?.mode === 'signup') this.isLogin = false
+    const q = this.$route?.query || {}
+    if (!q.setup && !q.token && !q.error) track('auth_view')
     this.handleOAuthCallback()
     this.handleSetupCallback()
   },
@@ -359,6 +366,7 @@ export default {
       this.$emit('close')
     },
     toggleMode(loginMode) {
+      if (!loginMode && this.isLogin) track('auth_switch_signup')
       this.isLogin = loginMode
       this.showVerification = false
       this.error = ''
@@ -397,6 +405,7 @@ export default {
       this.success = ''
       try {
         this.validateForm()
+        track('signup_start')
         const response = await axios.post(`${this.API_BASE_URL}/api/auth/send-verification`,{name: this.formData.name.trim(), email: this.formData.email.toLowerCase().trim(), password: this.formData.password, language: this.currentLanguage()},{headers: {'Content-Type': 'application/json'}})
         this.pendingEmail = response.data.email
         this.showVerification = true
@@ -417,6 +426,7 @@ export default {
       try {
         const response = await axios.post(`${this.API_BASE_URL}/api/auth/verify-email`,{email: this.pendingEmail,code: this.verificationCode, language: this.currentLanguage()},{headers: {'Content-Type': 'application/json'}})
         if (response.data.token) {
+          track('signup_done')
           localStorage.setItem('authToken', response.data.token)
           localStorage.setItem('user', JSON.stringify(response.data.user))
           this.success = this.$t('auth.account_created')
@@ -507,6 +517,7 @@ export default {
       // Pass the chosen language across the Google round-trip — the server
       // can't read localStorage, so without it a Google signup always lands
       // on the English default.
+      track('google_tap')   // beacon survives the navigation below
       try { window.location.href = `${this.API_BASE_URL}/auth/google?lang=${encodeURIComponent(this.currentLanguage() || 'en')}` }
       catch (error) {
         console.error('Google login error:', error)

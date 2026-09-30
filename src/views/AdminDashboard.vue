@@ -190,6 +190,44 @@
             <p v-else class="empty-state">No activity data yet — deploy the tracking and run scripts/backfillUserActivity.js.</p>
           </div>
 
+          <!-- Sign-up funnel (anonymous browsers per step) — /api/admin/funnel -->
+          <div class="card chart-card funnel-card">
+            <div class="card-head">
+              <h2>Sign-up Funnel</h2>
+              <span class="card-sub">Last {{ funnelDays }} days · distinct browsers per step</span>
+              <div class="card-head-spacer"></div>
+              <div class="seg-group">
+                <button class="seg-btn" :class="{ 'seg-btn--active': funnelDays === 7 }"  @click="funnelDays = 7;  fetchFunnel()">7d</button>
+                <button class="seg-btn" :class="{ 'seg-btn--active': funnelDays === 30 }" @click="funnelDays = 30; fetchFunnel()">30d</button>
+              </div>
+            </div>
+            <div v-if="funnel && funnelSteps[0].n > 0" class="funnel-wrap">
+              <div v-for="(st, i) in funnelSteps" :key="st.key" class="funnel-row">
+                <div class="funnel-label">{{ st.label }}</div>
+                <div class="funnel-bar"><div class="funnel-bar-fill" :style="{ width: funnelPct(st.n, funnelSteps[0].n, true) }"></div></div>
+                <div class="funnel-count">{{ fmt(st.n) }}</div>
+                <div class="funnel-pct" :title="i ? 'of previous step' : ''">{{ i ? funnelPct(st.n, st.prev) : '' }}</div>
+                <div class="funnel-pct" :title="i ? 'of landing views' : ''">{{ i ? funnelPct(st.n, funnelSteps[0].n) : '' }}</div>
+              </div>
+              <div class="funnel-cols"><span></span><span></span><span></span><span>of prev</span><span>of landing</span></div>
+              <template v-if="funnel.sources.length">
+                <div class="qa-divider"></div>
+                <div class="qa-section-label">Top sources</div>
+                <div class="funnel-src-table">
+                  <div class="funnel-src-row funnel-src-head">
+                    <span>Source</span><span>Landing</span><span>Wish</span><span>Auth</span><span>Sign-up</span><span>Google</span><span>Done</span>
+                  </div>
+                  <div v-for="s in funnel.sources.slice(0, 5)" :key="s.source" class="funnel-src-row">
+                    <span class="funnel-src-name">{{ s.source }}</span>
+                    <span>{{ s.counts.landing_view }}</span><span>{{ s.counts.wish_tap }}</span><span>{{ s.counts.auth_view }}</span>
+                    <span>{{ s.counts.signup_start }}</span><span>{{ s.counts.google_tap }}</span><span>{{ s.counts.signup_done }}</span>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <p v-else class="empty-state">No funnel data yet for this window.</p>
+          </div>
+
           <!-- Feature Usage Chart: Quick Actions + Chat Stream -->
           <div class="card chart-card">
             <div class="card-head">
@@ -5315,6 +5353,28 @@ export default {
     }
     const googleChartMax = computed(() => Math.max(...googleDailyStats.value.map(d => d.total), 1))
 
+    // ── Sign-up funnel card (anonymous, 2026-09-30) ──
+    const funnel = ref(null)
+    const funnelDays = ref(7)
+    const FUNNEL_LABELS = { landing_view: 'Landing view', wish_tap: 'Make a Wish tap', auth_view: 'Auth screen', auth_switch_signup: 'Switched to sign-up', signup_start: 'Email sign-up sent', google_tap: 'Google tap', signup_done: 'Email sign-up done' }
+    // "% of previous" for Google is measured against the auth screen (it is a
+    // sibling of the email path, not a step after it); email steps chain.
+    const FUNNEL_PREV = { wish_tap: 'landing_view', auth_view: 'wish_tap', auth_switch_signup: 'auth_view', signup_start: 'auth_view', google_tap: 'auth_view', signup_done: 'signup_start' }
+    const funnelSteps = computed(() => {
+      const o = funnel.value?.overall || {}
+      const keys = funnel.value?.events || Object.keys(FUNNEL_LABELS)
+      return keys.map(k => ({ key: k, label: FUNNEL_LABELS[k] || k, n: o[k] || 0, prev: FUNNEL_PREV[k] ? (o[FUNNEL_PREV[k]] || 0) : 0 }))
+    })
+    const funnelPct = (n, base, bar = false) => {
+      if (!base) return bar ? '0%' : '—'
+      const p = Math.min(100, Math.round((n / base) * 1000) / 10)
+      return p + '%'
+    }
+    const fetchFunnel = async () => {
+      try { const res = await apiFetch(`/funnel?days=${funnelDays.value}`); funnel.value = res.data }
+      catch (e) { console.warn('funnel fetch failed:', e.message) }
+    }
+
     // ── Shared styled chart tooltip (Google + AI provider + retention charts) ──
     const chartTip = ref({ show: false, x: 0, y: 0, title: '', rows: [] })
     let _tipTouchTimer = null
@@ -5879,7 +5939,7 @@ export default {
     const debouncedDestFetch = debounce(() => fetchDestinations(true))
     const fetchAll = async () => {
       loading.value = true
-      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiBalance(), fetchServerStats(), fetchRoutingUsage(), fetchDbStats()]) }
+      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchFunnel(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiBalance(), fetchServerStats(), fetchRoutingUsage(), fetchDbStats()]) }
       catch (e) { showToast(e.message, 'error') } finally { loading.value = false }
     }
     // Stored rec images are either absolute URLs or API-relative paths
@@ -8004,6 +8064,7 @@ export default {
       mobileNavItems, mobileNavItemsTripled, loopStrip, onMobileNavClick, onLoopStripScroll,
       overviewData, overview, registrations, premiumPct, barHeight, maxReg,
       retention, retentionDaily, retBarH, retPct,
+      funnel, funnelDays, funnelSteps, funnelPct, fetchFunnel,
       users, usersLoading, usersPage, usersTotalPages, userSearch, userFilter, userLocations,
       aiUsers, aiLoading, aiPage, aiTotalPages, aiSummary, aiDailyStats, aiChartDays, aiChartMax, dailyTokenPct, dailyPlacesPct, aiCost, todayCost,
       aiProvider, aiProviderLoading, aiProviderSaving, aiProviderSavedAt, fetchAiProvider, saveAiProvider, setProvider,
@@ -9329,6 +9390,32 @@ export default {
 .admin-shell.day-mode .qa-count { color: #2c1e10; }
 .admin-shell.day-mode .qa-pct { color: #A0522D; }
 .legend-dot--accent { background: linear-gradient(90deg, #D4AF37, #a78bfa); }
+
+/* Sign-up Funnel card — same bar palette as Feature Usage; colour-only feedback. */
+.funnel-wrap { padding: 14px 20px 18px; display: flex; flex-direction: column; gap: 8px; }
+.funnel-row, .funnel-cols { display: grid; grid-template-columns: 150px 1fr 52px 56px 64px; align-items: center; gap: 10px; }
+.funnel-label { font-size: 12px; }
+.funnel-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.07); position: relative; overflow: hidden; }
+.funnel-bar-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #D4AF37, #a78bfa); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.funnel-count { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; text-align: right; }
+.funnel-pct { font-family: 'DM Mono', monospace; font-size: 10px; opacity: 0.6; text-align: right; }
+.funnel-cols span { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.35; text-align: right; }
+.funnel-src-table { display: flex; flex-direction: column; gap: 4px; }
+.funnel-src-row { display: grid; grid-template-columns: minmax(90px, 1.6fr) repeat(6, minmax(34px, 1fr)); gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 6px; border-radius: 6px; transition: background 0.2s ease; }
+.funnel-src-row span:not(.funnel-src-name) { text-align: right; }
+.funnel-src-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.funnel-src-head { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.45; }
+.admin-shell.night-mode .funnel-src-row:not(.funnel-src-head):hover { background: rgba(139,92,246,0.07); }
+.admin-shell.day-mode .funnel-src-row:not(.funnel-src-head):hover { background: rgba(212,175,55,0.08); }
+.admin-shell.day-mode .funnel-bar { background: rgba(0,0,0,0.07); }
+.admin-shell.day-mode .funnel-label, .admin-shell.day-mode .funnel-count, .admin-shell.day-mode .funnel-src-row { color: #2c1e10; }
+.admin-shell.day-mode .funnel-pct { color: #A0522D; opacity: 0.85; }
+@media (max-width: 768px) {
+  .funnel-wrap { padding: 12px 14px 14px; }
+  .funnel-row, .funnel-cols { grid-template-columns: 104px 1fr 40px 44px 50px; gap: 6px; }
+  .funnel-label { font-size: 11px; }
+  .funnel-src-row { font-size: 10px; gap: 4px; padding: 3px 4px; grid-template-columns: minmax(70px, 1.4fr) repeat(6, minmax(26px, 1fr)); }
+}
 
 /* ── PREFERENCE CHARTS — TILE LAYOUT ── */
 

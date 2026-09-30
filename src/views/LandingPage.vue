@@ -95,6 +95,7 @@ import { ref, onMounted, computed, watch, onBeforeUnmount } from 'vue'
 import { useStore } from 'vuex'
 import MagicButton from '@/components/ui/MagicButton.vue'
 import { useRouter } from 'vue-router'
+import { track } from '@/utils/funnel'
 import AuthModal from '@/components/AuthModal.vue'
 import StarrySky from '@/components/ui/StarrySky.vue'
 import DaySky from "@/components/ui/DaySky.vue";
@@ -211,7 +212,9 @@ export default {
         visitorCountry.value = data.visitorCountry || null
       } catch (e) { cities.value = [] }
     }
-    const openAuthModal = () => {router.push('/auth')}
+    // Landing CTA opens /auth on Create account (founder 2026-09-30): a visitor
+    // from an ad has no account yet; every other /auth entry keeps Sign In.
+    const openAuthModal = () => { track('wish_tap'); router.push({ path: '/auth', query: { mode: 'signup' } }) }
     const goBusinessLanding = () => {router.push('/business')}
     const selectLanguage = (lang) => {
       clearAutoCloseTimer()
@@ -237,6 +240,7 @@ export default {
       if (store.state.i18n?.locale) {selectedLanguage.value = store.state.i18n.locale}
       showAllLanguages.value = false
       loadCities()
+      track('landing_view')
     })
     onBeforeUnmount(() => {clearAutoCloseTimer()})
     return {
