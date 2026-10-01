@@ -7,11 +7,17 @@
     </div>
 
     <div class="language-selector-container">
-      <div class="language-selector" ref="languageSelectorRef" @click.stop>
-        <button v-if="showAllLanguages" v-for="lang in languageOptions" :key="lang.code" @click="selectLanguage(lang.code)" :title="lang.title" :class="{ active: selectedLanguage === lang.code }">{{ lang.flag }}</button>
-        <button v-else @click="toggleLanguageSelector" :title="currentLanguageTitle">
-          {{ currentLanguageFlag }}
+      <div class="language-selector" :class="{ open: showAllLanguages }" ref="languageSelectorRef" @click.stop>
+        <!-- Same control as the main landing (founder 2026-10-01): a line
+             globe + the current code, and a menu of language names each in
+             its own script. No flag emojis. -->
+        <button type="button" class="lang-trigger" @click="toggleLanguageSelector" :title="currentLanguageTitle" :aria-label="currentLanguageTitle" aria-haspopup="true" :aria-expanded="showAllLanguages ? 'true' : 'false'">
+          <svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9s1.2-6.5 3.6-9z"/></svg>
+          <span class="lang-code">{{ currentLanguageCode }}</span>
         </button>
+        <div v-if="showAllLanguages" class="lang-menu" role="menu">
+          <button v-for="lang in languageOptions" :key="lang.code" type="button" role="menuitemradio" :aria-checked="selectedLanguage === lang.code ? 'true' : 'false'" :lang="lang.code" class="lang-option" :class="{ active: selectedLanguage === lang.code }" @click="selectLanguage(lang.code)">{{ lang.title }}</button>
+        </div>
       </div>
     </div>
 
@@ -109,12 +115,12 @@ export default {
     const autoCloseTimer = ref(null)
     const languageSelectorRef = ref(null)
     const languageOptions = ref([
-      { code: 'en', flag: '🇬🇧', title: 'English' },
-      { code: 'fr', flag: '🇫🇷', title: 'Français' },
-      { code: 'ru', flag: '🇷🇺', title: 'Русский' },
-      { code: 'zh', flag: '🇨🇳', title: '中文' },
-      { code: 'ar', flag: '🇸🇦', title: 'العربية' },
-      { code: 'hy', flag: '🇦🇲', title: 'Հայերեն' }
+      { code: 'en', title: 'English' },
+      { code: 'fr', title: 'Français' },
+      { code: 'ru', title: 'Русский' },
+      { code: 'zh', title: '中文' },
+      { code: 'ar', title: 'العربية' },
+      { code: 'hy', title: 'Հայերեն' }
     ])
     /* The brand word carries the gradient, the sentence stays solid — the
        landing page's rule. Inserted with v-html, so the span carries no scope
@@ -130,7 +136,7 @@ export default {
       { key: 'spotlight', suffix: true },
       { key: 'signature', suffix: true }
     ]
-    const currentLanguageFlag = computed(() => languageOptions.value.find(l => l.code === selectedLanguage.value)?.flag || '🌐')
+    const currentLanguageCode = computed(() => (selectedLanguage.value || 'en').toUpperCase())
     const currentLanguageTitle = computed(() => languageOptions.value.find(l => l.code === selectedLanguage.value)?.title || 'Select Language')
     const startAutoCloseTimer = () => {
       clearAutoCloseTimer()
@@ -143,7 +149,9 @@ export default {
       selectedLanguage.value = lang
       showAllLanguages.value = false
     }
-    const toggleLanguageSelector = () => { showAllLanguages.value = true; startAutoCloseTimer() }
+    // The trigger stays on screen while the menu is open, so it toggles
+    // (same as LandingPage; the watcher below starts the auto-close timer).
+    const toggleLanguageSelector = () => { showAllLanguages.value = !showAllLanguages.value }
     const handleClickOutside = () => { showAllLanguages.value = false; clearAutoCloseTimer() }
     watch(showAllLanguages, (newValue) => {
       if (newValue) {
@@ -169,7 +177,7 @@ export default {
     return {
       currentTheme, isNightMode, isDayMode, lampEl,
       selectedLanguage, showAllLanguages, languageOptions,
-      currentLanguageFlag, currentLanguageTitle,
+      currentLanguageCode, currentLanguageTitle,
       selectLanguage, toggleLanguageSelector, languageSelectorRef,
       heroSubtitleHtml, tiers,
       goHome, goApply
@@ -198,6 +206,24 @@ export default {
    lands on Cinzel, in all six languages. */
 .business-landing {
   --brand-serif: 'Cinzel', 'Noto Serif Armenian', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  /* The main landing's size system (LandingPage.vue, founder 2026-09-30),
+     mirrored so the two first screens are the same page (founder 2026-10-01:
+     "make the business landing page same like"). Pixels, not rem — the in-app
+     text-size setting must not resize the hero. --gutter is the same on both
+     sides and for header and hero; the header row is one band
+     (--hdr-top / --hdr-h) whose wordmark and language pill share a centre. */
+  --gutter: 16px; --hdr-top: 16px; --hdr-h: 48px;
+  --title-fs: clamp(30px, calc(3.3vw + 18px), 56px);
+  --sub-fs: clamp(18px, calc(0.5vw + 16px), 22px);
+  --cta-fs: clamp(17px, calc(0.3vw + 16px), 20px);
+  --cta-h: 52px;
+  --gap-lamp: 16px; --gap-sub: 16px; --gap-cta: 32px;
+}
+@media (min-width: 769px) {
+  .business-landing { --gutter: 24px; --hdr-top: 24px; --hdr-h: 56px; --cta-h: 56px; --gap-lamp: 24px }
+}
+@media (min-width: 1200px) {
+  .business-landing { --gutter: 32px; --hdr-top: 28px }
 }
 
 /* This page speaks the landing page's language (founder 2026-09-10: "make it
@@ -216,58 +242,90 @@ export default {
    CENTRES, not their top edges. Matching top edges is what made them look off:
    a 2rem serif line box and a 40px flag button are different heights, so equal
    tops put the wordmark's centre about 7px below the flag's. */
-.header-container { position: absolute; top: 20px; left: 20px; padding: 0; height: 40px; display: flex; align-items: center; z-index: 1000 }
+.header-container { position: absolute; top: var(--hdr-top); left: var(--gutter); padding: 0; height: var(--hdr-h); display: flex; align-items: center; z-index: 1000 }
 /* The two pinned corners are the only things on these pages that a logical
    property cannot flip for us: they are positioned, not laid out. In Arabic
    the wordmark takes the right corner and the language row the left, the way
    every other element already mirrors. */
-[dir="rtl"] .header-container { left: auto; right: 20px }
-[dir="rtl"] .language-selector-container { right: auto; left: 20px }
-@media (max-width: 768px) {
-  [dir="rtl"] .language-selector-container { right: auto; left: 10px }
-  [dir="rtl"] .header-container { left: auto; right: 10px }
-}
+[dir="rtl"] .header-container { left: auto; right: var(--gutter) }
+[dir="rtl"] .language-selector-container { right: auto; left: var(--gutter) }
 
-.app-name { font-family: var(--brand-serif); font-size: 2rem; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
-.language-selector-container { position: fixed; top: 20px; right: 20px; z-index: 1001 }
-/* No capsule, no ring (founder 2026-09-11): the flags sit in a row and the
-   chosen one is LIT — the same grammar the CTAs and the mode switch use. A
-   flag emoji is a rectangular colour bitmap, so light can never be drawn ON
-   the glyph (a filter traces its box and the halo comes out square); the rule
-   underneath carries the state instead. */
-.language-selector { display: flex; gap: 14px; background: transparent; padding: 0; border: none; border-radius: 0; backdrop-filter: none; -webkit-backdrop-filter: none; overflow: visible; transition: none }
-.language-selector button {
-  background: transparent; border: none; box-shadow: none; border-radius: 0;
-  padding: 6px 2px 12px; width: 44px; height: 40px; font-size: 24px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; position: relative;
-  opacity: 0.5; transition: opacity 0.3s ease;
+.app-name { font-family: var(--brand-serif); font-size: clamp(27px, calc(1.2vw + 23px), 36px); line-height: 1; font-weight: 600; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 1px }
+.language-selector-container { position: fixed; top: var(--hdr-top); right: var(--gutter); height: var(--hdr-h); display: flex; align-items: center; z-index: 1001 }
+/* Language control = the main landing's (founder 2026-10-01: "not beautiful
+   with emoji"). A quiet secondary control: a line globe + the current code in
+   a small pill of CLEAR glass — no orange, so the hero CTA stays the only
+   coloured thing on the first screen. The menu is the same clear glass, sized
+   to its longest name, each language in its own script; the current one is
+   bold. Hover = a light pane, nothing moves. */
+.business-landing.day-mode {
+  --lang-ink: #7A4A1C;
+  --lang-glass: rgba(255,255,255,0.22); --lang-glass-hover: rgba(255,255,255,0.36);
+  --lang-rim: inset 0 0 0 0.75px rgba(255,255,255,0.7), inset 0 1px 0 rgba(255,255,255,0.55), 0 0 18px -2px rgba(140,61,7,0.12);
+  --lang-panel: rgba(255,255,255,0.24);
+  --lang-panel-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.7), inset 0 1px 0 rgba(255,255,255,0.55), 0 0 18px -2px rgba(140,61,7,0.14);
+  --lang-hover: rgba(140,61,7,0.08);
 }
-/* Same rule as every other control — 1.5px, 6px off the bottom — but drawn to
-   the FLAG, not to the button. The button is 44px because a tap target has to
-   be; the glyph inside it is about 30px, and a rule run to the button's full
-   width overhangs the flag at both ends and reads as a stray line. Every other
-   control on the page has a label as wide as itself, so there the two are the
-   same measurement; here they are not. */
-.language-selector button::after {
-  content: ''; position: absolute; left: 7px; right: 7px; bottom: 6px; height: 1.5px;
-  background: transparent; transition: background 0.3s ease, box-shadow 0.3s ease;
+.business-landing.night-mode {
+  --lang-ink: #f5e6c8;
+  --lang-glass: rgba(255,255,255,0.06); --lang-glass-hover: rgba(255,255,255,0.12);
+  --lang-rim: inset 0 0 0 0.75px rgba(255,240,215,0.28), inset 0 1px 0 rgba(255,240,215,0.2), 0 0 18px -2px rgba(0,0,0,0.3);
+  --lang-panel: rgba(255,255,255,0.07);
+  --lang-panel-shadow: inset 0 0 0 0.75px rgba(255,240,215,0.28), inset 0 1px 0 rgba(255,240,215,0.2), 0 0 18px -2px rgba(0,0,0,0.3);
+  --lang-hover: rgba(255,240,215,0.1);
 }
-/* Nothing moves under the pointer — light only. */
-.language-selector button:hover { opacity: 0.85; transform: none; background: transparent; box-shadow: none }
-.language-selector button.active { opacity: 1; background: transparent; box-shadow: none; animation: none }
-/* Collapsed, the row is a single flag: it is neither dimmed nor unlit — it is
-   the current language, and it carries the same rule every other control does.
-   Opening the row is what introduces unchosen siblings to dim. */
-.language-selector button:only-child { opacity: 1 }
+.language-selector { position: relative; display: flex; align-items: center }
+.lang-trigger {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  height: 44px; min-width: 44px; padding: 0 15px 0 13px; margin: 0; border: none; border-radius: 999px; cursor: pointer;
+  font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1; letter-spacing: 0.08em;
+  color: var(--lang-ink); background: var(--lang-glass); box-shadow: var(--lang-rim);
+  backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+  transition: background-color 0.2s ease;
+}
+.lang-trigger:hover, .lang-trigger:focus-visible, .language-selector.open .lang-trigger { background: var(--lang-glass-hover); outline: none }
+.lang-globe { width: 18px; height: 18px; flex: none; display: block }
+.lang-code { display: block; padding-top: 1px }
+/* Phones: a smaller pill — 38px tall, 13px code, 16px globe. The tap area
+   stays 44px through an invisible ::before. */
+@media (max-width: 768px) {
+  .lang-trigger { height: 38px; min-width: 38px; padding: 0 12px 0 10px; gap: 6px; font-size: 13px; position: relative }
+  .lang-trigger::before { content: ''; position: absolute; inset: -3px -2px }
+  .lang-globe { width: 16px; height: 16px }
+}
+.lang-menu {
+  position: absolute; top: calc(100% + 8px); inset-inline-end: 0; width: max-content; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px; padding: 6px; border-radius: 20px;
+  background: var(--lang-panel); box-shadow: var(--lang-panel-shadow);
+  /* saturate 110%: at 180% the violet sky glow came through as a purple panel */
+  backdrop-filter: blur(24px) saturate(110%); -webkit-backdrop-filter: blur(24px) saturate(110%);
+  animation: fadeIn 0.18s ease-out;
+}
+.lang-option {
+  display: flex; align-items: center; width: 100%; min-height: 44px; padding: 0 16px 0 14px; margin: 0;
+  border: none; border-radius: 14px; background: transparent; cursor: pointer;
+  font-family: inherit; font-size: 16px; font-weight: 400; line-height: 1.2; text-align: start; white-space: nowrap;
+  color: var(--lang-ink); transition: background-color 0.15s ease;
+}
+.lang-option:hover, .lang-option:focus-visible, .lang-option:active { background: var(--lang-hover); outline: none }
+.lang-option.active { font-weight: 700 }
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 
 /* ── Hero ──────────────────────────────────────────────────────────────────── */
 /* The inset lives HERE, not on .hero-content: that box has a max-width,
    and padding on a content-box max-width ADDS to it — 800 + 44 — so the
    hero grew wider than the viewport and the page scrolled sideways into
    a white strip. .hero is full width with nothing to overflow. */
-.hero { padding-inline: 22px; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
-.hero-content { max-width: 1080px; animation: fadeInUp 1s ease-out }
-.lamp { position: relative; display: block; width: 150px; margin: auto }
+.hero { padding-inline: var(--gutter); min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 2 }
+.hero-content { max-width: 800px; animation: fadeInUp 1s ease-out; display: flex; flex-direction: column; align-items: center }
+/* Laptop and up: room for the headline on one line where it fits (as on the
+   main landing); longer sentences wrap, balanced. */
+@media (min-width: 1024px) { .hero-content { max-width: min(1100px, 100%) } }
+/* bottle.png carries ~24% transparent space under the lamp (ink ends at row
+   948 of 1254), so at 150px the lamp sat ~36px further from the heading than
+   --gap-lamp says. The negative margin cancels that band (main landing,
+   2026-09-30). */
+.lamp { position: relative; display: block; width: 150px; margin: auto auto -36px }
 .static-bottle { width: 100%; height: auto; max-height: 250px; display: block }
 /* Colour ON the metal, not only behind it: the lamp's own silhouette masks a
    gradient that is blended INTO the image, so the body carries a lit edge and
@@ -298,8 +356,9 @@ export default {
    800px box at a fixed 4rem. It now scales with the window and balances, so
    longer translations split evenly instead of orphaning a word. */
 /* Pixels, not rem — see LandingPage: the text-size setting must not resize the hero. */
-.magic-title { font-family: var(--brand-serif); font-size: clamp(34px, 5.4vw, 56px); text-wrap: balance; letter-spacing: 1px; margin-bottom: 0.5rem; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
-.magic-subtitle { font-family: var(--brand-serif); font-size: clamp(1.02rem, 2.4vw, 1.5rem); max-width: 700px; margin: 0 auto 2rem; text-shadow: 0 0 7px rgba(255,255,255,0.3) }
+.magic-title { font-family: var(--brand-serif); font-size: var(--title-fs); line-height: 1.15; max-width: 100%; text-wrap: pretty; text-wrap: balance; letter-spacing: 1px; margin: var(--gap-lamp) 0 0; background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text }
+/* No text-shadow (main landing 2026-10-01: its glow rendered unreliably). */
+.magic-subtitle { font-family: var(--brand-serif); font-size: var(--sub-fs); line-height: 1.45; max-width: 700px; margin: var(--gap-sub) auto 0; text-wrap: pretty; text-wrap: balance; text-shadow: none }
 /* v-html content carries NO scope attribute — a plain scoped descendant rule
    would never match this span. */
 /* The brand word was the only gradient-clipped run in the line, and clipped
@@ -369,41 +428,30 @@ export default {
    the palette differs, because the two grounds differ: night lights the rule
    in lamp-gold on indigo, day draws it in the lamp's burnt end so it holds
    against a peach sky. */
-.day-mode .hero .magic-button,
 .day-mode .tier-cta {
   background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
-  box-shadow: none; border-radius: 0; padding: 14px 8px 22px; position: relative;
-  font-size: 1.32rem; letter-spacing: 0.01em;
+  box-shadow: none; border-radius: 0; position: relative;
+  letter-spacing: 0.01em; font-size: 0.98rem; padding: 10px 4px 18px;
 }
-.day-mode .tier-cta { font-size: 0.98rem; padding: 10px 4px 18px }
 /* The rest state sits BELOW full strength or the hover has nowhere to go
    (founder 2026-09-11). Night can answer by moving toward white, which is a
    long way on a dark ground; day can only move down into the colour, and that
    trip is short — so it starts at half strength and arrives at full. */
-.day-mode .hero .magic-button::after,
 .day-mode .tier-cta::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
-  background: rgba(115, 47, 6, 0.5); box-shadow: 0 0 10px rgba(214, 120, 40, 0.22);
+  background: rgba(122, 74, 28, 0.5); box-shadow: 0 0 10px rgba(214, 120, 40, 0.22);
   transition: background 0.3s ease, box-shadow 0.3s ease, height 0.3s ease;
 }
 /* The tier rules sit a step quieter than the hero's, the same way night's do,
    so three of them in a row don't compete with the one wish above. */
-.day-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(115, 47, 6, 0.55); box-shadow: 0 0 9px rgba(214, 120, 40, 0.3) }
-.day-mode .hero .magic-button:hover,
+.day-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(122, 74, 28, 0.55); box-shadow: 0 0 9px rgba(214, 120, 40, 0.3) }
 .day-mode .tier-cta:hover { background: transparent; box-shadow: none }
-/* A 1.5px rule changing alpha is too small a signal to see, and a warm glow
-   on a warm light ground is almost none at all — so the rule gains WEIGHT on
-   hover, not just strength. It thickens in place from its own baseline; the
-   button does not move and nothing shifts around it. */
-.day-mode .hero .magic-button:hover::after {
-  background: #732F06; height: 3px; box-shadow: 0 0 20px rgba(214, 120, 40, 0.75);
-}
-.day-mode .hero .magic-button:hover .wish-label { text-shadow: 0 0 14px rgba(255, 224, 176, 1) }
-.day-mode .tier-cta:hover::after { background: #732F06; box-shadow: 0 0 14px rgba(214, 120, 40, 0.5) }
+.day-mode .tier-cta:hover::after { background: #7A4A1C; box-shadow: 0 0 14px rgba(214, 120, 40, 0.5) }
 /* the label leaves the gradient clip: a clip carries no glow, and on a light
-   ground the bright half of the brand gradient falls under 2:1 */
+   ground the bright half of the brand gradient falls under 2:1. Bronze
+   #7A4A1C = the day text family (main landing 2026-10-01). */
 .day-mode .wish-label {
-  background: none; -webkit-text-fill-color: initial; color: #732F06; font-weight: 700;
+  background: none; -webkit-text-fill-color: initial; color: #7A4A1C; font-weight: 700;
   text-shadow: 0 0 10px rgba(255, 224, 176, 0.7);
 }
 .day-mode .tier-cta .wish-label { font-weight: 600 }
@@ -426,23 +474,17 @@ export default {
 .day-mode .wish-item { border-inline-start: 1px solid rgba(150,100,55,0.28) }
 .day-mode .wish-item:first-child { border-inline-start: none; padding-inline-start: 0 }
 .day-mode .wish-item:last-child { padding-inline-end: 0 }
+/* Day text = ONE bronze family (main landing, founder 2026-10-01): headings,
+   labels and links #7A4A1C, body #7a5434. The tier mark and price keep their
+   gold — they play the part the landing's numerals do. */
 .day-mode .tier-mark { color: rgba(168,114,15,0.75) }
-.day-mode .tier-label { color: rgba(150,100,55,0.75) }
+.day-mode .tier-label { color: rgba(122,74,28,0.78) }
 .day-mode .tier-price { color: rgba(168,114,15,0.9) }
-.day-mode .tier-price-suffix { color: rgba(150,100,55,0.6) }
-.day-mode .wish-item h3 { color: #4a3226 }
-.day-mode .wish-item p { color: #6b4a36 }
-/* #b87d4e is the same value as the peach behind it — mid-tone on
-   mid-tone, so the links nearly vanished on the lower half of the page. */
-.day-mode .footer-links a { color: #7a4a24 }
+.day-mode .tier-price-suffix { color: rgba(122,84,52,0.7) }
+.day-mode .wish-item h3 { color: #7A4A1C }
+.day-mode .wish-item p { color: #7a5434 }
+.day-mode .footer-links a { color: #7A4A1C }
 .day-mode .footer-links a:hover { color: #5c3416; text-shadow: 0 0 10px rgba(255,255,255,0.35) }
-/* Same glass recipe on the language pill: an inset hairline and an even glow
-   instead of a hard border and a downward shadow. */
-/* Same three rings as the wish button, so the pill is the same ice. */
-.day-mode .language-selector button { color: #732F06 }
-.day-mode .language-selector button:hover::after { background: rgba(115,47,6,0.35) }
-.day-mode .language-selector button.active::after,
-.day-mode .language-selector button:only-child::after { background: rgba(115,47,6,0.85); box-shadow: 0 0 12px rgba(214,120,40,0.5) }
 /* The 44px glow drew a RECTANGLE around the lamp (founder 2026-09-11). Not a
    filter bug: .lamp::after blends with mix-blend-mode, which forces this whole
    subtree into its own blending group, and that group is the 150x150 .lamp box
@@ -457,8 +499,9 @@ export default {
      at its own distance. The old 18px was sized to a constraint that is gone:
      it had to fade out inside the 150px blend group .lamp::after used to
      create. Day has no such group any more, so radius is free. */
-  filter: drop-shadow(0 0 8px rgba(255,170,80,0.45))
-          drop-shadow(0 0 8px rgba(206,96,26,0.22));
+  /* Tone matched to the "Jinni" text (main landing 2026-10-01): same hue, so
+     only saturation and brightness move. The glow lives on .lamp. */
+  filter: saturate(0.88) brightness(0.92);
 }
 .day-mode .button-glow-wrapper { filter: none }
 /* The switch takes the wish button's glacier glass (founder 2026-09-10), so
@@ -602,11 +645,10 @@ export default {
 /* The lamp PNG is a saturated orange next to parchment type, so on its own it
    reads as a sticker dropped on the page. Pulled toward the type's gold and
    given the same bloom, it becomes the source of the light. */
+/* Tone only on the image; the bloom moved to .lamp (see the end of this
+   block) — inside the ::after blend group Chrome clipped it to the 150px box. */
 .night-mode .static-bottle {
-  filter: saturate(0.76) brightness(1.06) contrast(0.96)
-          drop-shadow(0 0 8px rgba(255,214,150,0.5))
-          drop-shadow(0 0 26px rgba(255,170,90,0.4))
-          drop-shadow(0 0 60px rgba(255,140,60,0.26));
+  filter: saturate(0.76) brightness(1.06) contrast(0.96);
 }
 .night-mode .magic-title, .night-mode .features-heading { background: none; -webkit-text-fill-color: initial }
 /* Founder 2026-09-10: at hero size the three-layer bloom is too much — the
@@ -623,30 +665,18 @@ export default {
 }
 /* CTAs drop the capsule for a word over a lit hairline — the same grammar as
    the landing's Make a Wish and its Explore switch. */
-.night-mode .hero .magic-button, .night-mode .tier-cta {
+.night-mode .tier-cta {
   background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
-  box-shadow: none; border-radius: 0; padding: 14px 8px 22px; position: relative;
-  font-size: 1.32rem; letter-spacing: 0.01em;
+  box-shadow: none; border-radius: 0; position: relative;
+  letter-spacing: 0.01em; font-size: 0.98rem; padding: 10px 4px 18px;
 }
-.night-mode .tier-cta { font-size: 0.98rem; padding: 10px 4px 18px }
-.night-mode .hero .magic-button::after, .night-mode .tier-cta::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 1.5px;
-  background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9);
+.night-mode .tier-cta::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 6px; height: 1px;
+  background: rgba(255,214,150,0.55); box-shadow: 0 0 9px rgba(255,180,90,0.5);
   transition: background 0.3s ease, box-shadow 0.3s ease, height 0.3s ease;
 }
-.night-mode .tier-cta::after { bottom: 6px; height: 1px; background: rgba(255,214,150,0.55); box-shadow: 0 0 9px rgba(255,180,90,0.5) }
-.night-mode .hero .magic-button:hover, .night-mode .tier-cta:hover { background: transparent; box-shadow: none }
-/* The rest state is bright here and stays that way — it is the approved
-   halation. What was missing is headroom in the ANSWER: 0.85 -> 1.0 alpha
-   with a 12px -> 16px glow is a step small enough to read as nothing. On a
-   dark ground there is room to go further, so the hover now goes to white,
-   roughly doubles the near glow and adds a wide one underneath, and lifts the
-   label's own bloom with it. Nothing moves; only the light changes. */
-.night-mode .hero .magic-button:hover::after {
-  background: #ffffff; height: 3px;
-  box-shadow: 0 0 22px rgba(255,205,130,1), 0 0 44px rgba(255,160,60,0.5);
-}
-.night-mode .hero .magic-button:hover .wish-label { color: #fff6e6; text-shadow: 0 0 20px rgba(255,190,110,0.95) }
+.night-mode .tier-cta:hover { background: transparent; box-shadow: none }
+/* Nothing moves; only the light changes. */
 .night-mode .tier-cta:hover::after { background: #ffffff; box-shadow: 0 0 18px rgba(255,205,130,0.95), 0 0 34px rgba(255,160,60,0.4) }
 .night-mode .tier-cta:hover .wish-label { color: #fff6e6; text-shadow: 0 0 16px rgba(255,190,110,0.85) }
 /* the label leaves the gradient clip: halation needs a solid colour to bloom */
@@ -695,12 +725,6 @@ export default {
 .night-mode .mode-switch-btn--active::after {
   background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9);
 }
-/* Halation has no boxes, so the language pill goes too — the flag keeps a soft
-   warm halo instead of a rim: findable, but nothing is drawn. */
-.night-mode .language-selector button { color: #f5e6c8 }
-.night-mode .language-selector button:hover::after { background: rgba(255,214,150,0.45) }
-.night-mode .language-selector button.active::after,
-.night-mode .language-selector button:only-child::after { background: rgba(255,214,150,0.85); box-shadow: 0 0 12px rgba(255,180,90,0.9) }
 /* Lavender at rest, warming to gold on hover — the link behaves like a star
    catching the lamp. The flat #FF8C00 was the loudest thing on the page. */
 .night-mode .footer-links a { color: #dcb977 }
@@ -709,14 +733,6 @@ export default {
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* The lamp's 60px spill is sized for a desktop hero; on a phone it covers a
-     third of the screen and its outer edge bands against the dark sky, which
-     reads as a border drawn across the top. */
-  .night-mode .static-bottle {
-    filter: saturate(0.76) brightness(1.06) contrast(0.96)
-            drop-shadow(0 0 7px rgba(255,214,150,0.45))
-            drop-shadow(0 0 20px rgba(255,170,90,0.3));
-  }
   /* One column: the vertical hairline becomes a horizontal one between items. */
   .features-grid { grid-template-columns: 1fr }
   .wish-item { padding: 20px 0 }
@@ -725,20 +741,154 @@ export default {
   .day-mode .wish-item:first-child, .night-mode .wish-item:first-child { border-top: none; padding-top: 0 }
   .tier-price { font-size: 2.1rem; margin-bottom: 8px }
   .tier-mark svg { width: 21px; height: 21px }
-  .magic-title { font-size: clamp(30px, 8vw, 40px) }
-  .magic-subtitle { font-size: 1.1rem }
   .features-heading { font-size: 2rem }
-  .language-selector-container { top: 10px; right: 10px }
-  .header-container { top: 10px; left: 10px; padding: 0 }
-  .app-name { font-size: 1.5rem }
-  .language-selector { gap: 6px }
-  .language-selector button { width: 40px; height: 40px; font-size: 20px }
   .footer-links { gap: 0.1rem }
   .footer-links a { font-size: 1rem }
 }
 
+/* Phone landscape: a 390px-tall screen cannot hold a 150px lamp plus the
+   copy under the header band, so the lamp shrinks and the hero clears it. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero { padding-block: calc(var(--hdr-top) + var(--hdr-h) + 8px) 24px }
+  .lamp { width: 84px; margin-bottom: -20px }
+  .business-landing { --title-fs: clamp(26px, 3.4vw, 34px); --gap-lamp: 8px; --gap-sub: 8px; --gap-cta: 16px; --cta-h: 48px }
+}
+
 /* Below-sky continuation — DesertSky's ending peach (Discovery-style fix) */
 .business-landing.day-mode{background:linear-gradient(180deg,#f9f5eb 0%,#e0a082 30%,#e0a082 100%)}
+
+/* ══ MIRROR OF THE MAIN LANDING (founder 2026-10-01: "make the business
+   landing page same like"). LandingPage.vue is the source of truth for every
+   element the two pages share; the blocks below port its latest decisions
+   (its late blocks, same order) onto this page's classes. Business-only parts
+   — the tier manifest, its per-tier CTAs, the copy — keep their own rules
+   above. ══ */
+
+/* ── Lamp glow: shape-following drop-shadows on the .lamp CONTAINER, never
+   the image — the ::after blend group clips filters painted inside it. ── */
+.day-mode .lamp {
+  filter: drop-shadow(0 0 8px rgba(255,170,80,0.45)) drop-shadow(0 0 18px rgba(206,96,26,0.18));
+}
+.night-mode .lamp {
+  filter: drop-shadow(0 0 8px rgba(255,214,150,0.5))
+          drop-shadow(0 0 26px rgba(255,170,90,0.4))
+          drop-shadow(0 0 60px rgba(255,140,60,0.26));
+}
+@media (max-width: 768px) {
+  .night-mode .lamp {
+    filter: drop-shadow(0 0 7px rgba(255,214,150,0.45)) drop-shadow(0 0 20px rgba(255,170,90,0.3));
+  }
+}
+
+/* ── Hero CTA = the main landing's Make a Wish ──
+   Night: the "Jinni" gold pill — the wordmark gradient at ~86% alpha with the
+   lamp's tone filter on the ::before fill, the wordmark's three-layer warm
+   halo as a STATIC box-shadow, and the hover glow as a FADING ::after layer.
+   Day: clear glacier glass filled with a slow moving warm light. Text-sized
+   pill, 52px phones / 56px tablet+. Nothing moves or scales on hover. */
+.business-landing.day-mode {
+  --wish-body: linear-gradient(45deg, rgba(176,106,24,0.94), rgba(207,83,23,0.94));
+  --wish-tone: none;
+  --wish-halo: 0 0 4px rgba(207,120,50,0.35), 0 0 14px rgba(190,90,30,0.28);
+  --wish-filter: blur(10px) saturate(150%);
+  --wish-ink-shadow: 0 0 6px rgba(70,25,0,0.4);
+}
+.business-landing.night-mode {
+  --wish-body: linear-gradient(45deg, rgba(212,175,55,0.86), rgba(255,140,0,0.86));
+  --wish-tone: saturate(0.76) brightness(1.06) contrast(0.96);
+  --wish-halo: 0 0 4px rgba(255,214,150,0.5), 0 0 16px rgba(255,170,90,0.42), 0 0 40px rgba(255,140,60,0.26);
+  --wish-filter: blur(10px) saturate(150%);
+  --wish-ink-shadow: 0 0 6px rgba(90,40,0,0.45);
+}
+.business-landing .hero .magic-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--cta-h); min-width: 48px; max-width: 100%; padding: 12px 28px; margin: var(--gap-cta) 0 0; border: none; border-radius: 999px; position: relative;
+  background: none; box-shadow: var(--wish-halo); backdrop-filter: none; -webkit-backdrop-filter: none;
+  font-size: var(--cta-fs); line-height: 1.25; letter-spacing: 0.01em; text-wrap: balance;
+  transition: none;
+}
+.business-landing .hero .magic-button::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; border-radius: inherit; pointer-events: none;
+  background: var(--wish-body); filter: var(--wish-tone);
+  backdrop-filter: var(--wish-filter); -webkit-backdrop-filter: var(--wish-filter);
+}
+.business-landing .hero .magic-button:hover { background: none; box-shadow: var(--wish-halo) }
+.business-landing .hero .wish-label,
+.business-landing .hero .magic-button:hover .wish-label {
+  position: relative; z-index: 2;
+  background: none; -webkit-text-fill-color: #ffffff; color: #ffffff; opacity: 1;
+  font-weight: 600; font-variant-caps: normal; letter-spacing: 0.01em; font-size: 1em;
+  text-shadow: var(--wish-ink-shadow);
+}
+/* Night hover glow as a FADING LAYER: a blurred radial pool of the glow's own
+   colours under and around the pill, fading in by opacity only. A growing
+   box-shadow left the top of the glow unpainted, and a box-shadow layer
+   showed as a thin dark ring through the 86% gold. */
+.business-landing.night-mode .hero .magic-button::after {
+  content: ''; position: absolute; inset: -10px -12px; z-index: -1; border-radius: 999px; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255,200,120,0.55), rgba(255,160,80,0.32) 60%, rgba(255,140,60,0) 100%);
+  filter: blur(10px); opacity: 0; transition: opacity 0.25s ease;
+}
+.business-landing.night-mode .hero .magic-button:hover::after,
+.business-landing.night-mode .hero .magic-button:focus-visible::after { opacity: 1 }
+/* Day: glacier glass filled with a moving warm light — clear glass on the
+   pill; ::before = three soft warm pools far larger than the pill, drifting
+   by translate only (no rotation, so no layer edge ever enters the pill). */
+.business-landing.day-mode .hero .magic-button {
+  overflow: hidden; isolation: isolate;
+  box-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.65), inset 0 1px 0 rgba(255,255,255,0.7), 0 0 16px -3px rgba(190,110,40,0.28);
+  transition: box-shadow 0.25s ease;
+}
+.business-landing.day-mode .hero .magic-button:hover {
+  box-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.8), inset 0 1px 0 rgba(255,255,255,0.85), 0 0 20px -3px rgba(190,110,40,0.36);
+}
+.business-landing.day-mode .hero .magic-button::after { content: none }
+.business-landing.day-mode .hero .magic-button::before,
+.business-landing.day-mode .hero .magic-button:hover::before {
+  inset: -150% -45%; border-radius: 0; filter: blur(12px); opacity: 0.8;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  background:
+    radial-gradient(22% 26% at 34% 52%, rgba(255,168,60,0.75), rgba(255,168,60,0) 100%),
+    radial-gradient(20% 24% at 62% 46%, rgba(255,214,120,0.7), rgba(255,214,120,0) 100%),
+    radial-gradient(18% 22% at 48% 58%, rgba(226,112,52,0.55), rgba(226,112,52,0) 100%),
+    rgba(255,255,255,0.22);
+  animation: wishFlow 9s ease-in-out infinite;
+}
+.business-landing.day-mode .hero .magic-button:hover::before { opacity: 0.95 }
+.business-landing.day-mode .hero .wish-label,
+.business-landing.day-mode .hero .magic-button:hover .wish-label {
+  color: #7A4A1C; -webkit-text-fill-color: #7A4A1C; text-shadow: 0 0 8px rgba(255,248,235,0.75);
+}
+@keyframes wishFlow {
+  0%   { transform: translate(-9%, 2%) }
+  33%  { transform: translate(7%, -3%) }
+  66%  { transform: translate(-3%, 4%) }
+  100% { transform: translate(-9%, 2%) }
+}
+@media (prefers-reduced-motion: reduce) { .business-landing.day-mode .hero .magic-button::before { animation: none } }
+
+/* ── Day text: one bronze family; the brand gold carries no glow by day ── */
+.day-mode .magic-title, .day-mode .features-heading { color: #7A4A1C }
+.day-mode .magic-subtitle, .day-mode .footer-copyright { color: #7a5434; text-shadow: none }
+.business-landing.day-mode .app-name {
+  background: linear-gradient(45deg, #D4AF37, #FF8C00);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  filter: none; text-shadow: none;
+}
+/* The subtitle's brand word at body size: solid deep lamp tone, bold — the
+   main landing's rule (a gradient cannot be read at this size on the sand). */
+.day-mode .magic-subtitle :deep(.brand-grad) {
+  background: none; -webkit-background-clip: initial; background-clip: initial;
+  -webkit-text-fill-color: initial; color: #7A3A06; font-weight: 700; filter: none;
+}
+
+/* ── Night text: slightly transparent ink, gold accent words solid ── */
+.night-mode .magic-title { color: rgba(255,246,226,0.7); text-shadow: none }
+.night-mode .magic-subtitle { color: rgba(234,217,184,0.72); text-shadow: none }
+.night-mode .features-heading { color: rgba(251,240,216,0.7); text-shadow: none }
+.night-mode .wish-item h3 { color: rgba(240,220,174,0.72) }
+.night-mode .wish-item p { color: rgba(228,215,189,0.68) }
 </style>
 
 <style>

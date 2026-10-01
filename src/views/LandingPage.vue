@@ -1067,8 +1067,27 @@ export default {
 .landing-container.day-mode .hero .magic-button:hover .wish-label { color: #7A4A1C; -webkit-text-fill-color: #7A4A1C }
 .day-mode .footer-links a { color: #7A4A1C }
 .landing-container.day-mode { --lang-ink: #7A4A1C }
-.landing-container.day-mode .hero .wish-label,
-.landing-container.day-mode .hero .magic-button:hover .wish-label { color: #8C3D07; -webkit-text-fill-color: #8C3D07 }
+
+/* NIGHT HOVER GLOW AS A FADING LAYER (founder 2026-10-01: "if I hover Make a
+   Wish the upper side of the shadow may vanish"). Hover used to TRANSITION
+   box-shadow from --wish-halo to the larger --wish-halo-hover; while a shadow
+   grows, Chrome can leave the newly covered area above the pill unpainted, so
+   the top of the glow dropped out. Now the base glow is a static box-shadow
+   and the stronger hover glow lives on ::after, always painted, fading in by
+   opacity only — no shadow geometry ever changes on hover. Night only: the
+   day pill clips its children (overflow: hidden) for the moving light. */
+.landing-container:not(.day-mode) .hero .magic-button,
+.landing-container:not(.day-mode) .hero .magic-button:hover { box-shadow: var(--wish-halo); transition: none }
+.landing-container:not(.day-mode) .hero .magic-button::after {
+  /* a blurred pool of the glow's own colours UNDER and around the pill, not a
+     box-shadow: a shadow stops at the box edge, and through the 86% gold that
+     edge showed as a thin dark ring on hover. */
+  content: ''; position: absolute; inset: -10px -12px; z-index: -1; border-radius: 999px; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255,200,120,0.55), rgba(255,160,80,0.32) 60%, rgba(255,140,60,0) 100%);
+  filter: blur(10px); opacity: 0; transition: opacity 0.25s ease;
+}
+.landing-container:not(.day-mode) .hero .magic-button:hover::after,
+.landing-container:not(.day-mode) .hero .magic-button:focus-visible::after { opacity: 1 }
 </style>
 
 <style>
