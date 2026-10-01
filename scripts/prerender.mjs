@@ -184,13 +184,16 @@ function sitemapXml(cities, day) {
     return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 }
 
+// NOTE (2026-10-01): this is a template literal, so a regex backslash must be
+// doubled — the old `/\/+$/` reached the page as `//+$/`, a COMMENT, so the
+// guard threw a SyntaxError on every page and never hid the landing text.
 // The static markup belongs to ONE route. dist/index.html is also the SPA
 // fallback for every other route (nginx try_files), so a refresh on /chat
 // painted the landing's prerendered text for a few frames before the app
 // mounted (founder 2026-09-20). Each file is stamped with its route and a
 // head script — run before the body paints — hides the static block whenever
 // the address differs. Crawlers still get the full text.
-const ROUTE_GUARD = `<script>(function(){var r=document.documentElement.getAttribute('data-pre-path')||'/';var p=location.pathname.replace(/\/+$/,'')||'/';if(p!==r&&p!==r+'/index.html')document.documentElement.classList.add('pre-off')})()</script><style>html.pre-off #app>main.pre{display:none}</style>`;
+const ROUTE_GUARD = `<script>(function(){var r=document.documentElement.getAttribute('data-pre-path')||'/';var p=location.pathname.replace(/\\/+$/,'')||'/';if(p!==r&&p!==r+'/index.html')document.documentElement.classList.add('pre-off')})()</script><style>html.pre-off #app>main.pre{display:none}</style>`;
 function write(rel, html) {
     const p = resolve(DIST, rel);
     const route = '/' + rel.replace(/\\/g, '/').replace(/(^|\/)index\.html$/, '').replace(/^\/+|\/+$/g, '');
