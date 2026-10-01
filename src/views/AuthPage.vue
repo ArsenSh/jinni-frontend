@@ -82,6 +82,14 @@ export default {
    the card in the first viewport when it fits, top-align it when it's
    taller — never clipped either way. */
 .auth-page :deep(.auth-card) { margin-top: auto; margin-bottom: auto; }
+/* Android scroll fix (2026-09-30): AuthModal's card is overflow-y:auto +
+   overscroll-behavior:contain with no max-height — a scroll container that
+   can't scroll. Chrome 144+ (Android Chrome + Instagram/FB WebView) still
+   applies `contain`, so a finger drag starting on the card never scrolled the
+   page and the submit/Google buttons were unreachable on small screens. Here
+   the page is the one scroll surface, so the card must not be a container.
+   The landing-page modal (true fixed overlay) keeps its own rule. */
+.auth-page :deep(.auth-card) { overflow-y: visible; overscroll-behavior: auto; }
 @media (pointer: coarse) and (max-width: 480px) {
   .auth-page :deep(.auth-modal-overlay) { padding: 30px 16px calc(env(safe-area-inset-bottom, 0px) + 20px); }
 }

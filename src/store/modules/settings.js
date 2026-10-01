@@ -1,6 +1,13 @@
 import { isNightTime } from '@/utils/timeUtils';
 
 const getInitialPreference = () => {
+  // Localhost-only preview switch (founder 2026-10-01): ?theme=light|dark
+  // forces a theme without touching saved settings. import.meta.env.DEV is
+  // false in production builds, so this line is compiled out of the live site.
+  if (import.meta.env.DEV) {
+    const q = new URLSearchParams(window.location.search).get('theme');
+    if (q === 'light' || q === 'dark') return q;
+  }
   const saved = localStorage.getItem('jinni_settings');
   if (saved) {
     try {

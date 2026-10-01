@@ -12,7 +12,9 @@ import { onMounted, onBeforeUnmount, ref } from 'vue'
    — the same shared-path idea as the lamp's smoke in AnimatedLamp, so a column
    reads as one moving body rather than as scattered dots. Every channel ends
    at the lamp, which starts as a faint shape made of sand, fills as the wind
-   delivers, and only then hands over to the real icon.
+   delivers, and only then hands over to the real icon. Since 2026-10-01 the
+   fill runs LEFT -> RIGHT (founder): the columns feed a front that sweeps
+   across the lamp, and the sand shape is revealed behind it.
 
    Tuned in ~/Desktop/DesertLab — a standalone copy of this page with sliders.
    Paste new values from its "Copy as SAND_DEFAULTS" button straight in below.
@@ -61,9 +63,20 @@ export const SAND_DEFAULTS = {
   /* maxOpacity 20 -> 34 (founder 2026-09-11): the lamp the sand builds only
      ever reached a fifth opacity, so the thing being assembled was fainter
      than the grains assembling it. */
-  formSeconds: 1.5, baseOpacity: 0, maxOpacity: 34,
+  /* formSeconds 1.5 -> 3.2 (founder 2026-10-01: "the lamp feels fast") — the
+     left->right fill now takes as long as a slow breath; revealMs/sandHoldMs
+     below were lengthened to match, so the handover keeps the same pace. */
+  formSeconds: 3.2, baseOpacity: 0, maxOpacity: 34,
+  /* LEFT → RIGHT (founder 2026-10-01: "it can run from the left to the right
+     side of the lamp, like filling"). The sand lamp is revealed behind a
+     front that sweeps across the drawing over formSeconds, and the columns
+     deliver to that front instead of the lamp's centre. fillLeft/fillRight =
+     where the DRAWING sits in the box (bottle.png alpha bbox x 84-1182 of
+     1254 = 6.7%-94.3%); fillFront = the soft edge, % of the drawing's width;
+     frontSpreadY = how much of the lamp's height the delivery point covers. */
+  fillLeft: 6.7, fillRight: 94.3, fillFront: 18, frontSpreadY: 44,
   waitForSand: 1, clearBelow: 1400,
-  holdMs: 120, revealMs: 1600, sandHoldMs: 700, sandFadeMs: 900,
+  holdMs: 200, revealMs: 2200, sandHoldMs: 1000, sandFadeMs: 1100,
   /* 38 -> 0 (founder 2026-09-11): this ramped a hue-shifted COPY of the
      bottle over the real one, which is the other half of the warm gold
      cast. The lamp the sand hands over to is now the PNG itself. */
@@ -85,6 +98,12 @@ const SAND = [[198, 126, 54], [186, 126, 54], [198, 138, 54], [174, 114, 42],
 const SAND_SORTED = [...SAND].sort((a, b) =>
   (a[0] * 0.3 + a[1] * 0.59 + a[2] * 0.11) - (b[0] * 0.3 + b[1] * 0.59 + b[2] * 0.11))
 
+// Localhost-only: ?sandclock=manual stops the rAF loop and exposes
+// window.__sandStep(ms) so a headless capture can record exact 30 fps frames.
+// Compiled out of the production build.
+const MANUAL = import.meta.env.DEV && typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('sandclock') === 'manual'
+
 export default {
   name: 'DesertSand',
   props: {
@@ -102,6 +121,12 @@ export default {
     let vents = [], dust = [], puff = null
     const tintCache = {}
     let fill = 0, formed = false, revealAt = 0, revealFrom = 0
+    /* The fill waits for the SAND (founder 2026-10-01: "the left side starts
+       immediately, but from half to right it goes right"): the front used to
+       start sweeping at load while the columns were still rising, so the left
+       half appeared before any grain reached it. It now starts when the first
+       grain is absorbed into the lamp. */
+    let fillStarted = false
     let lampImg = null, sandLamp = null, warmLamp = null
     let lampBox = { x: 0, y: 0, w: 0, h: 0 }
     let stopped = false
@@ -235,20 +260,78 @@ export default {
         spin: (Math.random() * 2 - 1),
         wob: Math.random(),
         warm: 0, x: 0, y: 0,
+        ty: Math.random() - 0.5,
+        fx: Math.random(),
       })
       dust.push(d)
     }
     /* Every puff from a vent walks the SAME serpent — that shared path is what
        makes a column look like one body of sand instead of confetti. */
-    function channel(v, t, off, now) {
+    /* Where the sand is being delivered right now: the fill front, sweeping
+       left to right across the drawing as the lamp forms. */
+    /* REAL TARGETS (founder 2026-10-01: "the destination point is even the
+       upper side of the lamp — it should fill vertically correct, not only
+       move right"). The old target was one band at reach±frontSpreadY/2 of the
+       box (24%-68%) at every x, so the sand filled a stripe above the
+       drawing's middle. Now bottle.png's alpha is read once into 128 columns;
+       a grain lands on an OPAQUE pixel of the column under the fill front,
+       anywhere from that column's top edge to its bottom edge, so the fill
+       follows the lamp's true shape vertically while it sweeps right. */
+    const COLS = 128
+    let colMap = null
+    function buildColumns() {
+      const img = new Image()
+      img.onload = () => {
+        try {
+          const c = document.createElement('canvas'); c.width = COLS; c.height = COLS
+          const g = c.getContext('2d', { willReadFrequently: true })
+          g.drawImage(img, 0, 0, COLS, COLS)
+          const px = g.getImageData(0, 0, COLS, COLS).data
+          const map = []
+          for (let x = 0; x < COLS; x++) {
+            const ys = []
+            for (let y = 0; y < COLS; y++) if (px[(y * COLS + x) * 4 + 3] > 60) ys.push((y + 0.5) / COLS)
+            map.push(ys)
+          }
+          colMap = map
+        } catch (e) { colMap = null }
+      }
+      img.src = '/images/bottle.png?v=3'
+    }
+    // Front width in px: the soft edge the grains spread across, behind the front.
+    function frontWidth() {
+      return lampBox.w * ((cfg.fillRight - cfg.fillLeft) / 100) * (cfg.fillFront / 100)
+    }
+    function grainTargetX(fx) {
+      // spread over the soft front, mostly just behind it
+      return frontX() - fx * frontWidth() * 0.9 + frontWidth() * 0.15
+    }
+    function grainTargetY(x, ty) {
+      if (colMap && lampBox.w > 0) {
+        let i = Math.round(((x - lampBox.x) / lampBox.w) * (COLS - 1))
+        i = Math.max(0, Math.min(COLS - 1, i))
+        // nearest non-empty column (the front may sit over a gap, e.g. inside the handle ring)
+        for (let k = 0; k < 12; k++) {
+          const a = colMap[Math.max(0, i - k)], b = colMap[Math.min(COLS - 1, i + k)]
+          const ys = (a && a.length) ? a : (b && b.length) ? b : null
+          if (ys) return lampBox.y + lampBox.h * ys[Math.min(ys.length - 1, Math.floor((ty + 0.5) * ys.length))]
+        }
+      }
+      return lampBox.y + lampBox.h * (cfg.reach / 100 + ty * cfg.frontSpreadY / 100)
+    }
+    function frontX() {
+      const L = cfg.fillLeft / 100, R = cfg.fillRight / 100
+      return lampBox.x + lampBox.w * (L + (R - L) * Math.min(1, fill))
+    }
+    function channel(v, t, off, now, ty = 0, fx = 0.5) {
       /* Re-read the lamp a few times a second while the sand is still flying.
          Observers catch resizes and font loads; this catches everything else —
          a late image, a scrollbar appearing, an orientation change mid-flight.
          It is a single getBoundingClientRect every 12th frame, for about three
          seconds, and then the animation stops for good. */
       if ((frameCount = (frameCount + 1) % 12) === 0) measureLamp()
-      const lampCx = lampBox.x + lampBox.w / 2
-      const lampCy = lampBox.y + lampBox.h * (cfg.reach / 100)
+      const lampCx = grainTargetX(fx)
+      const lampCy = grainTargetY(lampCx, ty)
       const eased = t + (1 - t) * t * (cfg.riseEase / 100)
       const startY = H + 34
       const y = startY + (lampCy - startY) * eased
@@ -270,7 +353,7 @@ export default {
       const tSec = now / 1000
       ctx.clearRect(0, 0, W, H)
 
-      if (!formed) {
+      if (!formed && fillStarted) {
         fill = Math.min(1, fill + dt / Math.max(0.5, cfg.formSeconds))
         if (fill >= 1) { formed = true; revealAt = now }
       }
@@ -289,20 +372,18 @@ export default {
         }
       }
 
-      const lampCx = lampBox.x + lampBox.w / 2
-      const lampCy = lampBox.y + lampBox.h * (cfg.reach / 100)
-
       for (let i = dust.length - 1; i >= 0; i--) {
         const d = dust[i]
         d.t += dt / d.life
         if (d.t >= 1) { pool.push(dust.splice(i, 1)[0]); continue }
         const wob = Math.sin(d.t * cfg.wobbleRate / 6 + d.wob * 6.28) * cfg.wobble * d.depth
-        const pos = channel(d.v, d.t, d.off + wob, tSec)
+        const pos = channel(d.v, d.t, d.off + wob, tSec, d.ty, d.fx)
         d.x = pos.x; d.y = pos.y
         d.rot += d.spin * (cfg.spin / 1000) * (1 + d.t)
-        const dd = Math.hypot(lampCx - d.x, lampCy - d.y)
+        const gx = grainTargetX(d.fx), gy = grainTargetY(gx, d.ty)
+        const dd = Math.hypot(gx - d.x, gy - d.y)
         d.warm = cfg.warmDistance > 0 ? Math.max(0, 1 - dd / cfg.warmDistance) : 0
-        if (dd < cfg.absorbAt) { pool.push(dust.splice(i, 1)[0]); continue }
+        if (dd < cfg.absorbAt) { fillStarted = true; pool.push(dust.splice(i, 1)[0]); continue }
 
         const fi = Math.min(1, d.t / Math.max(0.01, cfg.fadeIn / 100))
         const fo = d.t > 1 - cfg.fadeOut / 100
@@ -334,9 +415,19 @@ export default {
          metal itself then warms toward AnimatedLamp's golden. */
       const base = cfg.baseOpacity / 100
       const top = Math.max(base, cfg.maxOpacity / 100)
-      if (!formed) {
-        const eased = fill * fill * fill * fill
+      if (!formed && !fillStarted) {
+        // sand still rising: nothing of the lamp shows yet
+        put(sandLamp, 'opacity', '0'); put(lampImg, 'opacity', '0'); put(warmLamp, 'opacity', '0')
+      } else if (!formed) {
+        /* The shape now fills left to right behind a soft front (a moving
+           mask), so the filled part shows at nearly full strength from the
+           start instead of the whole lamp brightening from nothing. */
+        const eased = 0.55 + 0.45 * fill
         put(sandLamp, 'opacity', (base + eased * (top - base)).toFixed(3))
+        const L = cfg.fillLeft, R = cfg.fillRight, f = cfg.fillFront / 100
+        const b = L + (R - L) * fill * (1 + f), a = b - (R - L) * f
+        const m = `linear-gradient(to right, #000 ${a.toFixed(1)}%, transparent ${b.toFixed(1)}%)`
+        put(sandLamp, 'maskImage', m); put(sandLamp, 'webkitMaskImage', m)
         put(lampImg, 'opacity', '0')
         put(warmLamp, 'opacity', '0')
       } else {
@@ -348,6 +439,7 @@ export default {
           const clear = !cfg.waitForSand || dust.length <= cfg.clearBelow
           if (held && clear) revealFrom = now
         }
+        put(sandLamp, 'maskImage', 'none'); put(sandLamp, 'webkitMaskImage', 'none')
         const since = revealFrom ? now - revealFrom : -1
         const rev = Math.max(0, Math.min(1, since / cfg.revealMs))
         const out = Math.max(0, Math.min(1, (since - cfg.sandHoldMs) / cfg.sandFadeMs))
@@ -362,7 +454,7 @@ export default {
           return
         }
       }
-      raf = requestAnimationFrame(frame)
+      if (!MANUAL) raf = requestAnimationFrame(frame)
     }
 
     /* The extra layers are created here rather than in the page's template, so
@@ -412,6 +504,7 @@ export default {
       // Reduce Motion: no columns, no becoming — the lamp is simply there.
       if (reduced()) { stopped = true; return }
       ctx = cv.value.getContext('2d')
+      buildColumns()
       buildPuff()
       attachLamp()
       resize()
@@ -426,7 +519,7 @@ export default {
       /* Webfonts land after first paint and reflow the hero, which moves the
          lamp again. Cinzel and Noto Serif Armenian both arrive this way. */
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => measureLamp())
-      raf = requestAnimationFrame(frame)
+      if (MANUAL) { last = 0; window.__sandStep = ms => frame(ms) } else raf = requestAnimationFrame(frame)
     })
     onBeforeUnmount(() => {
       stopped = true

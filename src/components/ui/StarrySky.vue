@@ -308,6 +308,7 @@ export default {
      dvh would track the bars live and slide the gradient while scrolling. */
   height: 100vh;
   height: 100lvh;
+  /* Phones: see the max-width rule below — the sky runs on past the bottom. */
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
@@ -330,6 +331,14 @@ export default {
     #05020d 80%,
     #000000 100%
     );
+}
+/* Founder 2026-10-01: on phones the sky is taller than the screen, so it
+   clearly runs on under Safari's glass bottom bar and the home-indicator
+   strip. The surplus is clipped by the viewport (fixed + overflow hidden), so
+   nothing scrolls or shifts; createStars() reads the real height, so the
+   extra area gets stars at the same density. */
+@media (max-width: 768px) {
+  .starry-sky { height: calc(100lvh + env(safe-area-inset-bottom, 0px) + 140px) }
 }
 .starry-sky::after {
   content: '';
