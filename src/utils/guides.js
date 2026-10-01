@@ -1,0 +1,61 @@
+// utils/guides.js — shared bits for the guide pages (2026-10-02).
+import { computed } from 'vue'
+import { isNightTime } from '@/utils/timeUtils'
+
+const API = import.meta.env.VITE_API_BASE_URL || ''
+
+export const hasToken = () => {
+  const t = localStorage.getItem('authToken')
+  if (!t) return false
+  try { return JSON.parse(atob(t.split('.')[1])).exp * 1000 > Date.now() } catch { return false }
+}
+
+/** fetch against /api/guides with the stored token; throws Error(message) on a non-2xx. */
+export async function guideApi(path, { method = 'GET', body } = {}) {
+  const token = localStorage.getItem('authToken')
+  const res = await fetch(`${API}/api/guides${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw Object.assign(new Error(data.error || `Request failed (${res.status})`), { status: res.status })
+  return data
+}
+
+/** Day/night the same way the business pages decide it. */
+export function guideTheme() {
+  return computed(() => {
+    let t = 'auto'
+    try { t = JSON.parse(localStorage.getItem('jinni_settings') || '{}').theme || localStorage.getItem('theme') || 'auto' } catch { /* auto */ }
+    if (t === 'dark') return 'night-mode'
+    if (t === 'light') return 'day-mode'
+    return isNightTime() ? 'night-mode' : 'day-mode'
+  })
+}
+
+export const CATEGORY_LABELS = { restaurant: 'Restaurant', hidden_gem: 'Hidden gem', photo_spot: 'Photo spot', activity: 'Activity' }
+export const LANGUAGE_OPTIONS = [['en', 'English'], ['hy', 'Armenian'], ['ru', 'Russian'], ['fr', 'French'], ['es', 'Spanish'], ['de', 'German'], ['it', 'Italian'], ['fa', 'Persian'], ['ar', 'Arabic'], ['zh', 'Chinese'], ['ka', 'Georgian']]
+
+/** instagram.com/reel/<code> → its official embed URL, or null (mirrors the backend rule). */
+export function instagramEmbed(url) {
+  try {
+    const u = new URL(String(url || '').trim())
+    if (!/^(www\.)?instagram\.com$/i.test(u.hostname) || u.protocol !== 'https:') return null
+    const m = u.pathname.match(/^\/(?:[a-z0-9._]+\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]{5,40})\/?$/i)
+    if (!m) return null
+    const kind = m[1].toLowerCase() === 'p' ? 'p' : (m[1].toLowerCase() === 'tv' ? 'tv' : 'reel')
+    return `https://www.instagram.com/${kind}/${m[2]}/embed`
+  } catch { return null }
+}
+
+/** Remember which guide brought this visitor: first-touch only, same shape acquisition.js stores. */
+export function tagGuideVisit(handle) {
+  try {
+    if (!handle) return
+    localStorage.setItem('jinni_guide', handle)
+    if (!localStorage.getItem('jinni_acq')) {
+      localStorage.setItem('jinni_acq', JSON.stringify({ source: `guide-${handle}`, medium: 'guide', campaign: null, term: null, content: null, landing: `/@${handle}`, referrer: document.referrer || null }))
+    }
+  } catch { /* storage blocked — attribution is best-effort */ }
+}

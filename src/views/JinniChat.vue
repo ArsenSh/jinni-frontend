@@ -309,6 +309,7 @@
                             </div>
                           </div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
+                            <a v-if="getRecommendationAtPosition(message, position).guidePicks?.length" :href="'/@' + getRecommendationAtPosition(message, position).guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="getRecommendationAtPosition(message, position).guidePicks[0].note || ''" @click.stop>Picked by @{{ getRecommendationAtPosition(message, position).guidePicks[0].handle }}</a>
                             <div v-if="(getRecommendationAtPosition(message, position).verifiedId || getRecommendationAtPosition(message, position).id?.startsWith('db-')) && getRecommendationAtPosition(message, position)._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(getRecommendationAtPosition(message, position))]" v-html="getPartnerIcon(getRecommendationAtPosition(message, position)) + ' ' + getPartnerLabel(getRecommendationAtPosition(message, position))"></div>
                             <a v-if="getRecommendationAtPosition(message, position).sourceUrl" :href="getRecommendationAtPosition(message, position).sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -434,6 +435,7 @@
                           </div>
                         </div><!-- /recommendation-card -->
                         <div class="rec-card-bottom">
+                          <a v-if="message.recommendations[part.index].guidePicks?.length" :href="'/@' + message.recommendations[part.index].guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="message.recommendations[part.index].guidePicks[0].note || ''" @click.stop>Picked by @{{ message.recommendations[part.index].guidePicks[0].handle }}</a>
                           <div v-if="(message.recommendations[part.index].verifiedId || message.recommendations[part.index].id?.startsWith('db-')) && message.recommendations[part.index]._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(message.recommendations[part.index])]" v-html="getPartnerIcon(message.recommendations[part.index]) + ' ' + getPartnerLabel(message.recommendations[part.index])"></div>
                           <a v-if="message.recommendations[part.index].sourceUrl" :href="message.recommendations[part.index].sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -590,6 +592,7 @@
                             </div>
                           </div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
+                            <a v-if="rec.guidePicks?.length" :href="'/@' + rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ rec.guidePicks[0].handle }}</a>
                             <div v-if="(rec.verifiedId || rec.id?.startsWith('db-')) && rec._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(rec)]" v-html="getPartnerIcon(rec) + ' ' + getPartnerLabel(rec)"></div>
                             <!-- Event source ("Check listing") — placed BELOW the card like the
                                  partner badge, so it reads as a footnote to the whole card, not
@@ -1767,6 +1770,7 @@
                 </div>
               </div><!-- /recommendation-card -->
               <div class="rec-card-bottom">
+                <a v-if="item.rec.guidePicks?.length" :href="'/@' + item.rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="item.rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ item.rec.guidePicks[0].handle }}</a>
                 <div v-if="(item.rec.verifiedId || item.rec.id?.startsWith('db-')) && item.rec._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(item.rec)]" v-html="getPartnerIcon(item.rec) + ' ' + getPartnerLabel(item.rec)"></div>
               </div>
               </div><!-- /rec-card-wrapper -->
@@ -3335,6 +3339,7 @@ export default {
                 isLargeCard: rec.isLargeCard === true,
                 _verifiedModel: rec._verifiedModel || null,
                 ...(rec.sourceUrl ? { sourceUrl: rec.sourceUrl } : {}),
+                ...(rec.guidePicks?.length ? { guidePicks: rec.guidePicks } : {}),
                 ownerDescription: result.data.description || null,
                 rating: result.data.rating || rec.rating,
                 address: result.data.address || rec.address,
@@ -3429,6 +3434,7 @@ export default {
         partnerTier: rec.partnerTier,
         _verifiedModel: rec._verifiedModel || null,   // destination ≠ partner: no badge on the share page
         ...(rec.sourceUrl ? { sourceUrl: rec.sourceUrl } : {}),   // the event's listing page
+        ...(rec.guidePicks?.length ? { guidePicks: rec.guidePicks } : {}),   // "Picked by @guide"
         // Live price + Book link and the owner's listed price travel with the share (2026-09-19).
         ...(rec.hotelPrice ? { hotelPrice: rec.hotelPrice } : {}),
         ...(rec.bookingUrl ? { bookingUrl: rec.bookingUrl } : {}),
@@ -5462,6 +5468,7 @@ export default {
             // schema stores it (recommendationSchema.sourceUrl) — it was this
             // whitelist that dropped it, killing the link on every reload.
             ...(rec.sourceUrl && { sourceUrl: rec.sourceUrl }),
+            ...(rec.guidePicks?.length && { guidePicks: rec.guidePicks }),
             // Live partner price + booking link and the owner's listed price —
             // without these the "from $X / night" row and the Check-rates pill
             // vanished on every reload (founder 2026-09-19).
@@ -7789,6 +7796,11 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .partner-label svg{flex-shrink:0;vertical-align:middle}
 .night-mode .partner-label--verified{color:#22c556b1}
 .day-mode .partner-label--verified{color:#22c556ea}
+/* Guide pages (2026-10-02): "Picked by @guide" under the card */
+.rec-guide-pick{font-size:11px;letter-spacing:.02em;text-decoration:none;margin-right:10px;white-space:nowrap}
+.night-mode .rec-guide-pick{color:#ffd27a}
+.day-mode .rec-guide-pick{color:#b4540a}
+.rec-guide-pick:hover{text-decoration:underline}
 .partner-label--spotlight{color:#3b9fdda2}
 .night-mode .partner-label--signature{color:#ffbf0085}
 .day-mode .partner-label--signature{color:#d39510}

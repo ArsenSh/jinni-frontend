@@ -21,10 +21,20 @@ export default {
     // gave Safari's bars day cream ("white") under the dark modal.
     isNightMode() { return this.$store.getters['settings/effectiveTheme'] === 'dark' }
   },
+  mounted() {
+    // Guide pages (2026-10-02): remember where a guide came from, so signing
+    // in — including the Google round trip — returns them to the application
+    // or their dashboard instead of the traveler chat. Guide paths only.
+    const r = String(this.$route.query.redirect || '')
+    if (/^\/(guides?\/|@)/.test(r)) { try { sessionStorage.setItem('jinni_after_auth', r) } catch { /* no storage */ } }
+  },
   methods: {
     handleClose() { this.$router.push('/') },
     handleLoginSuccess(authData) {
-      if (authData.user.onboardingCompleted) { this.$router.push('/chat')  } 
+      let back = null
+      try { back = sessionStorage.getItem('jinni_after_auth'); sessionStorage.removeItem('jinni_after_auth') } catch { /* no storage */ }
+      if (back && /^\/(guides?\/|@)/.test(back)) { this.$router.push(back); return }
+      if (authData.user.onboardingCompleted) { this.$router.push('/chat')  }
       else { this.$router.push('/onboarding') }
     }
   }

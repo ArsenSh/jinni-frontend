@@ -1573,6 +1573,9 @@
          by default; staff bury garbage (Hide) or endorse places (Verify).
          Sorted suspicion-first (most disliked → lowest rated) server-side.
          ════════════════════════════════════════════════════════════════ -->
+    <!-- GUIDES TAB (2026-10-02): guide applications, Instagram bio-code check -->
+    <StaffGuides v-if="activeTab === 'guides'" :theme="theme" @count="guidesPending = $event" />
+
     <template v-if="activeTab === 'explore'">
 
     <div v-if="scopeBanner" class="scope-banner" :class="{ 'scope-banner--empty': scopeBanner.empty }">
@@ -2152,6 +2155,7 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import axios from 'axios'
 import { isNightTime } from '@/utils/timeUtils'
+import StaffGuides from '@/components/staff/StaffGuides.vue'
 const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.5:5000/api'
 // Status keys & labels — match Business.js enum
 // 'expired' was added when one-time events past their end-date became their
@@ -2178,6 +2182,7 @@ const STYLE_TAGS    = ['family','romantic','luxury','budget']
 
 export default {
   name: 'StaffValidation',
+  components: { StaffGuides },
   setup() {
     const store = useStore()
     // ── Theme (matches the rest of the app) ─────────────────────────
@@ -2401,6 +2406,7 @@ export default {
     // (A staff member with manageDestinations only would land directly on
     // their working surface.) Admin sees both.
     const activeTab = ref('validation')
+    const guidesPending = ref(null)
     const visibleTabs = computed(() => {
       const tabs = []
       if (myPermissions.value.validateBusinesses) {
@@ -2411,6 +2417,10 @@ export default {
       }
       if (myPermissions.value.moderateExplore) {
         tabs.push({ key: 'explore', label: 'Explore', count: expTotal.value || null })
+      }
+      // Guide applications (2026-10-02) ride on the business-validation permission.
+      if (myPermissions.value.validateBusinesses) {
+        tabs.push({ key: 'guides', label: 'Guides', count: guidesPending.value })
       }
       return tabs
     })
@@ -4302,6 +4312,7 @@ export default {
     onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
     return {
+      guidesPending,
       theme, toggleTheme, statusList, tierList,
       status, tier, cityInput, page, total, totalPages, businesses, counts, listLoading,
       setStatus, setTier, onCityInput, changePage, loadList,

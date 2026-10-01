@@ -34,6 +34,34 @@ const routes = [
         component: () => import('@/views/BusinessOnboarding.vue'),
         meta: { title: 'List Your Business on Jinni', requiresAuth: false }
     },
+    // ── Guide pages (2026-10-02) ──────────────────────────────────────────────
+    // /guides = programme page (public), /guides/apply + /guide/dashboard need an
+    // account but skip traveler onboarding (meta.guide), /@handle = the guide's
+    // public page that goes in their Instagram bio.
+    {
+        path: '/guides',
+        name: 'GuidesLanding',
+        component: () => import('@/views/GuidesLanding.vue'),
+        meta: { title: 'Jinni for Guides', public: true }
+    },
+    {
+        path: '/guides/apply',
+        name: 'GuideApply',
+        component: () => import('@/views/GuideApply.vue'),
+        meta: { title: 'Apply as a guide — Jinni', requiresAuth: true, guide: true }
+    },
+    {
+        path: '/guide/dashboard',
+        name: 'GuideDashboard',
+        component: () => import('@/views/GuideDashboard.vue'),
+        meta: { title: 'My guide page — Jinni', requiresAuth: true, guide: true }
+    },
+    {
+        path: '/@:handle([A-Za-z0-9._]+)',
+        name: 'GuidePage',
+        component: () => import('@/views/GuidePage.vue'),
+        meta: { title: 'Local picks on Jinni', public: true }
+    },
     {
         path: '/chat',
         name: 'JinniChat',
@@ -224,6 +252,10 @@ router.beforeEach(async (to, from, next) => {
             const payload = JSON.parse(atob(data.token.split('.')[1]))
             const userData = { id: payload.userId || payload.id, email: payload.email, name: payload.name, onboardingCompleted: payload.onboardingCompleted || false, isAdmin: payload.isAdmin || false, role: payload.role || (payload.isAdmin ? 'admin' : 'user'), businessId: payload.businessId || null }
             localStorage.setItem('user', JSON.stringify(userData))
+            // A guide who started at /guides/apply returns there (AuthPage stored it).
+            let back = null
+            try { back = sessionStorage.getItem('jinni_after_auth'); sessionStorage.removeItem('jinni_after_auth') } catch { /* no storage */ }
+            if (back && /^\/(guides?\/|@)/.test(back)) { return next({ path: back, replace: true }) }
             if (userData.onboardingCompleted) { return next({ name: 'JinniChat', replace: true }) }
             else { return next({ name: 'Onboarding', replace: true }) }
         } catch (error) {
@@ -306,10 +338,13 @@ router.beforeEach(async (to, from, next) => {
     }
     // Business owners go to their dashboard, not traveler onboarding/chat
     if (user?.businessId && !user?.isAdmin) {
-        const bizRoutes = ['BusinessDashboard', 'BusinessApply', 'BusinessLanding', 'JinniChat', 'Explore', 'ContactUs', 'Onboarding', 'MapSelector', 'Terms', 'Privacy', 'BusinessPrivacy', 'BusinessTerms']
+        const bizRoutes = ['BusinessDashboard', 'BusinessApply', 'BusinessLanding', 'JinniChat', 'Explore', 'ContactUs', 'Onboarding', 'MapSelector', 'Terms', 'Privacy', 'BusinessPrivacy', 'BusinessTerms', 'GuideApply', 'GuideDashboard']
         if (!bizRoutes.includes(to.name)) { return next({ name: 'BusinessDashboard' }) }
         return next()
     }
+    // Guide pages: a guide who signed up only to apply is not sent through the
+    // traveler onboarding first.
+    if (to.meta.guide) return next()
     const needsOnboarding = !user?.onboardingCompleted && to.name !== 'Onboarding';
     const completedOnboarding = user?.onboardingCompleted && to.name === 'Onboarding' && !to.query.editing && from.name !== 'MapSelector';
     if (needsOnboarding) { return next({ name: 'Onboarding' }) }
