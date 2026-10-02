@@ -102,8 +102,11 @@ onMounted(async () => {
 <style scoped>
 .gl { --serif: var(--brand-serif, 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif);
   min-height: 100vh; font-family: 'Lora', Georgia, serif; padding: 0 16px 0; box-sizing: border-box; overflow-x: hidden; }
-.gl.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 100%); color: #3c2a1e; }
-.gl.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 100%); color: #f5e6c8; }
+.gl.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 50%, #f9f5eb 100%); color: #3c2a1e; }
+.gl.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 50%, #0a0118 100%); color: #f5e6c8; }
+/* Both themes end on their TOP colour: iOS 26 paints the area past the page
+   with one solid colour (the top), so a page ending lighter showed a band at
+   the bottom edge (founder 2026-10-03). */
 
 /* Header: lamp + gold wordmark + "Guides" */
 .gl-top { max-width: 1080px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 20px 0; gap: 12px; }

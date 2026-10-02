@@ -111,8 +111,11 @@ onMounted(async () => {
 
 <style scoped>
 .gp { min-height: 100vh; font-family: 'Lora', Georgia, serif; padding: 0 16px 40px; box-sizing: border-box; }
-.gp.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 100%); color: #3c2a1e; }
-.gp.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 100%); color: #f5e6c8; }
+.gp.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 50%, #f9f5eb 100%); color: #3c2a1e; }
+.gp.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 50%, #0a0118 100%); color: #f5e6c8; }
+/* Both themes end on their TOP colour: iOS 26 paints the area past the page
+   with one solid colour (the top), so a page ending lighter showed a band at
+   the bottom edge (founder 2026-10-03). */
 .gp-top { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 18px 0; }
 .gp-brand { display: inline-flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 600; text-decoration: none; color: inherit; }
 .gp-lamp { width: 52px; margin-block: -8px; margin-inline: -8px -4px; }
