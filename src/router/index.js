@@ -60,7 +60,8 @@ const routes = [
         path: '/guides/apply',
         name: 'GuideApply',
         component: () => import('@/views/GuideApply.vue'),
-        meta: { title: 'Apply as a guide — Jinni', requiresAuth: true, guide: true }
+        // Public since 2026-10-02: a signed-out guide creates the account on this page.
+        meta: { title: 'Apply as a guide — Jinni', guide: true }
     },
     {
         path: '/guide/dashboard',

@@ -90,7 +90,8 @@ const theme = guideTheme()
 const signedIn = hasToken()
 const isGuide = ref(false)
 const year = new Date().getFullYear()
-const ctaTo = computed(() => (isGuide.value ? '/guide/dashboard' : (signedIn ? '/guides/apply' : '/auth?redirect=/guides/apply')))
+// The apply page creates the account itself — no detour through the sign-in page.
+const ctaTo = computed(() => (isGuide.value ? '/guide/dashboard' : '/guides/apply'))
 
 onMounted(async () => {
   if (!signedIn) return
