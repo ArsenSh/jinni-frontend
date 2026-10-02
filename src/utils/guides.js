@@ -31,6 +31,13 @@ export async function guideApi(path, { method = 'GET', body } = {}) {
   return data
 }
 
+/** A pick's image: Jinni's own image paths get the API host; full https links (staff Destination photos) stay as they are. */
+export function guideImage(src) {
+  if (!src || typeof src !== 'string') return ''
+  if (/^https:\/\//.test(src)) return src
+  return src.startsWith('/') ? `${API}${src}` : ''
+}
+
 /** Day/night the same way the business pages decide it. */
 export function guideTheme() {
   return computed(() => {

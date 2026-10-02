@@ -1519,7 +1519,12 @@
       "edit": "Edit",
       "remove": "Remove",
       "remove_confirm": "Remove {name} from your page?",
-      "reel_error": "That reel link is not an Instagram post or reel."
+      "reel_error": "That reel link is not an Instagram post or reel.",
+      "staff_place": "Curated by Jinni",
+      "place_gone": "No longer shown on Jinni",
+      "cat_team": "Jinni's team lists this place as: {cats}.",
+      "cat_none": "Jinni's team hasn't listed this place under a guide category yet — ask us to add one.",
+      "cat_not_food": "Only places that serve food or drink can be a restaurant pick."
     },
     "page": {
       "loading": "Loading…",

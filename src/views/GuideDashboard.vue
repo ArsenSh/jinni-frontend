@@ -59,17 +59,17 @@
               <input v-model="query" :placeholder="t('guides.dashboard.find_place_ph')" @input="search" />
             </label>
             <p v-if="searching" class="gd-muted">{{ t('guides.dashboard.searching') }}</p>
-            <p v-else-if="query.length >= 2 && !results.length && searched" class="gd-muted">{{ t('guides.dashboard.no_place') }}</p>
+            <p v-else-if="query.length >= 2 && !results.length && searched && !draft.place" class="gd-muted">{{ t('guides.dashboard.no_place') }}</p>
             <div v-if="results.length && !draft.place" class="gd-results">
               <button v-for="p in results" :key="p.placeId" type="button" class="gd-result" @click="choose(p)">
-                <img v-if="p.image" :src="apiBase + p.image" alt="" loading="lazy" /><span v-else class="gd-noimg">◎</span>
-                <span><strong>{{ p.name }}</strong><small>{{ p.address }}</small></span>
+                <img v-if="p.image" :src="guideImage(p.image)" alt="" loading="lazy" /><span v-else class="gd-noimg">◎</span>
+                <span><strong>{{ p.name }}</strong><small>{{ p.address }}</small><small v-if="p.source === 'destination'" class="gd-curated">{{ t('guides.dashboard.staff_place') }}</small></span>
               </button>
             </div>
           </template>
 
           <div v-if="draft.place" class="gd-chosen">
-            <img v-if="draft.place.image" :src="apiBase + draft.place.image" alt="" />
+            <img v-if="draft.place.image" :src="guideImage(draft.place.image)" alt="" />
             <div><strong>{{ draft.place.name }}</strong><small>{{ draft.place.address }}</small></div>
             <button v-if="!editing" type="button" class="gd-btn-ghost" @click="draft.place = null">{{ t('guides.dashboard.change') }}</button>
           </div>
@@ -78,8 +78,10 @@
             <fieldset>
               <legend>{{ t('guides.dashboard.what_is_it') }}</legend>
               <div class="gd-chips">
-                <button v-for="key in CATEGORY_KEYS" :key="key" type="button" class="gd-chip" :class="{ on: draft.category === key, 'jinni-chip-on': draft.category === key }" @click="draft.category = key">{{ t('guides.categories.' + key) }}</button>
+                <button v-for="key in CATEGORY_KEYS" :key="key" type="button" class="gd-chip" :disabled="!catAllowed(key)" :class="{ on: draft.category === key, 'jinni-chip-on': draft.category === key, off: !catAllowed(key) }" @click="draft.category = key">{{ t('guides.categories.' + key) }}</button>
               </div>
+              <!-- Why some chips are off: the place's categories were set by Jinni's team, or it doesn't serve food. -->
+              <p v-if="catHint" class="gd-muted gd-cat-hint">{{ catHint }}</p>
             </fieldset>
             <label><span>{{ t('guides.dashboard.why') }} <span class="gd-muted">{{ t('guides.dashboard.why_hint') }}</span></span>
               <textarea v-model="draft.note" maxlength="280" rows="2" :placeholder="t('guides.dashboard.why_ph')"></textarea>
@@ -103,7 +105,7 @@
 
             <p v-if="error" class="gd-bad">{{ error }}</p>
             <div class="gd-actions">
-              <button type="button" class="gd-btn jinni-pill" :disabled="saving || !draft.category" @click="save">{{ saving ? t('guides.dashboard.saving') : (editing ? t('guides.dashboard.save_changes') : t('guides.dashboard.add_to_page')) }}</button>
+              <button type="button" class="gd-btn jinni-pill" :disabled="saving || !draft.category || !catAllowed(draft.category)" @click="save">{{ saving ? t('guides.dashboard.saving') : (editing ? t('guides.dashboard.save_changes') : t('guides.dashboard.add_to_page')) }}</button>
               <button type="button" class="gd-btn-ghost" @click="reset">{{ t('guides.dashboard.cancel') }}</button>
             </div>
           </template>
@@ -117,6 +119,7 @@
               <div>
                 <span class="gd-tag">{{ t('guides.categories.' + p.category) }}</span>
                 <strong>{{ p.placeName }}</strong>
+                <small v-if="p.placeGone" class="gd-bad"> · {{ t('guides.dashboard.place_gone') }}</small>
                 <p v-if="p.note" class="gd-note">"{{ p.note }}"</p>
                 <small v-if="p.tour" class="gd-muted">{{ t('guides.dashboard.tour_line') }} {{ p.tour.title }}{{ p.tour.price != null ? ` · ${p.tour.price} ${p.tour.currency || ''}` : '' }}</small>
                 <small v-if="p.reelUrl" class="gd-muted"> · {{ t('guides.dashboard.reel_attached') }}</small>
@@ -137,7 +140,7 @@
 import '@/assets/styles/jinni-pill.css'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { guideTheme, guideApi, CATEGORY_KEYS, instagramEmbed, initGuideLanguage } from '@/utils/guides'
+import { guideTheme, guideApi, CATEGORY_KEYS, instagramEmbed, initGuideLanguage, guideImage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
 import SwitchModeOverlay from '@/components/ui/SwitchModeOverlay.vue'
 import { useRouter } from 'vue-router'
@@ -145,7 +148,6 @@ import { useRouter } from 'vue-router'
 const { t, locale } = useI18n()
 initGuideLanguage(locale)
 
-const apiBase = import.meta.env.VITE_API_BASE_URL || ''
 const theme = guideTheme()
 // Back to the chat the same way the business dashboard does it: the switching overlay, then /chat.
 const router = useRouter()
@@ -187,7 +189,21 @@ function search() {
     searching.value = false; searched.value = true
   }, 300)
 }
-function choose(p) { draft.place = p; results.value = [] }
+function choose(p) {
+  draft.place = p; results.value = []
+  // Start on the category Jinni already knows for this place, when it has one.
+  draft.category = p.categories?.suggested || (p.categories?.allowed?.length === 1 ? p.categories.allowed[0] : '')
+}
+// Category rules come from the server with each place (null = older data → all open; the server still checks).
+const catAllowed = (key) => { const c = draft.place?.categories; return !c || c.allowed.includes(key) }
+const catHint = computed(() => {
+  const c = draft.place?.categories
+  if (!c) return ''
+  const names = c.allowed.map(k => t('guides.categories.' + k)).join(', ')
+  if (c.curated) return c.allowed.length ? t('guides.dashboard.cat_team', { cats: names }) : t('guides.dashboard.cat_none')
+  if (!c.allowed.includes('restaurant')) return t('guides.dashboard.cat_not_food')
+  return ''
+})
 function reset() {
   Object.assign(draft, { place: null, category: '', note: '', reelUrl: '', tour: emptyTour() })
   editing.value = null; query.value = ''; results.value = []; error.value = ''; searched.value = false
@@ -195,7 +211,9 @@ function reset() {
 function edit(p) {
   reset()
   editing.value = p.id
-  Object.assign(draft, { place: { placeId: p.placeId, name: p.placeName, address: '', image: `/api/ai/place-image/${p.placeId}/0` },
+  Object.assign(draft, { place: { placeId: p.placeId, name: p.placeName, address: p.address || '', image: p.image || null, source: p.placeId.startsWith('dest:') ? 'destination' : 'place',
+      // Editing keeps the pick's own category available even if the rules changed since.
+      categories: p.categories ? { ...p.categories, allowed: [...new Set([...p.categories.allowed, p.category])] } : null },
     category: p.category, note: p.note || '', reelUrl: p.reelUrl || '', tour: p.tour ? { ...emptyTour(), ...p.tour } : emptyTour() })
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -239,6 +257,10 @@ onMounted(async () => { try { await load() } catch { /* shows the empty state */
   .gd-sub { max-width: 42vw; }
 }
 .gd-top-right { display: flex; align-items: center; gap: 8px; }
+.gd-chip.off, .gd-chip:disabled { opacity: 0.38; cursor: not-allowed; }
+.gd-cat-hint { margin: 8px 0 0; font-size: 14px; }
+.gd-curated { display: block; color: #b4540a; font-size: 12px; letter-spacing: 0.04em; }
+.night-mode .gd-curated { color: #ffd27a; }
 .gd-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; box-sizing: border-box; font-size: 15px; line-height: 1; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); white-space: nowrap; }
 .gd-main { max-width: 760px; margin: 0 auto; display: grid; gap: 16px; }
 .gd-panel { border-radius: 20px; padding: 22px; display: grid; gap: 14px; backdrop-filter: blur(20px) saturate(160%); }

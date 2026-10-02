@@ -1519,7 +1519,12 @@
       "edit": "Modifier",
       "remove": "Retirer",
       "remove_confirm": "Retirer {name} de votre page ?",
-      "reel_error": "Ce lien n'est pas une publication ou un reel Instagram."
+      "reel_error": "Ce lien n'est pas une publication ou un reel Instagram.",
+      "staff_place": "Sélectionné par Jinni",
+      "place_gone": "N'est plus affiché sur Jinni",
+      "cat_team": "L'équipe Jinni classe ce lieu comme : {cats}.",
+      "cat_none": "L'équipe Jinni n'a pas encore classé ce lieu dans une catégorie de guide — demandez-nous d'en ajouter une.",
+      "cat_not_food": "Seuls les lieux qui servent à manger ou à boire peuvent être un choix « restaurant »."
     },
     "page": {
       "loading": "Chargement…",

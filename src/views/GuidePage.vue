@@ -42,7 +42,7 @@
 
         <section class="gp-grid">
           <article v-for="p in shown" :key="p.id" class="gp-card">
-            <img v-if="p.image" :src="apiBase + p.image" :alt="p.name" class="gp-img" loading="lazy" />
+            <img v-if="p.image" :src="guideImage(p.image)" :alt="p.name" class="gp-img" loading="lazy" />
             <div class="gp-body">
               <span class="gp-tag">{{ t('guides.categories.' + p.category) }}</span>
               <h3>{{ p.name }}</h3>
@@ -74,14 +74,13 @@ import '@/assets/styles/jinni-pill.css'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { guideTheme, guideApi, CATEGORY_KEYS, tagGuideVisit, hasToken, initGuideLanguage } from '@/utils/guides'
+import { guideTheme, guideApi, CATEGORY_KEYS, tagGuideVisit, hasToken, initGuideLanguage, guideImage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
 
 const { t, locale } = useI18n()
 initGuideLanguage(locale)
 
 const route = useRoute()
-const apiBase = import.meta.env.VITE_API_BASE_URL || ''
 const theme = guideTheme()
 const loading = ref(true)
 const guide = ref(null)

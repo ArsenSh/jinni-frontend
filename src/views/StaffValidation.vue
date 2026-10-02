@@ -1659,12 +1659,16 @@
           <div v-if="gPicksLoading" class="muted-sm">Loading picks…</div>
           <div v-for="pk in gPicks" :key="pk.id" style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(128,128,128,.18)">
             <div style="min-width:0">
-              <div style="font-size:14px"><strong>{{ pk.placeName || pk.placeId }}</strong> <span class="row-tag">{{ GUIDE_CAT_LABEL[pk.category] || pk.category }}</span></div>
+              <div style="font-size:14px"><strong>{{ pk.placeName || pk.placeId }}</strong> <span class="row-tag">{{ GUIDE_CAT_LABEL[pk.category] || pk.category }}</span>
+                <span v-if="pk.categoryMismatch" class="row-tag" style="color:#f59e0b" :title="`Jinni's data lists this place as: ${(pk.teamCategories || []).join(', ') || '—'}`">category mismatch</span>
+                <span v-if="pk.source === 'destination'" class="row-tag">destination</span>
+                <span v-if="pk.placeGone" class="row-tag" style="color:#ef4444">hidden / deleted</span></div>
               <div v-if="pk.note" style="margin-top:4px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">“{{ pk.note }}”</div>
               <div v-if="pk.tour" class="muted-sm" style="margin-top:4px">Tour: {{ pk.tour.title || '—' }}<span v-if="pk.tour.price != null"> · {{ pk.tour.price }} {{ pk.tour.currency || '' }}</span><span v-if="pk.tour.durationHours"> · {{ pk.tour.durationHours }}h</span><span v-if="pk.tour.contact"> · {{ pk.tour.contact }}</span></div>
               <div style="margin-top:4px;display:flex;gap:12px;flex-wrap:wrap">
                 <a v-if="pk.reelUrl" class="link-sm" :href="pk.reelUrl" target="_blank" rel="noopener">reel ↗</a>
-                <a class="link-sm" :href="`https://www.google.com/maps/place/?q=place_id:${pk.placeId}`" target="_blank" rel="noopener">open in map ↗</a>
+                <a v-if="pk.source !== 'destination'" class="link-sm" :href="`https://www.google.com/maps/place/?q=place_id:${pk.placeId}`" target="_blank" rel="noopener">open in map ↗</a>
+                <span v-if="pk.categoryMismatch" class="muted-sm">Jinni lists it as: {{ (pk.teamCategories || []).join(', ') }}</span>
                 <span class="muted-sm">{{ relTime(pk.createdAt) }}</span>
               </div>
             </div>

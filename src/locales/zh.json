@@ -1519,7 +1519,12 @@
       "edit": "编辑",
       "remove": "移除",
       "remove_confirm": "要从您的主页移除 {name} 吗？",
-      "reel_error": "该链接不是 Instagram 帖子或 Reels。"
+      "reel_error": "该链接不是 Instagram 帖子或 Reels。",
+      "staff_place": "Jinni 精选",
+      "place_gone": "已不再在 Jinni 上显示",
+      "cat_team": "Jinni 团队将此地点归类为：{cats}。",
+      "cat_none": "Jinni 团队尚未将此地点归入向导类别——请联系我们添加。",
+      "cat_not_food": "只有提供餐饮的地点才能作为餐厅推荐。"
     },
     "page": {
       "loading": "加载中…",
