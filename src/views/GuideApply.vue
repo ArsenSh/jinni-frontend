@@ -124,7 +124,9 @@ const handleState = ref('')
 let checkTimer = null
 
 const clean = (s) => String(s || '').trim().replace(/^@+/, '').toLowerCase()
-function syncHandle() { if (!handleTouched.value) { form.handle = clean(form.instagram); checkHandle() } }
+// Instagram as people type it: '@Name', 'name' or a pasted profile link (same rule as the server).
+const cleanIg = (s) => { let v = String(s || '').trim(); const m = v.match(/^(?:https?:\/\/)?(?:www\.)?instagram\.com\/([^/?#\s]+)/i); if (m) v = m[1]; return clean(v) }
+function syncHandle() { if (!handleTouched.value) { form.handle = cleanIg(form.instagram); checkHandle() } }
 function checkHandle() {
   clearTimeout(checkTimer)
   const h = clean(form.handle)
@@ -146,7 +148,7 @@ async function submit() {
   if (!form.acceptTerms) { error.value = t('guides.apply.accept_terms_error'); return }
   sending.value = true
   try {
-    const r = await guideApi('/apply', { method: 'POST', body: { ...form, handle: clean(form.handle), instagram: clean(form.instagram) } })
+    const r = await guideApi('/apply', { method: 'POST', body: { ...form, handle: clean(form.handle), instagram: cleanIg(form.instagram) } })
     guide.value = r.guide
     window.scrollTo({ top: 0 })
   } catch (e) { error.value = e.message } finally { sending.value = false }
