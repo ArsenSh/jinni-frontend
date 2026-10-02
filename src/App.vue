@@ -107,6 +107,15 @@ function findPagePaint(rootEl) {
     scanned++;
     let paint = null;
     try { paint = parsePaint(getComputedStyle(el)); } catch (e) { /* detached node */ }
+    // A backdrop may state the colours it really shows at the screen's top and
+    // bottom (data-chrome-top/bottom). Needed where a radial gradient's last
+    // stop is a far corner, not the visible edge: StarrySky's ends in #000 but
+    // its bottom edge reads #0b0419, so the bottom chrome painted a black band
+    // under a violet sky (founder 2026-10-02, night landing on the phone).
+    if (paint && el.dataset) {
+      if (el.dataset.chromeTop) paint.top = el.dataset.chromeTop;
+      if (el.dataset.chromeBottom) paint.bottom = el.dataset.chromeBottom;
+    }
     if (paint) return paint;
     if (depth < 4) {
       for (const child of el.children) {

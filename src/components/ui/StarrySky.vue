@@ -1,5 +1,5 @@
 <template>
-  <div class="starry-sky" ref="starrySky"></div>
+  <div class="starry-sky" data-chrome-top="#0a0118" data-chrome-bottom="#0b0419" ref="starrySky"></div>
 </template>
 
 
