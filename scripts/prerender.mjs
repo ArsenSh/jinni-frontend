@@ -65,9 +65,13 @@ function withHead(shell, { title, description, canonical, ogImage = null, extraH
     return h;
 }
 
-/** Put static markup inside #app. The app replaces it on mount. A small
- *  inline style keeps the instant before mount looking intentional. */
-const PRE_STYLE = `<style>#app>main.pre{max-width:820px;margin:0 auto;padding:40px 20px;font-family:Georgia,serif;color:#3c2a1e;text-align:center}#app>main.pre h1{font-size:2rem;margin:0 0 8px}#app>main.pre h2{font-size:1.2rem;margin:28px 0 8px}#app>main.pre ul{list-style:none;padding:0;margin:0}#app>main.pre li{margin:6px 0}#app>main.pre img{display:none}#app>main.pre a{color:#B7791F}</style>`;
+/** Put static markup inside #app. The app replaces it on mount.
+ *  2026-10-02 (founder screenshot, iPhone): on its own route the raw text
+ *  showed for the first second before the app loaded. It now stays IN the
+ *  HTML (crawlers read it) but is invisible while the app loads; it fades in
+ *  only if the app has not mounted after 4 s (very slow network), and at once
+ *  when JavaScript is off (<noscript>). */
+const PRE_STYLE = `<style>@keyframes pre-show{to{opacity:1}}#app>main.pre{opacity:0;animation:pre-show .4s ease 4s forwards;max-width:820px;margin:0 auto;padding:40px 20px;font-family:Georgia,serif;color:#3c2a1e;text-align:center}#app>main.pre h1{font-size:2rem;margin:0 0 8px}#app>main.pre h2{font-size:1.2rem;margin:28px 0 8px}#app>main.pre ul{list-style:none;padding:0;margin:0}#app>main.pre li{margin:6px 0}#app>main.pre img{display:none}#app>main.pre a{color:#B7791F}@media (prefers-color-scheme:dark){#app>main.pre{color:#f5e6c8}}</style><noscript><style>#app>main.pre{opacity:1;animation:none}</style></noscript>`;
 function withBody(shell, inner) {
     const h = shell.includes(PRE_STYLE) ? shell : shell.replace('</head>', `${PRE_STYLE}\n</head>`);
     return h.replace('<div id="app"></div>', `<div id="app">${inner.replace('<main>', '<main class="pre">')}</div>`);
