@@ -80,7 +80,7 @@
               <input v-model.trim="draft.reelUrl" placeholder="https://www.instagram.com/reel/…" />
             </label>
             <p v-if="draft.reelUrl && !reelEmbed" class="gd-bad">Paste a link to one of your Instagram posts or reels.</p>
-            <div v-if="reelEmbed" class="gd-embed"><iframe :src="reelEmbed" loading="lazy" scrolling="no" allowtransparency="true" title="Instagram preview"></iframe></div>
+            <div v-if="reelEmbed" class="gd-embed"><iframe :src="reelEmbed" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" title="Instagram preview"></iframe></div>
 
             <div v-if="draft.category === 'activity'" class="gd-tour">
               <p><strong>Is this one of your tours?</strong> <span class="gd-muted">Fill this in and travelers can book you directly.</span></p>

@@ -1,7 +1,12 @@
 <template>
   <div class="ga" :class="theme">
     <header class="ga-top">
-      <router-link to="/guides" class="ga-brand"><img src="/images/bottle.png" alt="" class="ga-lamp" />Jinni Guides</router-link>
+      <router-link to="/guides" class="ga-brand" aria-label="Jinni Guides">
+        <img src="/images/bottle.png" alt="" class="ga-lamp" />
+        <span class="ga-word" translate="no">Jinni</span>
+        <span class="ga-sep" aria-hidden="true"></span>
+        <span class="ga-sub-brand">Guides</span>
+      </router-link>
     </header>
 
     <main class="ga-main">
@@ -156,8 +161,13 @@ onMounted(async () => {
 .ga.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 100%); color: #3c2a1e; }
 .ga.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 100%); color: #f5e6c8; }
 .ga-top { max-width: 640px; margin: 0 auto; padding: 18px 0; }
-.ga-brand { display: inline-flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; text-decoration: none; color: inherit; }
-.ga-lamp { width: 30px; }
+.ga-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.ga-lamp { width: 36px; height: auto; }
+.ga-word { font-family: var(--brand-serif, 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif); font-size: 26px; font-weight: 600; line-height: 1; letter-spacing: 1px;
+  background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.ga-sep { width: 1px; height: 20px; background: linear-gradient(180deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.8), rgba(212, 175, 55, 0)); }
+.ga-sub-brand { font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
+@media (min-width: 900px) { .ga-top { padding: 28px 0 22px; } .ga-main { margin-top: 12px; } }
 .ga-main { max-width: 640px; margin: 0 auto; }
 .ga-panel { border-radius: 20px; padding: 26px 22px; display: grid; gap: 16px; backdrop-filter: blur(20px) saturate(160%); }
 .day-mode .ga-panel { background: rgba(255, 255, 255, 0.65); box-shadow: 0 0 18px -2px rgba(60, 42, 30, 0.14); }

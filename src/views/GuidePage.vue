@@ -55,7 +55,7 @@
                 <a v-if="p.lat != null" :href="`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`" target="_blank" rel="noopener" class="gp-btn-ghost">Map</a>
                 <button v-if="p.embedUrl" type="button" class="gp-btn-ghost" @click="toggleReel(p.id)">{{ openReel === p.id ? 'Hide reel' : 'Watch reel' }}</button>
               </div>
-              <div v-if="openReel === p.id && p.embedUrl" class="gp-embed"><iframe :src="p.embedUrl" loading="lazy" scrolling="no" allowtransparency="true" :title="`${guide.displayName} on Instagram`"></iframe></div>
+              <div v-if="openReel === p.id && p.embedUrl" class="gp-embed"><iframe :src="p.embedUrl" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="`${guide.displayName} on Instagram`"></iframe></div>
             </div>
           </article>
         </section>

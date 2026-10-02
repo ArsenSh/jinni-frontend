@@ -13,11 +13,19 @@ export const hasToken = () => {
 /** fetch against /api/guides with the stored token; throws Error(message) on a non-2xx. */
 export async function guideApi(path, { method = 'GET', body } = {}) {
   const token = localStorage.getItem('authToken')
-  const res = await fetch(`${API}/api/guides${path}`, {
-    method,
-    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  })
+  // Never wait forever: a hung request would leave a page on "Loading…".
+  const ac = new AbortController()
+  const timer = setTimeout(() => ac.abort(), 15000)
+  let res
+  try {
+    res = await fetch(`${API}/api/guides${path}`, {
+      method, signal: ac.signal,
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    })
+  } catch (e) {
+    throw Object.assign(new Error(e.name === 'AbortError' ? 'The server is taking too long. Please try again.' : 'Could not reach Jinni. Check your connection and try again.'), { status: 0 })
+  } finally { clearTimeout(timer) }
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw Object.assign(new Error(data.error || `Request failed (${res.status})`), { status: res.status })
   return data
