@@ -112,7 +112,7 @@ onMounted(async () => {
   background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 .gl-sep { width: 1px; height: 22px; background: linear-gradient(180deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.8), rgba(212, 175, 55, 0)); }
 .gl-sub-brand { font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
-.gl-link { color: inherit; text-decoration: none; font-size: 15px; padding: 9px 18px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); white-space: nowrap; }
+.gl-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; box-sizing: border-box; font-size: 15px; line-height: 1; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); white-space: nowrap; }
 .gl-link:hover { background: rgba(212, 175, 55, 0.12); }
 .gl-top-right { display: flex; align-items: center; gap: 8px; }
 
@@ -185,6 +185,6 @@ onMounted(async () => {
   .gl-example { justify-self: end; }
   .gl-steps ol { grid-template-columns: repeat(3, 1fr); gap: 20px; }
 }
-@media (max-width: 430px) { .gl-sub-brand, .gl-sep { display: none; } .gl-link { padding: 8px 14px; } }
+@media (max-width: 430px) { .gl-sub-brand, .gl-sep { display: none; } }
 @media (max-width: 360px) { .gl-word { font-size: 24px; } }
 </style>

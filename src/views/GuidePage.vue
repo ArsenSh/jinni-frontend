@@ -118,7 +118,7 @@ onMounted(async () => {
 .gp-brand { display: inline-flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 600; text-decoration: none; color: inherit; }
 .gp-lamp { width: 52px; margin-block: -8px; margin-inline: -8px -4px; }
 .gp-top-right { display: flex; align-items: center; gap: 8px; }
-.gp-link { color: inherit; text-decoration: none; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); }
+.gp-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; box-sizing: border-box; font-size: 15px; line-height: 1; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); white-space: nowrap; }
 .gp-main { max-width: 960px; margin: 0 auto; }
 .gp-center { text-align: center; }
 .gp-panel { border-radius: 20px; padding: 26px; display: grid; gap: 12px; justify-items: center; }

@@ -27,7 +27,7 @@ function pick(code) { setGuideLanguage(locale, code); open.value = false }
 
 <style scoped>
 .gls { position: relative; }
-.gls-btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 14px; letter-spacing: 0.04em; color: inherit; background: transparent; border: 1px solid rgba(212, 175, 55, 0.45); border-radius: 999px; padding: 8px 12px; cursor: pointer; }
+.gls-btn { font: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; box-sizing: border-box; font-size: 15px; line-height: 1; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); white-space: nowrap; letter-spacing: 0.04em; color: inherit; background: transparent; cursor: pointer; }
 .gls-btn:hover { background: rgba(212, 175, 55, 0.12); }
 .gls-backdrop { position: fixed; inset: 0; z-index: 40; }
 .gls-menu { position: absolute; top: calc(100% + 8px); inset-inline-end: 0; z-index: 41; min-width: 150px; padding: 6px; border-radius: 14px; display: grid; gap: 2px; backdrop-filter: blur(20px) saturate(160%); }

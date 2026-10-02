@@ -212,7 +212,7 @@ onMounted(async () => { try { await load() } catch { /* shows the empty state */
 .gd-brand { display: inline-flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; text-decoration: none; color: inherit; }
 .gd-lamp { width: 50px; margin-block: -8px; margin-inline: -8px -4px; }
 .gd-top-right { display: flex; align-items: center; gap: 8px; }
-.gd-link { color: inherit; text-decoration: none; font-size: 15px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); }
+.gd-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; box-sizing: border-box; font-size: 15px; line-height: 1; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); white-space: nowrap; }
 .gd-main { max-width: 760px; margin: 0 auto; display: grid; gap: 16px; }
 .gd-panel { border-radius: 20px; padding: 22px; display: grid; gap: 14px; backdrop-filter: blur(20px) saturate(160%); }
 .day-mode .gd-panel { background: rgba(255, 255, 255, 0.65); box-shadow: 0 0 18px -2px rgba(60, 42, 30, 0.14); }
