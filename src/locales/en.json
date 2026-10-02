@@ -898,7 +898,9 @@
     },
     "switch_mode": {
       "button": "Switch to Listing",
-      "switching": "Switching to Listing"
+      "switching": "Switching to Listing",
+      "guide_button": "My Guide Page",
+      "guide_switching": "Opening your guide page"
     },
     "price": {
       "from": "from {price}",
@@ -1334,7 +1336,8 @@
       "open_jinni": "Open Jinni",
       "for_guides": "For guides",
       "guides_label": "Guides",
-      "language": "Language"
+      "language": "Language",
+      "switching_to_jinni": "Switching to Jinni"
     },
     "types": {
       "local": "Local expert",

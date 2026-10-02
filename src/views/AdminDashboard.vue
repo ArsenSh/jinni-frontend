@@ -2558,6 +2558,7 @@
                       <span v-if="(s.staffAssignment?.permissions?.validateBusinesses ?? true)" class="staff-perm-badge staff-perm-badge--validate" title="Can validate business applications">validate</span>
                       <span v-if="s.staffAssignment?.permissions?.manageDestinations" class="staff-perm-badge staff-perm-badge--destinations" title="Can add and manage destinations">destinations</span>
                       <span v-if="s.staffAssignment?.permissions?.moderateExplore" class="staff-perm-badge staff-perm-badge--explore" title="Can hide / verify Explore-page places">explore</span>
+                      <span v-if="s.staffAssignment?.permissions?.validateGuides" class="staff-perm-badge staff-perm-badge--validate" title="Can approve / reject guide applications and remove guide picks">guides</span>
                       <span v-if="s.staffAssignment?.permissions?.viewMarketing" class="staff-perm-badge staff-perm-badge--explore" title="Can view the Growth &amp; Retention marketing report">marketing</span>
                     </div>
                     <span v-if="!(s.staffAssignment?.countries?.length || s.staffAssignment?.cities?.length)" class="assign-empty">no scope</span>
@@ -3792,6 +3793,13 @@
                     <span class="staff-perm-sub">Hide low-quality places or verify good ones on the Explore page, inside their territory.</span>
                   </span>
                 </label>
+                <label v-if="!staffCreateMarketingOnly" class="staff-perm-row">
+                  <input type="checkbox" v-model="staffModal.form.permissions.validateGuides" />
+                  <span class="staff-perm-body">
+                    <span class="staff-perm-title">Validate guides</span>
+                    <span class="staff-perm-sub">Approve or reject guide applications (check the code in their Instagram bio) and remove a guide's picks that break the rules. Not limited by territory.</span>
+                  </span>
+                </label>
                 <label class="staff-perm-row">
                   <input type="checkbox" v-model="staffModal.form.permissions.viewMarketing" @change="onMarketingPermToggle(staffModal.form.permissions)" />
                   <span class="staff-perm-body">
@@ -3800,7 +3808,7 @@
                   </span>
                 </label>
               </div>
-              <div v-if="!staffModal.form.permissions.validateBusinesses && !staffModal.form.permissions.manageDestinations && !staffModal.form.permissions.moderateExplore && !staffModal.form.permissions.viewMarketing"
+              <div v-if="!staffModal.form.permissions.validateBusinesses && !staffModal.form.permissions.manageDestinations && !staffModal.form.permissions.moderateExplore && !staffModal.form.permissions.viewMarketing && !staffModal.form.permissions.validateGuides"
                    style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.1); color:#f59e0b; border-radius:6px; font-size:12.5px">
                 Pick at least one — a staff member with no permissions can't do anything.
               </div>
@@ -4205,6 +4213,13 @@
                     <span class="staff-perm-sub">Hide low-quality places or verify good ones on the Explore page, inside their territory.</span>
                   </span>
                 </label>
+                <label v-if="!staffAssignMarketingOnly" class="staff-perm-row">
+                  <input type="checkbox" v-model="staffAssignModal.form.permissions.validateGuides" />
+                  <span class="staff-perm-body">
+                    <span class="staff-perm-title">Validate guides</span>
+                    <span class="staff-perm-sub">Approve or reject guide applications (check the code in their Instagram bio) and remove a guide's picks that break the rules. Not limited by territory.</span>
+                  </span>
+                </label>
                 <label class="staff-perm-row">
                   <input type="checkbox" v-model="staffAssignModal.form.permissions.viewMarketing" @change="onMarketingPermToggle(staffAssignModal.form.permissions)" />
                   <span class="staff-perm-body">
@@ -4213,7 +4228,7 @@
                   </span>
                 </label>
               </div>
-              <div v-if="!staffAssignModal.form.permissions.validateBusinesses && !staffAssignModal.form.permissions.manageDestinations && !staffAssignModal.form.permissions.moderateExplore && !staffAssignModal.form.permissions.viewMarketing"
+              <div v-if="!staffAssignModal.form.permissions.validateBusinesses && !staffAssignModal.form.permissions.manageDestinations && !staffAssignModal.form.permissions.moderateExplore && !staffAssignModal.form.permissions.viewMarketing && !staffAssignModal.form.permissions.validateGuides"
                    style="margin-top:10px; padding:8px 12px; background:rgba(245,158,11,0.1); color:#f59e0b; border-radius:6px; font-size:12.5px">
                 At least one permission must stay enabled.
               </div>
@@ -4710,6 +4725,7 @@ export default {
           manageDestinations: false,
           moderateExplore: false,
           viewMarketing: false,
+          validateGuides: false,
         },
       },
     })
@@ -4733,6 +4749,7 @@ export default {
           manageDestinations: false,
           moderateExplore: false,
           viewMarketing: false,
+          validateGuides: false,
         },
       },
     })
@@ -4782,12 +4799,12 @@ export default {
     })
     const staffCanSubmit = computed(() => {
       const f = staffModal.value.form
-      const anyPerm = f.permissions?.validateBusinesses || f.permissions?.manageDestinations || f.permissions?.moderateExplore || f.permissions?.viewMarketing
+      const anyPerm = f.permissions?.validateBusinesses || f.permissions?.manageDestinations || f.permissions?.moderateExplore || f.permissions?.viewMarketing || f.permissions?.validateGuides
       return f.email && f.tempPassword && !staffPwError.value && anyPerm
     })
     // Marketing-only staff (only viewMarketing checked) need no territory —
     // they see worldwide numbers and filter country/city on the report page.
-    const marketingOnlyPerms = (p) => !!p?.viewMarketing && !p?.validateBusinesses && !p?.manageDestinations && !p?.moderateExplore
+    const marketingOnlyPerms = (p) => !!p?.viewMarketing && !p?.validateBusinesses && !p?.manageDestinations && !p?.moderateExplore && !p?.validateGuides
     const staffCreateMarketingOnly = computed(() => marketingOnlyPerms(staffModal.value.form.permissions))
     const staffAssignMarketingOnly = computed(() => marketingOnlyPerms(staffAssignModal.value.form.permissions))
     // Checking "Marketing report" is a deliberate account-type choice — it
@@ -4797,8 +4814,8 @@ export default {
     const onMarketingPermToggle = (p) => {
       if (p.viewMarketing) {
         // Marketing-only account: the other permission rows hide entirely.
-        p.validateBusinesses = false; p.manageDestinations = false; p.moderateExplore = false
-      } else if (!p.validateBusinesses && !p.manageDestinations && !p.moderateExplore) {
+        p.validateBusinesses = false; p.manageDestinations = false; p.moderateExplore = false; p.validateGuides = false
+      } else if (!p.validateBusinesses && !p.manageDestinations && !p.moderateExplore && !p.validateGuides) {
         // Un-ticking Marketing with nothing else set would strand the form on
         // "no permissions" — restore the validator default.
         p.validateBusinesses = true
@@ -4814,7 +4831,7 @@ export default {
           countriesText: '', citiesText: '',
           priorityCountriesText: '', priorityCitiesText: '',
           notes: '',
-          permissions: { validateBusinesses: true, manageDestinations: false, moderateExplore: false, viewMarketing: false },
+          permissions: { validateBusinesses: true, manageDestinations: false, moderateExplore: false, viewMarketing: false, validateGuides: false },
         },
       }
     }
@@ -4854,6 +4871,7 @@ export default {
             manageDestinations: !!f.permissions?.manageDestinations,
             moderateExplore:    !!f.permissions?.moderateExplore,
             viewMarketing:      !!f.permissions?.viewMarketing,
+            validateGuides:     !!f.permissions?.validateGuides,
           },
         }
         const res = await apiFetch('/staff', {
@@ -4906,6 +4924,7 @@ export default {
             manageDestinations: p.manageDestinations === true,
             moderateExplore:    p.moderateExplore === true,
             viewMarketing:      p.viewMarketing === true,
+            validateGuides:     p.validateGuides === true,
           },
         },
       }
@@ -4929,6 +4948,7 @@ export default {
             manageDestinations: !!m.form.permissions?.manageDestinations,
             moderateExplore:    !!m.form.permissions?.moderateExplore,
             viewMarketing:      !!m.form.permissions?.viewMarketing,
+            validateGuides:     !!m.form.permissions?.validateGuides,
           },
         }
         await apiFetch(`/staff/${m.target._id}/assignment`, {

@@ -4,7 +4,7 @@
          shell and the keyboard in the page's own bottom tone (see the
          visualViewport handler in mounted). Hidden whenever kbStripTop is 0. -->
     <div v-if="kbStripTop" class="kb-strip" :style="{ top: kbStripTop + 'px' }" aria-hidden="true"></div>
-    <SwitchModeOverlay :visible="isSwitching" :label="t('chat.switch_mode.switching')" :theme="currentTheme === 'night-mode' ? 'dark' : 'light'" />
+    <SwitchModeOverlay :visible="isSwitching" :label="switchingTo === 'guide' ? t('chat.switch_mode.guide_switching') : t('chat.switch_mode.switching')" :theme="currentTheme === 'night-mode' ? 'dark' : 'light'" />
     <div v-if="mobileSidebarOpen && !isDesktop" class="sidebar-overlay" @click="handleOverlayClick"></div>
     <div class="sidebar" :class="{ 'sidebar-collapsed': !sidebarOpen, 'sidebar-open': mobileSidebarOpen }" ref="sidebar">
       <div class="app-header">
@@ -95,6 +95,19 @@
             </svg>
           </span>
           <span class="switch-mode-label">{{ t('chat.switch_mode.button') }}</span>
+        </button>
+      </div>
+
+      <!-- Switch to the guide dashboard — only for users with a guide page (2026-10-02) -->
+      <div v-if="(sidebarOpen || mobileSidebarOpen) && hasGuidePage" class="switch-mode-wrapper">
+        <button @click="switchToGuide" class="switch-mode-btn">
+          <span class="switch-mode-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+              <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
+            </svg>
+          </span>
+          <span class="switch-mode-label">{{ t('chat.switch_mode.guide_button') }}</span>
         </button>
       </div>
 
@@ -1850,6 +1863,8 @@ export default {
       showMobileActions: false,
       showProfileMenu: false,
       isSwitching: false,
+      switchingTo: null,
+      hasGuidePage: false,
       isDesktop: true,
       isGeneratingTitle: false,
       tokenCheckInterval: null,
@@ -2484,6 +2499,7 @@ export default {
     setTimeout(() => { this.getCurrentLocation().catch(() => { console.log('Location not available on mount') }) }, 100);
     this.tokenCheckInterval = setInterval(() => { if (!this.isTokenValid()) { this.handleTokenExpiration() } }, 5 * 60 * 1000);
     setTimeout(() => { this.scrollToBottom(); }, 200);
+    this.checkGuidePage();
     const savedNearbyMode = localStorage.getItem('nearbyMode');
     if (savedNearbyMode !== null) { this.nearbyMode = savedNearbyMode === 'true' }
     if (!this.isMobile) {
@@ -4007,7 +4023,32 @@ export default {
       this.showProfileMenu = false;
       this.$router.push('/explore');
     },
+    async switchToGuide() {
+      this.switchingTo = 'guide';
+      this.isSwitching = true;
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      this.$router.push('/guide/dashboard');
+    },
+    // Does this account have a guide page? Remembered per account so the
+    // button shows instantly next time; refreshed quietly on every visit.
+    async checkGuidePage() {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        const p = JSON.parse(atob(token.split('.')[1])) || {};
+        const uid = p.userId || p.id || '';
+        const key = `jinni_guide_page_${uid}`;
+        this.hasGuidePage = localStorage.getItem(key) === '1';
+        const base = import.meta.env.VITE_API_BASE_URL || '';
+        const res = await fetch(`${base}/api/guides/me`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+        this.hasGuidePage = !!data.guide;
+        localStorage.setItem(key, this.hasGuidePage ? '1' : '0');
+      } catch { /* the button is a convenience — never block the chat */ }
+    },
     async switchToListing() {
+      this.switchingTo = 'listing';
       this.isSwitching = true;
       await new Promise(resolve => setTimeout(resolve, 5000));
       this.$router.push('/business/dashboard');

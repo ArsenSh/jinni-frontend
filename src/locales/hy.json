@@ -898,7 +898,9 @@
     },
     "switch_mode": {
       "button": "Անցնել հաստատության էջ",
-      "switching": "Անցում հաստատության էջին…"
+      "switching": "Անցում հաստատության էջին…",
+      "guide_button": "Իմ գիդի էջը",
+      "guide_switching": "Բացվում է ձեր գիդի էջը"
     },
     "price": {
       "from": "{price}-ից",
@@ -1334,7 +1336,8 @@
       "open_jinni": "Բացել Jinni-ն",
       "for_guides": "Գիդերի համար",
       "guides_label": "Գիդեր",
-      "language": "Լեզու"
+      "language": "Լեզու",
+      "switching_to_jinni": "Անցում Jinni-ին"
     },
     "types": {
       "local": "Տեղացի փորձագետ",

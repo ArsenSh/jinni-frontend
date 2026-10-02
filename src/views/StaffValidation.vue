@@ -1573,8 +1573,124 @@
          by default; staff bury garbage (Hide) or endorse places (Verify).
          Sorted suspicion-first (most disliked → lowest rated) server-side.
          ════════════════════════════════════════════════════════════════ -->
-    <!-- GUIDES TAB (2026-10-02): guide applications, Instagram bio-code check -->
-    <StaffGuides v-if="activeTab === 'guides'" :theme="theme" @count="guidesPending = $event" />
+    <!-- GUIDES TAB (2026-10-02): same layout as business validation — filter bar,
+         table, drawer, action footer. Instagram ownership = the bio code. -->
+    <template v-if="activeTab === 'guides'">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <div class="filter-chips">
+          <button v-for="s in GUIDE_STATUSES" :key="s" class="chip" :class="{ active: gStatus === s }" @click="gStatus = s; gSelected = null; loadGuides()">
+            {{ s }}<span v-if="gCounts[s] != null"> · {{ gCounts[s] }}</span>
+          </button>
+        </div>
+      </div>
+      <div class="filter-group filter-group--right">
+        <button class="ghost-btn" @click="loadGuides()" :disabled="gLoading">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <main class="main-grid" :class="{ 'drawer-open': !!gSelected }">
+      <section class="table-wrap">
+        <div v-if="gLoading && !gList.length" class="table-empty"><div class="spinner"/><span>Loading guide applications…</span></div>
+        <div v-else-if="!gList.length" class="table-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Nothing in the {{ gStatus }} queue.</span>
+        </div>
+        <table v-else class="biz-table">
+          <thead><tr><th class="col-name">Guide</th><th class="col-cat">Instagram</th><th class="col-city">Region</th><th class="col-tier">Type</th><th class="col-ai">Picks</th><th class="col-age">Age</th></tr></thead>
+          <tbody>
+            <tr v-for="g in gList" :key="g.id" class="biz-row" :class="{ 'biz-row--selected': gSelected?.id === g.id }" @click="openGuide(g)">
+              <td class="col-name" data-label="Guide">
+                <div class="row-name"><span class="row-name-text">{{ g.displayName }}</span><span class="row-tag">@{{ g.handle }}</span></div>
+                <div class="row-sub">{{ g.email || '—' }}</div>
+              </td>
+              <td class="col-cat" data-label="Instagram"><span class="mono-sm">@{{ g.instagram }}</span></td>
+              <td class="col-city" data-label="Region">{{ g.region }}</td>
+              <td class="col-tier" data-label="Type"><span class="mono-sm">{{ GUIDE_TYPE_LABEL[g.guideType] || g.guideType }}</span></td>
+              <td class="col-ai" data-label="Picks"><span class="mono-sm">{{ g.pickCount || 0 }}</span></td>
+              <td class="col-age" data-label="Age"><span class="muted-sm">{{ relTime(g.createdAt) }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div v-if="gSelected" class="drawer-backdrop" @click="gSelected = null"></div>
+      <aside v-if="gSelected" class="drawer">
+        <div class="drawer-head">
+          <div class="drawer-head-top">
+            <span class="status-pill" :class="`status-${gSelected.status === 'suspended' ? 'frozen' : gSelected.status}`">{{ gSelected.status }}</span>
+            <button class="drawer-close" @click="gSelected = null" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <h2 class="drawer-title">{{ gSelected.displayName }}</h2>
+          <div class="drawer-sub"><span class="mono-sm">jinni.travel/@{{ gSelected.handle }}</span><span class="dot-sep">·</span><span>{{ formatDate(gSelected.createdAt) }}</span></div>
+        </div>
+
+        <section class="drawer-section">
+          <header class="section-head"><h3>Instagram verification</h3></header>
+          <dl class="kv-grid">
+            <dt>Instagram</dt>
+            <dd><a class="link-sm" :href="`https://www.instagram.com/${gSelected.instagram}/`" target="_blank" rel="noopener">@{{ gSelected.instagram }} ↗</a></dd>
+            <dt>Code in bio</dt>
+            <dd><span class="mono-sm" style="font-size:16px;letter-spacing:.06em">{{ gSelected.verificationCode }}</span></dd>
+          </dl>
+          <p class="muted-sm" style="margin-top:8px">Open the Instagram profile and approve only when this code is in its bio.</p>
+        </section>
+
+        <section class="drawer-section">
+          <header class="section-head"><h3>Details</h3></header>
+          <dl class="kv-grid">
+            <dt>Type</dt><dd>{{ GUIDE_TYPE_LABEL[gSelected.guideType] || gSelected.guideType }}</dd>
+            <dt>Region</dt><dd>{{ gSelected.region }}</dd>
+            <dt>Languages</dt><dd>{{ (gSelected.languages || []).join(', ') || '—' }}</dd>
+            <dt>Account</dt><dd>{{ gSelected.email || '—' }}<span v-if="gSelected.accountName" class="muted-sm"> ({{ gSelected.accountName }})</span></dd>
+            <template v-if="gSelected.bio"><dt>Bio</dt><dd>{{ gSelected.bio }}</dd></template>
+            <template v-if="gSelected.staffNotes"><dt>Staff notes</dt><dd>{{ gSelected.staffNotes }}</dd></template>
+            <template v-if="gSelected.status === 'active'"><dt>Page</dt><dd><a class="link-sm" :href="`/@${gSelected.handle}`" target="_blank" rel="noopener">jinni.travel/@{{ gSelected.handle }} ↗</a></dd></template>
+          </dl>
+        </section>
+
+        <section v-if="gSelected.pickCount || gPicks.length" class="drawer-section">
+          <header class="section-head"><h3>Picks ({{ gSelected.pickCount || gPicks.length }})</h3></header>
+          <p class="muted-sm">Picks go live as soon as the guide adds them. Remove one that is wrong, offensive, or an ad.</p>
+          <div v-if="gPicksLoading" class="muted-sm">Loading picks…</div>
+          <div v-for="pk in gPicks" :key="pk.id" style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(128,128,128,.18)">
+            <div style="min-width:0">
+              <div style="font-size:14px"><strong>{{ pk.placeName || pk.placeId }}</strong> <span class="row-tag">{{ GUIDE_CAT_LABEL[pk.category] || pk.category }}</span></div>
+              <div v-if="pk.note" style="margin-top:4px;font-size:13.5px;white-space:pre-wrap;word-break:break-word">“{{ pk.note }}”</div>
+              <div v-if="pk.tour" class="muted-sm" style="margin-top:4px">Tour: {{ pk.tour.title || '—' }}<span v-if="pk.tour.price != null"> · {{ pk.tour.price }} {{ pk.tour.currency || '' }}</span><span v-if="pk.tour.durationHours"> · {{ pk.tour.durationHours }}h</span><span v-if="pk.tour.contact"> · {{ pk.tour.contact }}</span></div>
+              <div style="margin-top:4px;display:flex;gap:12px;flex-wrap:wrap">
+                <a v-if="pk.reelUrl" class="link-sm" :href="pk.reelUrl" target="_blank" rel="noopener">reel ↗</a>
+                <a class="link-sm" :href="`https://www.google.com/maps/place/?q=place_id:${pk.placeId}`" target="_blank" rel="noopener">open in map ↗</a>
+                <span class="muted-sm">{{ relTime(pk.createdAt) }}</span>
+              </div>
+            </div>
+            <button class="ghost-btn" style="flex:none" @click="removeGuidePick(pk)" :disabled="gBusy">Remove</button>
+          </div>
+        </section>
+
+        <footer class="drawer-actions">
+          <label v-if="gSelected.status === 'pending' || gSelected.status === 'active'" class="filter-label" style="display:block;margin-bottom:6px">
+            {{ gSelected.status === 'pending' ? 'Reason (required to reject — the guide will see it)' : 'Reason for suspending (staff only)' }}
+          </label>
+          <textarea v-if="gSelected.status === 'pending' || gSelected.status === 'active'" v-model="gReason" rows="3" class="filter-input" style="width:100%;box-sizing:border-box;margin-bottom:10px" placeholder="e.g. We couldn't find the code in your Instagram bio — please add it and apply again."></textarea>
+          <div v-if="gError" class="action-error">{{ gError }}</div>
+          <div class="action-buttons">
+            <template v-if="gSelected.status === 'pending'">
+              <button class="action-btn reject" @click="actOnGuide('reject')" :disabled="gBusy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Reject (allow reapply)</button>
+              <button class="action-btn approve" @click="actOnGuide('approve')" :disabled="gBusy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>{{ gBusy ? 'Working…' : 'Approve' }}</button>
+            </template>
+            <button v-else-if="gSelected.status === 'rejected'" class="action-btn approve" @click="actOnGuide('approve')" :disabled="gBusy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>{{ gBusy ? 'Working…' : 'Approve anyway' }}</button>
+            <button v-else-if="gSelected.status === 'active'" class="action-btn reject" @click="actOnGuide('suspend')" :disabled="gBusy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Suspend page</button>
+            <button v-else-if="gSelected.status === 'suspended'" class="action-btn approve" @click="actOnGuide('reinstate')" :disabled="gBusy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Reinstate</button>
+          </div>
+        </footer>
+      </aside>
+    </main>
+    </template>
 
     <template v-if="activeTab === 'explore'">
 
@@ -2155,7 +2271,6 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import axios from 'axios'
 import { isNightTime } from '@/utils/timeUtils'
-import StaffGuides from '@/components/staff/StaffGuides.vue'
 const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.5:5000/api'
 // Status keys & labels — match Business.js enum
 // 'expired' was added when one-time events past their end-date became their
@@ -2182,7 +2297,6 @@ const STYLE_TAGS    = ['family','romantic','luxury','budget']
 
 export default {
   name: 'StaffValidation',
-  components: { StaffGuides },
   setup() {
     const store = useStore()
     // ── Theme (matches the rest of the app) ─────────────────────────
@@ -2329,7 +2443,7 @@ export default {
     const myAssignment = ref(null)
     const userName = ref('')
     const userRole = ref('user')           // 'staff' | 'admin' | 'user'
-    const myPermissions = ref({ validateBusinesses: true, manageDestinations: false, moderateExplore: false })
+    const myPermissions = ref({ validateBusinesses: true, manageDestinations: false, moderateExplore: false, validateGuides: false })
     const meEndpointHit = ref(null)        // for debug visibility
     async function loadMyAssignment() {
       // Try our own staff /me first because it ships permissions in a
@@ -2361,10 +2475,11 @@ export default {
               validateBusinesses: p.validateBusinesses !== false,
               manageDestinations: p.manageDestinations === true,
               moderateExplore: p.moderateExplore === true,
+              validateGuides: p.validateGuides === true,
             }
             // Admin sees everything regardless.
             if (userRole.value === 'admin' || u.isAdmin) {
-              myPermissions.value = { validateBusinesses: true, manageDestinations: true, moderateExplore: true }
+              myPermissions.value = { validateBusinesses: true, manageDestinations: true, moderateExplore: true, validateGuides: true }
             }
             meEndpointHit.value = path
             return
@@ -2407,6 +2522,55 @@ export default {
     // their working surface.) Admin sees both.
     const activeTab = ref('validation')
     const guidesPending = ref(null)
+    // ── Guides queue (2026-10-02), same flow as businesses ──
+    const GUIDE_STATUSES = ['pending', 'active', 'rejected', 'suspended']
+    const GUIDE_TYPE_LABEL = { local: 'Local expert', licensed: 'Licensed guide', creator: 'Travel creator' }
+    const gStatus = ref('pending'), gList = ref([]), gCounts = ref({}), gLoading = ref(false)
+    const gSelected = ref(null), gReason = ref(''), gBusy = ref(false), gError = ref('')
+    const loadGuides = async () => {
+      gLoading.value = true
+      try {
+        const r = await axios.get(`${API_URL}/guides/staff/queue`, { params: { status: gStatus.value }, headers: authHeader() })
+        gList.value = r.data.guides || []; gCounts.value = r.data.counts || {}; guidesPending.value = gCounts.value.pending ?? null
+        if (gSelected.value) gSelected.value = gList.value.find(g => g.id === gSelected.value.id) || null
+      } catch (e) { gError.value = e.response?.data?.error || e.message } finally { gLoading.value = false }
+    }
+    // A guide's picks go live at once; staff review them here and remove a bad one.
+    const gPicks = ref([]), gPicksLoading = ref(false)
+    const openGuide = async (g) => {
+      gSelected.value = g; gReason.value = ''; gError.value = ''; gPicks.value = []
+      if (!g.pickCount) return
+      gPicksLoading.value = true
+      try {
+        const r = await axios.get(`${API_URL}/guides/staff/${g.id}/picks`, { headers: authHeader() })
+        if (gSelected.value?.id === g.id) gPicks.value = r.data.picks || []
+      } catch (e) { gError.value = e.response?.data?.error || e.message } finally { gPicksLoading.value = false }
+    }
+    const removeGuidePick = async (pick) => {
+      const reason = window.prompt(`Remove "${pick.placeName}" from @${gSelected.value?.handle}'s page?\nReason (kept in the guide's history):`, '')
+      if (reason === null) return
+      gBusy.value = true; gError.value = ''
+      try {
+        await axios.delete(`${API_URL}/guides/staff/picks/${pick.id}`, { headers: authHeader(), data: { reason } })
+        gPicks.value = gPicks.value.filter(p => p.id !== pick.id)
+        if (gSelected.value) gSelected.value.pickCount = Math.max(0, (gSelected.value.pickCount || 1) - 1)
+      } catch (e) { gError.value = e.response?.data?.error || e.message } finally { gBusy.value = false }
+    }
+    // Load when the tab opens, and once permissions arrive (for the tab's count).
+    watch(activeTab, (tab) => { if (tab === 'guides') loadGuides() })
+    watch(() => myPermissions.value.validateGuides, (ok) => { if (ok) loadGuides() }, { immediate: true })
+    const GUIDE_CAT_LABEL = { restaurant: 'Restaurant', hidden_gem: 'Hidden gem', photo_spot: 'Photo spot', activity: 'Activity' }
+    const actOnGuide = async (action) => {
+      gError.value = ''
+      const g = gSelected.value; if (!g) return
+      if ((action === 'reject' || action === 'suspend') && !gReason.value.trim()) { gError.value = 'Please write a reason first.'; return }
+      if (action === 'approve' && !window.confirm(`Approve @${g.handle}? Check the code ${g.verificationCode} is in @${g.instagram}'s Instagram bio.`)) return
+      gBusy.value = true
+      try {
+        await axios.post(`${API_URL}/guides/staff/${g.id}/${action}`, { reason: gReason.value.trim() }, { headers: authHeader() })
+        gReason.value = ''; gSelected.value = null; await loadGuides()
+      } catch (e) { gError.value = e.response?.data?.error || e.message } finally { gBusy.value = false }
+    }
     const visibleTabs = computed(() => {
       const tabs = []
       if (myPermissions.value.validateBusinesses) {
@@ -2418,8 +2582,8 @@ export default {
       if (myPermissions.value.moderateExplore) {
         tabs.push({ key: 'explore', label: 'Explore', count: expTotal.value || null })
       }
-      // Guide applications (2026-10-02) ride on the business-validation permission.
-      if (myPermissions.value.validateBusinesses) {
+      // Guide applications (2026-10-02) — their own "Validate guides" permission.
+      if (myPermissions.value.validateGuides) {
         tabs.push({ key: 'guides', label: 'Guides', count: guidesPending.value })
       }
       return tabs
@@ -2428,7 +2592,7 @@ export default {
     // Without this, e.g. an explore-only staff would land on 'validation' and
     // see nothing.
     watch(myPermissions, (p) => {
-      const order = [['validation', 'validateBusinesses'], ['destinations', 'manageDestinations'], ['explore', 'moderateExplore']]
+      const order = [['validation', 'validateBusinesses'], ['destinations', 'manageDestinations'], ['explore', 'moderateExplore'], ['guides', 'validateGuides']]
       const allowed = order.filter(([, perm]) => p[perm]).map(([tab]) => tab)
       if (allowed.length && !allowed.includes(activeTab.value)) activeTab.value = allowed[0]
     }, { immediate: false })
@@ -4312,7 +4476,7 @@ export default {
     onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
     return {
-      guidesPending,
+      guidesPending, GUIDE_STATUSES, GUIDE_TYPE_LABEL, gStatus, gList, gCounts, gLoading, gSelected, gReason, gBusy, gError, loadGuides, actOnGuide, gPicks, gPicksLoading, openGuide, removeGuidePick, GUIDE_CAT_LABEL,
       theme, toggleTheme, statusList, tierList,
       status, tier, cityInput, page, total, totalPages, businesses, counts, listLoading,
       setStatus, setTier, onCityInput, changePage, loadList,

@@ -898,7 +898,9 @@
     },
     "switch_mode": {
       "button": "التبديل إلى صفحة النشاط",
-      "switching": "جارٍ التبديل إلى صفحة النشاط…"
+      "switching": "جارٍ التبديل إلى صفحة النشاط…",
+      "guide_button": "صفحتي كمرشد",
+      "guide_switching": "جارٍ فتح صفحتك كمرشد"
     },
     "price": {
       "from": "من {price}",
@@ -1334,7 +1336,8 @@
       "open_jinni": "افتح Jinni",
       "for_guides": "للمرشدين",
       "guides_label": "المرشدون",
-      "language": "اللغة"
+      "language": "اللغة",
+      "switching_to_jinni": "جارٍ الانتقال إلى Jinni"
     },
     "types": {
       "local": "خبير محلي",

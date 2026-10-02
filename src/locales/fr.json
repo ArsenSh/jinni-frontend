@@ -898,7 +898,9 @@
     },
     "switch_mode": {
       "button": "Passer à l'établissement",
-      "switching": "Passage à l'établissement…"
+      "switching": "Passage à l'établissement…",
+      "guide_button": "Ma page de guide",
+      "guide_switching": "Ouverture de votre page de guide"
     },
     "price": {
       "from": "dès {price}",
@@ -1334,7 +1336,8 @@
       "open_jinni": "Ouvrir Jinni",
       "for_guides": "Pour les guides",
       "guides_label": "Guides",
-      "language": "Langue"
+      "language": "Langue",
+      "switching_to_jinni": "Retour vers Jinni"
     },
     "types": {
       "local": "Expert local",

@@ -1,10 +1,11 @@
 <template>
   <div class="gd" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
+    <SwitchModeOverlay :visible="isSwitching" :label="t('guides.nav.switching_to_jinni')" :theme="theme === 'day-mode' ? 'light' : 'dark'" />
     <header class="gd-top">
       <router-link to="/guides" class="gd-brand"><img src="/images/bottle.png" alt="" class="gd-lamp" /><span translate="no">Jinni</span>&nbsp;{{ t('guides.nav.guides_label') }}</router-link>
       <div class="gd-top-right">
         <GuideLangSwitch />
-        <router-link to="/chat" class="gd-link">{{ t('guides.nav.open_jinni') }}</router-link>
+        <a href="/chat" class="gd-link" @click.prevent="switchToChat">{{ t('guides.nav.open_jinni') }}</a>
       </div>
     </header>
 
@@ -132,12 +133,21 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { guideTheme, guideApi, CATEGORY_KEYS, instagramEmbed, initGuideLanguage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
+import SwitchModeOverlay from '@/components/ui/SwitchModeOverlay.vue'
+import { useRouter } from 'vue-router'
 
 const { t, locale } = useI18n()
 initGuideLanguage(locale)
 
 const apiBase = import.meta.env.VITE_API_BASE_URL || ''
 const theme = guideTheme()
+// Back to the chat the same way the business dashboard does it: the switching overlay, then /chat.
+const router = useRouter()
+const isSwitching = ref(false)
+function switchToChat() {
+  isSwitching.value = true
+  setTimeout(() => router.push('/chat'), 1500)
+}
 const loading = ref(true)
 const guide = ref(null)
 const picks = ref([])

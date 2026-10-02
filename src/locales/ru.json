@@ -898,7 +898,9 @@
     },
     "switch_mode": {
       "button": "Перейти к заведению",
-      "switching": "Переход к заведению…"
+      "switching": "Переход к заведению…",
+      "guide_button": "Моя страница гида",
+      "guide_switching": "Открываем вашу страницу гида"
     },
     "price": {
       "from": "от {price}",
@@ -1334,7 +1336,8 @@
       "open_jinni": "Открыть Jinni",
       "for_guides": "Для гидов",
       "guides_label": "Гиды",
-      "language": "Язык"
+      "language": "Язык",
+      "switching_to_jinni": "Переходим в Jinni"
     },
     "types": {
       "local": "Местный эксперт",

@@ -319,7 +319,7 @@ router.beforeEach(async (to, from, next) => {
             if (user?.role === 'staff') {
                 // Marketing-only staff live on the report page, not the queue
                 const sp = user?.staffPermissions || {}
-                const marketingOnly = sp.viewMarketing && !sp.validateBusinesses && !sp.manageDestinations && !sp.moderateExplore
+                const marketingOnly = sp.viewMarketing && !sp.validateBusinesses && !sp.manageDestinations && !sp.moderateExplore && !sp.validateGuides
                 return next({ name: marketingOnly ? 'MarketingView' : 'StaffValidation' })
             }
             if (user?.isAdmin || user?.role === 'admin') { return next({ name: 'Admin' }) }
@@ -340,7 +340,7 @@ router.beforeEach(async (to, from, next) => {
     // permission, nothing else) live on the Growth & Retention report.
     if (user?.role === 'staff') {
         const sp = user?.staffPermissions || {}
-        const marketingOnly = sp.viewMarketing && !sp.validateBusinesses && !sp.manageDestinations && !sp.moderateExplore
+        const marketingOnly = sp.viewMarketing && !sp.validateBusinesses && !sp.manageDestinations && !sp.moderateExplore && !sp.validateGuides
         const staffRoutes = ['ContactUs', 'Terms', 'Privacy', 'BusinessPrivacy', 'BusinessTerms']
         if (sp.viewMarketing) staffRoutes.push('MarketingView')
         if (!marketingOnly) staffRoutes.push('StaffValidation')

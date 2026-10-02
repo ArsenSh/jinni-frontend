@@ -898,7 +898,9 @@
     },
     "switch_mode": {
       "button": "切换到商家页面",
-      "switching": "正在切换到商家页面…"
+      "switching": "正在切换到商家页面…",
+      "guide_button": "我的向导页面",
+      "guide_switching": "正在打开您的向导页面"
     },
     "price": {
       "from": "{price} 起",
@@ -1334,7 +1336,8 @@
       "open_jinni": "打开 Jinni",
       "for_guides": "向导专区",
       "guides_label": "向导",
-      "language": "语言"
+      "language": "语言",
+      "switching_to_jinni": "正在切换到 Jinni"
     },
     "types": {
       "local": "本地达人",
