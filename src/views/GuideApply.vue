@@ -21,14 +21,14 @@
           <li>Our team checks it, usually within a day, and emails you. Then you can remove it.</li>
         </ol>
         <p class="ga-muted">Your page will be: <strong>jinni.travel/@{{ guide.handle }}</strong></p>
-        <router-link to="/guide/dashboard" class="ga-btn">Go to my dashboard</router-link>
+        <router-link to="/guide/dashboard" class="ga-btn jinni-pill">Go to my dashboard</router-link>
       </section>
 
       <!-- Already active -->
       <section v-else-if="guide && guide.status === 'active'" class="ga-panel">
         <h1>Your page is live</h1>
         <p>jinni.travel/@{{ guide.handle }}</p>
-        <router-link to="/guide/dashboard" class="ga-btn">Open my dashboard</router-link>
+        <router-link to="/guide/dashboard" class="ga-btn jinni-pill">Open my dashboard</router-link>
       </section>
 
       <section v-else-if="guide && guide.status === 'suspended'" class="ga-panel">
@@ -56,6 +56,7 @@
           <small v-else-if="handleState === 'ok'" class="ga-ok">Available</small>
           <small v-else-if="handleState === 'taken'" class="ga-bad">Taken — try another</small>
           <small v-else-if="handleState === 'invalid'" class="ga-bad">3–30 letters, digits, dots or underscores</small>
+          <small v-else-if="handleState === 'reserved'" class="ga-bad">That name is reserved — please choose another</small>
         </label>
 
         <label>Where do you guide?
@@ -65,18 +66,18 @@
         <fieldset>
           <legend>You are a…</legend>
           <div class="ga-chips">
-            <button v-for="t in types" :key="t[0]" type="button" class="ga-chip" :class="{ on: form.guideType === t[0] }" @click="form.guideType = t[0]">{{ t[1] }}</button>
+            <button v-for="t in types" :key="t[0]" type="button" class="ga-chip" :class="{ on: form.guideType === t[0], 'jinni-chip-on': form.guideType === t[0] }" @click="form.guideType = t[0]">{{ t[1] }}</button>
           </div>
         </fieldset>
 
         <fieldset>
           <legend>Languages you guide in</legend>
           <div class="ga-chips">
-            <button v-for="l in LANGUAGE_OPTIONS" :key="l[0]" type="button" class="ga-chip" :class="{ on: form.languages.includes(l[0]) }" @click="toggleLang(l[0])">{{ l[1] }}</button>
+            <button v-for="l in LANGUAGE_OPTIONS" :key="l[0]" type="button" class="ga-chip" :class="{ on: form.languages.includes(l[0]), 'jinni-chip-on': form.languages.includes(l[0]) }" @click="toggleLang(l[0])">{{ l[1] }}</button>
           </div>
         </fieldset>
 
-        <label>A few words about you <span class="ga-muted">(optional)</span>
+        <label><span>A few words about you <span class="ga-muted">(optional)</span></span>
           <textarea v-model="form.bio" maxlength="400" rows="3" placeholder="What makes your recommendations different?"></textarea>
         </label>
 
@@ -86,13 +87,14 @@
         </label>
 
         <p v-if="error" class="ga-alert">{{ error }}</p>
-        <button type="submit" class="ga-btn" :disabled="sending">{{ sending ? 'Sending…' : 'Send application' }}</button>
+        <button type="submit" class="ga-btn jinni-pill" :disabled="sending">{{ sending ? 'Sending…' : 'Send application' }}</button>
       </form>
     </main>
   </div>
 </template>
 
 <script setup>
+import '@/assets/styles/jinni-pill.css'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { guideTheme, guideApi, LANGUAGE_OPTIONS } from '@/utils/guides'
@@ -121,7 +123,7 @@ function checkHandle() {
     try {
       const r = await guideApi(`/handle-available/${encodeURIComponent(h)}`)
       const mine = guide.value && guide.value.handle === h
-      handleState.value = r.reason === 'invalid' ? 'invalid' : (r.available || mine ? 'ok' : 'taken')
+      handleState.value = r.reason === 'invalid' || r.reason === 'reserved' ? r.reason : (r.available || mine ? 'ok' : 'taken')
     } catch { handleState.value = '' }
   }, 350)
 }
@@ -172,12 +174,11 @@ input:focus, textarea:focus { outline: none; border-color: #D4AF37; box-shadow: 
 .ga-prefix input { border: 0; border-radius: 0; background: transparent; padding-left: 2px; box-shadow: none; }
 .ga-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .ga-chip { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.5); background: transparent; color: inherit; cursor: pointer; }
-.ga-chip.on { background: linear-gradient(45deg, #D4AF37, #FF8C00); color: #2b1d0e; border-color: transparent; }
 .ga-check { grid-template-columns: 22px 1fr; align-items: start; font-size: 14px; line-height: 1.45; }
 .ga-check input { width: 18px; height: 18px; margin-top: 2px; }
-.ga-btn { justify-self: start; display: inline-block; font: inherit; font-weight: 700; font-size: 16px; padding: 13px 28px; border-radius: 999px; border: 0; cursor: pointer; text-decoration: none;
-  background: linear-gradient(45deg, #D4AF37, #FF8C00); color: #2b1d0e; box-shadow: 0 0 18px -2px rgba(255, 140, 0, 0.45); }
-.ga-btn:disabled { opacity: 0.6; cursor: default; }
+.ga-check a { color: #b4540a; }
+.night-mode .ga-check a { color: #ffd27a; }
+.ga-btn { justify-self: start; }
 .ga-btn-ghost { font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.6); background: transparent; color: inherit; cursor: pointer; }
 .ga-code { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 14px; border: 1px dashed #D4AF37; font-size: 24px; font-weight: 700; letter-spacing: 0.06em; }
 .ga-steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; line-height: 1.5; }

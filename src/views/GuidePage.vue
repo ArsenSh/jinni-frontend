@@ -11,7 +11,7 @@
       <section v-else-if="!guide" class="gp-panel gp-center">
         <h1>Guide not found</h1>
         <p class="gp-muted">This page doesn't exist or isn't public yet.</p>
-        <router-link to="/" class="gp-btn">Go to Jinni</router-link>
+        <router-link to="/" class="gp-btn jinni-pill">Go to Jinni</router-link>
       </section>
 
       <template v-else>
@@ -27,12 +27,12 @@
         </section>
 
         <div class="gp-ask">
-          <router-link :to="askTo" class="gp-btn" @click="tagGuideVisit(guide.handle)">Ask Jinni with {{ firstName }}'s picks</router-link>
+          <router-link :to="askTo" class="gp-btn jinni-pill" @click="tagGuideVisit(guide.handle)">Ask Jinni with {{ firstName }}'s picks</router-link>
           <p class="gp-muted">Free · your AI travel companion</p>
         </div>
 
         <nav class="gp-tabs" v-if="picks.length">
-          <button v-for="t in tabs" :key="t.key" type="button" class="gp-tab" :class="{ on: tab === t.key }" @click="tab = t.key">{{ t.label }} <span>{{ t.count }}</span></button>
+          <button v-for="t in tabs" :key="t.key" type="button" class="gp-tab" :class="{ on: tab === t.key, 'jinni-chip-on': tab === t.key }" @click="tab = t.key">{{ t.label }} <span>{{ t.count }}</span></button>
         </nav>
 
         <p v-if="!picks.length" class="gp-muted gp-center">{{ firstName }} hasn't added picks yet.</p>
@@ -67,6 +67,7 @@
 </template>
 
 <script setup>
+import '@/assets/styles/jinni-pill.css'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { guideTheme, guideApi, CATEGORY_LABELS, LANGUAGE_OPTIONS, tagGuideVisit, hasToken } from '@/utils/guides'
@@ -124,12 +125,11 @@ onMounted(async () => {
 .night-mode .gp-ig { color: #ffd27a; }
 .gp-bio { margin: 10px 0 6px; line-height: 1.55; max-width: 620px; }
 .gp-ask { margin: 0 0 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.gp-btn { display: inline-block; font-weight: 700; font-size: 16px; padding: 13px 26px; border-radius: 999px; text-decoration: none; background: linear-gradient(45deg, #D4AF37, #FF8C00); color: #2b1d0e; box-shadow: 0 0 18px -2px rgba(255, 140, 0, 0.45); }
+.gp-btn { justify-self: start; }
 .gp-btn-ghost { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.6); background: transparent; color: inherit; cursor: pointer; text-decoration: none; }
 .gp-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .gp-tab { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.5); background: transparent; color: inherit; cursor: pointer; }
 .gp-tab span { opacity: 0.65; margin-left: 4px; }
-.gp-tab.on { background: linear-gradient(45deg, #D4AF37, #FF8C00); color: #2b1d0e; border-color: transparent; }
 .gp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
 .gp-card { border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
 .day-mode .gp-card { background: rgba(255, 255, 255, 0.7); box-shadow: 0 0 18px -2px rgba(60, 42, 30, 0.14); }

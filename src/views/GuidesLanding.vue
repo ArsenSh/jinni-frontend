@@ -10,7 +10,7 @@
       <p class="gl-kicker">Jinni for Guides</p>
       <h1>Your picks.<br />Your page.<br /><span class="grad">Travelers listening.</span></h1>
       <p class="gl-sub">A free page at <strong>jinni.travel/@you</strong> for local guides and travel creators. Share your favourite places, photo spots and tours — and every traveler who asks Jinni about them sees your name.</p>
-      <router-link :to="ctaTo" class="gl-cta">{{ isGuide ? 'Open my dashboard' : 'Apply as a guide' }}</router-link>
+      <router-link :to="ctaTo" class="gl-cta jinni-pill">{{ isGuide ? 'Open my dashboard' : 'Apply as a guide' }}</router-link>
       <p class="gl-note">Free · takes 3 minutes · approved by our team</p>
     </section>
 
@@ -39,7 +39,7 @@
         <li><span>2</span><div><strong>Verify</strong> — put a short code in your Instagram bio for a day. Our team checks it.</div></li>
         <li><span>3</span><div><strong>Add your picks</strong> — choose places from Jinni, add a line in your words and your reel.</div></li>
       </ol>
-      <router-link :to="ctaTo" class="gl-cta">{{ isGuide ? 'Open my dashboard' : 'Start my page' }}</router-link>
+      <router-link :to="ctaTo" class="gl-cta jinni-pill">{{ isGuide ? 'Open my dashboard' : 'Start my page' }}</router-link>
     </section>
 
     <footer class="gl-foot">
@@ -49,6 +49,7 @@
 </template>
 
 <script setup>
+import '@/assets/styles/jinni-pill.css'
 import { ref, computed, onMounted } from 'vue'
 import { guideTheme, guideApi, hasToken } from '@/utils/guides'
 
@@ -78,9 +79,7 @@ onMounted(async () => {
 .gl-hero h1 { font-size: clamp(34px, 7vw, 56px); line-height: 1.08; margin: 0 0 16px; font-weight: 600; }
 .grad { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 .gl-sub { font-size: 18px; line-height: 1.55; max-width: 620px; margin: 0 0 24px; opacity: 0.92; }
-.gl-cta { display: inline-block; padding: 14px 30px; border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none;
-  background: linear-gradient(45deg, #D4AF37, #FF8C00); color: #2b1d0e; box-shadow: 0 0 18px -2px rgba(255, 140, 0, 0.45); }
-.gl-cta:hover { box-shadow: 0 0 24px 0 rgba(255, 140, 0, 0.6); }
+.gl-cta { justify-self: start; }
 .gl-note { font-size: 13px; opacity: 0.7; margin: 10px 0 0; }
 .gl-grid { max-width: 960px; margin: 44px auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .gl-card { border-radius: 18px; padding: 22px; backdrop-filter: blur(20px) saturate(160%); }

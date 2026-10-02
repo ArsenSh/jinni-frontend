@@ -10,7 +10,7 @@
 
       <section v-else-if="!guide" class="gd-panel">
         <h1>You don't have a guide page yet</h1>
-        <router-link to="/guides/apply" class="gd-btn">Apply as a guide</router-link>
+        <router-link to="/guides/apply" class="gd-btn jinni-pill">Apply as a guide</router-link>
       </section>
 
       <section v-else-if="guide.status === 'pending'" class="gd-panel">
@@ -23,7 +23,7 @@
       <section v-else-if="guide.status !== 'active'" class="gd-panel">
         <h1>Your guide page isn't active</h1>
         <p v-if="guide.status === 'rejected'">{{ guide.staffNotes }}</p>
-        <router-link v-if="guide.status === 'rejected'" to="/guides/apply" class="gd-btn">Fix and apply again</router-link>
+        <router-link v-if="guide.status === 'rejected'" to="/guides/apply" class="gd-btn jinni-pill">Fix and apply again</router-link>
         <p v-else>Please <router-link to="/contact">contact us</router-link>.</p>
       </section>
 
@@ -70,13 +70,13 @@
             <fieldset>
               <legend>What is it?</legend>
               <div class="gd-chips">
-                <button v-for="(label, key) in CATEGORY_LABELS" :key="key" type="button" class="gd-chip" :class="{ on: draft.category === key }" @click="draft.category = key">{{ label }}</button>
+                <button v-for="(label, key) in CATEGORY_LABELS" :key="key" type="button" class="gd-chip" :class="{ on: draft.category === key, 'jinni-chip-on': draft.category === key }" @click="draft.category = key">{{ label }}</button>
               </div>
             </fieldset>
-            <label>Why you love it <span class="gd-muted">(one or two lines, in your words)</span>
+            <label><span>Why you love it <span class="gd-muted">(one or two lines, in your words)</span></span>
               <textarea v-model="draft.note" maxlength="280" rows="2" placeholder="e.g. Order the gata — the best in Garni, baked every morning."></textarea>
             </label>
-            <label>Your Instagram reel or post about it <span class="gd-muted">(optional)</span>
+            <label><span>Your Instagram reel or post about it <span class="gd-muted">(optional)</span></span>
               <input v-model.trim="draft.reelUrl" placeholder="https://www.instagram.com/reel/…" />
             </label>
             <p v-if="draft.reelUrl && !reelEmbed" class="gd-bad">Paste a link to one of your Instagram posts or reels.</p>
@@ -95,7 +95,7 @@
 
             <p v-if="error" class="gd-bad">{{ error }}</p>
             <div class="gd-actions">
-              <button type="button" class="gd-btn" :disabled="saving || !draft.category" @click="save">{{ saving ? 'Saving…' : (editing ? 'Save changes' : 'Add to my page') }}</button>
+              <button type="button" class="gd-btn jinni-pill" :disabled="saving || !draft.category" @click="save">{{ saving ? 'Saving…' : (editing ? 'Save changes' : 'Add to my page') }}</button>
               <button type="button" class="gd-btn-ghost" @click="reset">Cancel</button>
             </div>
           </template>
@@ -127,6 +127,7 @@
 </template>
 
 <script setup>
+import '@/assets/styles/jinni-pill.css'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { guideTheme, guideApi, CATEGORY_LABELS, instagramEmbed } from '@/utils/guides'
 
@@ -234,15 +235,12 @@ input:focus, textarea:focus { outline: none; border-color: #D4AF37; box-shadow: 
 .gd-chosen > div { flex: 1; }
 .gd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .gd-chip { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.5); background: transparent; color: inherit; cursor: pointer; }
-.gd-chip.on { background: linear-gradient(45deg, #D4AF37, #FF8C00); color: #2b1d0e; border-color: transparent; }
 .gd-embed { display: flex; justify-content: center; }
 .gd-embed iframe { width: 100%; max-width: 360px; height: 560px; border: 0; border-radius: 14px; background: #fff; }
 .gd-tour { display: grid; gap: 10px; padding: 14px; border-radius: 14px; border: 1px dashed rgba(212, 175, 55, 0.6); }
 .gd-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .gd-actions, .gd-list-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.gd-btn { display: inline-block; font: inherit; font-weight: 700; font-size: 16px; padding: 12px 26px; border-radius: 999px; border: 0; cursor: pointer; text-decoration: none; justify-self: start;
-  background: linear-gradient(45deg, #D4AF37, #FF8C00); color: #2b1d0e; box-shadow: 0 0 18px -2px rgba(255, 140, 0, 0.45); }
-.gd-btn:disabled { opacity: 0.55; cursor: default; }
+.gd-btn { justify-self: start; }
 .gd-btn-ghost { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.6); background: transparent; color: inherit; cursor: pointer; text-decoration: none; }
 .gd-danger { border-color: rgba(179, 38, 30, 0.5); }
 .gd-code { font-size: 24px; font-weight: 700; letter-spacing: 0.06em; padding: 12px 16px; border-radius: 14px; border: 1px dashed #D4AF37; justify-self: start; }
