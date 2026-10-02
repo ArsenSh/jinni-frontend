@@ -1325,5 +1325,346 @@
     "skip": "暂时跳过",
     "seo_title": "{city}：{count} 个吃喝、游览与探索之地 — Jinni 的探索",
     "seo_desc": "{city}的 {count} 家餐厅、景点、隐秘去处和活动，Jinni 了解并信赖。免费浏览 — 问问 Jinni 什么最适合你。"
+  },
+  "guides": {
+    "nav": {
+      "sign_in": "登录",
+      "apply": "申请",
+      "my_page": "我的向导主页",
+      "open_jinni": "打开 Jinni",
+      "for_guides": "向导专区",
+      "guides_label": "向导",
+      "language": "语言"
+    },
+    "types": {
+      "local": "本地达人",
+      "licensed": "持证导游",
+      "creator": "旅行博主"
+    },
+    "types_short": {
+      "local": "本地达人",
+      "licensed": "持证导游",
+      "creator": "旅行博主"
+    },
+    "categories": {
+      "restaurant": "餐厅",
+      "hidden_gem": "宝藏小众地",
+      "photo_spot": "拍照点",
+      "activity": "活动"
+    },
+    "categories_plural": {
+      "all": "全部",
+      "restaurant": "餐厅",
+      "hidden_gem": "宝藏小众地",
+      "photo_spot": "拍照点",
+      "activity": "活动"
+    },
+    "langs": {
+      "en": "英语",
+      "hy": "亚美尼亚语",
+      "ru": "俄语",
+      "fr": "法语",
+      "es": "西班牙语",
+      "de": "德语",
+      "it": "意大利语",
+      "fa": "波斯语",
+      "ar": "阿拉伯语",
+      "zh": "中文",
+      "ka": "格鲁吉亚语"
+    },
+    "landing": {
+      "badge": "Jinni 向导计划",
+      "badge_free": "免费",
+      "h1_a": "你的推荐。",
+      "h1_b": "你的主页。",
+      "h1_c": "旅行者在倾听。",
+      "sub_before": "免费主页",
+      "sub_page": "jinni.travel/{'@'}you",
+      "sub_after": "，专为本地向导和旅行博主打造。分享您最爱的地方、拍照点和行程——每位向 Jinni 询问这些地方的旅行者都会看到您的名字。",
+      "cta_apply": "申请成为向导",
+      "cta_dashboard": "打开我的控制台",
+      "cta_start": "创建我的主页",
+      "note": "只需 3 分钟 · 由我们的团队审核",
+      "example_tag": "示例",
+      "example_label": "向导主页示例",
+      "ex_meta": "本地达人 · Dilijan",
+      "ex1_title": "Dilijan 老街",
+      "ex1_note": "“早上 8 点来，赶在旅游大巴之前。”",
+      "ex2_title": "湖边的家庭厨房",
+      "ex2_note": "“点鳟鱼——当天早上刚钓的。”",
+      "ex3_title": "日出徒步 · 4 小时",
+      "ex3_note": "通过 WhatsApp 预约 Ani",
+      "ex_badge": "{'@'}ani.travels 精选",
+      "b1_title": "您的名字，挂在您推荐的地方",
+      "b1_text": "您挑选的餐厅、宝藏小众地、拍照点和活动，会向每位在 Jinni 上看到它们的人显示“{'@'}you 精选”。",
+      "b2_title": "为您的行程带来客人",
+      "b2_text": "把您的行程添加到活动中。旅行者直接预约您——通过 WhatsApp、Telegram、电话或您的网站。收入 100% 归您。",
+      "b3_title": "少回答“这是哪里？”",
+      "b3_text": "把主页链接放进 Instagram 简介。粉丝打开后向 Jinni 提问——您的推荐优先显示，还附带您的 Reels。",
+      "how_title": "如何运作",
+      "step1_strong": "申请",
+      "step1_text": "使用您的 Jinni 账户：填写名字、Instagram 和您带团的地区。",
+      "step2_strong": "验证",
+      "step2_text": "——在 Instagram 简介中放一段短代码，保留一天。我们的团队会进行核对。",
+      "step3_strong": "添加您的推荐",
+      "step3_text": "——从 Jinni 中选择地点，用您自己的话写一句推荐，并附上您的 Reels。",
+      "foot_terms": "条款",
+      "foot_privacy": "隐私",
+      "foot_guide_terms": "向导条款",
+      "foot_guide_privacy": "向导隐私",
+      "foot_contact": "联系我们",
+      "foot_business": "商家合作",
+      "foot_copy": "© {year} Jinni · 您的 AI 旅行伙伴"
+    },
+    "apply": {
+      "loading": "加载中…",
+      "pending_title": "就差一步，{name}",
+      "pending_text_before": "为证明",
+      "pending_text_after": "属于您，请将此代码添加到您的 Instagram 简介：",
+      "copy": "复制",
+      "copied": "已复制",
+      "step1": "打开 Instagram → 您的个人主页 → 编辑主页 → 个人简介。",
+      "step2": "将代码粘贴到简介中的任意位置并保存。",
+      "step3": "我们的团队会进行核对（通常在一天内），并通过邮件通知您。之后即可删除代码。",
+      "page_will_be": "您的主页地址：",
+      "go_dashboard": "前往我的控制台",
+      "live_title": "您的主页已上线",
+      "open_dashboard": "打开我的控制台",
+      "paused_title": "您的向导主页已暂停",
+      "paused_before": "请",
+      "paused_link": "联系我们",
+      "paused_after": "，我们会帮您处理。",
+      "title": "申请成为 Jinni 向导",
+      "intro": "对本地向导和旅行博主免费，大约只需 3 分钟。",
+      "rejected": "您上次的申请未通过：{reason}。修改后可以重新申请。",
+      "no_reason": "未说明原因",
+      "name": "您的名字（旅行者看到的名字）",
+      "name_ph": "例如 Ani Petrosyan",
+      "instagram": "Instagram 用户名",
+      "instagram_ph": "ani.travels",
+      "address": "您的主页地址",
+      "checking": "检查中…",
+      "available": "可用",
+      "taken": "已被占用，换一个试试",
+      "invalid": "3–30 个字母、数字、点或下划线",
+      "reserved": "该名称已被保留，请换一个",
+      "region": "您在哪里带团？",
+      "region_ph": "例如 Yerevan、Dilijan、Syunik",
+      "you_are": "您是…",
+      "languages": "您带团使用的语言",
+      "bio": "简单介绍一下自己",
+      "optional": "（选填）",
+      "bio_ph": "您的推荐有什么不同之处？",
+      "consent_before": "我确认我添加的帖子和推荐均为本人原创，我允许 Jinni 通过 Instagram 官方嵌入功能展示我的 Instagram 帖子，并同意",
+      "consent_terms": "向导条款",
+      "consent_and": "和",
+      "consent_privacy": "向导隐私政策",
+      "accept_terms_error": "请接受条款。",
+      "sending": "提交中…",
+      "send": "提交申请"
+    },
+    "dashboard": {
+      "no_page_title": "您还没有向导主页",
+      "apply": "申请成为向导",
+      "waiting_title": "等待审核",
+      "waiting_text": "请确保此代码在您的 Instagram 简介中（{handle}）：",
+      "waiting_note": "您的主页通过审核后，我们会立即发邮件通知您——通常在一天内。",
+      "inactive_title": "您的向导主页未启用",
+      "fix_apply": "修改并重新申请",
+      "contact_before": "请",
+      "contact_link": "联系我们",
+      "your_page": "您的主页",
+      "copy_link": "复制链接",
+      "copied": "已复制",
+      "view_page": "查看主页",
+      "tip": "把这个链接放进 Instagram 简介。打开链接的粉丝会首先看到您的推荐。",
+      "add_pick": "添加推荐",
+      "edit_pick": "编辑推荐",
+      "find_place": "在 Jinni 中查找地点",
+      "find_place_ph": "输入名称，例如 Lavash、Garni 神庙",
+      "searching": "搜索中…",
+      "no_place": "Jinni 中暂无该名称的地点。换个拼写试试——新地点可由我们的团队添加。",
+      "change": "更换",
+      "what_is_it": "这是什么？",
+      "why": "您喜欢它的理由",
+      "why_hint": "（一两句话，用您自己的话说）",
+      "why_ph": "例如：点一份 gata——Garni 最好吃的，每天早上现烤。",
+      "reel": "您关于这里的 Instagram Reels 或帖子",
+      "reel_hint": "（选填）",
+      "reel_ph": "https://www.instagram.com/reel/…",
+      "reel_bad": "请粘贴您的某条 Instagram 帖子或 Reels 的链接。",
+      "reel_preview": "Instagram 预览",
+      "tour_q": "这是您的行程之一吗？",
+      "tour_hint": "填写后，旅行者可以直接预约您。",
+      "tour_name": "行程名称",
+      "tour_name_ph": "例如 Lastiver 日出徒步",
+      "hours": "时长（小时）",
+      "price": "价格",
+      "currency": "币种",
+      "how_book": "预约方式",
+      "how_book_ph": "WhatsApp +374 …、Telegram 或您的网站",
+      "saving": "保存中…",
+      "save_changes": "保存更改",
+      "add_to_page": "添加到我的主页",
+      "cancel": "取消",
+      "my_picks": "我的推荐",
+      "no_picks": "还没有推荐。先从您最常推荐的 5–10 个地方开始吧。",
+      "tour_line": "行程：",
+      "reel_attached": "已附 Reels",
+      "edit": "编辑",
+      "remove": "移除",
+      "remove_confirm": "要从您的主页移除 {name} 吗？",
+      "reel_error": "该链接不是 Instagram 帖子或 Reels。"
+    },
+    "page": {
+      "loading": "加载中…",
+      "not_found_title": "未找到该向导",
+      "not_found_text": "此页面不存在或尚未公开。",
+      "go_jinni": "前往 Jinni",
+      "instagram_link": "{handle} 的 Instagram",
+      "guides_in": "带团语言：{langs}",
+      "ask": "带着 {name} 的推荐问 Jinni",
+      "ask_note": "免费 · 您的 AI 旅行伙伴",
+      "no_picks": "{name} 还没有添加推荐。",
+      "map": "地图",
+      "watch_reel": "观看 Reels",
+      "hide_reel": "收起 Reels",
+      "hours_short": "{n} 小时",
+      "book": "预约：",
+      "foot": "由真实本地向导推荐，尽在",
+      "become": "成为向导",
+      "title_suffix": "Jinni 上的本地推荐"
+    }
+  },
+  "guideTerms": {
+    "title": "向导服务条款",
+    "last_updated": "最后更新：2026年10月2日",
+    "sections": {
+      "intro": {
+        "title": "1. 协议",
+        "content": "本向导服务条款适用于您申请和使用 Jinni 向导主页。向导主页是 jinni.travel 上的公开页面，您可以在上面推荐餐厅、宝藏小众地、拍照点和活动，包括您自己的行程。提交申请即表示您同意本条款、向导隐私政策以及 Jinni 的通用服务条款。如本条款与通用条款不一致，以本条款为准适用于您的向导主页。"
+      },
+      "eligibility": {
+        "title": "2. 谁可以成为向导",
+        "content": "要拥有向导主页，您必须：",
+        "points": [
+          "年满 18 周岁，并能够订立具有约束力的协议；",
+          "使用您本人的 Jinni 账户和您本人的 Instagram 账户申请；",
+          "如实提供您的身份、带团地区和所讲语言等信息；",
+          "持有您所在国家法律要求的、与您提供的行程或服务相关的任何执照、许可或保险。"
+        ]
+      },
+      "verification": {
+        "title": "3. 验证与审核",
+        "content": "Jinni 会要求您在所填写的 Instagram 账户简介中放置一段短代码，以验证该账户属于您。我们的团队会审核每一份申请，并可自行决定通过或拒绝。14 天内未完成验证的申请可能会被关闭，其主页地址将被释放。每个 Instagram 账户只能拥有一个向导主页。"
+      },
+      "content": {
+        "title": "4. 您的推荐与内容",
+        "content": "您可以自行选择在主页上展示哪些地点，并撰写相应的推荐语。您确认：",
+        "points": [
+          "您的推荐真实可信，反映您的亲身体验；",
+          "您添加的推荐语、链接和 Reels 为您本人所有，或您有权分享；",
+          "如果您从所推荐的地点获得金钱、礼品或其他利益，您会明确告知旅行者；",
+          "您不会添加虚假、误导性、仇恨、违法或有害的内容，也不会冒充他人。"
+        ]
+      },
+      "license": {
+        "title": "5. 展示您内容的许可",
+        "content": "您保留对您内容的所有权。在您的主页存续期间，您授予 Jinni 一项非独占、全球范围、免版税的许可，可在您的向导主页、Jinni 的地点卡片（例如显示“精选”及您的主页地址）以及 Jinni 自身对向导主页的推广中展示您的推荐、推荐语、名字、主页地址和 Instagram 用户名。您的 Instagram 帖子仅通过 Instagram 官方嵌入功能展示：Jinni 只保存链接，绝不保存视频或照片本身。如果您在 Instagram 上删除某条帖子，它将不再出现在 Jinni 上。"
+      },
+      "tours": {
+        "title": "6. 您的行程",
+        "content": "如果您发布行程，该行程的协议由您与旅行者之间订立。Jinni 不组织、销售、运营或担保任何行程，也不是该协议的一方。您需对所标价格、行程的履行、客人的安全以及任何退款、税费和许可负责。您展示的价格必须是您实际收取的价格。"
+      },
+      "fees": {
+        "title": "7. 费用",
+        "content": "向导主页目前免费。如果 Jinni 将来为向导推出付费功能或收费，我们会提前通知您，您可以选择不使用。"
+      },
+      "jinni_rights": {
+        "title": "8. Jinni 可以采取的措施",
+        "content": "为保证推荐值得信赖，Jinni 可以在事先通知或不通知的情况下：",
+        "points": [
+          "审核、调整格式、隐藏或删除任何违反本条款的推荐、推荐语或链接；",
+          "暂停或关闭违反本条款、误导旅行者或损害 Jinni 用户的向导主页；",
+          "更改、改进或停止向导主页的功能。"
+        ]
+      },
+      "relationship": {
+        "title": "9. 独立关系",
+        "content": "您是独立的向导或创作者。本条款中的任何内容均不使您成为 Jinni 的员工、代理人或合伙人，您也不得代表 Jinni 作出任何承诺。"
+      },
+      "liability": {
+        "title": "10. 责任",
+        "content": "向导主页按“现状”提供。在法律允许的范围内，Jinni 不对向导的行程、服务或推荐、向导与旅行者之间的任何协议，以及任何间接或后果性损失承担责任。如因您的内容或行程导致有人向 Jinni 提出索赔，您同意承担 Jinni 由此产生的合理费用。"
+      },
+      "ending": {
+        "title": "11. 终止您的向导主页",
+        "content": "您可以随时联系我们或删除您的 Jinni 账户，以停止担任向导；删除账户将移除您的向导主页及所有推荐。Jinni 可按第 8 条所述终止您的向导主页。"
+      },
+      "changes": {
+        "title": "12. 条款变更",
+        "content": "我们可能会更新本条款。如有重大变更，我们会在其生效前通知您。此后继续使用您的向导主页，即表示您接受更新后的条款。"
+      },
+      "contact": {
+        "title": "13. 联系我们",
+        "content": "关于本条款的问题：support{'@'}jinni.ai。"
+      }
+    }
+  },
+  "guidePrivacy": {
+    "title": "向导隐私政策",
+    "last_updated": "最后更新：2026年10月2日",
+    "sections": {
+      "intro": {
+        "title": "1. 关于本政策",
+        "content": "本政策说明您申请和使用向导主页时，Jinni 会收集哪些信息、原因是什么、谁可以看到，以及您拥有哪些选择。本政策是对 Jinni 通用隐私政策的补充，通用隐私政策同样适用于您的 Jinni 账户。"
+      },
+      "collect": {
+        "title": "2. 我们收集的信息",
+        "content": "在您申请和使用向导主页时，我们会收集：",
+        "points": [
+          "您提供的信息：显示名称、Instagram 用户名、主页地址、地区、语言、向导类型和简短介绍；",
+          "您的推荐：您选择的地点、推荐语、Instagram 帖子链接以及行程详情（名称、时长、价格和预约方式）；",
+          "验证代码以及审核决定记录（日期和我们团队撰写的备注，包括拒绝的原因，如有）；",
+          "您对向导条款的接受情况及接受日期。"
+        ]
+      },
+      "public": {
+        "title": "3. 哪些信息是公开的",
+        "content": "您的主页通过审核后，以下信息会公开显示在您的主页和 Jinni 的地点卡片上：您的显示名称、主页地址、Instagram 用户名、地区、语言、向导类型、简介、推荐、推荐语、Instagram 帖子和行程详情，包括您选择提供的预约联系方式。您的电子邮箱地址、Jinni 账户信息、验证代码和我们团队的审核备注永远不会公开。在您的申请等待审核期间，与其相关的任何信息都不会公开。"
+      },
+      "use": {
+        "title": "4. 我们如何使用这些信息",
+        "content": "我们使用这些信息来验证您的身份、审核您的申请、展示您的主页和推荐、让旅行者就您的行程与您联系、防止冒充和滥用，并了解向导主页的使用情况（例如，有多少人在访问向导主页后注册）。"
+      },
+      "visitors": {
+        "title": "5. 您主页的访客",
+        "content": "当有人打开您的主页时，Jinni 可能会在其设备上记录该访客来自您的主页，以便我们统计向导主页带来了多少旅行者。我们不会与您分享这些旅行者的个人信息。"
+      },
+      "instagram": {
+        "title": "6. Instagram 嵌入内容",
+        "content": "您的 Instagram 帖子通过 Instagram 官方嵌入功能展示。当访客播放嵌入的帖子时，Instagram（Meta）可能会根据 Instagram 自己的隐私政策收集该访客的信息。Jinni 仅保存帖子链接。"
+      },
+      "sharing": {
+        "title": "7. 信息共享",
+        "content": "我们不会出售您的信息。我们仅在以下情况下共享您的信息：与帮助我们运营 Jinni 的服务提供商（如托管和电子邮件服务）共享、法律要求时，或为保护用户安全时。"
+      },
+      "retention": {
+        "title": "8. 保存期限",
+        "content": "在您的向导主页存续期间，我们会保存您的向导信息。如果您删除 Jinni 账户，您的向导主页及所有推荐将随之删除。从未完成验证的申请可能会在 14 天后被删除。为防止滥用，审核记录可能会保留一段有限的时间。"
+      },
+      "rights": {
+        "title": "9. 您的选择与权利",
+        "content": "您可以随时在控制台中查看和编辑大部分向导信息。您可以要求我们提供您信息的副本、要求更正或删除这些信息，或删除您的 Jinni 账户以彻底移除您的向导主页。"
+      },
+      "changes": {
+        "title": "10. 变更",
+        "content": "我们可能会更新本政策。如有重大变更，我们会在其生效前通知您。"
+      },
+      "contact": {
+        "title": "11. 联系我们",
+        "content": "隐私相关问题：support{'@'}jinni.ai。"
+      }
+    }
   }
 }

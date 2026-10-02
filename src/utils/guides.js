@@ -42,8 +42,38 @@ export function guideTheme() {
   })
 }
 
-export const CATEGORY_LABELS = { restaurant: 'Restaurant', hidden_gem: 'Hidden gem', photo_spot: 'Photo spot', activity: 'Activity' }
-export const LANGUAGE_OPTIONS = [['en', 'English'], ['hy', 'Armenian'], ['ru', 'Russian'], ['fr', 'French'], ['es', 'Spanish'], ['de', 'German'], ['it', 'Italian'], ['fa', 'Persian'], ['ar', 'Arabic'], ['zh', 'Chinese'], ['ka', 'Georgian']]
+export const CATEGORY_KEYS = ['restaurant', 'hidden_gem', 'photo_spot', 'activity']
+/** Languages a guide can say they guide in (labels: guides.langs.<code>). */
+export const GUIDING_LANGS = ['en', 'hy', 'ru', 'fr', 'es', 'de', 'it', 'fa', 'ar', 'zh', 'ka']
+
+/** The app's own languages — each shown in its own script. */
+export const GUIDE_LANGS = [
+  { code: 'en', label: 'English' }, { code: 'hy', label: 'Հայերեն' }, { code: 'ru', label: 'Русский' },
+  { code: 'fr', label: 'Français' }, { code: 'zh', label: '中文' }, { code: 'ar', label: 'العربية' },
+]
+const APP_CODES = GUIDE_LANGS.map(l => l.code)
+
+/** Switch the page language and remember it (same key the business pages use). */
+export function setGuideLanguage(localeRef, code) {
+  if (!APP_CODES.includes(code)) return
+  localeRef.value = code
+  try {
+    const s = JSON.parse(localStorage.getItem('jinni_settings') || '{}')
+    s.language = code
+    localStorage.setItem('jinni_settings', JSON.stringify(s))
+  } catch { /* storage blocked — the switch still works for this visit */ }
+}
+
+/** On page open: the saved choice, else the browser's language when the app speaks it. */
+export function initGuideLanguage(localeRef) {
+  let code = null
+  try { code = JSON.parse(localStorage.getItem('jinni_settings') || '{}').language || null } catch { /* none saved */ }
+  if (!APP_CODES.includes(code)) {
+    const b = String(navigator.language || '').slice(0, 2).toLowerCase()
+    code = APP_CODES.includes(b) ? b : null
+  }
+  if (code && localeRef.value !== code) localeRef.value = code
+}
 
 /** instagram.com/reel/<code> → its official embed URL, or null (mirrors the backend rule). */
 export function instagramEmbed(url) {

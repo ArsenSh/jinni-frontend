@@ -1,68 +1,71 @@
 <template>
-  <div class="gp" :class="theme">
+  <div class="gp" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <header class="gp-top">
-      <router-link to="/" class="gp-brand"><img src="/images/bottle.png" alt="" class="gp-lamp" />Jinni</router-link>
-      <router-link to="/guides" class="gp-link">For guides</router-link>
+      <router-link to="/" class="gp-brand"><img src="/images/bottle.png" alt="" class="gp-lamp" /><span translate="no">Jinni</span></router-link>
+      <div class="gp-top-right">
+        <GuideLangSwitch />
+        <router-link to="/guides" class="gp-link">{{ t('guides.nav.for_guides') }}</router-link>
+      </div>
     </header>
 
     <main class="gp-main">
-      <p v-if="loading" class="gp-muted">Loading…</p>
+      <p v-if="loading" class="gp-muted">{{ t('guides.page.loading') }}</p>
 
       <section v-else-if="!guide" class="gp-panel gp-center">
-        <h1>Guide not found</h1>
-        <p class="gp-muted">This page doesn't exist or isn't public yet.</p>
-        <router-link to="/" class="gp-btn jinni-pill">Go to Jinni</router-link>
+        <h1>{{ t('guides.page.not_found_title') }}</h1>
+        <p class="gp-muted">{{ t('guides.page.not_found_text') }}</p>
+        <router-link to="/" class="gp-btn jinni-pill">{{ t('guides.page.go_jinni') }}</router-link>
       </section>
 
       <template v-else>
         <section class="gp-hero">
           <div class="gp-avatar">{{ initials }}</div>
           <div>
-            <p class="gp-kicker">{{ typeLabel }} · {{ guide.region }}</p>
+            <p class="gp-kicker">{{ t('guides.types_short.' + (guide.guideType || 'local')) }} · {{ guide.region }}</p>
             <h1>{{ guide.displayName }}</h1>
-            <a :href="`https://www.instagram.com/${guide.instagram}/`" target="_blank" rel="noopener" class="gp-ig">@{{ guide.instagram }} on Instagram</a>
+            <a :href="`https://www.instagram.com/${guide.instagram}/`" target="_blank" rel="noopener" class="gp-ig">{{ t('guides.page.instagram_link', { handle: '@' + guide.instagram }) }}</a>
             <p v-if="guide.bio" class="gp-bio">{{ guide.bio }}</p>
-            <p v-if="guide.languages.length" class="gp-muted">Guides in {{ languagesText }}</p>
+            <p v-if="guide.languages.length" class="gp-muted">{{ t('guides.page.guides_in', { langs: languagesText }) }}</p>
           </div>
         </section>
 
         <div class="gp-ask">
-          <router-link :to="askTo" class="gp-btn jinni-pill" @click="tagGuideVisit(guide.handle)">Ask Jinni with {{ firstName }}'s picks</router-link>
-          <p class="gp-muted">Free · your AI travel companion</p>
+          <router-link :to="askTo" class="gp-btn jinni-pill" @click="tagGuideVisit(guide.handle)">{{ t('guides.page.ask', { name: firstName }) }}</router-link>
+          <p class="gp-muted">{{ t('guides.page.ask_note') }}</p>
         </div>
 
         <nav class="gp-tabs" v-if="picks.length">
-          <button v-for="t in tabs" :key="t.key" type="button" class="gp-tab" :class="{ on: tab === t.key, 'jinni-chip-on': tab === t.key }" @click="tab = t.key">{{ t.label }} <span>{{ t.count }}</span></button>
+          <button v-for="tb in tabs" :key="tb.key" type="button" class="gp-tab" :class="{ on: tab === tb.key, 'jinni-chip-on': tab === tb.key }" @click="tab = tb.key">{{ tb.label }} <span>{{ tb.count }}</span></button>
         </nav>
 
-        <p v-if="!picks.length" class="gp-muted gp-center">{{ firstName }} hasn't added picks yet.</p>
+        <p v-if="!picks.length" class="gp-muted gp-center">{{ t('guides.page.no_picks', { name: firstName }) }}</p>
 
         <section class="gp-grid">
           <article v-for="p in shown" :key="p.id" class="gp-card">
             <img v-if="p.image" :src="apiBase + p.image" :alt="p.name" class="gp-img" loading="lazy" />
             <div class="gp-body">
-              <span class="gp-tag">{{ CATEGORY_LABELS[p.category] }}</span>
+              <span class="gp-tag">{{ t('guides.categories.' + p.category) }}</span>
               <h3>{{ p.name }}</h3>
               <p v-if="p.address" class="gp-muted gp-addr">{{ p.address }}</p>
               <p v-if="p.note" class="gp-note">"{{ p.note }}" <span>— {{ firstName }}</span></p>
               <div v-if="p.tour" class="gp-tour">
                 <strong>{{ p.tour.title }}</strong>
-                <span v-if="p.tour.durationHours">{{ p.tour.durationHours }} h</span>
+                <span v-if="p.tour.durationHours">{{ t('guides.page.hours_short', { n: p.tour.durationHours }) }}</span>
                 <span v-if="p.tour.price != null">{{ p.tour.price }} {{ p.tour.currency || '' }}</span>
-                <span class="gp-book">Book: {{ p.tour.contact }}</span>
+                <span class="gp-book">{{ t('guides.page.book') }} <bdi>{{ p.tour.contact }}</bdi></span>
               </div>
               <div class="gp-card-actions">
-                <a v-if="p.lat != null" :href="`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`" target="_blank" rel="noopener" class="gp-btn-ghost">Map</a>
-                <button v-if="p.embedUrl" type="button" class="gp-btn-ghost" @click="toggleReel(p.id)">{{ openReel === p.id ? 'Hide reel' : 'Watch reel' }}</button>
+                <a v-if="p.lat != null" :href="`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`" target="_blank" rel="noopener" class="gp-btn-ghost">{{ t('guides.page.map') }}</a>
+                <button v-if="p.embedUrl" type="button" class="gp-btn-ghost" @click="toggleReel(p.id)">{{ openReel === p.id ? t('guides.page.hide_reel') : t('guides.page.watch_reel') }}</button>
               </div>
-              <div v-if="openReel === p.id && p.embedUrl" class="gp-embed"><iframe :src="p.embedUrl" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="`${guide.displayName} on Instagram`"></iframe></div>
+              <div v-if="openReel === p.id && p.embedUrl" class="gp-embed"><iframe :src="p.embedUrl" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="guide.displayName + ' — Instagram'"></iframe></div>
             </div>
           </article>
         </section>
       </template>
     </main>
 
-    <footer class="gp-foot">Picks by real local guides on <router-link to="/">Jinni</router-link> · <router-link to="/guides">Become a guide</router-link></footer>
+    <footer class="gp-foot">{{ t('guides.page.foot') }} <router-link to="/">Jinni</router-link> · <router-link to="/guides">{{ t('guides.page.become') }}</router-link></footer>
   </div>
 </template>
 
@@ -70,7 +73,12 @@
 import '@/assets/styles/jinni-pill.css'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { guideTheme, guideApi, CATEGORY_LABELS, LANGUAGE_OPTIONS, tagGuideVisit, hasToken } from '@/utils/guides'
+import { useI18n } from 'vue-i18n'
+import { guideTheme, guideApi, CATEGORY_KEYS, tagGuideVisit, hasToken, initGuideLanguage } from '@/utils/guides'
+import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
+
+const { t, locale } = useI18n()
+initGuideLanguage(locale)
 
 const route = useRoute()
 const apiBase = import.meta.env.VITE_API_BASE_URL || ''
@@ -81,13 +89,12 @@ const picks = ref([])
 const tab = ref('all')
 const openReel = ref(null)
 
-const firstName = computed(() => String(guide.value?.displayName || '').split(' ')[0] || 'this guide')
+const firstName = computed(() => String(guide.value?.displayName || '').split(' ')[0] || '')
 const initials = computed(() => String(guide.value?.displayName || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase())
-const typeLabel = computed(() => ({ licensed: 'Licensed guide', creator: 'Travel creator', local: 'Local expert' }[guide.value?.guideType] || 'Local guide'))
-const languagesText = computed(() => (guide.value?.languages || []).map(l => (LANGUAGE_OPTIONS.find(o => o[0] === l) || [l, l])[1]).join(', '))
+const languagesText = computed(() => (guide.value?.languages || []).map(l => t('guides.langs.' + l)).join(', '))
 const askTo = computed(() => (hasToken() ? '/chat' : `/auth?redirect=/chat`))
-const tabs = computed(() => [{ key: 'all', label: 'All', count: picks.value.length },
-  ...Object.entries(CATEGORY_LABELS).map(([key, label]) => ({ key, label: label + 's', count: picks.value.filter(p => p.category === key).length })).filter(t => t.count)])
+const tabs = computed(() => [{ key: 'all', label: t('guides.categories_plural.all'), count: picks.value.length },
+  ...CATEGORY_KEYS.map(key => ({ key, label: t('guides.categories_plural.' + key), count: picks.value.filter(p => p.category === key).length })).filter(x => x.count)])
 const shown = computed(() => (tab.value === 'all' ? picks.value : picks.value.filter(p => p.category === tab.value)))
 const toggleReel = (id) => { openReel.value = openReel.value === id ? null : id }
 
@@ -97,7 +104,7 @@ onMounted(async () => {
     const r = await guideApi(`/public/${encodeURIComponent(handle)}`)
     guide.value = r.guide
     picks.value = r.picks || []
-    document.title = `${r.guide.displayName} — local picks on Jinni`
+    document.title = `${r.guide.displayName} — ${t('guides.page.title_suffix')}`
     tagGuideVisit(r.guide.handle)
   } catch { guide.value = null } finally { loading.value = false }
 })
@@ -109,7 +116,8 @@ onMounted(async () => {
 .gp.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 100%); color: #f5e6c8; }
 .gp-top { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 18px 0; }
 .gp-brand { display: inline-flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 600; text-decoration: none; color: inherit; }
-.gp-lamp { width: 32px; }
+.gp-lamp { width: 52px; margin-block: -8px; margin-inline: -8px -4px; }
+.gp-top-right { display: flex; align-items: center; gap: 8px; }
 .gp-link { color: inherit; text-decoration: none; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); }
 .gp-main { max-width: 960px; margin: 0 auto; }
 .gp-center { text-align: center; }

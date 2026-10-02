@@ -1,84 +1,77 @@
 <template>
-  <div class="gl" :class="theme">
+  <div class="gl" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <header class="gl-top">
-      <router-link to="/" class="gl-brand" aria-label="Jinni home">
+      <router-link to="/" class="gl-brand" aria-label="Jinni">
         <img src="/images/bottle.png" alt="" class="gl-lamp" />
         <span class="gl-word" translate="no">Jinni</span>
         <span class="gl-sep" aria-hidden="true"></span>
-        <span class="gl-sub-brand">Guides</span>
+        <span class="gl-sub-brand">{{ t('guides.nav.guides_label') }}</span>
       </router-link>
-      <router-link v-if="signedIn" :to="isGuide ? '/guide/dashboard' : '/guides/apply'" class="gl-link">{{ isGuide ? 'My guide page' : 'Apply' }}</router-link>
-      <router-link v-else to="/auth?redirect=/guides/apply" class="gl-link">Sign in</router-link>
+      <div class="gl-top-right">
+        <GuideLangSwitch />
+        <router-link v-if="signedIn" :to="isGuide ? '/guide/dashboard' : '/guides/apply'" class="gl-link">{{ isGuide ? t('guides.nav.my_page') : t('guides.nav.apply') }}</router-link>
+        <router-link v-else to="/auth?redirect=/guides/apply" class="gl-link">{{ t('guides.nav.sign_in') }}</router-link>
+      </div>
     </header>
 
     <section class="gl-hero">
       <div class="gl-hero-text">
-        <p class="gl-badge"><span class="gl-dot" aria-hidden="true"></span>Jinni for Guides <span class="gl-badge-free">· Free</span></p>
-        <h1>Your picks.<br />Your page.<br /><span class="grad">Travelers listening.</span></h1>
-        <p class="gl-sub">A free page at <strong>jinni.travel/@you</strong> for local guides and travel creators. Share your favourite places, photo spots and tours — and every traveler who asks Jinni about them sees your name.</p>
+        <p class="gl-badge"><span class="gl-dot" aria-hidden="true"></span>{{ t('guides.landing.badge') }} <span class="gl-badge-free">· {{ t('guides.landing.badge_free') }}</span></p>
+        <h1>{{ t('guides.landing.h1_a') }}<br />{{ t('guides.landing.h1_b') }}<br /><span class="grad">{{ t('guides.landing.h1_c') }}</span></h1>
+        <p class="gl-sub">{{ t('guides.landing.sub_before') }} <strong dir="ltr">{{ t('guides.landing.sub_page') }}</strong> {{ t('guides.landing.sub_after') }}</p>
         <div class="gl-cta-row">
-          <router-link :to="ctaTo" class="gl-cta jinni-pill">{{ isGuide ? 'Open my dashboard' : 'Apply as a guide' }}</router-link>
-          <span class="gl-note">Takes 3 minutes · approved by our team</span>
+          <router-link :to="ctaTo" class="gl-cta jinni-pill">{{ isGuide ? t('guides.landing.cta_dashboard') : t('guides.landing.cta_apply') }}</router-link>
+          <span class="gl-note">{{ t('guides.landing.note') }}</span>
         </div>
       </div>
 
       <!-- What a guide gets, shown, not told. Clearly an example. -->
-      <aside class="gl-example" aria-label="Example guide page">
-        <span class="gl-example-tag">Example</span>
+      <aside class="gl-example" :aria-label="t('guides.landing.example_label')">
+        <span class="gl-example-tag">{{ t('guides.landing.example_tag') }}</span>
         <div class="gl-ex-head">
           <div class="gl-ex-avatar">AP</div>
           <div>
             <strong>Ani Petrosyan</strong>
-            <small>Local expert · Dilijan</small>
+            <small>{{ t('guides.landing.ex_meta') }}</small>
           </div>
         </div>
         <ul class="gl-ex-list">
-          <li><span class="gl-ex-cat">Hidden gem</span><b>Old Dilijan street</b><em>"Come at 8am, before the buses."</em></li>
-          <li><span class="gl-ex-cat">Restaurant</span><b>A family kitchen by the lake</b><em>"Order the trout — caught that morning."</em></li>
-          <li><span class="gl-ex-cat">Activity</span><b>Sunrise hike · 4 h</b><em>Book Ani on WhatsApp</em></li>
+          <li><span class="gl-ex-cat">{{ t('guides.categories.hidden_gem') }}</span><b>{{ t('guides.landing.ex1_title') }}</b><em>{{ t('guides.landing.ex1_note') }}</em></li>
+          <li><span class="gl-ex-cat">{{ t('guides.categories.restaurant') }}</span><b>{{ t('guides.landing.ex2_title') }}</b><em>{{ t('guides.landing.ex2_note') }}</em></li>
+          <li><span class="gl-ex-cat">{{ t('guides.categories.activity') }}</span><b>{{ t('guides.landing.ex3_title') }}</b><em>{{ t('guides.landing.ex3_note') }}</em></li>
         </ul>
-        <div class="gl-ex-foot">jinni.travel/@ani.travels <span class="gl-ex-badge">Picked by @ani.travels</span></div>
+        <div class="gl-ex-foot"><span dir="ltr">jinni.travel/@ani.travels</span> <span class="gl-ex-badge">{{ t('guides.landing.ex_badge') }}</span></div>
       </aside>
     </section>
 
     <section class="gl-grid">
-      <div class="gl-card">
-        <div class="gl-ico">★</div>
-        <h3>Your name on your places</h3>
-        <p>Restaurants, hidden gems, photo spots and activities you pick show "Picked by @you" to everyone who meets them on Jinni.</p>
-      </div>
-      <div class="gl-card">
-        <div class="gl-ico">◎</div>
-        <h3>Customers for your tours</h3>
-        <p>List your tours under activities. Travelers book you directly — on WhatsApp, Telegram, phone or your site. You keep 100%.</p>
-      </div>
-      <div class="gl-card">
-        <div class="gl-ico">✉</div>
-        <h3>Fewer "where is this?" DMs</h3>
-        <p>Put your page in your Instagram bio. Followers open it and ask Jinni — your picks come first, with your reels.</p>
-      </div>
+      <div class="gl-card"><div class="gl-ico">★</div><h3>{{ t('guides.landing.b1_title') }}</h3><p>{{ t('guides.landing.b1_text') }}</p></div>
+      <div class="gl-card"><div class="gl-ico">◎</div><h3>{{ t('guides.landing.b2_title') }}</h3><p>{{ t('guides.landing.b2_text') }}</p></div>
+      <div class="gl-card"><div class="gl-ico">✉</div><h3>{{ t('guides.landing.b3_title') }}</h3><p>{{ t('guides.landing.b3_text') }}</p></div>
     </section>
 
     <section class="gl-steps">
-      <h2>How it works</h2>
+      <h2>{{ t('guides.landing.how_title') }}</h2>
       <ol>
-        <li><span>1</span><div><strong>Apply</strong> with your Jinni account: your name, Instagram, where you guide.</div></li>
-        <li><span>2</span><div><strong>Verify</strong> — put a short code in your Instagram bio for a day. Our team checks it.</div></li>
-        <li><span>3</span><div><strong>Add your picks</strong> — choose places from Jinni, add a line in your words and your reel.</div></li>
+        <li><span>1</span><div><strong>{{ t('guides.landing.step1_strong') }}</strong> {{ t('guides.landing.step1_text') }}</div></li>
+        <li><span>2</span><div><strong>{{ t('guides.landing.step2_strong') }}</strong> {{ t('guides.landing.step2_text') }}</div></li>
+        <li><span>3</span><div><strong>{{ t('guides.landing.step3_strong') }}</strong> {{ t('guides.landing.step3_text') }}</div></li>
       </ol>
-      <router-link :to="ctaTo" class="gl-cta jinni-pill">{{ isGuide ? 'Open my dashboard' : 'Start my page' }}</router-link>
+      <router-link :to="ctaTo" class="gl-cta jinni-pill">{{ isGuide ? t('guides.landing.cta_dashboard') : t('guides.landing.cta_start') }}</router-link>
     </section>
 
     <footer class="gl-foot">
       <div class="gl-foot-line" aria-hidden="true"></div>
       <router-link to="/" class="gl-foot-brand"><img src="/images/bottle.png" alt="" /><span translate="no">Jinni</span></router-link>
       <nav class="gl-foot-links">
-        <router-link to="/terms">Terms</router-link>
-        <router-link to="/privacy">Privacy</router-link>
-        <router-link to="/contact">Contact</router-link>
-        <router-link to="/business">For business</router-link>
+        <router-link to="/guides/terms">{{ t('guides.landing.foot_guide_terms') }}</router-link>
+        <router-link to="/guides/privacy">{{ t('guides.landing.foot_guide_privacy') }}</router-link>
+        <router-link to="/terms">{{ t('guides.landing.foot_terms') }}</router-link>
+        <router-link to="/privacy">{{ t('guides.landing.foot_privacy') }}</router-link>
+        <router-link to="/contact">{{ t('guides.landing.foot_contact') }}</router-link>
+        <router-link to="/business">{{ t('guides.landing.foot_business') }}</router-link>
       </nav>
-      <p class="gl-foot-copy">© {{ year }} Jinni · Your AI travel companion</p>
+      <p class="gl-foot-copy">{{ t('guides.landing.foot_copy', { year }) }}</p>
     </footer>
   </div>
 </template>
@@ -86,7 +79,12 @@
 <script setup>
 import '@/assets/styles/jinni-pill.css'
 import { ref, computed, onMounted } from 'vue'
-import { guideTheme, guideApi, hasToken } from '@/utils/guides'
+import { useI18n } from 'vue-i18n'
+import { guideTheme, guideApi, hasToken, initGuideLanguage } from '@/utils/guides'
+import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
+
+const { t, locale } = useI18n()
+initGuideLanguage(locale)
 
 const theme = guideTheme()
 const signedIn = hasToken()
@@ -109,13 +107,14 @@ onMounted(async () => {
 /* Header: lamp + gold wordmark + "Guides" */
 .gl-top { max-width: 1080px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 20px 0; gap: 12px; }
 .gl-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; min-width: 0; }
-.gl-lamp { width: 40px; height: auto; flex: 0 0 auto; }
+.gl-lamp { width: 58px; height: auto; flex: 0 0 auto; margin-block: -8px; margin-inline: -8px -6px; }
 .gl-word { font-family: var(--serif); font-size: 28px; font-weight: 600; line-height: 1; letter-spacing: 1px;
   background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 .gl-sep { width: 1px; height: 22px; background: linear-gradient(180deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.8), rgba(212, 175, 55, 0)); }
 .gl-sub-brand { font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
 .gl-link { color: inherit; text-decoration: none; font-size: 15px; padding: 9px 18px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); white-space: nowrap; }
 .gl-link:hover { background: rgba(212, 175, 55, 0.12); }
+.gl-top-right { display: flex; align-items: center; gap: 8px; }
 
 /* Hero */
 .gl-hero { max-width: 1080px; margin: 28px auto 0; display: grid; grid-template-columns: 1fr; gap: 32px; align-items: center; }
@@ -138,7 +137,7 @@ onMounted(async () => {
 .gl-ex-head { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
 .gl-ex-head strong { display: block; font-size: 17px; }
 .gl-ex-head small { opacity: 0.7; font-size: 13px; }
-.gl-ex-avatar { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #2b1d0e; background: linear-gradient(45deg, #D4AF37, #FF8C00); box-shadow: 0 0 14px -2px rgba(255, 140, 0, 0.5); }
+.gl-ex-avatar { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #2b1d0e; background: linear-gradient(45deg, #D4AF37, #FF8C00); box-shadow: 0 0 14px -2px rgba(255, 140, 0, 0.5); }
 .gl-ex-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .gl-ex-list li { display: grid; gap: 2px; padding: 10px 12px; border-radius: 14px; }
 .night-mode .gl-ex-list li { background: rgba(255, 255, 255, 0.04); }
@@ -156,7 +155,7 @@ onMounted(async () => {
 .gl-card { border-radius: 18px; padding: 22px; backdrop-filter: blur(20px) saturate(160%); }
 .day-mode .gl-card { background: rgba(255, 255, 255, 0.6); box-shadow: 0 0 18px -2px rgba(60, 42, 30, 0.14); }
 .night-mode .gl-card { background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 18px -2px rgba(0, 0, 0, 0.5); }
-.gl-ico { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; color: #fff; background: linear-gradient(45deg, #D4AF37, #FF8C00); margin-bottom: 12px; }
+.gl-ico { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; color: #fff; background: linear-gradient(45deg, #D4AF37, #FF8C00); margin-bottom: 12px; }
 .gl-card h3 { margin: 0 0 8px; font-size: 18px; }
 .gl-card p { margin: 0; line-height: 1.5; font-size: 15px; opacity: 0.9; }
 .gl-steps { max-width: 1080px; margin: 0 auto; }
@@ -170,7 +169,7 @@ onMounted(async () => {
 .gl-foot { max-width: 1080px; margin: 64px auto 0; padding: 0 0 34px; display: grid; justify-items: center; gap: 14px; text-align: center; }
 .gl-foot-line { width: 100%; height: 1px; background: linear-gradient(90deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.55), rgba(212, 175, 55, 0)); margin-bottom: 18px; }
 .gl-foot-brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-family: var(--serif); font-size: 20px; font-weight: 600; letter-spacing: 1px; }
-.gl-foot-brand img { width: 30px; }
+.gl-foot-brand img { width: 44px; margin: -6px -4px -6px -6px; }
 .gl-foot-brand span { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 .gl-foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 22px; }
 .gl-foot-links a { font-family: var(--serif); font-size: 15px; text-decoration: none; padding: 6px 2px; }
@@ -186,5 +185,6 @@ onMounted(async () => {
   .gl-example { justify-self: end; }
   .gl-steps ol { grid-template-columns: repeat(3, 1fr); gap: 20px; }
 }
-@media (max-width: 380px) { .gl-word { font-size: 24px; } .gl-sub-brand { display: none; } .gl-sep { display: none; } }
+@media (max-width: 430px) { .gl-sub-brand, .gl-sep { display: none; } .gl-link { padding: 8px 14px; } }
+@media (max-width: 360px) { .gl-word { font-size: 24px; } }
 </style>

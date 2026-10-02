@@ -45,6 +45,18 @@ const routes = [
         meta: { title: 'Jinni for Guides', public: true }
     },
     {
+        path: '/guides/terms',
+        name: 'GuideTerms',
+        component: () => import('@/views/GuideLegal.vue'),
+        meta: { title: 'Guide Terms of Service — Jinni', public: true, legal: 'guideTerms' }
+    },
+    {
+        path: '/guides/privacy',
+        name: 'GuidePrivacy',
+        component: () => import('@/views/GuideLegal.vue'),
+        meta: { title: 'Guide Privacy Policy — Jinni', public: true, legal: 'guidePrivacy' }
+    },
+    {
         path: '/guides/apply',
         name: 'GuideApply',
         component: () => import('@/views/GuideApply.vue'),

@@ -1,98 +1,99 @@
 <template>
-  <div class="ga" :class="theme">
+  <div class="ga" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <header class="ga-top">
       <router-link to="/guides" class="ga-brand" aria-label="Jinni Guides">
         <img src="/images/bottle.png" alt="" class="ga-lamp" />
         <span class="ga-word" translate="no">Jinni</span>
         <span class="ga-sep" aria-hidden="true"></span>
-        <span class="ga-sub-brand">Guides</span>
+        <span class="ga-sub-brand">{{ t('guides.nav.guides_label') }}</span>
       </router-link>
+      <GuideLangSwitch />
     </header>
 
     <main class="ga-main">
-      <p v-if="loading" class="ga-muted">Loading…</p>
+      <p v-if="loading" class="ga-muted">{{ t('guides.apply.loading') }}</p>
 
       <!-- Submitted: show the bio code -->
       <section v-else-if="guide && guide.status === 'pending'" class="ga-panel">
-        <h1>Almost there, {{ guide.displayName }}</h1>
-        <p>To prove <strong>@{{ guide.instagram }}</strong> is yours, add this code to your Instagram bio:</p>
-        <div class="ga-code">
+        <h1>{{ t('guides.apply.pending_title', { name: guide.displayName }) }}</h1>
+        <p>{{ t('guides.apply.pending_text_before') }} <strong dir="ltr">@{{ guide.instagram }}</strong> {{ t('guides.apply.pending_text_after') }}</p>
+        <div class="ga-code" dir="ltr">
           <span>{{ guide.verificationCode }}</span>
-          <button type="button" class="ga-btn-ghost" @click="copy(guide.verificationCode)">{{ copied ? 'Copied' : 'Copy' }}</button>
+          <button type="button" class="ga-btn-ghost" @click="copy(guide.verificationCode)">{{ copied ? t('guides.apply.copied') : t('guides.apply.copy') }}</button>
         </div>
         <ol class="ga-steps">
-          <li>Open Instagram → your profile → <em>Edit profile</em> → <em>Bio</em>.</li>
-          <li>Paste the code anywhere in your bio and save.</li>
-          <li>Our team checks it, usually within a day, and emails you. Then you can remove it.</li>
+          <li>{{ t('guides.apply.step1') }}</li>
+          <li>{{ t('guides.apply.step2') }}</li>
+          <li>{{ t('guides.apply.step3') }}</li>
         </ol>
-        <p class="ga-muted">Your page will be: <strong>jinni.travel/@{{ guide.handle }}</strong></p>
-        <router-link to="/guide/dashboard" class="ga-btn jinni-pill">Go to my dashboard</router-link>
+        <p class="ga-muted">{{ t('guides.apply.page_will_be') }} <strong dir="ltr">jinni.travel/@{{ guide.handle }}</strong></p>
+        <router-link to="/guide/dashboard" class="ga-btn jinni-pill">{{ t('guides.apply.go_dashboard') }}</router-link>
       </section>
 
       <!-- Already active -->
       <section v-else-if="guide && guide.status === 'active'" class="ga-panel">
-        <h1>Your page is live</h1>
-        <p>jinni.travel/@{{ guide.handle }}</p>
-        <router-link to="/guide/dashboard" class="ga-btn jinni-pill">Open my dashboard</router-link>
+        <h1>{{ t('guides.apply.live_title') }}</h1>
+        <p dir="ltr">jinni.travel/@{{ guide.handle }}</p>
+        <router-link to="/guide/dashboard" class="ga-btn jinni-pill">{{ t('guides.apply.open_dashboard') }}</router-link>
       </section>
 
       <section v-else-if="guide && guide.status === 'suspended'" class="ga-panel">
-        <h1>Your guide page is paused</h1>
-        <p>Please <router-link to="/contact">contact us</router-link> and we'll help.</p>
+        <h1>{{ t('guides.apply.paused_title') }}</h1>
+        <p>{{ t('guides.apply.paused_before') }} <router-link to="/contact">{{ t('guides.apply.paused_link') }}</router-link> {{ t('guides.apply.paused_after') }}</p>
       </section>
 
       <!-- Application form (new, or after a rejection) -->
       <form v-else class="ga-panel" @submit.prevent="submit">
-        <h1>Apply as a Jinni guide</h1>
-        <p v-if="guide && guide.status === 'rejected'" class="ga-alert">Your last application wasn't approved: {{ guide.staffNotes || 'no reason given' }}. You can fix it and apply again.</p>
-        <p v-else class="ga-muted">Free for local guides and travel creators. It takes about 3 minutes.</p>
+        <h1>{{ t('guides.apply.title') }}</h1>
+        <p v-if="guide && guide.status === 'rejected'" class="ga-alert">{{ t('guides.apply.rejected', { reason: guide.staffNotes || t('guides.apply.no_reason') }) }}</p>
+        <p v-else class="ga-muted">{{ t('guides.apply.intro') }}</p>
 
-        <label>Your name, as travelers will see it
-          <input v-model.trim="form.displayName" maxlength="60" required placeholder="e.g. Ani Petrosyan" />
+        <label>{{ t('guides.apply.name') }}
+          <input v-model.trim="form.displayName" maxlength="60" required :placeholder="t('guides.apply.name_ph')" />
         </label>
 
-        <label>Instagram username
-          <div class="ga-prefix"><span>@</span><input v-model.trim="form.instagram" maxlength="31" required placeholder="ani.travels" @input="syncHandle" /></div>
+        <label>{{ t('guides.apply.instagram') }}
+          <div class="ga-prefix" dir="ltr"><span>@</span><input v-model.trim="form.instagram" maxlength="31" required :placeholder="t('guides.apply.instagram_ph')" @input="syncHandle" /></div>
         </label>
 
-        <label>Your page address
-          <div class="ga-prefix"><span>jinni.travel/@</span><input v-model.trim="form.handle" maxlength="30" required @input="handleTouched = true; checkHandle()" /></div>
-          <small v-if="handleState === 'checking'" class="ga-muted">Checking…</small>
-          <small v-else-if="handleState === 'ok'" class="ga-ok">Available</small>
-          <small v-else-if="handleState === 'taken'" class="ga-bad">Taken — try another</small>
-          <small v-else-if="handleState === 'invalid'" class="ga-bad">3–30 letters, digits, dots or underscores</small>
-          <small v-else-if="handleState === 'reserved'" class="ga-bad">That name is reserved — please choose another</small>
+        <label>{{ t('guides.apply.address') }}
+          <div class="ga-prefix" dir="ltr"><span>jinni.travel/@</span><input v-model.trim="form.handle" maxlength="30" required @input="handleTouched = true; checkHandle()" /></div>
+          <small v-if="handleState === 'checking'" class="ga-muted">{{ t('guides.apply.checking') }}</small>
+          <small v-else-if="handleState === 'ok'" class="ga-ok">{{ t('guides.apply.available') }}</small>
+          <small v-else-if="handleState === 'taken'" class="ga-bad">{{ t('guides.apply.taken') }}</small>
+          <small v-else-if="handleState === 'invalid'" class="ga-bad">{{ t('guides.apply.invalid') }}</small>
+          <small v-else-if="handleState === 'reserved'" class="ga-bad">{{ t('guides.apply.reserved') }}</small>
         </label>
 
-        <label>Where do you guide?
-          <input v-model.trim="form.region" maxlength="80" required placeholder="e.g. Yerevan, Dilijan, Syunik" />
+        <label>{{ t('guides.apply.region') }}
+          <input v-model.trim="form.region" maxlength="80" required :placeholder="t('guides.apply.region_ph')" />
         </label>
 
         <fieldset>
-          <legend>You are a…</legend>
+          <legend>{{ t('guides.apply.you_are') }}</legend>
           <div class="ga-chips">
-            <button v-for="t in types" :key="t[0]" type="button" class="ga-chip" :class="{ on: form.guideType === t[0], 'jinni-chip-on': form.guideType === t[0] }" @click="form.guideType = t[0]">{{ t[1] }}</button>
+            <button v-for="k in TYPES" :key="k" type="button" class="ga-chip" :class="{ on: form.guideType === k, 'jinni-chip-on': form.guideType === k }" @click="form.guideType = k">{{ t('guides.types.' + k) }}</button>
           </div>
         </fieldset>
 
         <fieldset>
-          <legend>Languages you guide in</legend>
+          <legend>{{ t('guides.apply.languages') }}</legend>
           <div class="ga-chips">
-            <button v-for="l in LANGUAGE_OPTIONS" :key="l[0]" type="button" class="ga-chip" :class="{ on: form.languages.includes(l[0]), 'jinni-chip-on': form.languages.includes(l[0]) }" @click="toggleLang(l[0])">{{ l[1] }}</button>
+            <button v-for="l in GUIDING_LANGS" :key="l" type="button" class="ga-chip" :class="{ on: form.languages.includes(l), 'jinni-chip-on': form.languages.includes(l) }" @click="toggleLang(l)">{{ t('guides.langs.' + l) }}</button>
           </div>
         </fieldset>
 
-        <label><span>A few words about you <span class="ga-muted">(optional)</span></span>
-          <textarea v-model="form.bio" maxlength="400" rows="3" placeholder="What makes your recommendations different?"></textarea>
+        <label><span>{{ t('guides.apply.bio') }} <span class="ga-muted">{{ t('guides.apply.optional') }}</span></span>
+          <textarea v-model="form.bio" maxlength="400" rows="3" :placeholder="t('guides.apply.bio_ph')"></textarea>
         </label>
 
         <label class="ga-check">
           <input type="checkbox" v-model="form.acceptTerms" />
-          <span>I confirm the posts and recommendations I add are my own, I allow Jinni to show my Instagram posts through Instagram's official embed, and I agree to the <router-link to="/terms" target="_blank">terms</router-link>.</span>
+          <span>{{ t('guides.apply.consent_before') }} <router-link to="/guides/terms" target="_blank">{{ t('guides.apply.consent_terms') }}</router-link> {{ t('guides.apply.consent_and') }} <router-link to="/guides/privacy" target="_blank">{{ t('guides.apply.consent_privacy') }}</router-link>.</span>
         </label>
 
         <p v-if="error" class="ga-alert">{{ error }}</p>
-        <button type="submit" class="ga-btn jinni-pill" :disabled="sending">{{ sending ? 'Sending…' : 'Send application' }}</button>
+        <button type="submit" class="ga-btn jinni-pill" :disabled="sending">{{ sending ? t('guides.apply.sending') : t('guides.apply.send') }}</button>
       </form>
     </main>
   </div>
@@ -102,7 +103,12 @@
 import '@/assets/styles/jinni-pill.css'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { guideTheme, guideApi, LANGUAGE_OPTIONS } from '@/utils/guides'
+import { useI18n } from 'vue-i18n'
+import { guideTheme, guideApi, GUIDING_LANGS, initGuideLanguage } from '@/utils/guides'
+import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
+
+const { t, locale } = useI18n()
+initGuideLanguage(locale)
 
 const router = useRouter()
 const theme = guideTheme()
@@ -111,7 +117,7 @@ const guide = ref(null)
 const sending = ref(false)
 const error = ref('')
 const copied = ref(false)
-const types = [['local', 'Local expert'], ['licensed', 'Licensed tour guide'], ['creator', 'Travel creator']]
+const TYPES = ['local', 'licensed', 'creator']
 const form = reactive({ displayName: '', instagram: '', handle: '', region: '', guideType: 'local', languages: ['en'], bio: '', acceptTerms: false })
 const handleTouched = ref(false)
 const handleState = ref('')
@@ -137,7 +143,7 @@ async function copy(text) { try { await navigator.clipboard.writeText(text); cop
 
 async function submit() {
   error.value = ''
-  if (!form.acceptTerms) { error.value = 'Please accept the terms.'; return }
+  if (!form.acceptTerms) { error.value = t('guides.apply.accept_terms_error'); return }
   sending.value = true
   try {
     const r = await guideApi('/apply', { method: 'POST', body: { ...form, handle: clean(form.handle), instagram: clean(form.instagram) } })
@@ -160,9 +166,9 @@ onMounted(async () => {
 .ga { min-height: 100vh; font-family: 'Lora', Georgia, serif; padding: 0 16px 48px; box-sizing: border-box; }
 .ga.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 100%); color: #3c2a1e; }
 .ga.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 100%); color: #f5e6c8; }
-.ga-top { max-width: 640px; margin: 0 auto; padding: 18px 0; }
+.ga-top { max-width: 640px; margin: 0 auto; padding: 18px 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .ga-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
-.ga-lamp { width: 36px; height: auto; }
+.ga-lamp { width: 54px; height: auto; margin-block: -8px; margin-inline: -8px -6px; }
 .ga-word { font-family: var(--brand-serif, 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif); font-size: 26px; font-weight: 600; line-height: 1; letter-spacing: 1px;
   background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 .ga-sep { width: 1px; height: 20px; background: linear-gradient(180deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.8), rgba(212, 175, 55, 0)); }
@@ -185,6 +191,7 @@ input:focus, textarea:focus { outline: none; border-color: #D4AF37; box-shadow: 
 .ga-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .ga-chip { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.5); background: transparent; color: inherit; cursor: pointer; }
 .ga-check { grid-template-columns: 22px 1fr; align-items: start; font-size: 14px; line-height: 1.45; }
+@media (max-width: 400px) { .ga-sub-brand, .ga-sep { display: none; } }
 .ga-check input { width: 18px; height: 18px; margin-top: 2px; }
 .ga-check a { color: #b4540a; }
 .night-mode .ga-check a { color: #ffd27a; }

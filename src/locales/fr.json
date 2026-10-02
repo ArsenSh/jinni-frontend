@@ -1325,5 +1325,346 @@
     "skip": "Passer pour l’instant",
     "seo_title": "{city} : {count} adresses pour manger, voir et découvrir — Découvertes de Jinni",
     "seo_desc": "{count} restaurants, sites, lieux secrets et activités à {city} que Jinni connaît et recommande. Parcourez librement — demandez à Jinni ce qui vous correspond."
+  },
+  "guides": {
+    "nav": {
+      "sign_in": "Se connecter",
+      "apply": "Postuler",
+      "my_page": "Ma page de guide",
+      "open_jinni": "Ouvrir Jinni",
+      "for_guides": "Pour les guides",
+      "guides_label": "Guides",
+      "language": "Langue"
+    },
+    "types": {
+      "local": "Expert local",
+      "licensed": "Guide touristique agréé",
+      "creator": "Créateur voyage"
+    },
+    "types_short": {
+      "local": "Expert local",
+      "licensed": "Guide agréé",
+      "creator": "Créateur voyage"
+    },
+    "categories": {
+      "restaurant": "Restaurant",
+      "hidden_gem": "Pépite cachée",
+      "photo_spot": "Spot photo",
+      "activity": "Activité"
+    },
+    "categories_plural": {
+      "all": "Tout",
+      "restaurant": "Restaurants",
+      "hidden_gem": "Pépites cachées",
+      "photo_spot": "Spots photo",
+      "activity": "Activités"
+    },
+    "langs": {
+      "en": "Anglais",
+      "hy": "Arménien",
+      "ru": "Russe",
+      "fr": "Français",
+      "es": "Espagnol",
+      "de": "Allemand",
+      "it": "Italien",
+      "fa": "Persan",
+      "ar": "Arabe",
+      "zh": "Chinois",
+      "ka": "Géorgien"
+    },
+    "landing": {
+      "badge": "Jinni pour les guides",
+      "badge_free": "Gratuit",
+      "h1_a": "Vos coups de cœur.",
+      "h1_b": "Votre page.",
+      "h1_c": "Des voyageurs à l'écoute.",
+      "sub_before": "Une page gratuite sur",
+      "sub_page": "jinni.travel/{'@'}you",
+      "sub_after": "pour les guides locaux et les créateurs voyage. Partagez vos lieux préférés, vos spots photo et vos visites — et chaque voyageur qui interroge Jinni à leur sujet voit votre nom.",
+      "cta_apply": "Devenir guide",
+      "cta_dashboard": "Ouvrir mon tableau de bord",
+      "cta_start": "Créer ma page",
+      "note": "3 minutes · validé par notre équipe",
+      "example_tag": "Exemple",
+      "example_label": "Exemple de page de guide",
+      "ex_meta": "Expert local · Dilijan",
+      "ex1_title": "La vieille rue de Dilijan",
+      "ex1_note": "« Venez à 8 h, avant les bus. »",
+      "ex2_title": "Une cuisine familiale au bord du lac",
+      "ex2_note": "« Prenez la truite — pêchée le matin même. »",
+      "ex3_title": "Randonnée au lever du soleil · 4 h",
+      "ex3_note": "Réservez Ani sur WhatsApp",
+      "ex_badge": "Choisi par {'@'}ani.travels",
+      "b1_title": "Votre nom sur vos lieux",
+      "b1_text": "Les restaurants, pépites cachées, spots photo et activités que vous choisissez affichent « Choisi par {'@'}you » à tous ceux qui les découvrent sur Jinni.",
+      "b2_title": "Des clients pour vos visites",
+      "b2_text": "Ajoutez vos visites dans les activités. Les voyageurs vous réservent directement — sur WhatsApp, Telegram, par téléphone ou sur votre site. Vous gardez 100 %.",
+      "b3_title": "Moins de messages « c'est où ? »",
+      "b3_text": "Mettez votre page dans votre bio Instagram. Vos abonnés l'ouvrent et demandent à Jinni — vos coups de cœur passent en premier, avec vos reels.",
+      "how_title": "Comment ça marche",
+      "step1_strong": "Postulez",
+      "step1_text": "avec votre compte Jinni : votre nom, votre Instagram, votre zone de guidage.",
+      "step2_strong": "Vérifiez",
+      "step2_text": "— placez un court code dans votre bio Instagram pendant une journée. Notre équipe le contrôle.",
+      "step3_strong": "Ajoutez vos coups de cœur",
+      "step3_text": "— choisissez des lieux dans Jinni, ajoutez une phrase à vous et votre reel.",
+      "foot_terms": "Conditions",
+      "foot_privacy": "Confidentialité",
+      "foot_guide_terms": "Conditions guides",
+      "foot_guide_privacy": "Confidentialité guides",
+      "foot_contact": "Contact",
+      "foot_business": "Pour les pros",
+      "foot_copy": "© {year} Jinni · Votre compagnon de voyage IA"
+    },
+    "apply": {
+      "loading": "Chargement…",
+      "pending_title": "Presque fini, {name}",
+      "pending_text_before": "Pour prouver que",
+      "pending_text_after": "vous appartient, ajoutez ce code à votre bio Instagram :",
+      "copy": "Copier",
+      "copied": "Copié",
+      "step1": "Ouvrez Instagram → votre profil → Modifier le profil → Bio.",
+      "step2": "Collez le code n'importe où dans votre bio et enregistrez.",
+      "step3": "Notre équipe le vérifie, généralement sous 24 h, et vous envoie un e-mail. Vous pourrez ensuite le retirer.",
+      "page_will_be": "Votre page sera :",
+      "go_dashboard": "Aller à mon tableau de bord",
+      "live_title": "Votre page est en ligne",
+      "open_dashboard": "Ouvrir mon tableau de bord",
+      "paused_title": "Votre page de guide est suspendue",
+      "paused_before": "Merci de",
+      "paused_link": "nous contacter",
+      "paused_after": "et nous vous aiderons.",
+      "title": "Devenir guide Jinni",
+      "intro": "Gratuit pour les guides locaux et les créateurs voyage. Comptez environ 3 minutes.",
+      "rejected": "Votre dernière candidature n'a pas été acceptée : {reason}. Vous pouvez corriger et postuler à nouveau.",
+      "no_reason": "aucune raison indiquée",
+      "name": "Votre nom, tel que les voyageurs le verront",
+      "name_ph": "ex. Ani Petrosyan",
+      "instagram": "Nom d'utilisateur Instagram",
+      "instagram_ph": "ani.travels",
+      "address": "L'adresse de votre page",
+      "checking": "Vérification…",
+      "available": "Disponible",
+      "taken": "Déjà pris — essayez-en un autre",
+      "invalid": "3 à 30 lettres, chiffres, points ou tirets bas",
+      "reserved": "Ce nom est réservé — choisissez-en un autre",
+      "region": "Où guidez-vous ?",
+      "region_ph": "ex. Erevan, Dilijan, Syunik",
+      "you_are": "Vous êtes…",
+      "languages": "Langues dans lesquelles vous guidez",
+      "bio": "Quelques mots sur vous",
+      "optional": "(facultatif)",
+      "bio_ph": "Qu'est-ce qui rend vos recommandations uniques ?",
+      "consent_before": "Je confirme que les publications et recommandations que j'ajoute sont les miennes, j'autorise Jinni à afficher mes publications Instagram via l'intégration officielle d'Instagram, et j'accepte les",
+      "consent_terms": "Conditions guides",
+      "consent_and": "et la",
+      "consent_privacy": "Politique de confidentialité guides",
+      "accept_terms_error": "Veuillez accepter les conditions.",
+      "sending": "Envoi…",
+      "send": "Envoyer ma candidature"
+    },
+    "dashboard": {
+      "no_page_title": "Vous n'avez pas encore de page de guide",
+      "apply": "Devenir guide",
+      "waiting_title": "En attente de validation",
+      "waiting_text": "Vérifiez que ce code figure dans votre bio Instagram ({handle}) :",
+      "waiting_note": "Nous vous écrirons dès que votre page sera validée — généralement sous 24 h.",
+      "inactive_title": "Votre page de guide n'est pas active",
+      "fix_apply": "Corriger et postuler à nouveau",
+      "contact_before": "Merci de",
+      "contact_link": "nous contacter",
+      "your_page": "Votre page",
+      "copy_link": "Copier le lien",
+      "copied": "Copié",
+      "view_page": "Voir la page",
+      "tip": "Mettez ce lien dans votre bio Instagram. Les abonnés qui l'ouvrent voient d'abord vos coups de cœur.",
+      "add_pick": "Ajouter un lieu",
+      "edit_pick": "Modifier le lieu",
+      "find_place": "Trouvez le lieu sur Jinni",
+      "find_place_ph": "Tapez un nom, ex. Lavash, temple de Garni",
+      "searching": "Recherche…",
+      "no_place": "Aucun lieu de ce nom dans Jinni pour l'instant. Essayez une autre orthographe — notre équipe peut ajouter de nouveaux lieux.",
+      "change": "Changer",
+      "what_is_it": "Qu'est-ce que c'est ?",
+      "why": "Pourquoi vous l'aimez",
+      "why_hint": "(une ou deux lignes, avec vos mots)",
+      "why_ph": "ex. Prenez la gata — la meilleure de Garni, cuite chaque matin.",
+      "reel": "Votre reel ou publication Instagram sur ce lieu",
+      "reel_hint": "(facultatif)",
+      "reel_ph": "https://www.instagram.com/reel/…",
+      "reel_bad": "Collez le lien d'une de vos publications ou d'un de vos reels Instagram.",
+      "reel_preview": "Aperçu Instagram",
+      "tour_q": "Est-ce une de vos visites ?",
+      "tour_hint": "Remplissez ces champs et les voyageurs pourront vous réserver directement.",
+      "tour_name": "Nom de la visite",
+      "tour_name_ph": "ex. Randonnée au lever du soleil vers Lastiver",
+      "hours": "Heures",
+      "price": "Prix",
+      "currency": "Devise",
+      "how_book": "Comment réserver",
+      "how_book_ph": "WhatsApp +374 …, Telegram ou votre site",
+      "saving": "Enregistrement…",
+      "save_changes": "Enregistrer",
+      "add_to_page": "Ajouter à ma page",
+      "cancel": "Annuler",
+      "my_picks": "Mes coups de cœur",
+      "no_picks": "Aucun lieu pour l'instant. Commencez par les 5 à 10 lieux que vous recommandez le plus.",
+      "tour_line": "Visite :",
+      "reel_attached": "reel joint",
+      "edit": "Modifier",
+      "remove": "Retirer",
+      "remove_confirm": "Retirer {name} de votre page ?",
+      "reel_error": "Ce lien n'est pas une publication ou un reel Instagram."
+    },
+    "page": {
+      "loading": "Chargement…",
+      "not_found_title": "Guide introuvable",
+      "not_found_text": "Cette page n'existe pas ou n'est pas encore publique.",
+      "go_jinni": "Aller sur Jinni",
+      "instagram_link": "{handle} sur Instagram",
+      "guides_in": "Guide en {langs}",
+      "ask": "Demander à Jinni avec les choix de {name}",
+      "ask_note": "Gratuit · votre compagnon de voyage IA",
+      "no_picks": "{name} n'a pas encore ajouté de lieux.",
+      "map": "Carte",
+      "watch_reel": "Voir le reel",
+      "hide_reel": "Masquer le reel",
+      "hours_short": "{n} h",
+      "book": "Réserver :",
+      "foot": "Des lieux choisis par de vrais guides locaux sur",
+      "become": "Devenir guide",
+      "title_suffix": "coups de cœur locaux sur Jinni"
+    }
+  },
+  "guideTerms": {
+    "title": "Conditions d'utilisation pour les guides",
+    "last_updated": "Dernière mise à jour : 2 octobre 2026",
+    "sections": {
+      "intro": {
+        "title": "1. Accord",
+        "content": "Les présentes Conditions d'utilisation pour les guides régissent votre candidature à une page de guide Jinni et son utilisation — une page publique sur jinni.travel où vous recommandez des restaurants, pépites cachées, spots photo et activités, y compris vos propres visites. En postulant, vous acceptez ces conditions, la Politique de confidentialité guides et les Conditions d'utilisation générales de Jinni. En cas de divergence entre ces conditions et les conditions générales, ces conditions s'appliquent à votre page de guide."
+      },
+      "eligibility": {
+        "title": "2. Qui peut devenir guide",
+        "content": "Pour avoir une page de guide, vous devez :",
+        "points": [
+          "avoir au moins 18 ans et être en mesure de conclure un accord contraignant ;",
+          "postuler avec votre propre compte Jinni et votre propre compte Instagram ;",
+          "fournir des informations exactes sur votre identité, les lieux où vous guidez et les langues que vous parlez ;",
+          "détenir toute licence, autorisation ou assurance exigée par la loi de votre pays pour les visites ou services que vous proposez."
+        ]
+      },
+      "verification": {
+        "title": "3. Vérification et validation",
+        "content": "Jinni vérifie que le compte Instagram que vous indiquez vous appartient en vous demandant de placer un court code dans sa bio. Notre équipe examine chaque candidature et peut l'accepter ou la refuser à sa discrétion. Une candidature non vérifiée dans un délai de 14 jours peut être clôturée, et son adresse de page libérée. Un compte Instagram ne peut avoir qu'une seule page de guide."
+      },
+      "content": {
+        "title": "4. Vos choix et votre contenu",
+        "content": "Vous choisissez les lieux qui apparaissent sur votre page et rédigez les notes qui les accompagnent. Vous confirmez que :",
+        "points": [
+          "vos recommandations sont honnêtes et reflètent votre propre expérience ;",
+          "les notes, liens et reels que vous ajoutez sont les vôtres, ou vous avez le droit de les partager ;",
+          "vous indiquerez clairement aux voyageurs si vous recevez de l'argent, des cadeaux ou d'autres avantages d'un lieu que vous recommandez ;",
+          "vous n'ajouterez aucun contenu faux, trompeur, haineux, illégal ou nuisible, et n'usurperez l'identité de personne."
+        ]
+      },
+      "license": {
+        "title": "5. Autorisation d'afficher votre contenu",
+        "content": "Vous restez propriétaire de votre contenu. Vous accordez à Jinni une autorisation non exclusive, mondiale et gratuite d'afficher vos choix, notes, nom, adresse de page et nom d'utilisateur Instagram sur votre page de guide, sur les fiches de lieux dans Jinni (par exemple « Choisi par » suivi de l'adresse de votre page) et dans la promotion des pages de guides par Jinni, aussi longtemps que votre page existe. Vos publications Instagram sont affichées uniquement via l'intégration officielle d'Instagram : Jinni conserve le lien, jamais la vidéo ou la photo elle-même. Si vous supprimez une publication sur Instagram, elle n'apparaît plus sur Jinni."
+      },
+      "tours": {
+        "title": "6. Vos visites",
+        "content": "Si vous proposez une visite, l'accord relatif à cette visite est conclu entre vous et le voyageur. Jinni n'organise, ne vend, n'assure ni ne garantit de visites et n'est pas partie à cet accord. Vous êtes responsable du prix indiqué, de la réalisation de la visite, de la sécurité de vos clients ainsi que des remboursements, taxes et autorisations. Les prix affichés doivent être ceux que vous pratiquez réellement."
+      },
+      "fees": {
+        "title": "7. Frais",
+        "content": "La page de guide est actuellement gratuite. Si Jinni introduit à l'avenir des fonctionnalités payantes ou des frais pour les guides, nous vous en informerons à l'avance, et vous pourrez choisir de ne pas les utiliser."
+      },
+      "jinni_rights": {
+        "title": "8. Ce que Jinni peut faire",
+        "content": "Pour que les recommandations restent fiables, Jinni peut, avec ou sans préavis :",
+        "points": [
+          "examiner, corriger la mise en forme, masquer ou supprimer tout choix, note ou lien qui enfreint ces conditions ;",
+          "suspendre ou fermer une page de guide qui enfreint ces conditions, induit les voyageurs en erreur ou nuit aux utilisateurs de Jinni ;",
+          "modifier, améliorer ou arrêter des fonctionnalités des pages de guides."
+        ]
+      },
+      "relationship": {
+        "title": "9. Relation indépendante",
+        "content": "Vous êtes un guide ou un créateur indépendant. Rien dans ces conditions ne fait de vous un employé, un agent ou un associé de Jinni, et vous ne pouvez prendre aucun engagement au nom de Jinni."
+      },
+      "liability": {
+        "title": "10. Responsabilité",
+        "content": "Les pages de guides sont fournies « en l'état ». Dans la mesure permise par la loi, Jinni n'est pas responsable des visites, services ou recommandations des guides, de tout accord entre un guide et un voyageur, ni des pertes indirectes ou consécutives. Vous acceptez de couvrir les frais raisonnables de Jinni si une réclamation est formulée contre Jinni en raison de votre contenu ou de vos visites."
+      },
+      "ending": {
+        "title": "11. Fin de votre page de guide",
+        "content": "Vous pouvez cesser d'être guide à tout moment en nous contactant ou en supprimant votre compte Jinni ; la suppression de votre compte supprime votre page de guide et tous vos choix. Jinni peut mettre fin à votre page de guide comme décrit à la section 8."
+      },
+      "changes": {
+        "title": "12. Modifications de ces conditions",
+        "content": "Nous pouvons mettre à jour ces conditions. En cas de changement important, nous vous en informerons avant son entrée en vigueur. Continuer à utiliser votre page de guide ensuite signifie que vous acceptez les conditions mises à jour."
+      },
+      "contact": {
+        "title": "13. Contact",
+        "content": "Questions sur ces conditions : support{'@'}jinni.ai."
+      }
+    }
+  },
+  "guidePrivacy": {
+    "title": "Politique de confidentialité pour les guides",
+    "last_updated": "Dernière mise à jour : 2 octobre 2026",
+    "sections": {
+      "intro": {
+        "title": "1. À propos de cette politique",
+        "content": "Cette politique explique quelles informations Jinni collecte lorsque vous postulez à une page de guide et l'utilisez, pourquoi, qui peut les voir et quels choix s'offrent à vous. Elle complète la Politique de confidentialité générale de Jinni, qui s'applique aussi à votre compte Jinni."
+      },
+      "collect": {
+        "title": "2. Ce que nous collectons",
+        "content": "Lorsque vous postulez et utilisez votre page de guide, nous collectons :",
+        "points": [
+          "les informations que vous nous donnez : votre nom affiché, votre nom d'utilisateur Instagram, l'adresse de votre page, votre région, vos langues, votre type de guide et une courte bio ;",
+          "vos choix : les lieux que vous sélectionnez, vos notes, les liens de vos publications Instagram et les détails de vos visites (nom, durée, prix et mode de réservation) ;",
+          "un code de vérification et un historique des décisions d'examen (dates et notes rédigées par notre équipe, y compris le motif d'un éventuel refus) ;",
+          "votre acceptation des Conditions guides et sa date."
+        ]
+      },
+      "public": {
+        "title": "3. Ce qui est public",
+        "content": "Une fois votre page validée, les éléments suivants apparaissent publiquement sur votre page et sur les fiches de lieux dans Jinni : votre nom affiché, l'adresse de votre page, votre nom d'utilisateur Instagram, votre région, vos langues, votre type de guide, votre bio, vos choix, vos notes, vos publications Instagram et les détails de vos visites, y compris le contact de réservation que vous choisissez d'indiquer. Votre adresse e-mail, les informations de votre compte Jinni, votre code de vérification et les notes d'examen de notre équipe ne sont jamais publics. Tant que votre candidature est en attente de validation, rien la concernant n'est public."
+      },
+      "use": {
+        "title": "4. Comment nous les utilisons",
+        "content": "Nous utilisons ces informations pour vous vérifier, examiner votre candidature, afficher votre page et vos choix, permettre aux voyageurs de vous contacter au sujet de vos visites, prévenir l'usurpation d'identité et les abus, et comprendre comment les pages de guides sont utilisées (par exemple, combien de personnes s'inscrivent après avoir consulté une page de guide)."
+      },
+      "visitors": {
+        "title": "5. Les visiteurs de votre page",
+        "content": "Lorsqu'une personne ouvre votre page, Jinni peut enregistrer sur son appareil qu'elle vient de votre page, afin de compter combien de voyageurs les pages de guides apportent. Nous ne partageons pas avec vous les informations personnelles de ces voyageurs."
+      },
+      "instagram": {
+        "title": "6. Intégrations Instagram",
+        "content": "Vos publications Instagram sont affichées via l'intégration officielle d'Instagram. Lorsqu'un visiteur lit une publication intégrée, Instagram (Meta) peut collecter des informations sur ce visiteur conformément à sa propre politique de confidentialité. Jinni ne conserve que le lien de la publication."
+      },
+      "sharing": {
+        "title": "7. Partage",
+        "content": "Nous ne vendons pas vos informations. Nous les partageons uniquement avec les prestataires qui nous aident à faire fonctionner Jinni (comme l'hébergement et l'e-mail), lorsque la loi l'exige, ou pour protéger la sécurité de nos utilisateurs."
+      },
+      "retention": {
+        "title": "8. Durée de conservation",
+        "content": "Nous conservons vos informations de guide tant que votre page de guide existe. Si vous supprimez votre compte Jinni, votre page de guide et tous vos choix sont supprimés avec lui. Une candidature jamais vérifiée peut être supprimée après 14 jours. Les historiques d'examen peuvent être conservés pendant une durée limitée afin de prévenir les abus."
+      },
+      "rights": {
+        "title": "9. Vos choix et vos droits",
+        "content": "Vous pouvez consulter et modifier la plupart de vos informations de guide dans votre tableau de bord à tout moment. Vous pouvez nous demander une copie de vos informations, nous demander de les corriger ou de les supprimer, ou supprimer votre compte Jinni pour retirer complètement votre page de guide."
+      },
+      "changes": {
+        "title": "10. Modifications",
+        "content": "Nous pouvons mettre à jour cette politique. En cas de changement important, nous vous en informerons avant son entrée en vigueur."
+      },
+      "contact": {
+        "title": "11. Contact",
+        "content": "Questions de confidentialité : support{'@'}jinni.ai."
+      }
+    }
   }
 }

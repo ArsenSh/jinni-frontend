@@ -1,57 +1,58 @@
 <template>
-  <div class="gd" :class="theme">
+  <div class="gd" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <header class="gd-top">
-      <router-link to="/guides" class="gd-brand"><img src="/images/bottle.png" alt="" class="gd-lamp" />Jinni Guides</router-link>
-      <router-link to="/chat" class="gd-link">Open Jinni</router-link>
+      <router-link to="/guides" class="gd-brand"><img src="/images/bottle.png" alt="" class="gd-lamp" /><span translate="no">Jinni</span>&nbsp;{{ t('guides.nav.guides_label') }}</router-link>
+      <div class="gd-top-right">
+        <GuideLangSwitch />
+        <router-link to="/chat" class="gd-link">{{ t('guides.nav.open_jinni') }}</router-link>
+      </div>
     </header>
 
     <main class="gd-main">
-      <p v-if="loading" class="gd-muted">Loading…</p>
+      <p v-if="loading" class="gd-muted">{{ t('guides.apply.loading') }}</p>
 
       <section v-else-if="!guide" class="gd-panel">
-        <h1>You don't have a guide page yet</h1>
-        <router-link to="/guides/apply" class="gd-btn jinni-pill">Apply as a guide</router-link>
+        <h1>{{ t('guides.dashboard.no_page_title') }}</h1>
+        <router-link to="/guides/apply" class="gd-btn jinni-pill">{{ t('guides.dashboard.apply') }}</router-link>
       </section>
 
       <section v-else-if="guide.status === 'pending'" class="gd-panel">
-        <h1>Waiting for approval</h1>
-        <p>Make sure this code is in your Instagram bio (<strong>@{{ guide.instagram }}</strong>):</p>
-        <div class="gd-code">{{ guide.verificationCode }}</div>
-        <p class="gd-muted">We'll email you as soon as your page is approved — usually within a day.</p>
+        <h1>{{ t('guides.dashboard.waiting_title') }}</h1>
+        <p>{{ t('guides.dashboard.waiting_text', { handle: '@' + guide.instagram }) }}</p>
+        <div class="gd-code" dir="ltr">{{ guide.verificationCode }}</div>
+        <p class="gd-muted">{{ t('guides.dashboard.waiting_note') }}</p>
       </section>
 
       <section v-else-if="guide.status !== 'active'" class="gd-panel">
-        <h1>Your guide page isn't active</h1>
+        <h1>{{ t('guides.dashboard.inactive_title') }}</h1>
         <p v-if="guide.status === 'rejected'">{{ guide.staffNotes }}</p>
-        <router-link v-if="guide.status === 'rejected'" to="/guides/apply" class="gd-btn jinni-pill">Fix and apply again</router-link>
-        <p v-else>Please <router-link to="/contact">contact us</router-link>.</p>
+        <router-link v-if="guide.status === 'rejected'" to="/guides/apply" class="gd-btn jinni-pill">{{ t('guides.dashboard.fix_apply') }}</router-link>
+        <p v-else>{{ t('guides.dashboard.contact_before') }} <router-link to="/contact">{{ t('guides.dashboard.contact_link') }}</router-link>.</p>
       </section>
 
       <template v-else>
-        <!-- Page link -->
         <section class="gd-panel gd-head">
           <div>
-            <p class="gd-kicker">Your page</p>
+            <p class="gd-kicker">{{ t('guides.dashboard.your_page') }}</p>
             <h1>{{ guide.displayName }}</h1>
-            <a :href="pageUrl" target="_blank" class="gd-url">jinni.travel/@{{ guide.handle }}</a>
+            <a :href="pageUrl" target="_blank" class="gd-url" dir="ltr">jinni.travel/@{{ guide.handle }}</a>
           </div>
           <div class="gd-head-actions">
-            <button type="button" class="gd-btn-ghost" @click="copy(pageUrl)">{{ copied ? 'Copied' : 'Copy link' }}</button>
-            <a :href="pageUrl" target="_blank" class="gd-btn-ghost">View page</a>
+            <button type="button" class="gd-btn-ghost" @click="copy(pageUrl)">{{ copied ? t('guides.dashboard.copied') : t('guides.dashboard.copy_link') }}</button>
+            <a :href="pageUrl" target="_blank" class="gd-btn-ghost">{{ t('guides.dashboard.view_page') }}</a>
           </div>
-          <p class="gd-muted gd-tip">Put this link in your Instagram bio. Followers who open it see your picks first.</p>
+          <p class="gd-muted gd-tip">{{ t('guides.dashboard.tip') }}</p>
         </section>
 
-        <!-- Add a pick -->
         <section class="gd-panel">
-          <h2>{{ editing ? 'Edit pick' : 'Add a pick' }}</h2>
+          <h2>{{ editing ? t('guides.dashboard.edit_pick') : t('guides.dashboard.add_pick') }}</h2>
 
           <template v-if="!editing">
-            <label>Find the place on Jinni
-              <input v-model="query" placeholder="Type a name, e.g. Lavash, Garni Temple" @input="search" />
+            <label>{{ t('guides.dashboard.find_place') }}
+              <input v-model="query" :placeholder="t('guides.dashboard.find_place_ph')" @input="search" />
             </label>
-            <p v-if="searching" class="gd-muted">Searching…</p>
-            <p v-else-if="query.length >= 2 && !results.length && searched" class="gd-muted">No place with that name in Jinni yet. Try another spelling — new places can be added by our team.</p>
+            <p v-if="searching" class="gd-muted">{{ t('guides.dashboard.searching') }}</p>
+            <p v-else-if="query.length >= 2 && !results.length && searched" class="gd-muted">{{ t('guides.dashboard.no_place') }}</p>
             <div v-if="results.length && !draft.place" class="gd-results">
               <button v-for="p in results" :key="p.placeId" type="button" class="gd-result" @click="choose(p)">
                 <img v-if="p.image" :src="apiBase + p.image" alt="" loading="lazy" /><span v-else class="gd-noimg">◎</span>
@@ -63,60 +64,59 @@
           <div v-if="draft.place" class="gd-chosen">
             <img v-if="draft.place.image" :src="apiBase + draft.place.image" alt="" />
             <div><strong>{{ draft.place.name }}</strong><small>{{ draft.place.address }}</small></div>
-            <button v-if="!editing" type="button" class="gd-btn-ghost" @click="draft.place = null">Change</button>
+            <button v-if="!editing" type="button" class="gd-btn-ghost" @click="draft.place = null">{{ t('guides.dashboard.change') }}</button>
           </div>
 
           <template v-if="draft.place">
             <fieldset>
-              <legend>What is it?</legend>
+              <legend>{{ t('guides.dashboard.what_is_it') }}</legend>
               <div class="gd-chips">
-                <button v-for="(label, key) in CATEGORY_LABELS" :key="key" type="button" class="gd-chip" :class="{ on: draft.category === key, 'jinni-chip-on': draft.category === key }" @click="draft.category = key">{{ label }}</button>
+                <button v-for="key in CATEGORY_KEYS" :key="key" type="button" class="gd-chip" :class="{ on: draft.category === key, 'jinni-chip-on': draft.category === key }" @click="draft.category = key">{{ t('guides.categories.' + key) }}</button>
               </div>
             </fieldset>
-            <label><span>Why you love it <span class="gd-muted">(one or two lines, in your words)</span></span>
-              <textarea v-model="draft.note" maxlength="280" rows="2" placeholder="e.g. Order the gata — the best in Garni, baked every morning."></textarea>
+            <label><span>{{ t('guides.dashboard.why') }} <span class="gd-muted">{{ t('guides.dashboard.why_hint') }}</span></span>
+              <textarea v-model="draft.note" maxlength="280" rows="2" :placeholder="t('guides.dashboard.why_ph')"></textarea>
             </label>
-            <label><span>Your Instagram reel or post about it <span class="gd-muted">(optional)</span></span>
-              <input v-model.trim="draft.reelUrl" placeholder="https://www.instagram.com/reel/…" />
+            <label><span>{{ t('guides.dashboard.reel') }} <span class="gd-muted">{{ t('guides.dashboard.reel_hint') }}</span></span>
+              <input v-model.trim="draft.reelUrl" dir="ltr" :placeholder="t('guides.dashboard.reel_ph')" />
             </label>
-            <p v-if="draft.reelUrl && !reelEmbed" class="gd-bad">Paste a link to one of your Instagram posts or reels.</p>
-            <div v-if="reelEmbed" class="gd-embed"><iframe :src="reelEmbed" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" title="Instagram preview"></iframe></div>
+            <p v-if="draft.reelUrl && !reelEmbed" class="gd-bad">{{ t('guides.dashboard.reel_bad') }}</p>
+            <div v-if="reelEmbed" class="gd-embed"><iframe :src="reelEmbed" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="t('guides.dashboard.reel_preview')"></iframe></div>
 
             <div v-if="draft.category === 'activity'" class="gd-tour">
-              <p><strong>Is this one of your tours?</strong> <span class="gd-muted">Fill this in and travelers can book you directly.</span></p>
-              <label>Tour name <input v-model="draft.tour.title" maxlength="80" placeholder="e.g. Sunrise hike to Lastiver" /></label>
+              <p><strong>{{ t('guides.dashboard.tour_q') }}</strong> <span class="gd-muted">{{ t('guides.dashboard.tour_hint') }}</span></p>
+              <label>{{ t('guides.dashboard.tour_name') }} <input v-model="draft.tour.title" maxlength="80" :placeholder="t('guides.dashboard.tour_name_ph')" /></label>
               <div class="gd-row">
-                <label>Hours <input v-model="draft.tour.durationHours" type="number" min="0" step="0.5" /></label>
-                <label>Price <input v-model="draft.tour.price" type="number" min="0" /></label>
-                <label>Currency <input v-model="draft.tour.currency" maxlength="3" placeholder="AMD" /></label>
+                <label>{{ t('guides.dashboard.hours') }} <input v-model="draft.tour.durationHours" type="number" min="0" step="0.5" /></label>
+                <label>{{ t('guides.dashboard.price') }} <input v-model="draft.tour.price" type="number" min="0" /></label>
+                <label>{{ t('guides.dashboard.currency') }} <input v-model="draft.tour.currency" maxlength="3" placeholder="AMD" /></label>
               </div>
-              <label>How to book <input v-model="draft.tour.contact" maxlength="160" placeholder="WhatsApp +374 …, @telegram, or your website" /></label>
+              <label>{{ t('guides.dashboard.how_book') }} <input v-model="draft.tour.contact" maxlength="160" :placeholder="t('guides.dashboard.how_book_ph')" /></label>
             </div>
 
             <p v-if="error" class="gd-bad">{{ error }}</p>
             <div class="gd-actions">
-              <button type="button" class="gd-btn jinni-pill" :disabled="saving || !draft.category" @click="save">{{ saving ? 'Saving…' : (editing ? 'Save changes' : 'Add to my page') }}</button>
-              <button type="button" class="gd-btn-ghost" @click="reset">Cancel</button>
+              <button type="button" class="gd-btn jinni-pill" :disabled="saving || !draft.category" @click="save">{{ saving ? t('guides.dashboard.saving') : (editing ? t('guides.dashboard.save_changes') : t('guides.dashboard.add_to_page')) }}</button>
+              <button type="button" class="gd-btn-ghost" @click="reset">{{ t('guides.dashboard.cancel') }}</button>
             </div>
           </template>
         </section>
 
-        <!-- My picks -->
         <section class="gd-panel">
-          <h2>My picks <span class="gd-muted">({{ picks.length }})</span></h2>
-          <p v-if="!picks.length" class="gd-muted">No picks yet. Start with 5–10 places you recommend most.</p>
+          <h2>{{ t('guides.dashboard.my_picks') }} <span class="gd-muted">({{ picks.length }})</span></h2>
+          <p v-if="!picks.length" class="gd-muted">{{ t('guides.dashboard.no_picks') }}</p>
           <ul class="gd-list">
             <li v-for="p in picks" :key="p.id">
               <div>
-                <span class="gd-tag">{{ CATEGORY_LABELS[p.category] }}</span>
+                <span class="gd-tag">{{ t('guides.categories.' + p.category) }}</span>
                 <strong>{{ p.placeName }}</strong>
                 <p v-if="p.note" class="gd-note">"{{ p.note }}"</p>
-                <small v-if="p.tour" class="gd-muted">Tour: {{ p.tour.title }}{{ p.tour.price != null ? ` · ${p.tour.price} ${p.tour.currency || ''}` : '' }}</small>
-                <small v-if="p.reelUrl" class="gd-muted"> · reel attached</small>
+                <small v-if="p.tour" class="gd-muted">{{ t('guides.dashboard.tour_line') }} {{ p.tour.title }}{{ p.tour.price != null ? ` · ${p.tour.price} ${p.tour.currency || ''}` : '' }}</small>
+                <small v-if="p.reelUrl" class="gd-muted"> · {{ t('guides.dashboard.reel_attached') }}</small>
               </div>
               <div class="gd-list-actions">
-                <button type="button" class="gd-btn-ghost" @click="edit(p)">Edit</button>
-                <button type="button" class="gd-btn-ghost gd-danger" @click="remove(p)">Remove</button>
+                <button type="button" class="gd-btn-ghost" @click="edit(p)">{{ t('guides.dashboard.edit') }}</button>
+                <button type="button" class="gd-btn-ghost gd-danger" @click="remove(p)">{{ t('guides.dashboard.remove') }}</button>
               </div>
             </li>
           </ul>
@@ -129,7 +129,12 @@
 <script setup>
 import '@/assets/styles/jinni-pill.css'
 import { ref, reactive, computed, onMounted } from 'vue'
-import { guideTheme, guideApi, CATEGORY_LABELS, instagramEmbed } from '@/utils/guides'
+import { useI18n } from 'vue-i18n'
+import { guideTheme, guideApi, CATEGORY_KEYS, instagramEmbed, initGuideLanguage } from '@/utils/guides'
+import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
+
+const { t, locale } = useI18n()
+initGuideLanguage(locale)
 
 const apiBase = import.meta.env.VITE_API_BASE_URL || ''
 const theme = guideTheme()
@@ -180,7 +185,7 @@ function edit(p) {
 }
 async function save() {
   error.value = ''
-  if (draft.reelUrl && !reelEmbed.value) { error.value = 'That reel link is not an Instagram post or reel.'; return }
+  if (draft.reelUrl && !reelEmbed.value) { error.value = t('guides.dashboard.reel_error'); return }
   saving.value = true
   const body = { placeId: draft.place.placeId, category: draft.category, note: draft.note, reelUrl: draft.reelUrl || null,
     tour: draft.category === 'activity' && draft.tour.title ? draft.tour : null }
@@ -191,7 +196,7 @@ async function save() {
   } catch (e) { error.value = e.message } finally { saving.value = false }
 }
 async function remove(p) {
-  if (!window.confirm(`Remove ${p.placeName} from your page?`)) return
+  if (!window.confirm(t('guides.dashboard.remove_confirm', { name: p.placeName }))) return
   try { await guideApi(`/me/picks/${p.id}`, { method: 'DELETE' }); picks.value = picks.value.filter(x => x.id !== p.id) } catch (e) { window.alert(e.message) }
 }
 async function copy(text) { try { await navigator.clipboard.writeText(text); copied.value = true; setTimeout(() => (copied.value = false), 1600) } catch { /* manual copy */ } }
@@ -205,7 +210,8 @@ onMounted(async () => { try { await load() } catch { /* shows the empty state */
 .gd.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 100%); color: #f5e6c8; }
 .gd-top { max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 18px 0; }
 .gd-brand { display: inline-flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; text-decoration: none; color: inherit; }
-.gd-lamp { width: 30px; }
+.gd-lamp { width: 50px; margin-block: -8px; margin-inline: -8px -4px; }
+.gd-top-right { display: flex; align-items: center; gap: 8px; }
 .gd-link { color: inherit; text-decoration: none; font-size: 15px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); }
 .gd-main { max-width: 760px; margin: 0 auto; display: grid; gap: 16px; }
 .gd-panel { border-radius: 20px; padding: 22px; display: grid; gap: 14px; backdrop-filter: blur(20px) saturate(160%); }
