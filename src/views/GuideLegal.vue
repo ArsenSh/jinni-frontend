@@ -2,7 +2,7 @@
   <div class="glg" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <header class="glg-top">
       <router-link to="/guides" class="glg-brand" aria-label="Jinni Guides">
-        <img src="/images/bottle.png" alt="" class="glg-lamp" />
+        <img src="/images/lamp.webp" alt="" class="glg-lamp" />
         <span class="glg-word" translate="no">Jinni</span>
         <span class="glg-sep" aria-hidden="true"></span>
         <span class="glg-sub">{{ t('guides.nav.guides_label') }}</span>

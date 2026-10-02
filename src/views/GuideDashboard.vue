@@ -3,7 +3,7 @@
     <SwitchModeOverlay :visible="isSwitching" :label="t('guides.nav.switching_to_jinni')" :theme="theme === 'day-mode' ? 'light' : 'dark'" />
     <header class="gd-top">
       <router-link :to="guide?.status === 'active' ? `/@${guide.handle}` : '/guides'" class="gd-brand">
-        <img src="/images/bottle.png" alt="" class="gd-lamp" />
+        <img src="/images/lamp.webp" alt="" class="gd-lamp" />
         <span class="gd-word" translate="no">Jinni</span>
         <span class="gd-sep" aria-hidden="true"></span>
         <!-- The guide's own name once their page exists (founder 2026-10-02) -->

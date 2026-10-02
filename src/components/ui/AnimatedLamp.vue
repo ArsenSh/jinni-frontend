@@ -9,8 +9,8 @@
     <div class="bottle-wrap" ref="bottleWrapEl"
          :class="{ 'vanishing': isVanishing, 'rtl-flip': isRtl }"
          :style="{ opacity: bottleOpacity }">
-      <img src="/images/bottle.png?v=3" alt="Genie Bottle" class="genie-bottle" :style="baseGlowStyle">
-      <img src="/images/bottle.png?v=3" alt="" class="genie-bottle bottle-tint" aria-hidden="true" :style="tintStyle">
+      <img src="/images/lamp.webp" alt="Genie Bottle" class="genie-bottle" :style="baseGlowStyle">
+      <img src="/images/lamp.webp" alt="" class="genie-bottle bottle-tint" aria-hidden="true" :style="tintStyle">
     </div>
     <!-- The serpent's bends live as CSS vars on the container; every particle
          inherits them. One shared channel per awakening, a new channel each

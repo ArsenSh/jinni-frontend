@@ -9,7 +9,7 @@
     <div class="sidebar" :class="{ 'sidebar-collapsed': !sidebarOpen, 'sidebar-open': mobileSidebarOpen }" ref="sidebar">
       <div class="app-header">
         <div v-if="sidebarOpen || mobileSidebarOpen" class="app-brand">
-          <img src="/images/bottle.png?v=3" class="app-icon" alt="Jinni">
+          <img src="/images/lamp.webp" class="app-icon" alt="Jinni">
           <span class="app-name" translate="no">{{ t('chat.sidebar.app_name') }}</span>
           <button @click="toggleSidebar" class="collapse-btn collapse-btn-inline">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -18,7 +18,7 @@
           </button>
         </div>
         <div v-else class="app-brand-collapsed">
-          <img src="/images/bottle.png?v=3" class="app-icon-collapsed" alt="Jinni">
+          <img src="/images/lamp.webp" class="app-icon-collapsed" alt="Jinni">
         </div>
       </div>
 
@@ -1075,7 +1075,7 @@
   <transition name="share-fade">
     <div v-if="shareProgress.active" class="share-progress-overlay">
       <div class="share-progress-card" :class="currentTheme">
-        <div class="share-progress-genie" aria-hidden="true"><img src="/images/bottle.png?v=3" alt="" class="share-progress-lamp"></div>
+        <div class="share-progress-genie" aria-hidden="true"><img src="/images/lamp.webp" alt="" class="share-progress-lamp"></div>
         <div class="share-progress-title">{{ t('chat.share.preparing') }}</div>
         <div class="share-progress-bar-wrap">
           <div class="share-progress-bar" :style="{ width: shareProgress.total > 0 ? (shareProgress.current / shareProgress.total * 100) + '%' : '0%' }"></div>

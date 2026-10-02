@@ -2,7 +2,7 @@
   <div class="ga" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <header class="ga-top">
       <router-link to="/guides" class="ga-brand" aria-label="Jinni Guides">
-        <img src="/images/bottle.png" alt="" class="ga-lamp" />
+        <img src="/images/lamp.webp" alt="" class="ga-lamp" />
         <span class="ga-word" translate="no">Jinni</span>
         <span class="ga-sep" aria-hidden="true"></span>
         <span class="ga-sub-brand">{{ t('guides.nav.guides_label') }}</span>

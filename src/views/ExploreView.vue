@@ -2,7 +2,7 @@
   <div class="explore" :class="theme">
     <!-- ═══ Header — centered, chat-glacier back pill ═══ -->
     <header class="ex-head">
-      <img src="/images/bottle.png?v=3" class="ex-app-icon" alt="Jinni"/>
+      <img src="/images/lamp.webp" class="ex-app-icon" alt="Jinni"/>
       <h1 class="ex-title">{{ t('explore.title') || "Jinni's Discoveries" }}</h1>
       <!-- Framed as an open, growing set rather than a finished one. Saying
            Jinni "already analysed/visited" these places would read as a closed
@@ -18,7 +18,7 @@
            gradient — same treatment as the other conversion buttons. -->
       <div class="ex-head-cta">
         <button class="ex-back" @click="goBack">
-          <img src="/images/bottle.png?v=3" class="ex-back-lamp" alt=""/>
+          <img src="/images/lamp.webp" class="ex-back-lamp" alt=""/>
           <span class="jinni-grad">{{ t('explore.back_chat') || 'Meet Jinni' }}</span>
         </button>
         <!-- Preferences round-trip: onboarding returns here (returnTo), and the
@@ -188,7 +188,7 @@
         <p class="ex-footer-line">{{ t('explore.footer_line') || 'Jinni keeps discovering — this page grows as you explore' }}</p>
         <p class="ex-footer-ask">{{ t('explore.footer_ask') || "Didn't find what you were looking for?" }}</p>
         <button class="ex-footer-cta" @click="goChat">
-          <img src="/images/bottle.png?v=3" class="ex-back-lamp" alt=""/>
+          <img src="/images/lamp.webp" class="ex-back-lamp" alt=""/>
           <span class="jinni-grad">{{ t('explore.ask_chat') || 'Ask Jinni' }}</span>
         </button>
         <div class="ex-footer-links">

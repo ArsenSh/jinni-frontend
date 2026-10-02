@@ -2,7 +2,7 @@
   <div class="gl" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <header class="gl-top">
       <router-link to="/" class="gl-brand" aria-label="Jinni">
-        <img src="/images/bottle.png" alt="" class="gl-lamp" />
+        <img src="/images/lamp.webp" alt="" class="gl-lamp" />
         <span class="gl-word" translate="no">Jinni</span>
         <span class="gl-sep" aria-hidden="true"></span>
         <span class="gl-sub-brand">{{ t('guides.nav.guides_label') }}</span>
@@ -62,7 +62,7 @@
 
     <footer class="gl-foot">
       <div class="gl-foot-line" aria-hidden="true"></div>
-      <router-link to="/" class="gl-foot-brand"><img src="/images/bottle.png" alt="" /><span translate="no">Jinni</span></router-link>
+      <router-link to="/" class="gl-foot-brand"><img src="/images/lamp.webp" alt="" /><span translate="no">Jinni</span></router-link>
       <nav class="gl-foot-links">
         <router-link to="/guides/terms">{{ t('guides.landing.foot_guide_terms') }}</router-link>
         <router-link to="/guides/privacy">{{ t('guides.landing.foot_guide_privacy') }}</router-link>

@@ -11,6 +11,9 @@
     <!-- interactive-widget is Android-Chrome-only; Safari logs a console
          error for the unknown key, so the boot script injects it on Android
          instead of shipping it statically (2026-08-23). -->
+    <!-- The lamp is on the landing, sign-in and chat: fetch it first, at high priority
+         (founder 2026-10-02: it arrived ~1 s after the page; was an 835 KB PNG). -->
+    <link rel="preload" as="image" href="/images/lamp.webp" type="image/webp" fetchpriority="high">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
     <title>Jinni — AI Travel Guide to Places, Events &amp; Hidden Gems</title>
     <meta name="description" content="Jinni is an AI travel guide that finds restaurants, hotels, events, activities and hidden gems around you — personalised to how you like to travel.">

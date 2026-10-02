@@ -1,7 +1,7 @@
 <template>
   <div class="gp" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <header class="gp-top">
-      <router-link to="/" class="gp-brand"><img src="/images/bottle.png" alt="" class="gp-lamp" /><span translate="no">Jinni</span></router-link>
+      <router-link to="/" class="gp-brand"><img src="/images/lamp.webp" alt="" class="gp-lamp" /><span translate="no">Jinni</span></router-link>
       <div class="gp-top-right">
         <GuideLangSwitch />
         <router-link to="/guides" class="gp-link">{{ t('guides.nav.for_guides') }}</router-link>

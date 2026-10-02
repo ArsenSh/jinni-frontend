@@ -28,7 +28,7 @@
            does nothing -->
       <DesertSand v-if="isDayMode && lampEl" :lamp-el="lampEl" />
       <div class="hero-content">
-        <span class="lamp" ref="lampEl"><img src="/images/bottle.png?v=3" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
+        <span class="lamp" ref="lampEl"><img src="/images/lamp.webp" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
         <h1 class="magic-title">{{ $t('businessLanding.hero.title') }}</h1>
         <p class="magic-subtitle" v-html="heroSubtitleHtml"></p>
         <MagicButton @click="goApply('verified')"><span class="wish-label">{{ $t('businessLanding.hero.cta') }}</span></MagicButton>
@@ -333,7 +333,7 @@ export default {
    violet in its shadow; day takes the ground's terracotta. */
 .lamp::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
-  -webkit-mask-image: url('/images/bottle.png?v=3'); mask-image: url('/images/bottle.png?v=3');
+  -webkit-mask-image: url('/images/lamp.webp'); mask-image: url('/images/lamp.webp');
   -webkit-mask-size: contain; mask-size: contain;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   -webkit-mask-position: center; mask-position: center;

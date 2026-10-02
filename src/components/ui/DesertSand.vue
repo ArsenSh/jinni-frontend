@@ -296,7 +296,7 @@ export default {
           colMap = map
         } catch (e) { colMap = null }
       }
-      img.src = '/images/bottle.png?v=3'
+      img.src = '/images/lamp.webp'
     }
     // Front width in px: the soft edge the grains spread across, behind the front.
     function frontWidth() {
@@ -489,7 +489,7 @@ export default {
          it again would now push it back OUT of place. */
       // the metal's own colour, the way AnimatedLamp does it: a second copy of
       // the same image, hue-shifted, over the natural gold
-      warmLamp = mk('/images/bottle.png?v=3', 'hue-rotate(-9deg) saturate(1.4) brightness(0.9)', 3)
+      warmLamp = mk('/images/lamp.webp', 'hue-rotate(-9deg) saturate(1.4) brightness(0.9)', 3)
       lampImg.style.opacity = '0'
     }
     function detachLamp() {

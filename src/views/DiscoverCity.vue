@@ -11,7 +11,7 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         {{ t('legal.back_to_home') || 'Back' }}
       </button>
-      <router-link to="/" class="ex-app-link"><img src="/images/bottle.png?v=3" class="ex-app-icon" alt="Jinni"/></router-link>
+      <router-link to="/" class="ex-app-link"><img src="/images/lamp.webp" class="ex-app-icon" alt="Jinni"/></router-link>
       <h1 class="ex-title">{{ pageTitle }}</h1>
       <p class="ex-sub" v-if="city">{{ [city.name, city.country].filter(Boolean).join(', ') }}</p>
       <p class="ex-intro">{{ city ? (t('discover.intro', { city: city.name }) || `Places Jinni has verified in ${city.name} — open to everyone, no account needed.`) : '' }}</p>
@@ -20,7 +20,7 @@
            which returns here after saving. -->
       <div class="ex-head-cta">
         <button class="ex-back" @click="goAuth">
-          <img src="/images/bottle.png?v=3" class="ex-back-lamp" alt=""/>
+          <img src="/images/lamp.webp" class="ex-back-lamp" alt=""/>
           <span class="jinni-grad">{{ t('explore.back_chat') || 'Meet Jinni' }}</span>
         </button>
         <button class="ex-pref" @click="goPreferences">
@@ -124,7 +124,7 @@
         <p class="ex-footer-line">{{ t('discover.footer_line') || 'This is what Jinni already knows here — in chat it finds what fits you.' }}</p>
         <p class="ex-footer-ask">{{ t('explore.footer_ask') || "Didn't find what you were looking for?" }}</p>
         <button class="ex-footer-cta" @click="goAuth">
-          <img src="/images/bottle.png?v=3" class="ex-back-lamp" alt=""/>
+          <img src="/images/lamp.webp" class="ex-back-lamp" alt=""/>
           <span class="jinni-grad">{{ t('explore.ask_chat') || 'Ask Jinni' }}</span>
         </button>
         <div class="ex-footer-links">
@@ -192,7 +192,7 @@
                 <span>{{ t('place_info.website') || 'Website' }}</span>
               </a>
               <button @click="goAuth" class="pd-action">
-                <img src="/images/bottle.png?v=3" class="ex-back-lamp" alt=""/>
+                <img src="/images/lamp.webp" class="ex-back-lamp" alt=""/>
                 <span>{{ t('explore.ask_chat') || 'Ask Jinni' }}</span>
               </button>
             </div>
