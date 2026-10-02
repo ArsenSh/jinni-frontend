@@ -2,7 +2,13 @@
   <div class="gd" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
     <SwitchModeOverlay :visible="isSwitching" :label="t('guides.nav.switching_to_jinni')" :theme="theme === 'day-mode' ? 'light' : 'dark'" />
     <header class="gd-top">
-      <router-link to="/guides" class="gd-brand"><img src="/images/bottle.png" alt="" class="gd-lamp" /><span translate="no">Jinni</span>&nbsp;{{ t('guides.nav.guides_label') }}</router-link>
+      <router-link :to="guide?.status === 'active' ? `/@${guide.handle}` : '/guides'" class="gd-brand">
+        <img src="/images/bottle.png" alt="" class="gd-lamp" />
+        <span class="gd-word" translate="no">Jinni</span>
+        <span class="gd-sep" aria-hidden="true"></span>
+        <!-- The guide's own name once their page exists (founder 2026-10-02) -->
+        <span class="gd-sub" :class="{ 'gd-sub--name': guide?.displayName }">{{ guide?.displayName || t('guides.nav.guides_label') }}</span>
+      </router-link>
       <div class="gd-top-right">
         <GuideLangSwitch />
         <a href="/chat" class="gd-link" @click.prevent="switchToChat">{{ t('guides.nav.open_jinni') }}</a>
@@ -221,6 +227,17 @@ onMounted(async () => { try { await load() } catch { /* shows the empty state */
 .gd-top { max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 18px 0; }
 .gd-brand { display: inline-flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 600; text-decoration: none; color: inherit; }
 .gd-lamp { width: 50px; margin-block: -8px; margin-inline: -8px -4px; }
+.gd-brand { min-width: 0; }
+.gd-word { font-family: var(--brand-serif, 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif); font-size: 26px; font-weight: 600; line-height: 1; letter-spacing: 1px;
+  background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.gd-sep { width: 1px; height: 20px; flex: none; background: linear-gradient(180deg, rgba(212, 175, 55, 0), rgba(212, 175, 55, 0.8), rgba(212, 175, 55, 0)); }
+.gd-sub { font-size: 15px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 38vw; }
+.gd-sub--name { text-transform: none; letter-spacing: 0.01em; font-size: 17px; font-weight: 600; opacity: 1; }
+/* Phones: the lamp alone carries the brand, so the guide's name gets the room. */
+@media (max-width: 480px) {
+  .gd-brand:has(.gd-sub--name) .gd-word, .gd-brand:has(.gd-sub--name) .gd-sep { display: none; }
+  .gd-sub { max-width: 42vw; }
+}
 .gd-top-right { display: flex; align-items: center; gap: 8px; }
 .gd-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; box-sizing: border-box; font-size: 15px; line-height: 1; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.45); white-space: nowrap; }
 .gd-main { max-width: 760px; margin: 0 auto; display: grid; gap: 16px; }
