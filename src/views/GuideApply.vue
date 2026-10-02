@@ -16,6 +16,7 @@
       <!-- Submitted: show the bio code -->
       <section v-else-if="guide && guide.status === 'pending'" class="ga-panel">
         <h1>{{ t('guides.apply.pending_title', { name: guide.displayName }) }}</h1>
+        <p v-if="accountEmail" class="ga-who">{{ t('guides.apply.applying_as', { email: accountEmail }) }} · <button type="button" class="ga-linkbtn" @click="switchAccount">{{ t('guides.apply.switch_account') }}</button></p>
         <p>{{ t('guides.apply.pending_text_before') }} <strong dir="ltr">@{{ guide.instagram }}</strong> {{ t('guides.apply.pending_text_after') }}</p>
         <div class="ga-code" dir="ltr">
           <span>{{ guide.verificationCode }}</span>
@@ -47,6 +48,7 @@
         <h1>{{ t('guides.apply.title') }}</h1>
         <p v-if="guide && guide.status === 'rejected'" class="ga-alert">{{ t('guides.apply.rejected', { reason: guide.staffNotes || t('guides.apply.no_reason') }) }}</p>
         <p v-else class="ga-muted">{{ t('guides.apply.intro') }}</p>
+        <p v-if="accountEmail" class="ga-who">{{ t('guides.apply.applying_as', { email: accountEmail }) }} · <button type="button" class="ga-linkbtn" @click="switchAccount">{{ t('guides.apply.switch_account') }}</button></p>
 
         <label>{{ t('guides.apply.name') }}
           <input v-model.trim="form.displayName" maxlength="60" required :placeholder="t('guides.apply.name_ph')" />
@@ -120,6 +122,14 @@ const copied = ref(false)
 const TYPES = ['local', 'licensed', 'creator']
 const form = reactive({ displayName: '', instagram: '', handle: '', region: '', guideType: 'local', languages: ['en'], bio: '', acceptTerms: false })
 const handleTouched = ref(false)
+// Which account this application belongs to — the browser shares one login
+// across tabs, so an admin signed in elsewhere would otherwise apply silently
+// (live 2026-10-02).
+const accountEmail = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}').email || '' } catch { return '' } })()
+function switchAccount() {
+  try { localStorage.removeItem('authToken'); localStorage.removeItem('user'); sessionStorage.setItem('jinni_after_auth', '/guides/apply') } catch { /* storage blocked */ }
+  router.push('/auth?redirect=/guides/apply')
+}
 const handleState = ref('')
 let checkTimer = null
 
@@ -202,6 +212,9 @@ input:focus, textarea:focus { outline: none; border-color: #D4AF37; box-shadow: 
 .ga-code { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 14px; border: 1px dashed #D4AF37; font-size: 24px; font-weight: 700; letter-spacing: 0.06em; }
 .ga-steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; line-height: 1.5; }
 .ga-muted { opacity: 0.7; font-size: 14px; }
+.ga-who { font-size: 14px; padding: 9px 12px; border-radius: 12px; background: rgba(212, 175, 55, 0.12); }
+.ga-linkbtn { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; color: #b4540a; }
+.night-mode .ga-linkbtn { color: #ffd27a; }
 .ga-ok { color: #2e7d4f; }
 .ga-bad, .ga-alert { color: #b3261e; }
 .night-mode .ga-ok { color: #7bd69e; }

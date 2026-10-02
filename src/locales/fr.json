@@ -1461,7 +1461,9 @@
       "consent_privacy": "Politique de confidentialité guides",
       "accept_terms_error": "Veuillez accepter les conditions.",
       "sending": "Envoi…",
-      "send": "Envoyer ma candidature"
+      "send": "Envoyer ma candidature",
+      "applying_as": "Vous postulez en tant que {email}",
+      "switch_account": "Ce n'est pas vous ? Changer de compte"
     },
     "dashboard": {
       "no_page_title": "Vous n'avez pas encore de page de guide",

@@ -1461,7 +1461,9 @@
       "consent_privacy": "سياسة خصوصية المرشدين",
       "accept_terms_error": "يرجى قبول الشروط.",
       "sending": "جارٍ الإرسال…",
-      "send": "إرسال الطلب"
+      "send": "إرسال الطلب",
+      "applying_as": "أنت تتقدّم بالحساب {email}",
+      "switch_account": "لست أنت؟ بدّل الحساب"
     },
     "dashboard": {
       "no_page_title": "ليست لديك صفحة مرشد بعد",

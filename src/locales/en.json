@@ -1461,7 +1461,9 @@
       "consent_privacy": "Guide Privacy Policy",
       "accept_terms_error": "Please accept the terms.",
       "sending": "Sending…",
-      "send": "Send application"
+      "send": "Send application",
+      "applying_as": "Applying as {email}",
+      "switch_account": "Not you? Switch account"
     },
     "dashboard": {
       "no_page_title": "You don't have a guide page yet",

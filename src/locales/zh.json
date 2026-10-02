@@ -1461,7 +1461,9 @@
       "consent_privacy": "向导隐私政策",
       "accept_terms_error": "请接受条款。",
       "sending": "提交中…",
-      "send": "提交申请"
+      "send": "提交申请",
+      "applying_as": "您正在以 {email} 的身份申请",
+      "switch_account": "不是您？切换账号"
     },
     "dashboard": {
       "no_page_title": "您还没有向导主页",
