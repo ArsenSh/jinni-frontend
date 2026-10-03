@@ -120,12 +120,19 @@ export default {
 .lnav-txt { flex: 1; min-width: 0; display: grid; gap: 1px }
 .lnav-txt b { font-weight: 600; font-size: 15px; line-height: 1.3 }
 .lnav-txt small { font-size: 12.5px; line-height: 1.35; opacity: 0.62; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
-.lnav-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 6px; padding: 8px 4px 4px; margin-top: 4px; border-top: 1px solid var(--lnav-rule, rgba(255,240,215,0.12)) }
+/* founder 2026-10-03: no rule above the buttons; spacing separates them */
+.lnav-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; padding: 6px 4px 4px; margin-top: 6px }
 .lnav-ghost, .lnav-primary {
   display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 999px; padding: 0 12px;
   font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center; cursor: pointer; border: 0;
 }
-.lnav-ghost { color: inherit; background: transparent; box-shadow: inset 0 0 0 0.75px currentColor }
+/* Sign in: the same glass family as the sign-up button, without its light —
+   a soft frosted pill, no outline (founder: "that border makes it visible
+   that it is a button"). Tokens: the page's pill glass. */
+.lnav-ghost { color: inherit; background: var(--lnav-ghost-glass, rgba(255,255,255,0.07));
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: var(--lnav-ghost-shadow, 0 0 14px -4px rgba(0,0,0,0.5)) }
+.lnav-ghost:hover, .lnav-ghost:focus-visible { background: var(--lnav-ghost-glass-hover, rgba(255,255,255,0.12)); outline: none }
 /* founder 2026-10-03: "make the sign up button in mobile menu look like make
    a wish button" — the same Ember Breath glass: clear pane, warm light
    breathing inside (CSS only here). Night tokens are the defaults; the page
