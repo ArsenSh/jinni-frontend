@@ -78,34 +78,35 @@ body.theme-light {
   from { background-color: #f9f5eb; }
   to   { background-color: #e0a082; }
 }
-/* Jinni Night (founder 2026-10-03): the landing and /business at night take
-   JinniChat's gradient, #0a0118 at the top to #16213e at the bottom. Same
-   iOS 26 technique as the day pages above, so the bottom bounce shows the
-   deep blue instead of a midnight band. */
-/* (scroll shift removed 2026-10-03 — see the note above the keyframes) */
-/* Founder 2026-10-03 ("when I scroll down … the upper side", device
-   screenshots): NO scroll shift on the landing and /business. Their skies
-   (JinniNightSky / JinniDaySky) are FIXED, so the screen top always shows
-   the sky top colour; any shift made the top strip drift away from it (blue
-   at night, peach/sand by day). Body stays the sky TOP colour (App.vue
-   paints it); the bottom bounce shows that colour too — brief, accepted.
-   Keyframes kept unused for reference. Earlier note: these skies
-   are FIXED, so the screen top always shows the sky top colour. A shift
-   spread over the whole scroll slid the top strip toward the bottom colour
-   while the page top stayed put — a band. Hold the top colour, switch only
-   in the last stretch so the bottom bounce still gets the bottom colour. */
+/* Founder 2026-10-03 (device screenshots; "how do the other pages work,
+   like Contact?"): the landing and /business work exactly like Contact. The
+   sky (JinniDaySky / JinniNightSky) scrolls WITH the page, and body's colour
+   follows the scroll from the page's top colour to its bottom colour, so
+   iOS's top strip and both bounces match the pixels next to them. Colours
+   MEASURED on phone renders, glows included (day top #f9f0de: the lamp pool
+   warms it — a flat #f9f5eb read as white). Keep in step with the skies'
+   data-chrome-top/bottom. */
+@supports (animation-timeline: scroll()) {
+  body:has(.landing-container.jinni-night),
+  body:has(.business-landing.jinni-night) {
+    animation: jinni-night-shift linear both;
+    animation-timeline: scroll(root);
+  }
+  body:has(.landing-container.day-mode),
+  body:has(.business-landing.day-mode) {
+    animation: jinni-day-shift linear both;
+    animation-timeline: scroll(root);
+  }
+}
 @keyframes jinni-night-shift {
-  0%, 94% { background-color: #0a0118; }
-  100%    { background-color: #16213e; }
+  from { background-color: #0a0118; }
+  to   { background-color: #16213e; }
 }
-/* Jinni Day (landing + /business): JinniDaySky, #f9f5eb top → #efe4cf
-   bottom. Was on jinni-sky-shift, whose #e0a082 is the old desert-sky peach
-   and turned the top strip orange while scrolling. */
-/* (scroll shift removed 2026-10-03 — see the note above the keyframes) */
 @keyframes jinni-day-shift {
-  0%, 94% { background-color: #f9f5eb; }
-  100%    { background-color: #efe4cf; }
+  from { background-color: #f9f0de; }
+  to   { background-color: #efe4cf; }
 }
+
 
 /* Ember Breath (night Make a Wish): the glow's position glides between spots
    (utils/emberBreath.js); registered so the browser can transition them. */

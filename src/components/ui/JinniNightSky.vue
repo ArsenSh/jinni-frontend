@@ -24,16 +24,15 @@ export default { name: 'JinniNightSky' }
 
 <style scoped>
 .jinni-night-sky {
-  position: fixed; top: 0; left: 0; width: 100%;
-  height: 100vh; height: 100lvh;          /* tallest viewport: covers every Safari bar state */
+  /* Scrolls WITH the page, spanning its full height — like Contact's
+     DesertSky (founder 2026-10-03: "how do the other pages work, like
+     Contact?"). A fixed sky never matched iOS's scroll-driven strip colour. */
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   z-index: -1; overflow: hidden; pointer-events: none;
   background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 40%, #16213e 100%);
 }
 /* Phones: run on under Safari's glass bottom bar and the home-indicator strip
    (same reason as StarrySky, founder 2026-10-01). Clipped by the viewport. */
-@media (max-width: 768px) {
-  .jinni-night-sky { height: calc(100lvh + env(safe-area-inset-bottom, 0px) + 140px) }
-}
 .orb { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform }
 .orb-violet {
   width: 560px; height: 560px; left: -180px; top: 14%;

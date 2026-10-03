@@ -1,7 +1,9 @@
 <template>
-  <!-- data-chrome-*: the colours this backdrop really shows at the screen's
-       top and bottom, read by App.vue's chrome sync (see findPagePaint). -->
-  <div class="jinni-day-sky" data-chrome-top="#f9f5eb" data-chrome-bottom="#efe4cf" aria-hidden="true">
+  <!-- data-chrome-*: the colours this backdrop really shows at the page's
+       top and bottom, MEASURED on a phone render with the glows (the lamp pool
+       warms the top to #f9f0de — #f9f5eb read as white beside it). Keep in
+       step with jinni-day-shift in genie-theme.css. -->
+  <div class="jinni-day-sky" data-chrome-top="#f9f0de" data-chrome-bottom="#efe4cf" aria-hidden="true">
     <span class="orb orb-apricot"></span>
     <span class="orb orb-honey"></span>
     <span class="orb orb-lamp"></span>
@@ -15,7 +17,7 @@
    day gradient, so a visitor lands in the world they will see in the app:
      #f9f5eb (top) → #f5edda (55%) → #efe4cf (bottom)
    Two warm glows (apricot, honey) drift slowly, and a soft pool of lamplight
-   sits behind the hero. Mirrors JinniNightSky: fixed to the viewport, pure
+   sits behind the hero. Mirrors JinniNightSky: scrolls with the page (as Contact's sky), pure
    CSS, reduced motion stops the drift.
    ═══════════════════════════════════════════════════════════════════════════ */
 export default { name: 'JinniDaySky' }
@@ -23,13 +25,12 @@ export default { name: 'JinniDaySky' }
 
 <style scoped>
 .jinni-day-sky {
-  position: fixed; top: 0; left: 0; width: 100%;
-  height: 100vh; height: 100lvh;
+  /* Scrolls WITH the page, spanning its full height — like Contact's
+     DesertSky (founder 2026-10-03: "how do the other pages work, like
+     Contact?"). A fixed sky never matched iOS's scroll-driven strip colour. */
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   z-index: -1; overflow: hidden; pointer-events: none;
   background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 55%, #efe4cf 100%);
-}
-@media (max-width: 768px) {
-  .jinni-day-sky { height: calc(100lvh + env(safe-area-inset-bottom, 0px) + 140px) }
 }
 .orb { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform }
 .orb-apricot {
