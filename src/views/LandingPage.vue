@@ -3,9 +3,9 @@
     <!-- Night = "Jinni Night" (founder 2026-10-03): JinniChat's own gradient
          with two drifting glows, replacing the starry sky on this page. -->
     <JinniNightSky v-if="isNightMode" />
-    <DesertSky v-else />
+    <JinniDaySky v-else />
     <div class="header-container">
-      <img v-if="isNightMode" class="brand-lamp" src="/images/lamp.webp" alt="" aria-hidden="true">
+      <img class="brand-lamp" src="/images/lamp.webp" alt="" aria-hidden="true">
       <div class="app-name" translate="no">Jinni</div>
     </div>
     <div class="language-selector-container">
@@ -110,6 +110,7 @@ import StarrySky from '@/components/ui/StarrySky.vue'
 import DaySky from "@/components/ui/DaySky.vue";
 import DesertSky from '@/components/ui/DesertSky.vue'
 import DesertSand from '@/components/ui/DesertSand.vue'
+import JinniDaySky from '@/components/ui/JinniDaySky.vue'
 import JinniNightSky from '@/components/ui/JinniNightSky.vue'
 import LandingNav from '@/components/ui/LandingNav.vue'
 import { startEmberBreath } from '@/utils/emberBreath'
@@ -146,7 +147,7 @@ export default {
     DaySky,
     DesertSky,
     DesertSand,
-    JinniNightSky,
+    JinniDaySky, JinniNightSky,
     LandingNav
   },
   setup() {
@@ -243,7 +244,7 @@ export default {
     watch([isNightMode, wishBtn], ([night, btn]) => {
       stopEmber()
       const el = btn && (btn.$el || btn)
-      stopEmber = night && el ? startEmberBreath(el) : () => {}
+      stopEmber = el ? startEmberBreath(el) : () => {}   // both themes now (day = copper light)
     }, { immediate: true })
     const selectLanguage = (lang) => {
       clearAutoCloseTimer()
@@ -1297,6 +1298,139 @@ export default {
 /* Cinzel now loads (2026-10-03): it is a capitals face, so day keeps it for
    titles only and sets its sentence in Lora, as the Jinni Day preview does. */
 .landing-container.day-mode .hero .magic-subtitle { font-family: 'Lora', 'Noto Serif Armenian', Georgia, serif }
+
+/* day: the same preview layout as night */
+.landing-container.day-mode { --section: clamp(64px, 9vw, 104px); --lora: 'Lora', 'Noto Serif Armenian', Georgia, serif }
+
+/* mark: small lamp + JINNI (Cinzel's lowercase is small caps) */
+.landing-container.day-mode .header-container { gap: 10px }
+.landing-container.day-mode .brand-lamp { width: 44px; height: auto; margin: -6px -4px -6px -6px; filter: drop-shadow(0 0 8px rgba(255,170,90,0.35)) }
+.landing-container.day-mode .app-name { font-size: 22px; font-weight: 600; letter-spacing: 2px; background: none; -webkit-text-fill-color: #f3eaf8; color: #f3eaf8; filter: none }
+
+/* desktop bar: plain links, an outlined Sign in — no capsule */
+.landing-container.day-mode :deep(.lnav-links) { background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; gap: 8px; padding: 0 }
+.landing-container.day-mode :deep(.lnav-links a) { font-family: var(--lora); font-weight: 400; opacity: 0.75 }
+.landing-container.day-mode :deep(.lnav-links a:hover) { opacity: 1; background: none }
+.landing-container.day-mode :deep(.lnav-links .lnav-signin) { opacity: 0.9; padding: 8px 16px; margin-inline-start: 8px }
+.landing-container.day-mode .lang-trigger { font-family: var(--lora) }
+
+/* hero: flows from under the bar; lamp → title → line → button */
+.landing-container.day-mode .hero { min-height: 0; display: block; padding: calc(var(--hdr-top) + var(--hdr-h) + clamp(40px, 7vh, 88px)) 24px var(--section) }
+.landing-container.day-mode .hero-content { max-width: 1180px; margin: 0 auto }
+.landing-container.day-mode .lamp { width: min(210px, 50vw); margin: 0 auto -8px }
+.landing-container.day-mode .hero .magic-title { font-family: var(--brand-serif); font-weight: 500; font-size: clamp(36px, 6.4vw, 76px); line-height: 1.08;
+  letter-spacing: 0.02em; max-width: 900px; margin: 0 auto 18px }
+.landing-container.day-mode .hero .magic-subtitle { font-family: var(--lora); font-size: clamp(17px, 2vw, 20px); line-height: 1.55; max-width: 560px; margin: 0 auto 34px }
+.landing-container.day-mode .hero .magic-button, .landing-container.day-mode .hero .magic-button:hover { margin: 0; min-height: 56px; padding: 14px 36px }
+.landing-container.day-mode .hero .wish-label, .landing-container.day-mode .hero .magic-button:hover .wish-label { font-family: var(--lora); font-size: 17px; font-weight: 600 }
+
+/* features / plans */
+.landing-container.day-mode .features { padding: 0 24px var(--section) }
+.landing-container.day-mode .features-container { max-width: 1180px }
+.landing-container.day-mode .features h2.features-heading { font-family: var(--brand-serif); font-weight: 500; font-size: clamp(24px, 3.2vw, 34px); line-height: 1.2;
+  letter-spacing: 0.02em; margin: 0 0 clamp(28px, 4vw, 44px) }
+.landing-container.day-mode .wish-num { font-family: var(--brand-serif); font-size: 13px; font-weight: 400; line-height: 1; letter-spacing: 0.2em; margin: 0; opacity: 0.6 }
+.landing-container.day-mode .wish-item h3 { font-family: var(--lora); font-size: 18px; font-weight: 600; line-height: 1.3; margin: 14px 0 10px }
+.landing-container.day-mode .wish-item p { font-family: var(--lora); font-size: 15.5px; line-height: 1.6; margin: 0; color: rgba(238,230,246,0.78) }
+
+/* the Explore / For Business switch: the bar's links do this job now */
+.landing-container.day-mode .mode-switch-wrapper { display: none }
+
+/* cities */
+.landing-container.day-mode .cities { padding: 0 24px var(--section) }
+.landing-container.day-mode .cities .features-container { max-width: 900px }
+.landing-container.day-mode .cities h2.cities-heading { font-size: clamp(22px, 2.8vw, 30px); margin: 0 0 8px }
+.landing-container.day-mode .cities-sub { font-family: var(--lora); font-size: 16px; color: rgba(238,230,246,0.7); margin: 0 0 26px }
+.landing-container.day-mode .cities-country { margin: 0 auto 22px }
+.landing-container.day-mode .cities-country-name { font-family: var(--brand-serif); font-size: 12px; font-weight: 400; letter-spacing: 0.2em; color: rgba(238,230,246,0.55); opacity: 1; margin: 0 0 12px }
+.landing-container.day-mode .cities-grid { justify-content: center; gap: 10px 14px }
+.landing-container.day-mode .city-card-name { font-family: var(--lora); font-size: 17px; font-weight: 400 }
+.landing-container.day-mode .city-card-meta { font-family: var(--lora); font-size: 13px; opacity: 0.8 }
+
+/* footer: one ruled line — © left, links right */
+.landing-container.day-mode .footer { margin-top: auto; padding: 0 }
+.landing-container.day-mode .footer-content { max-width: 1180px; margin: 0 auto; padding: 26px 24px calc(26px + env(safe-area-inset-bottom, 0px));
+  display: flex; justify-content: space-between; align-items: center; gap: 12px 16px; flex-wrap: wrap;
+  border-top: 1px solid rgba(200,190,255,0.14); text-align: start }
+.landing-container.day-mode .footer-copyright { order: -1; margin: 0; font-family: var(--lora); font-size: 13px; color: rgba(238,230,246,0.6) }
+.landing-container.day-mode .footer-links { gap: 0; justify-content: flex-end }
+.landing-container.day-mode .footer-links a { font-family: var(--lora); font-size: 13px; padding: 0; color: rgba(238,230,246,0.6) }
+.landing-container.day-mode .footer-links a:hover { color: #f3eaf8 }
+.landing-container.day-mode .footer-links a + a::before { content: '·'; margin: 0 8px; color: rgba(238,230,246,0.4) }
+@media (max-width: 768px) {
+  .landing-container.day-mode .header-container { gap: 8px }
+  .landing-container.day-mode .brand-lamp { width: 38px }
+  .landing-container.day-mode .app-name { font-size: 20px }
+  .landing-container.day-mode .footer-content { justify-content: center; text-align: center }
+}
+
+/* ── JINNI DAY (founder 2026-10-03: "below make a wish button, everything
+   stayed as before … where is the background colour as in your preview").
+   Day takes the same preview layout as night (the block above, re-keyed to
+   day) plus LandingLab design 5's own colours: <JinniDaySky> behind, bronze
+   type, white-glass cards and pills, Ember Breath with a copper light. ── */
+.landing-container.day-mode { background: none; color: #7a5434;
+  --lang-ink: #7A4A1C; --lang-glass: rgba(255,255,255,0.45); --lang-glass-hover: rgba(255,255,255,0.62);
+  --lang-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), 0 0 18px -2px rgba(140,61,7,0.14); --lang-hover: rgba(140,61,7,0.08);
+  --lnav-primary-ink: #6e3f16 }
+.landing-container.day-mode::after { content: none }
+.landing-container.day-mode .app-name { -webkit-text-fill-color: #b8741f; color: #b8741f }
+.landing-container.day-mode .brand-lamp { filter: saturate(0.88) brightness(0.95) }
+.landing-container.day-mode .lamp { filter: drop-shadow(0 0 26px rgba(255,170,80,0.45)) drop-shadow(0 0 60px rgba(230,140,60,0.2)) }
+.landing-container.day-mode .static-bottle { filter: saturate(0.88) brightness(0.95) }
+.landing-container.day-mode .hero .magic-title, .landing-container.day-mode .features h2.features-heading { color: #7A4A1C; -webkit-text-fill-color: #7A4A1C; background: none; text-shadow: none }
+.landing-container.day-mode .magic-title :deep(.brand-grad), .landing-container.day-mode .features-heading :deep(.brand-grad) { background: none; -webkit-text-fill-color: currentColor; color: inherit; filter: none }
+.landing-container.day-mode .hero .magic-subtitle { color: #8a6444; text-shadow: none }
+/* cards */
+.landing-container.day-mode .features-grid { gap: 16px }
+.landing-container.day-mode .wish-item, .landing-container.day-mode .wish-item:first-child, .landing-container.day-mode .wish-item:last-child {
+  padding: 26px 24px; border: none; border-radius: 22px; background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.9), 0 0 18px -2px rgba(140,61,7,0.12) }
+.landing-container.day-mode .wish-num { color: #c0702a; opacity: 1; text-shadow: none }
+.landing-container.day-mode .wish-item h3 { color: #6e3f16 }
+.landing-container.day-mode .wish-item p { color: rgba(122,84,52,0.85) }
+@media (max-width: 768px) { .landing-container.day-mode .features-grid { gap: 12px } .landing-container.day-mode .wish-item { border-top: none } }
+/* cities */
+.landing-container.day-mode .cities-sub { color: rgba(122,84,52,0.8) }
+.landing-container.day-mode .cities-country-name { color: rgba(122,74,28,0.6) }
+.landing-container.day-mode .cities-grid { gap: 10px }
+.landing-container.day-mode .city-card { padding: 9px 16px; border-radius: 999px; background: rgba(255,255,255,0.5);
+  box-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.9), 0 0 14px -4px rgba(140,61,7,0.14) }
+.landing-container.day-mode .city-card:hover { background: rgba(255,255,255,0.7) }
+.landing-container.day-mode .city-card::after { content: none }
+.landing-container.day-mode .city-card-body { flex-direction: row; align-items: baseline; gap: 8px }
+.landing-container.day-mode .city-card-name, .landing-container.day-mode .city-card:hover .city-card-name { color: #6e3f16; -webkit-text-fill-color: #6e3f16; background: none; text-shadow: none }
+.landing-container.day-mode .city-card-meta { color: rgba(122,84,52,0.65) }
+/* footer */
+.landing-container.day-mode .footer-content { border-top-color: rgba(122,74,28,0.16) }
+.landing-container.day-mode .footer-copyright, .landing-container.day-mode .footer-links a { color: rgba(122,84,52,0.75) }
+.landing-container.day-mode .footer-links a:hover { color: #6e3f16 }
+.landing-container.day-mode .footer-links a + a::before { color: rgba(122,84,52,0.4) }
+/* Make a Wish = Ember Breath, day: clear white glass, copper light inside */
+.landing-container.day-mode .hero .magic-button, .landing-container.day-mode .hero .magic-button:hover {
+  overflow: hidden; isolation: isolate; background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 18px -3px rgba(190,110,40,0.3);
+  transition: --ex 3.4s ease-in-out, --ey 3.4s ease-in-out, box-shadow 0.25s ease }
+.landing-container.day-mode .hero .magic-button:hover, .landing-container.day-mode .hero .magic-button:focus-visible {
+  box-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.95), inset 0 1px 0 rgba(255,255,255,1), 0 0 22px -2px rgba(190,110,40,0.42) }
+.landing-container.day-mode .hero .magic-button::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; border-radius: inherit; pointer-events: none;
+  filter: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  background: radial-gradient(62% 120% at var(--ex, 50%) var(--ey, 110%), rgba(255,160,70,0.75), rgba(255,160,70,0) 70%),
+              radial-gradient(34% 80% at var(--ex, 50%) var(--ey, 110%), rgba(255,230,170,0.7), rgba(255,230,170,0) 70%);
+  animation: ember-breathe 3.4s ease-in-out infinite }
+.landing-container.day-mode .hero .magic-button::after, .landing-container.day-mode .hero .magic-button:hover::after {
+  content: ''; position: absolute; inset: -60% -30%; z-index: 0; border-radius: 0; opacity: 1; pointer-events: none; filter: blur(12px);
+  background: radial-gradient(18% 30% at 30% 50%, rgba(255,200,120,0.5), rgba(255,200,120,0) 100%);
+  animation: ember-drift 11s ease-in-out infinite; transition: none }
+.landing-container.day-mode .hero .wish-label, .landing-container.day-mode .hero .magic-button:hover .wish-label {
+  position: relative; z-index: 2; background: none; color: #6e3f16; -webkit-text-fill-color: #6e3f16; text-shadow: 0 0 8px rgba(255,248,235,0.8) }
+@media (prefers-reduced-motion: reduce) { .landing-container.day-mode .hero .magic-button::before, .landing-container.day-mode .hero .magic-button::after { animation: none } }
+.landing-container.day-mode { --lnav-wish-ink: #6e3f16; --lnav-wish-glass: rgba(255,255,255,0.35); --lnav-wish-ink-shadow: 0 0 8px rgba(255,248,235,0.8);
+  --lnav-wish-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 18px -3px rgba(190,110,40,0.3);
+  --lnav-wish-light: rgba(255,160,70,0.75); --lnav-wish-core: rgba(255,230,170,0.7) }
 </style>
 
 <style>

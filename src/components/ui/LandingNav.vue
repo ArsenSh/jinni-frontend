@@ -126,7 +126,25 @@ export default {
   font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; text-align: center; cursor: pointer; border: 0;
 }
 .lnav-ghost { color: inherit; background: transparent; box-shadow: inset 0 0 0 0.75px currentColor }
-.lnav-primary { color: var(--lnav-primary-ink, #2a1405); background: var(--lnav-primary, linear-gradient(45deg, #E9C766, #FFA640)) }
+/* founder 2026-10-03: "make the sign up button in mobile menu look like make
+   a wish button" — the same Ember Breath glass: clear pane, warm light
+   breathing inside (CSS only here). Night tokens are the defaults; the page
+   sets the day ones (--lnav-wish-*). */
+.lnav-primary {
+  position: relative; overflow: hidden; isolation: isolate;
+  color: var(--lnav-wish-ink, #fffaf0); background: var(--lnav-wish-glass, rgba(255,255,255,0.04));
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: var(--lnav-wish-rim, inset 0 0 0 0.75px rgba(255,240,215,0.38), inset 0 1px 0 rgba(255,246,228,0.5), 0 0 18px -2px rgba(255,160,80,0.32));
+  text-shadow: var(--lnav-wish-ink-shadow, 0 0 10px rgba(120,50,0,0.55), 0 0 2px rgba(80,30,0,0.4));
+}
+.lnav-primary::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(62% 120% at 50% 110%, var(--lnav-wish-light, rgba(255,150,50,0.62)), transparent 70%),
+              radial-gradient(34% 80% at 50% 110%, var(--lnav-wish-core, rgba(255,228,170,0.5)), transparent 70%);
+  animation: lnav-breathe 3.4s ease-in-out infinite;
+}
+@keyframes lnav-breathe { 0%, 100% { opacity: 0.45 } 50% { opacity: 0.9 } }
+@media (prefers-reduced-motion: reduce) { .lnav-primary::before { animation: none } }
 @media (prefers-reduced-motion: reduce) { .lnav-sheet { animation: none } }
 
 @media (max-width: 768px) {
