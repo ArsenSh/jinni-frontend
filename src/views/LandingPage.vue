@@ -1,11 +1,15 @@
 <template>
-  <div class="landing-container" :class="isNightMode ? '' : 'day-mode'">
-    <StarrySky v-if="isNightMode" />
+  <div class="landing-container" :class="isNightMode ? 'jinni-night' : 'day-mode'">
+    <!-- Night = "Jinni Night" (founder 2026-10-03): JinniChat's own gradient
+         with two drifting glows, replacing the starry sky on this page. -->
+    <JinniNightSky v-if="isNightMode" />
     <DesertSky v-else />
     <div class="header-container">
       <div class="app-name" translate="no">Jinni</div>
     </div>
     <div class="language-selector-container">
+      <LandingNav variant="travel" :languages="languageOptions" :current-language="selectedLanguage"
+                  @discover="scrollToCities" @primary="openSignup" @select-language="selectLanguage" />
       <div class="language-selector" :class="{ open: showAllLanguages }" ref="languageSelectorRef" @click.stop>
         <!-- No flag emojis (founder 2026-10-01): a line globe + the current
              code, and a menu of language names each in its own script. -->
@@ -29,7 +33,7 @@
         <span class="lamp" ref="lampEl"><img src="/images/lamp.webp" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
         <h1 class="magic-title" v-html="heroTitleHtml"></h1>
         <p class="magic-subtitle">{{ $t('landing.hero.subtitle') }}</p>
-        <MagicButton @click="openAuthModal"><span class="wish-label">{{ $t('landing.hero.cta') }}</span></MagicButton>
+        <MagicButton ref="wishBtn" @click="openAuthModal"><span class="wish-label">{{ $t('landing.hero.cta') }}</span></MagicButton>
       </div>
     </section>
     <section class="features">
@@ -61,7 +65,7 @@
          Derived from the data — a city appears once it has enough places.
          Hidden entirely while there are none, so the landing never shows an
          empty section. -->
-    <section v-if="cities.length" class="cities">
+    <section v-if="cities.length" id="cities" class="cities">
       <div class="features-container">
         <h2 class="features-heading cities-heading" v-html="citiesTitleHtml"></h2>
         <p class="cities-sub">{{ $t('landing.cities.subtitle') }}</p>
@@ -105,6 +109,9 @@ import StarrySky from '@/components/ui/StarrySky.vue'
 import DaySky from "@/components/ui/DaySky.vue";
 import DesertSky from '@/components/ui/DesertSky.vue'
 import DesertSand from '@/components/ui/DesertSand.vue'
+import JinniNightSky from '@/components/ui/JinniNightSky.vue'
+import LandingNav from '@/components/ui/LandingNav.vue'
+import { startEmberBreath } from '@/utils/emberBreath'
 export default {
   computed: {
     // Only the brand word carries the gradient; the rest of the sentence is
@@ -137,7 +144,9 @@ export default {
     StarrySky,
     DaySky,
     DesertSky,
-    DesertSand
+    DesertSand,
+    JinniNightSky,
+    LandingNav
   },
   setup() {
     const store = useStore()
@@ -220,6 +229,21 @@ export default {
     // from an ad has no account yet; every other /auth entry keeps Sign In.
     const openAuthModal = () => { track('wish_tap'); router.push({ path: '/auth', query: { mode: 'signup' } }) }
     const goBusinessLanding = () => {router.push('/business')}
+    // Nav (2026-10-03): "Discover" scrolls to the cities; the panel's main
+    // button is a plain sign-up (the hero CTA keeps its own wish_tap event).
+    const scrollToCities = () => {
+      const el = document.getElementById('cities')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+    const openSignup = () => { router.push({ path: '/auth', query: { mode: 'signup' } }) }
+    // Night Make a Wish = Ember Breath: the glow rises from a new spot each breath.
+    const wishBtn = ref(null)
+    let stopEmber = () => {}
+    watch([isNightMode, wishBtn], ([night, btn]) => {
+      stopEmber()
+      const el = btn && (btn.$el || btn)
+      stopEmber = night && el ? startEmberBreath(el) : () => {}
+    }, { immediate: true })
     const selectLanguage = (lang) => {
       clearAutoCloseTimer()
       store.dispatch('i18n/changeLanguage', lang)
@@ -246,7 +270,7 @@ export default {
       loadCities()
       track('landing_view')
     })
-    onBeforeUnmount(() => {clearAutoCloseTimer()})
+    onBeforeUnmount(() => {clearAutoCloseTimer(); stopEmber()})
     return {
       features,
       languageOptions,
@@ -256,6 +280,9 @@ export default {
       currentLanguageTitle,
       openAuthModal,
       goBusinessLanding,
+      scrollToCities,
+      openSignup,
+      wishBtn,
       selectLanguage,
       toggleLanguageSelector,
       languageSelectorRef,
@@ -1088,6 +1115,112 @@ export default {
 }
 .landing-container:not(.day-mode) .hero .magic-button:hover::after,
 .landing-container:not(.day-mode) .hero .magic-button:focus-visible::after { opacity: 1 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   JINNI NIGHT (founder 2026-10-03, LandingLab night direction 4: "that one is
+   powerful, set it for night mode"). Overrides the older night rules above by
+   order (same specificity, later wins) — day mode is untouched.
+   Background = <JinniNightSky> (JinniChat's gradient + drifting glows).
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* nav + EN pill share one row */
+.language-selector-container { gap: 8px }
+/* nav panel tokens, per theme (LandingNav reads them) */
+.landing-container.day-mode {
+  --lnav-sheet: rgba(255,250,242,0.97); --lnav-sheet-ink: #7A4A1C; --lnav-rule: rgba(122,74,28,0.15);
+  --lnav-sheet-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.8), 0 0 18px -2px rgba(140,61,7,0.18);
+  --lnav-primary: linear-gradient(45deg, rgba(176,106,24,0.94), rgba(207,83,23,0.94)); --lnav-primary-ink: #fff;
+}
+.landing-container.jinni-night {
+  --lnav-sheet: rgba(18,10,30,0.97); --lnav-sheet-ink: #f3eaf8; --lnav-rule: rgba(220,210,255,0.14);
+  --lnav-sheet-shadow: inset 0 0 0 0.75px rgba(220,210,255,0.16), 0 0 18px -2px rgba(0,0,0,0.6);
+  --lnav-primary: linear-gradient(45deg, #E9C766, #FFA640); --lnav-primary-ink: #2a1405;
+  --lang-ink: #f3eaf8; --lang-glass: rgba(255,255,255,0.06); --lang-glass-hover: rgba(255,255,255,0.12);
+  --lang-rim: inset 0 0 0 0.75px rgba(220,210,255,0.22), inset 0 1px 0 rgba(255,255,255,0.12), 0 0 18px -2px rgba(0,0,0,0.3);
+  --lang-hover: rgba(220,210,255,0.1);
+}
+/* the starry-sky vignette is not part of this look */
+.landing-container.jinni-night::after { content: none }
+
+/* lamp: bigger, glowing — the warm light of the page */
+.landing-container.jinni-night .lamp { width: 190px; margin-bottom: -46px;
+  filter: drop-shadow(0 0 28px rgba(255,160,70,0.45)) drop-shadow(0 0 70px rgba(255,130,50,0.22)) }
+@media (max-width: 768px) { .landing-container.jinni-night .lamp { width: 130px; margin-bottom: -31px } }
+
+/* type: full-strength, plain (the lab version) */
+.landing-container.jinni-night .magic-title,
+.landing-container.jinni-night .features-heading { color: #fbf5ff; text-shadow: 0 0 30px rgba(255,170,90,0.16) }
+.landing-container.jinni-night .magic-title :deep(.brand-grad),
+.landing-container.jinni-night .features-heading :deep(.brand-grad) {
+  background: none; -webkit-text-fill-color: currentColor; color: inherit; filter: none }
+.landing-container.jinni-night .magic-subtitle { color: #c5bcd6; text-shadow: none }
+.landing-container.jinni-night .app-name { filter: drop-shadow(0 0 10px rgba(255,170,90,0.35)) }
+
+/* Make a Wish = Ember Breath: clear glass, the light lives inside and rises
+   from a new spot each breath (utils/emberBreath.js moves --ex/--ey) */
+.landing-container.jinni-night .hero .magic-button,
+.landing-container.jinni-night .hero .magic-button:hover {
+  overflow: hidden; isolation: isolate; background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: inset 0 0 0 0.75px rgba(255,240,215,0.38), inset 0 1px 0 rgba(255,246,228,0.5), 0 0 18px -2px rgba(255,160,80,0.32);
+  transition: --ex 3.4s ease-in-out, --ey 3.4s ease-in-out, box-shadow 0.25s ease;
+}
+.landing-container.jinni-night .hero .magic-button:hover,
+.landing-container.jinni-night .hero .magic-button:focus-visible {
+  box-shadow: inset 0 0 0 0.75px rgba(255,240,215,0.5), inset 0 1px 0 rgba(255,246,228,0.62), 0 0 22px -2px rgba(255,160,80,0.44);
+}
+.landing-container.jinni-night .hero .magic-button::before {
+  filter: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  background: radial-gradient(62% 120% at var(--ex, 50%) var(--ey, 110%), rgba(255,150,50,0.62), rgba(255,150,50,0) 70%),
+              radial-gradient(34% 80% at var(--ex, 50%) var(--ey, 110%), rgba(255,228,170,0.5), rgba(255,228,170,0) 70%);
+  animation: ember-breathe 3.4s ease-in-out infinite;
+}
+.landing-container.jinni-night .hero .magic-button::after,
+.landing-container.jinni-night .hero .magic-button:hover::after {
+  content: ''; position: absolute; inset: -60% -30%; z-index: 0; border-radius: 0; opacity: 1; pointer-events: none; filter: blur(12px);
+  background: radial-gradient(18% 30% at 30% 50%, rgba(233,199,102,0.34), rgba(233,199,102,0) 100%);
+  animation: ember-drift 11s ease-in-out infinite; transition: none;
+}
+.landing-container.jinni-night .hero .wish-label,
+.landing-container.jinni-night .hero .magic-button:hover .wish-label {
+  color: #fffaf0; -webkit-text-fill-color: #fffaf0; text-shadow: 0 0 10px rgba(120,50,0,0.55), 0 0 2px rgba(80,30,0,0.4) }
+@keyframes ember-breathe { 0%, 100% { opacity: 0.38 } 50% { opacity: 0.82 } }
+@keyframes ember-drift { 0% { transform: translate(-9%, 2%) } 33% { transform: translate(7%, -3%) } 66% { transform: translate(-3%, 4%) } 100% { transform: translate(-9%, 2%) } }
+@media (prefers-reduced-motion: reduce) {
+  .landing-container.jinni-night .hero .magic-button::before,
+  .landing-container.jinni-night .hero .magic-button::after { animation: none }
+}
+
+/* features = three frosted-glass cards over the moving glows */
+.landing-container.jinni-night .features-grid { gap: 16px }
+.landing-container.jinni-night .wish-item,
+.landing-container.jinni-night .wish-item:first-child,
+.landing-container.jinni-night .wish-item:last-child {
+  padding: 26px 24px; border: none; border-radius: 22px; background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 0 0 0.75px rgba(220,210,255,0.14), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -2px rgba(0,0,0,0.45);
+}
+.landing-container.jinni-night .wish-num { color: #ffb36b; text-shadow: none; opacity: 1 }
+.landing-container.jinni-night .wish-item h3 { color: #f3eaf8 }
+.landing-container.jinni-night .wish-item p { color: #c9c0da }
+@media (max-width: 768px) {
+  .landing-container.jinni-night .features-grid { gap: 12px }
+  .landing-container.jinni-night .wish-item { border-top: none }
+}
+
+/* cities = glass pills */
+.landing-container.jinni-night .cities-grid { gap: 10px }
+.landing-container.jinni-night .city-card { padding: 9px 16px; border-radius: 999px; background: rgba(255,255,255,0.06);
+  box-shadow: inset 0 0 0 0.75px rgba(220,210,255,0.18) }
+.landing-container.jinni-night .city-card:hover { background: rgba(255,255,255,0.1) }
+.landing-container.jinni-night .city-card::after { content: none }
+.landing-container.jinni-night .city-card-body { flex-direction: row; align-items: baseline; gap: 8px }
+.landing-container.jinni-night .city-card-name { color: #f3eaf8; text-shadow: none }
+.landing-container.jinni-night .city-card:hover .city-card-name { color: #fff; text-shadow: none }
+.landing-container.jinni-night .city-card-meta { color: #a99fbf }
+.landing-container.jinni-night .cities-country-name { color: #c5bcd6 }
+.landing-container.jinni-night .cities-sub { color: #c5bcd6 }
+.landing-container.jinni-night .footer-links a { color: #e6dcf2 }
+.landing-container.jinni-night .footer-copyright { color: rgba(220,210,240,0.55) }
 </style>
 
 <style>

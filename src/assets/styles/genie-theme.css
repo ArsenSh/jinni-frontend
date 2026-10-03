@@ -80,6 +80,26 @@ body.theme-light {
   from { background-color: #f9f5eb; }
   to   { background-color: #e0a082; }
 }
+/* Jinni Night (founder 2026-10-03): the landing and /business at night take
+   JinniChat's gradient, #0a0118 at the top to #16213e at the bottom. Same
+   iOS 26 technique as the day pages above, so the bottom bounce shows the
+   deep blue instead of a midnight band. */
+@supports (animation-timeline: scroll()) {
+  body:has(.landing-container.jinni-night),
+  body:has(.business-landing.jinni-night) {
+    animation: jinni-night-shift linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes jinni-night-shift {
+  from { background-color: #0a0118; }
+  to   { background-color: #16213e; }
+}
+
+/* Ember Breath (night Make a Wish): the glow's position glides between spots
+   (utils/emberBreath.js); registered so the browser can transition them. */
+@property --ex { syntax: '<percentage>'; initial-value: 50%; inherits: true; }
+@property --ey { syntax: '<percentage>'; initial-value: 110%; inherits: true; }
 
 /* Legal-link labels (founder 2026-09-09): full document names where there is
    room, short one-word forms on phones. Both are rendered; CSS picks. */

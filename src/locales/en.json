@@ -293,6 +293,22 @@
       "subtitle": "The cities Jinni knows well. Open to everyone, no account needed.",
       "places": "{count} places",
       "alt": "places Jinni discovered"
+    },
+    "nav": {
+      "menu": "Menu",
+      "close_menu": "Close menu",
+      "language": "Language",
+      "discover": "Discover",
+      "discover_cities": "Discover cities",
+      "discover_sub": "Yerevan, Dilijan, Gyumri and more · no account needed",
+      "guides": "For Guides",
+      "guides_sub": "Your own page with your picks and tours",
+      "business": "For Business",
+      "business_sub": "Put your place in front of travelers",
+      "travelers": "For Travelers",
+      "travelers_sub": "Ask Jinni where to go, eat and explore",
+      "sign_in": "Sign in",
+      "create_account": "Create free account"
     }
   },
   "auth": {

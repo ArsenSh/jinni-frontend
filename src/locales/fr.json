@@ -293,6 +293,22 @@
       "subtitle": "Les villes que Jinni connaît bien. Accessibles à tous, sans inscription.",
       "places": "{count} adresses",
       "alt": "adresses découvertes par Jinni"
+    },
+    "nav": {
+      "menu": "Menu",
+      "close_menu": "Fermer le menu",
+      "language": "Langue",
+      "discover": "Découvrir",
+      "discover_cities": "Découvrir les villes",
+      "discover_sub": "Erevan, Dilijan, Gyumri et plus · sans compte",
+      "guides": "Pour les guides",
+      "guides_sub": "Votre page avec vos lieux et vos visites",
+      "business": "Pour les entreprises",
+      "business_sub": "Montrez votre lieu aux voyageurs",
+      "travelers": "Pour les voyageurs",
+      "travelers_sub": "Demandez à Jinni où aller, manger et explorer",
+      "sign_in": "Se connecter",
+      "create_account": "Créer un compte gratuit"
     }
   },
   "auth": {

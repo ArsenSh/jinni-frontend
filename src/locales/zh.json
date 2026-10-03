@@ -293,6 +293,22 @@
       "subtitle": "Jinni 熟悉的城市。所有人均可查看，无需注册账号。",
       "places": "{count} 个地点",
       "alt": "Jinni 发现的地点"
+    },
+    "nav": {
+      "menu": "菜单",
+      "close_menu": "关闭菜单",
+      "language": "语言",
+      "discover": "探索",
+      "discover_cities": "探索城市",
+      "discover_sub": "埃里温、迪利然、久姆里等 · 无需账户",
+      "guides": "向导专区",
+      "guides_sub": "展示您推荐地点和行程的个人页面",
+      "business": "商家专区",
+      "business_sub": "让旅行者发现您的店铺",
+      "travelers": "旅行者专区",
+      "travelers_sub": "问 Jinni 去哪儿、吃什么、玩什么",
+      "sign_in": "登录",
+      "create_account": "免费注册"
     }
   },
   "auth": {

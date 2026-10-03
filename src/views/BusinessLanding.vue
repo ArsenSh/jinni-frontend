@@ -1,12 +1,15 @@
 <template>
-  <div class="business-landing" :class="currentTheme">
-    <StarrySky v-if="isNightMode" />
+  <div class="business-landing" :class="[currentTheme, { 'jinni-night': isNightMode }]">
+    <!-- Night = "Jinni Night" (founder 2026-10-03), same as the main landing. -->
+    <JinniNightSky v-if="isNightMode" />
     <DesertSky v-else />
     <div class="header-container">
       <div class="app-name" translate="no">Jinni</div>
     </div>
 
     <div class="language-selector-container">
+      <LandingNav variant="business" :languages="languageOptions" :current-language="selectedLanguage"
+                  :primary-label="$t('businessLanding.hero.cta')" @primary="goApply('verified')" @select-language="selectLanguage" />
       <div class="language-selector" :class="{ open: showAllLanguages }" ref="languageSelectorRef" @click.stop>
         <!-- Same control as the main landing (founder 2026-10-01): a line
              globe + the current code, and a menu of language names each in
@@ -31,7 +34,7 @@
         <span class="lamp" ref="lampEl"><img src="/images/lamp.webp" alt="Jinni — the AI travel guide's genie lamp" class="static-bottle"></span>
         <h1 class="magic-title">{{ $t('businessLanding.hero.title') }}</h1>
         <p class="magic-subtitle" v-html="heroSubtitleHtml"></p>
-        <MagicButton @click="goApply('verified')"><span class="wish-label">{{ $t('businessLanding.hero.cta') }}</span></MagicButton>
+        <MagicButton ref="wishBtn" @click="goApply('verified')"><span class="wish-label">{{ $t('businessLanding.hero.cta') }}</span></MagicButton>
       </div>
     </section>
 
@@ -104,9 +107,12 @@ import MagicButton from '@/components/ui/MagicButton.vue'
 import StarrySky from '@/components/ui/StarrySky.vue'
 import DesertSky from '@/components/ui/DesertSky.vue'
 import DesertSand from '@/components/ui/DesertSand.vue'
+import JinniNightSky from '@/components/ui/JinniNightSky.vue'
+import LandingNav from '@/components/ui/LandingNav.vue'
+import { startEmberBreath } from '@/utils/emberBreath'
 export default {
   name: 'BusinessLanding',
-  components: { MagicButton, StarrySky, DesertSky, DesertSand },
+  components: { MagicButton, StarrySky, DesertSky, DesertSand, JinniNightSky, LandingNav },
   setup() {
     const router = useRouter()
     const store = useStore()
@@ -167,15 +173,23 @@ export default {
     const currentTheme = computed(() => isNightMode.value ? 'night-mode' : 'day-mode')
     const isDayMode = computed(() => !isNightMode.value)
     const lampEl = ref(null)
+    // Night Make a Wish = Ember Breath (same as the main landing).
+    const wishBtn = ref(null)
+    let stopEmber = () => {}
+    watch([isNightMode, wishBtn], ([night, btn]) => {
+      stopEmber()
+      const el = btn && (btn.$el || btn)
+      stopEmber = night && el ? startEmberBreath(el) : () => {}
+    }, { immediate: true })
     onMounted(() => {
       if (store.state.i18n?.locale) selectedLanguage.value = store.state.i18n.locale
       showAllLanguages.value = false
     })
-    onBeforeUnmount(() => { clearAutoCloseTimer() })
+    onBeforeUnmount(() => { clearAutoCloseTimer(); stopEmber() })
     function goHome()  { router.push('/') }
     function goApply(tier = 'verified') { router.push({ path: '/business/apply', query: { tier } }) }
     return {
-      currentTheme, isNightMode, isDayMode, lampEl,
+      currentTheme, isNightMode, isDayMode, lampEl, wishBtn,
       selectedLanguage, showAllLanguages, languageOptions,
       currentLanguageCode, currentLanguageTitle,
       selectLanguage, toggleLanguageSelector, languageSelectorRef,
@@ -889,6 +903,90 @@ export default {
 .night-mode .features-heading { color: rgba(251,240,216,0.7); text-shadow: none }
 .night-mode .wish-item h3 { color: rgba(240,220,174,0.72) }
 .night-mode .wish-item p { color: rgba(228,215,189,0.68) }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   JINNI NIGHT (founder 2026-10-03: "set it for night mode please and same way
+   in BusinessLandingpage"). Mirrors LandingPage.vue's block; overrides the
+   older night rules above by order. Day mode untouched.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.language-selector-container { gap: 8px }
+.business-landing.day-mode {
+  --lnav-sheet: rgba(255,250,242,0.97); --lnav-sheet-ink: #7A4A1C; --lnav-rule: rgba(122,74,28,0.15);
+  --lnav-sheet-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.8), 0 0 18px -2px rgba(140,61,7,0.18);
+  --lnav-primary: linear-gradient(45deg, rgba(176,106,24,0.94), rgba(207,83,23,0.94)); --lnav-primary-ink: #fff;
+}
+.business-landing.jinni-night {
+  --lnav-sheet: rgba(18,10,30,0.97); --lnav-sheet-ink: #f3eaf8; --lnav-rule: rgba(220,210,255,0.14);
+  --lnav-sheet-shadow: inset 0 0 0 0.75px rgba(220,210,255,0.16), 0 0 18px -2px rgba(0,0,0,0.6);
+  --lnav-primary: linear-gradient(45deg, #E9C766, #FFA640); --lnav-primary-ink: #2a1405;
+  --lang-ink: #f3eaf8; --lang-glass: rgba(255,255,255,0.06); --lang-glass-hover: rgba(255,255,255,0.12);
+  --lang-rim: inset 0 0 0 0.75px rgba(220,210,255,0.22), inset 0 1px 0 rgba(255,255,255,0.12), 0 0 18px -2px rgba(0,0,0,0.3);
+  --lang-hover: rgba(220,210,255,0.1);
+}
+.business-landing.jinni-night::after { content: none }
+.business-landing.jinni-night .lamp { width: 190px; margin-bottom: -46px;
+  filter: drop-shadow(0 0 28px rgba(255,160,70,0.45)) drop-shadow(0 0 70px rgba(255,130,50,0.22)) }
+@media (max-width: 768px) { .business-landing.jinni-night .lamp { width: 130px; margin-bottom: -31px } }
+.business-landing.jinni-night .magic-title,
+.business-landing.jinni-night .features-heading { color: #fbf5ff; text-shadow: 0 0 30px rgba(255,170,90,0.16) }
+.business-landing.jinni-night .magic-subtitle { color: #c5bcd6; text-shadow: none }
+.business-landing.jinni-night .magic-subtitle :deep(.brand-grad) { background: none; -webkit-text-fill-color: #ffd29a; color: #ffd29a; filter: none; font-weight: 600 }
+.business-landing.jinni-night .app-name { filter: drop-shadow(0 0 10px rgba(255,170,90,0.35)) }
+
+/* Make a Wish = Ember Breath */
+.business-landing.jinni-night .hero .magic-button,
+.business-landing.jinni-night .hero .magic-button:hover {
+  overflow: hidden; isolation: isolate; background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: inset 0 0 0 0.75px rgba(255,240,215,0.38), inset 0 1px 0 rgba(255,246,228,0.5), 0 0 18px -2px rgba(255,160,80,0.32);
+  transition: --ex 3.4s ease-in-out, --ey 3.4s ease-in-out, box-shadow 0.25s ease;
+}
+.business-landing.jinni-night .hero .magic-button:hover,
+.business-landing.jinni-night .hero .magic-button:focus-visible {
+  box-shadow: inset 0 0 0 0.75px rgba(255,240,215,0.5), inset 0 1px 0 rgba(255,246,228,0.62), 0 0 22px -2px rgba(255,160,80,0.44);
+}
+.business-landing.jinni-night .hero .magic-button::before {
+  filter: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  background: radial-gradient(62% 120% at var(--ex, 50%) var(--ey, 110%), rgba(255,150,50,0.62), rgba(255,150,50,0) 70%),
+              radial-gradient(34% 80% at var(--ex, 50%) var(--ey, 110%), rgba(255,228,170,0.5), rgba(255,228,170,0) 70%);
+  animation: ember-breathe 3.4s ease-in-out infinite;
+}
+.business-landing.jinni-night .hero .magic-button::after,
+.business-landing.jinni-night .hero .magic-button:hover::after {
+  content: ''; position: absolute; inset: -60% -30%; z-index: 0; border-radius: 0; opacity: 1; pointer-events: none; filter: blur(12px);
+  background: radial-gradient(18% 30% at 30% 50%, rgba(233,199,102,0.34), rgba(233,199,102,0) 100%);
+  animation: ember-drift 11s ease-in-out infinite; transition: none;
+}
+.business-landing.jinni-night .hero .wish-label,
+.business-landing.jinni-night .hero .magic-button:hover .wish-label {
+  color: #fffaf0; -webkit-text-fill-color: #fffaf0; text-shadow: 0 0 10px rgba(120,50,0,0.55), 0 0 2px rgba(80,30,0,0.4) }
+@keyframes ember-breathe { 0%, 100% { opacity: 0.38 } 50% { opacity: 0.82 } }
+@keyframes ember-drift { 0% { transform: translate(-9%, 2%) } 33% { transform: translate(7%, -3%) } 66% { transform: translate(-3%, 4%) } 100% { transform: translate(-9%, 2%) } }
+@media (prefers-reduced-motion: reduce) {
+  .business-landing.jinni-night .hero .magic-button::before,
+  .business-landing.jinni-night .hero .magic-button::after { animation: none }
+}
+
+/* tiers = frosted-glass cards */
+.business-landing.jinni-night .features-grid { gap: 16px }
+.business-landing.jinni-night .wish-item,
+.business-landing.jinni-night .wish-item:first-child,
+.business-landing.jinni-night .wish-item:last-child {
+  padding: 26px 24px; border: none; border-radius: 22px; background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%);
+  box-shadow: inset 0 0 0 0.75px rgba(220,210,255,0.14), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -2px rgba(0,0,0,0.45);
+}
+.business-landing.jinni-night .tier-mark { color: #ffb36b; filter: drop-shadow(0 0 6px rgba(255,170,90,0.35)) }
+.business-landing.jinni-night .tier-label { color: #a99fbf }
+.business-landing.jinni-night .wish-item h3 { color: #f3eaf8 }
+.business-landing.jinni-night .wish-item p { color: #c9c0da }
+.business-landing.jinni-night .tier-cta .wish-label { color: #ffd29a; -webkit-text-fill-color: #ffd29a; text-shadow: none }
+@media (max-width: 768px) {
+  .business-landing.jinni-night .features-grid { gap: 12px }
+  .business-landing.jinni-night .wish-item { border-top: none }
+}
+.business-landing.jinni-night .footer-links a { color: #e6dcf2 }
+.business-landing.jinni-night .footer-copyright { color: rgba(220,210,240,0.55) }
 </style>
 
 <style>
