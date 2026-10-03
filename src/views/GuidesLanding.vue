@@ -65,6 +65,15 @@
         <li><span>2</span><div><strong>{{ t('guides.landing.step2_strong') }}</strong> {{ t('guides.landing.step2_text') }}</div></li>
         <li><span>3</span><div><strong>{{ t('guides.landing.step3_strong') }}</strong> {{ t('guides.landing.step3_text') }}</div></li>
       </ol>
+    </section>
+
+    <!-- closing call (founder 2026-10-04: "more alluring … sentences marketingly
+         correct"): one lit lamp, the promise, the honest urgency — handles
+         are first come, first served -->
+    <section class="gl-final">
+      <img src="/images/lamp.webp" alt="" class="gl-final-lamp" />
+      <h2>{{ t('guides.landing.final_title') }}</h2>
+      <p dir="auto">{{ t('guides.landing.final_text') }}</p>
       <router-link :to="ctaTo" class="gl-cta jinni-pill">{{ isGuide ? t('guides.landing.cta_dashboard') : t('guides.landing.cta_start') }}</router-link>
     </section>
 
@@ -311,4 +320,16 @@ onMounted(async () => {
 .gl-foot-links a, .night-mode .gl-foot-links a, .day-mode .gl-foot-links a { font-family: var(--lora); font-size: 14px; color: var(--soft) }
 .gl-foot-links a:hover { color: var(--ink) }
 .gl-foot-copy { font-family: var(--lora); color: var(--soft); opacity: 1 }
+
+/* closing call + the example card's lamplight */
+.gl-example::before { content: ''; position: absolute; inset: -18% -14%; z-index: -1; pointer-events: none; filter: blur(30px);
+  background: radial-gradient(closest-side, rgba(255,170,80,0.22), rgba(255,140,60,0.06) 60%, transparent) }
+.gl-final { max-width: 760px; margin: clamp(64px, 9vw, 104px) auto 0; display: grid; justify-items: center; gap: 14px; text-align: center; position: relative }
+.gl-final::before { content: ''; position: absolute; left: 50%; top: -40px; width: 520px; max-width: 100vw; height: 320px; transform: translateX(-50%); z-index: -1;
+  pointer-events: none; filter: blur(40px); background: radial-gradient(closest-side, rgba(255,180,90,0.22), transparent) }
+.gl-final-lamp { width: 84px; height: auto; filter: drop-shadow(0 0 22px rgba(255,160,70,0.5)) }
+.day-mode .gl-final-lamp { filter: saturate(0.88) brightness(0.95) drop-shadow(0 0 20px rgba(255,170,80,0.45)) }
+.gl-final h2 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(26px, 4vw, 40px); line-height: 1.15; letter-spacing: 0.02em; color: var(--ink); text-wrap: balance }
+.gl-final p { margin: 0 0 10px; font-size: 17px; color: var(--body) }
+.gl-steps ol { margin-bottom: 0 }
 </style>
