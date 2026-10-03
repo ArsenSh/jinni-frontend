@@ -1,6 +1,7 @@
 // utils/guides.js — shared bits for the guide pages (2026-10-02).
 import { computed } from 'vue'
 import { isNightTime } from '@/utils/timeUtils'
+import { visibleLanguageOptions } from '@/utils/languages'
 
 const API = import.meta.env.VITE_API_BASE_URL || ''
 
@@ -54,10 +55,10 @@ export const CATEGORY_KEYS = ['restaurant', 'hidden_gem', 'photo_spot', 'activit
 export const GUIDING_LANGS = ['en', 'hy', 'ru', 'fr', 'es', 'de', 'it', 'fa', 'ar', 'zh', 'ka']
 
 /** The app's own languages — each shown in its own script. */
-export const GUIDE_LANGS = [
+export const GUIDE_LANGS = visibleLanguageOptions([
   { code: 'en', label: 'English' }, { code: 'hy', label: 'Հայերեն' }, { code: 'ru', label: 'Русский' },
   { code: 'fr', label: 'Français' }, { code: 'zh', label: '中文' }, { code: 'ar', label: 'العربية' },
-]
+])   // hidden languages (utils/languages.js) drop out here, so a saved or browser hy falls to English
 const APP_CODES = GUIDE_LANGS.map(l => l.code)
 
 /** Switch the page language and remember it (same key the business pages use). */

@@ -9,9 +9,9 @@
     <div class="lnav-links">
       <a v-if="variant === 'travel'" href="#cities" @click.prevent="$emit('discover')">{{ t('landing.nav.discover') }}</a>
       <router-link v-else to="/">{{ t('landing.nav.travelers') }}</router-link>
-      <router-link to="/guides">{{ t('landing.nav.guides') }}</router-link>
-      <router-link v-if="variant === 'travel'" to="/business">{{ t('landing.nav.business') }}</router-link>
-      <router-link to="/auth" class="lnav-signin">{{ t('landing.nav.sign_in') }}</router-link>
+      <router-link v-if="variant !== 'guides'" to="/guides">{{ t('landing.nav.guides') }}</router-link>
+      <router-link v-if="variant !== 'business'" to="/business">{{ t('landing.nav.business') }}</router-link>
+      <router-link :to="signInTo" class="lnav-signin">{{ signInLabel || t('landing.nav.sign_in') }}</router-link>
     </div>
 
     <button type="button" class="lnav-menu-btn" :aria-expanded="open ? 'true' : 'false'"
@@ -25,12 +25,12 @@
         <svg class="lnav-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span class="lnav-txt"><b>{{ t('landing.nav.discover_cities') }}</b><small>{{ t('landing.nav.discover_sub') }}</small></span><svg class="lnav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
       <router-link v-else to="/" class="lnav-item" @click="open = false">
         <svg class="lnav-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span class="lnav-txt"><b>{{ t('landing.nav.travelers') }}</b><small>{{ t('landing.nav.travelers_sub') }}</small></span><svg class="lnav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></router-link>
-      <router-link to="/guides" class="lnav-item" @click="open = false">
+      <router-link v-if="variant !== 'guides'" to="/guides" class="lnav-item" @click="open = false">
         <svg class="lnav-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></svg><span class="lnav-txt"><b>{{ t('landing.nav.guides') }}</b><small>{{ t('landing.nav.guides_sub') }}</small></span><svg class="lnav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></router-link>
-      <router-link v-if="variant === 'travel'" to="/business" class="lnav-item" @click="open = false">
+      <router-link v-if="variant !== 'business'" to="/business" class="lnav-item" @click="open = false">
         <svg class="lnav-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v10h16V10"/><path d="M3 10l2-6h14l2 6z"/><path d="M10 20v-5h4v5"/></svg><span class="lnav-txt"><b>{{ t('landing.nav.business') }}</b><small>{{ t('landing.nav.business_sub') }}</small></span><svg class="lnav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></router-link>
       <div class="lnav-actions">
-        <router-link to="/auth" class="lnav-ghost" @click="open = false">{{ t('landing.nav.sign_in') }}</router-link>
+        <router-link :to="signInTo" class="lnav-ghost" @click="open = false">{{ signInLabel || t('landing.nav.sign_in') }}</router-link>
         <button type="button" class="lnav-primary" @click="open = false; $emit('primary')">{{ primaryLabel || t('landing.nav.create_account') }}</button>
       </div>
     </div>
@@ -45,7 +45,9 @@ import { useRoute } from 'vue-router'
 export default {
   name: 'LandingNav',
   props: {
-    variant: { type: String, default: 'travel' },          // 'travel' (/) or 'business' (/business)
+    variant: { type: String, default: 'travel' },          // 'travel' (/), 'business' (/business) or 'guides' (/guides)
+    signInTo: { type: [String, Object], default: '/auth' },  // guides: back to the application after signing in
+    signInLabel: { type: String, default: '' },             // guides, signed in: "My page" / "Apply"
     languages: { type: Array, default: () => [] },          // [{ code, title }]
     currentLanguage: { type: String, default: 'en' },
     primaryLabel: { type: String, default: '' },            // panel's main button; default "Create free account"

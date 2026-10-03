@@ -68,8 +68,7 @@ body.theme-light {
    scroll-timeline just keep the painter's solid color. */
 @supports (animation-timeline: scroll()) {
   body:has(.contact-page.day-mode),
-  body:has(.legal-page.day-mode),
-  body:has(.auth-page.day-mode) {
+  body:has(.legal-page.day-mode) {
     animation: jinni-sky-shift linear both;
     animation-timeline: scroll(root);
   }
@@ -88,12 +87,16 @@ body.theme-light {
    data-chrome-top/bottom. */
 @supports (animation-timeline: scroll()) {
   body:has(.landing-container.jinni-night),
-  body:has(.business-landing.jinni-night) {
+  body:has(.business-landing.jinni-night),
+  body:has(.auth-page.jinni-night),
+  body:has(.gl.night-mode) {
     animation: jinni-night-shift linear both;
     animation-timeline: scroll(root);
   }
   body:has(.landing-container.day-mode),
-  body:has(.business-landing.day-mode) {
+  body:has(.business-landing.day-mode),
+  body:has(.auth-page.day-mode),
+  body:has(.gl.day-mode) {
     animation: jinni-day-shift linear both;
     animation-timeline: scroll(root);
   }

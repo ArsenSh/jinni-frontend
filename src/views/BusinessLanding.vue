@@ -43,7 +43,7 @@
       <div class="features-container">
         <h2 class="features-heading">{{ $t('businessLanding.features.title') }}</h2>
         <div class="features-grid">
-          <div v-for="tier in tiers" :key="tier.key" class="wish-item">
+          <div v-for="tier in tiers" :key="tier.key" class="wish-item" :class="`tier-${tier.key}`">
             <span class="tier-mark">
               <svg v-if="tier.key === 'verified'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="4.2 12.9 9.4 18.1 19.8 6.4"/>
@@ -1208,6 +1208,47 @@ export default {
    page as in the preview — pinned, EN + menu floated over the text */
 .business-landing.day-mode .language-selector-container { position: absolute }
 .business-landing.day-mode .cities h2.cities-heading { font-family: var(--brand-serif); font-weight: 500; letter-spacing: 0.02em; line-height: 1.2 }
+
+/* Tier colours (founder 2026-10-03: "each has its colour, green, blue and gold
+   orange — check the onboarding page"). Same identities as BusinessOnboarding:
+   Verified #4CAF50, Spotlight #3b9edd, Signature #D4AF37→#FF8C00. Day uses the
+   deeper tones already chosen for the day hovers so they read on cream. */
+.business-landing.jinni-night .tier-verified .tier-mark, .business-landing.jinni-night .tier-verified .tier-label { color: #5cc062 }
+.business-landing.jinni-night .tier-verified .tier-price { background: linear-gradient(45deg, #5cc062, #4CAF50); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+.business-landing.jinni-night .tier-verified .tier-price-suffix { -webkit-text-fill-color: #5cc062; color: #5cc062; opacity: .75 }
+.business-landing.jinni-night .tier-verified .tier-cta .wish-label, .business-landing.jinni-night .tier-verified .tier-cta:hover .wish-label { color: #5cc062; -webkit-text-fill-color: #5cc062; background: none; text-shadow: none }
+.business-landing.jinni-night .tier-verified .tier-cta { border-color: #5cc062; --tier-ink: #5cc062 }
+.business-landing.jinni-night .tier-spotlight .tier-mark, .business-landing.jinni-night .tier-spotlight .tier-label { color: #4fb0ec }
+.business-landing.jinni-night .tier-spotlight .tier-price { background: linear-gradient(45deg, #4fb0ec, #3b9edd); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+.business-landing.jinni-night .tier-spotlight .tier-price-suffix { -webkit-text-fill-color: #4fb0ec; color: #4fb0ec; opacity: .75 }
+.business-landing.jinni-night .tier-spotlight .tier-cta .wish-label, .business-landing.jinni-night .tier-spotlight .tier-cta:hover .wish-label { color: #4fb0ec; -webkit-text-fill-color: #4fb0ec; background: none; text-shadow: none }
+.business-landing.jinni-night .tier-spotlight .tier-cta { border-color: #4fb0ec; --tier-ink: #4fb0ec }
+.business-landing.jinni-night .tier-signature .tier-mark, .business-landing.jinni-night .tier-signature .tier-label { color: #D4AF37 }
+.business-landing.jinni-night .tier-signature .tier-price { background: linear-gradient(45deg, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+.business-landing.jinni-night .tier-signature .tier-price-suffix { -webkit-text-fill-color: #D4AF37; color: #D4AF37; opacity: .75 }
+.business-landing.jinni-night .tier-signature .tier-cta .wish-label, .business-landing.jinni-night .tier-signature .tier-cta:hover .wish-label { color: #D4AF37; -webkit-text-fill-color: #D4AF37; background: none; text-shadow: none }
+.business-landing.jinni-night .tier-signature .tier-cta { border-color: #D4AF37; --tier-ink: #D4AF37 }
+.business-landing.day-mode .tier-verified .tier-mark, .business-landing.day-mode .tier-verified .tier-label { color: #35853C }
+.business-landing.day-mode .tier-verified .tier-price { background: linear-gradient(45deg, #35853C, #35853C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+.business-landing.day-mode .tier-verified .tier-price-suffix { -webkit-text-fill-color: #35853C; color: #35853C; opacity: .75 }
+.business-landing.day-mode .tier-verified .tier-cta .wish-label, .business-landing.day-mode .tier-verified .tier-cta:hover .wish-label { color: #35853C; -webkit-text-fill-color: #35853C; background: none; text-shadow: none }
+.business-landing.day-mode .tier-verified .tier-cta { border-color: #35853C; --tier-ink: #35853C }
+.business-landing.day-mode .tier-spotlight .tier-mark, .business-landing.day-mode .tier-spotlight .tier-label { color: #2A7DA8 }
+.business-landing.day-mode .tier-spotlight .tier-price { background: linear-gradient(45deg, #2A7DA8, #2A7DA8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+.business-landing.day-mode .tier-spotlight .tier-price-suffix { -webkit-text-fill-color: #2A7DA8; color: #2A7DA8; opacity: .75 }
+.business-landing.day-mode .tier-spotlight .tier-cta .wish-label, .business-landing.day-mode .tier-spotlight .tier-cta:hover .wish-label { color: #2A7DA8; -webkit-text-fill-color: #2A7DA8; background: none; text-shadow: none }
+.business-landing.day-mode .tier-spotlight .tier-cta { border-color: #2A7DA8; --tier-ink: #2A7DA8 }
+.business-landing.day-mode .tier-signature .tier-mark, .business-landing.day-mode .tier-signature .tier-label { color: #B8860B }
+.business-landing.day-mode .tier-signature .tier-price { background: linear-gradient(45deg, #B8860B, #C2570C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent }
+.business-landing.day-mode .tier-signature .tier-price-suffix { -webkit-text-fill-color: #B8860B; color: #B8860B; opacity: .75 }
+.business-landing.day-mode .tier-signature .tier-cta .wish-label, .business-landing.day-mode .tier-signature .tier-cta:hover .wish-label { color: #B8860B; -webkit-text-fill-color: #B8860B; background: none; text-shadow: none }
+.business-landing.day-mode .tier-signature .tier-cta { border-color: #B8860B; --tier-ink: #B8860B }
+.business-landing.jinni-night .tier-verified .tier-cta::after { background: #5cc062; box-shadow: none; opacity: .7 }
+.business-landing.jinni-night .tier-spotlight .tier-cta::after { background: #4fb0ec; box-shadow: none; opacity: .7 }
+.business-landing.jinni-night .tier-signature .tier-cta::after { background: #E8A33A; box-shadow: none; opacity: .7 }
+.business-landing.day-mode .tier-verified .tier-cta::after { background: #35853C; box-shadow: none; opacity: .7 }
+.business-landing.day-mode .tier-spotlight .tier-cta::after { background: #2A7DA8; box-shadow: none; opacity: .7 }
+.business-landing.day-mode .tier-signature .tier-cta::after { background: #B8700B; box-shadow: none; opacity: .7 }
 </style>
 
 <style>

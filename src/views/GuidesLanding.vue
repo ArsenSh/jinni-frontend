@@ -1,5 +1,10 @@
 <template>
   <div class="gl" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
+    <!-- The landing's world (founder 2026-10-03: "give the guides page
+         appropriate design in both modes, navigation and page language the
+         same way"). First child, so App.vue's chrome sync reads its colours. -->
+    <JinniNightSky v-if="theme === 'night-mode'" />
+    <JinniDaySky v-else />
     <header class="gl-top">
       <router-link to="/" class="gl-brand" aria-label="Jinni">
         <img src="/images/lamp.webp" alt="" class="gl-lamp" />
@@ -8,9 +13,12 @@
         <span class="gl-sub-brand">{{ t('guides.nav.guides_label') }}</span>
       </router-link>
       <div class="gl-top-right">
+        <!-- the landing's menu: desktop links + Sign in, phone menu button;
+             signed in, its Sign in slot becomes My page / Apply -->
+        <LandingNav variant="guides" :sign-in-to="signedIn ? ctaTo : '/auth?redirect=/guides/apply'"
+                    :sign-in-label="signedIn ? (isGuide ? t('guides.nav.my_page') : t('guides.nav.apply')) : ''"
+                    :primary-label="isGuide ? t('guides.landing.cta_dashboard') : t('guides.landing.cta_apply')" @primary="router.push(ctaTo)" />
         <GuideLangSwitch />
-        <router-link v-if="signedIn" :to="isGuide ? '/guide/dashboard' : '/guides/apply'" class="gl-link">{{ isGuide ? t('guides.nav.my_page') : t('guides.nav.apply') }}</router-link>
-        <router-link v-else to="/auth?redirect=/guides/apply" class="gl-link">{{ t('guides.nav.sign_in') }}</router-link>
       </div>
     </header>
 
@@ -82,8 +90,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { guideTheme, guideApi, hasToken, initGuideLanguage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
+import LandingNav from '@/components/ui/LandingNav.vue'
+import JinniDaySky from '@/components/ui/JinniDaySky.vue'
+import JinniNightSky from '@/components/ui/JinniNightSky.vue'
+import { useRouter } from 'vue-router'
 
 const { t, locale } = useI18n()
+const router = useRouter()
 initGuideLanguage(locale)
 
 const theme = guideTheme()
@@ -102,8 +115,8 @@ onMounted(async () => {
 <style scoped>
 .gl { --serif: var(--brand-serif, 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif);
   min-height: 100vh; font-family: 'Lora', Georgia, serif; padding: 0 16px 0; box-sizing: border-box; overflow-x: hidden; }
-.gl.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 50%, #f9f5eb 100%); color: #3c2a1e; }
-.gl.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 50%, #0a0118 100%); color: #f5e6c8; }
+.gl.day-mode { color: #3c2a1e; }
+.gl.night-mode { color: #f5e6c8; }
 /* Both themes end on their TOP colour: iOS 26 paints the area past the page
    with one solid colour (the top), so a page ending lighter showed a band at
    the bottom edge (founder 2026-10-03). */
@@ -191,4 +204,111 @@ onMounted(async () => {
 }
 @media (max-width: 430px) { .gl-sub-brand, .gl-sep { display: none; } }
 @media (max-width: 360px) { .gl-word { font-size: 24px; } }
+
+/* ═══ GUIDES · the landing's world (founder 2026-10-03: "give the guides page
+   appropriate design in both modes too, and navigation and page language the
+   same way"). Overrides the rules above by order. Sky = JinniDaySky /
+   JinniNightSky (scrolls with the page; iOS strip colours in genie-theme.css),
+   Cinzel titles at 500, Lora sentences, frosted glass cards, the landing's
+   menu (LandingNav) and globe/EN glass pill, Ember Breath call to action,
+   ruled footer. Content and order unchanged. ═══ */
+.gl { position: relative; z-index: 1; padding-inline: var(--gutter); background: none;
+  --gutter: 16px; --hdr-top: 20px; --hdr-h: 40px;
+  --lora: 'Lora', 'Noto Serif Armenian', Georgia, serif; font-family: var(--lora) }
+@media (min-width: 900px) { .gl { --gutter: 32px; padding-inline: var(--gutter) } }
+.gl.day-mode { background: none; color: #7a5434;
+  --ink: #7A4A1C; --body: #7a5434; --soft: rgba(122,84,52,0.8); --accent: #c0702a; --rule: rgba(122,74,28,0.16);
+  --glass: rgba(255,255,255,0.5); --glass-rim: inset 0 0 0 0.75px rgba(255,255,255,0.9), 0 0 18px -2px rgba(140,61,7,0.12);
+  --lang-ink: #7A4A1C; --lang-glass: rgba(255,255,255,0.45); --lang-glass-hover: rgba(255,255,255,0.62);
+  --lang-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), 0 0 18px -2px rgba(140,61,7,0.14); --lang-hover: rgba(140,61,7,0.08);
+  --lnav-sheet: rgba(255,250,242,0.97); --lnav-sheet-ink: #7A4A1C; --lnav-rule: rgba(122,74,28,0.15);
+  --lnav-sheet-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.8), 0 0 18px -2px rgba(140,61,7,0.18);
+  --lnav-wish-ink: #6e3f16; --lnav-wish-glass: rgba(255,255,255,0.35); --lnav-wish-ink-shadow: 0 0 8px rgba(255,248,235,0.8);
+  --lnav-wish-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 18px -3px rgba(190,110,40,0.3);
+  --lnav-wish-light: rgba(255,160,70,0.75); --lnav-wish-core: rgba(255,230,170,0.7);
+  --lnav-ghost-glass: rgba(140,61,7,0.06); --lnav-ghost-glass-hover: rgba(140,61,7,0.1); --lnav-ghost-shadow: none;
+  --cta-ink: #6e3f16; --cta-glass: rgba(255,255,255,0.35); --cta-ink-shadow: 0 0 8px rgba(255,248,235,0.8);
+  --cta-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 18px -3px rgba(190,110,40,0.3);
+  --cta-light: rgba(255,160,70,0.75); --cta-core: rgba(255,230,170,0.7) }
+.gl.night-mode { background: none; color: #eee6f6;
+  --ink: #fbf5ff; --body: #c9c0da; --soft: rgba(238,230,246,0.72); --accent: #ffb36b; --rule: rgba(200,190,255,0.14);
+  --glass: rgba(255,255,255,0.05); --glass-rim: inset 0 0 0 0.75px rgba(220,210,255,0.14), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -2px rgba(0,0,0,0.45);
+  --lang-ink: #f3eaf8; --lang-glass: rgba(255,255,255,0.06); --lang-glass-hover: rgba(255,255,255,0.12);
+  --lang-rim: inset 0 0 0 0.75px rgba(220,210,255,0.22), inset 0 1px 0 rgba(255,255,255,0.12), 0 0 18px -2px rgba(0,0,0,0.3); --lang-hover: rgba(220,210,255,0.1);
+  --lnav-sheet: rgba(18,10,30,0.97); --lnav-sheet-ink: #f3eaf8; --lnav-rule: rgba(220,210,255,0.14);
+  --lnav-sheet-shadow: inset 0 0 0 0.75px rgba(220,210,255,0.16), 0 0 18px -2px rgba(0,0,0,0.6);
+  --cta-ink: #fffaf0; --cta-glass: rgba(255,255,255,0.04); --cta-ink-shadow: 0 0 10px rgba(120,50,0,0.55), 0 0 2px rgba(80,30,0,0.4);
+  --cta-rim: inset 0 0 0 0.75px rgba(255,240,215,0.38), inset 0 1px 0 rgba(255,246,228,0.5), 0 0 18px -2px rgba(255,160,80,0.32);
+  --cta-light: rgba(255,150,50,0.62); --cta-core: rgba(255,228,170,0.5) }
+
+/* header: lamp + JINNI · GUIDES, menu + EN pill (phone: EN, then menu at the edge) */
+.gl-top { min-height: calc(var(--hdr-h) + 2 * var(--hdr-top)); padding-block: var(--hdr-top) }
+.gl-lamp { width: 44px; margin: -6px -4px -6px -6px }
+.night-mode .gl-lamp { filter: drop-shadow(0 0 8px rgba(255,170,90,0.35)) }
+.day-mode .gl-lamp { filter: saturate(0.88) brightness(0.95) }
+.gl-word { font-size: 22px; letter-spacing: 2px; background: none; -webkit-text-fill-color: currentColor; color: var(--ink) }
+.day-mode .gl-word { color: #b8741f }
+.gl-sep { background: var(--rule) }
+.gl-sub-brand { font-size: 12px; letter-spacing: 0.2em; color: var(--soft); opacity: 1; font-family: var(--serif) }
+.gl-top-right :deep(.lnav-links a) { font-family: var(--lora) }
+.gl-top-right :deep(.lnav-links) { background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; gap: 8px; padding: 0 }
+.gl-top-right :deep(.lnav-links a) { font-weight: 400; opacity: 0.75 }
+.gl-top-right :deep(.lnav-links a:hover) { opacity: 1; background: none }
+.gl-top-right :deep(.lnav-links .lnav-signin) { opacity: 0.9; padding: 8px 16px; margin-inline-start: 8px }
+/* the globe/EN pill = the landing's */
+.gl-top-right :deep(.gls-btn) { height: 44px; padding: 0 16px 0 14px; border: 0; font-size: 14px; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--lang-ink); background: var(--lang-glass); box-shadow: var(--lang-rim);
+  backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%) }
+.gl-top-right :deep(.gls-btn:hover) { background: var(--lang-glass-hover) }
+@media (max-width: 768px) { .gl-top-right :deep(.gls-btn) { height: 38px; padding: 0 12px 0 10px; font-size: 13px } }
+
+/* hero */
+.gl-hero h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(34px, 5.6vw, 64px); line-height: 1.08; letter-spacing: 0.02em; color: var(--ink);
+  text-wrap: balance; text-shadow: 0 0 30px rgba(255,170,90,0.16) }
+.day-mode .gl-hero h1 { text-shadow: none }
+.grad { background: none; -webkit-text-fill-color: currentColor; color: var(--accent) }
+.gl-sub { font-size: clamp(17px, 2vw, 20px); line-height: 1.55; color: var(--body); opacity: 1 }
+.gl-sub strong { color: var(--ink); font-weight: 600 }
+.gl-note { color: var(--soft); opacity: 1 }
+.night-mode .gl-badge, .day-mode .gl-badge { background: var(--lang-glass); box-shadow: var(--lang-rim); color: var(--ink) }
+
+/* call to action = Ember Breath glass (the landing's Make a Wish) */
+.gl .gl-cta { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; justify-content: center;
+  min-height: 56px; padding: 14px 36px; border: 0; border-radius: 999px; text-decoration: none;
+  font: 600 17px/1.25 var(--lora); color: var(--cta-ink); text-shadow: var(--cta-ink-shadow); background: var(--cta-glass);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); box-shadow: var(--cta-rim) }
+.gl .gl-cta::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(62% 120% at 50% 110%, var(--cta-light), transparent 70%), radial-gradient(34% 80% at 50% 110%, var(--cta-core), transparent 70%);
+  animation: gl-breathe 3.4s ease-in-out infinite }
+.gl .gl-cta::after { content: none }
+@keyframes gl-breathe { 0%, 100% { opacity: 0.45 } 50% { opacity: 0.9 } }
+@media (prefers-reduced-motion: reduce) { .gl .gl-cta::before { animation: none } }
+
+/* example page + benefit cards = frosted glass like the landing cards */
+.night-mode .gl-example, .day-mode .gl-example, .night-mode .gl-card, .day-mode .gl-card {
+  background: var(--glass); box-shadow: var(--glass-rim); backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%) }
+.gl-example, .gl-card { border-radius: 22px }
+.gl-card { padding: 26px 24px }
+.night-mode .gl-ex-list li { background: rgba(255,255,255,0.05) }
+.day-mode .gl-ex-list li { background: rgba(255,255,255,0.55) }
+.gl-ex-list b, .gl-ex-head strong { color: var(--ink) }
+.gl-ex-list em, .gl-ex-head small { color: var(--body) }
+.gl-ex-cat { color: var(--accent); background: transparent; padding: 0; font-family: var(--serif); letter-spacing: 0.12em; font-size: 11px }
+.gl-ico { width: auto; height: auto; display: block; background: none; color: var(--accent); font-size: 20px; margin-bottom: 10px; text-align: start }
+.gl-card h3 { font: 600 18px/1.3 var(--lora); color: var(--ink); margin: 0 0 10px }
+.gl-card p { font-size: 15.5px; line-height: 1.6; color: var(--body); opacity: 1 }
+
+/* steps */
+.gl-steps h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(24px, 3.2vw, 34px); letter-spacing: 0.02em; color: var(--ink) }
+.gl-steps li { color: var(--body) }
+.gl-steps li strong { color: var(--ink) }
+.gl-steps li span, .night-mode .gl-steps li span { border: 0; font: 400 15px/30px var(--serif); color: var(--accent); background: var(--glass); box-shadow: var(--glass-rim) }
+
+/* footer: one ruled line, quiet links */
+.gl-foot-line { background: var(--rule) }
+.gl-foot-brand span { background: none; -webkit-text-fill-color: currentColor; color: var(--ink) }
+.day-mode .gl-foot-brand span { color: #b8741f }
+.gl-foot-links a, .night-mode .gl-foot-links a, .day-mode .gl-foot-links a { font-family: var(--lora); font-size: 14px; color: var(--soft) }
+.gl-foot-links a:hover { color: var(--ink) }
+.gl-foot-copy { font-family: var(--lora); color: var(--soft); opacity: 1 }
 </style>
