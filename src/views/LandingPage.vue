@@ -1432,6 +1432,16 @@ export default {
   --lnav-wish-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 18px -3px rgba(190,110,40,0.3);
   --lnav-wish-light: rgba(255,160,70,0.75); --lnav-wish-core: rgba(255,230,170,0.7) }
 .landing-container.day-mode { --lnav-ghost-glass: rgba(140,61,7,0.06); --lnav-ghost-glass-hover: rgba(140,61,7,0.1); --lnav-ghost-shadow: none }
+
+/* founder 2026-10-03 (phone screenshots): the header scrolls away with the
+   page as in the preview — pinned, EN + menu floated over the text */
+.landing-container.jinni-night .language-selector-container { position: absolute }
+.landing-container.jinni-night .cities h2.cities-heading { font-family: var(--brand-serif); font-weight: 500; letter-spacing: 0.02em; line-height: 1.2 }
+
+/* founder 2026-10-03 (phone screenshots): the header scrolls away with the
+   page as in the preview — pinned, EN + menu floated over the text */
+.landing-container.day-mode .language-selector-container { position: absolute }
+.landing-container.day-mode .cities h2.cities-heading { font-family: var(--brand-serif); font-weight: 500; letter-spacing: 0.02em; line-height: 1.2 }
 </style>
 
 <style>
