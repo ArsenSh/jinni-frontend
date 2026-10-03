@@ -127,8 +127,8 @@ export default {
       { code: 'fr', title: 'Français' },
       { code: 'ru', title: 'Русский' },
       { code: 'zh', title: '中文' },
-      { code: 'ar', title: 'العربية' },
-      { code: 'hy', title: 'Հայերեն' }
+      { code: 'ar', title: 'العربية' }
+      // hy hidden (utils/languages.js)
     ])
     /* The brand word carries the gradient, the sentence stays solid — the
        landing page's rule. Inserted with v-html, so the span carries no scope

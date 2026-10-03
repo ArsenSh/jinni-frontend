@@ -162,8 +162,8 @@ export default {
       { code: 'fr', title: 'Français' },
       { code: 'ru', title: 'Русский' },
       { code: 'zh', title: '中文' },
-      { code: 'ar', title: 'العربية' },
-      { code: 'hy', title: 'Հայերեն' }
+      { code: 'ar', title: 'العربية' }
+      // hy hidden (utils/languages.js)
     ])
     const currentLanguageCode = computed(() => (selectedLanguage.value || 'en').toUpperCase())
     const currentLanguageTitle = computed(() => {return languageOptions.value.find(l => l.code === selectedLanguage.value)?.title || 'Select Language'})

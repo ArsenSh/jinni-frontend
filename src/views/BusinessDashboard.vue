@@ -1780,7 +1780,7 @@ export default {
       { code: 'fr', name: 'French',   nativeName: 'Français', flag: '🇫🇷' },
       { code: 'zh', name: 'Chinese',  nativeName: '中文',      flag: '🇨🇳' },
       { code: 'ar', name: 'Arabic',   nativeName: 'العربية',  flag: '🇸🇦' },
-      { code: 'hy', name: 'Armenian', nativeName: 'Հայերեն', flag: '🇦🇲' },
+      // hy hidden (utils/languages.js)
     ]
 
     const filteredLanguages = computed(() => {

@@ -8,6 +8,7 @@ import './assets/styles/genie-theme.css'
 import { applyDisplayPrefs } from './utils/displayPrefs'
 import { captureAcquisition } from './utils/acquisition'
 import './assets/styles/animations.css'
+import { visibleLanguage } from './utils/languages'
 
 // The app persists the chosen language as 'jinni_language' (and inside
 // 'jinni_settings') — read those so views outside JinniChat mount in the
@@ -15,9 +16,9 @@ import './assets/styles/animations.css'
 function savedLocale() {
     try {
         const s = JSON.parse(localStorage.getItem('jinni_settings') || '{}');
-        if (s.language) return s.language;
+        if (s.language) return visibleLanguage(s.language);
     } catch (e) { /* ignore corrupt settings */ }
-    return localStorage.getItem('jinni_language') || localStorage.getItem('lang') || 'en';
+    return visibleLanguage(localStorage.getItem('jinni_language') || localStorage.getItem('lang'));
 }
 
 // The only right-to-left locale Jinni ships. Add to this set, not to a

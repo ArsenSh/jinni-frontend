@@ -67,8 +67,6 @@ body.theme-light {
    Scoped to the day-mode desert-sky pages via :has(); browsers without
    scroll-timeline just keep the painter's solid color. */
 @supports (animation-timeline: scroll()) {
-  body:has(.landing-container.day-mode),
-  body:has(.business-landing.day-mode),
   body:has(.contact-page.day-mode),
   body:has(.legal-page.day-mode),
   body:has(.auth-page.day-mode) {
@@ -91,9 +89,28 @@ body.theme-light {
     animation-timeline: scroll(root);
   }
 }
+/* Founder 2026-10-03 ("when I scroll down … the upper side"): these skies
+   are FIXED, so the screen top always shows the sky top colour. A shift
+   spread over the whole scroll slid the top strip toward the bottom colour
+   while the page top stayed put — a band. Hold the top colour, switch only
+   in the last stretch so the bottom bounce still gets the bottom colour. */
 @keyframes jinni-night-shift {
-  from { background-color: #0a0118; }
-  to   { background-color: #16213e; }
+  0%, 94% { background-color: #0a0118; }
+  100%    { background-color: #16213e; }
+}
+/* Jinni Day (landing + /business): JinniDaySky, #f9f5eb top → #efe4cf
+   bottom. Was on jinni-sky-shift, whose #e0a082 is the old desert-sky peach
+   and turned the top strip orange while scrolling. */
+@supports (animation-timeline: scroll()) {
+  body:has(.landing-container.day-mode),
+  body:has(.business-landing.day-mode) {
+    animation: jinni-day-shift linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes jinni-day-shift {
+  0%, 94% { background-color: #f9f5eb; }
+  100%    { background-color: #efe4cf; }
 }
 
 /* Ember Breath (night Make a Wish): the glow's position glides between spots

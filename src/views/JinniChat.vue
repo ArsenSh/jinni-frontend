@@ -1822,6 +1822,7 @@ import SwitchModeOverlay from '@/components/ui/SwitchModeOverlay.vue';
 import RecommendationMap from '@/components/ui/RecommendationMap.vue';
 import ItineraryView from '@/components/ui/ItineraryView.vue';
 import { isNightTime } from '@/utils/timeUtils';
+import { isHiddenLanguage } from '@/utils/languages';
 import { applyDisplayPrefs as applyDisplayPrefsGlobal } from '../utils/displayPrefs'
 import { useI18n } from 'vue-i18n';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000';
@@ -2002,8 +2003,8 @@ export default {
         { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
         { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
         { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
-        { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
-        { code: 'hy', name: 'Armenian', nativeName: 'Հայերեն', flag: '🇦🇲' }
+        { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' }
+        // hy hidden (utils/languages.js)
       ],
       dangerConfirm: {deleteChats: { step: 0 }, deleteAccount: { step: 0, typedValue: '' }},
       // Saved Places
@@ -3813,6 +3814,8 @@ export default {
       this.saveSettings();
     },
     applySettings() {
+      // a hidden language saved earlier (local or server) falls back to English
+      if (this.userSettings && isHiddenLanguage(this.userSettings.language)) this.userSettings.language = 'en';
       const theme = this.resolveTheme();
       // console.log('🎨 Applying theme:', theme); 
       document.documentElement.setAttribute('data-theme', theme);    

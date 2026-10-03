@@ -1,9 +1,11 @@
+import { visibleLanguage } from '@/utils/languages'
+
 function getInitialLanguage() {
     try {
         const settings = localStorage.getItem('jinni_settings');
         if (settings) {
             const parsed = JSON.parse(settings);
-            return parsed.language || 'en';
+            return visibleLanguage(parsed.language);
         }
     } catch (error) {console.error('Failed to parse jinni_settings:', error)}
     return 'en';
@@ -14,6 +16,7 @@ export default {
     state: {locale: getInitialLanguage()},
     mutations: {
         SET_LANGUAGE(state, lang) {
+            lang = visibleLanguage(lang);
             state.locale = lang;            
             try {
                 const settings = JSON.parse(localStorage.getItem('jinni_settings') || '{}');
