@@ -322,7 +322,7 @@
                             </div>
                           </div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
-                            <a v-if="getRecommendationAtPosition(message, position).guidePicks?.length" :href="'/@' + getRecommendationAtPosition(message, position).guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="getRecommendationAtPosition(message, position).guidePicks[0].note || ''" @click.stop>Picked by @{{ getRecommendationAtPosition(message, position).guidePicks[0].handle }}</a>
+                            <a v-if="getRecommendationAtPosition(message, position).guidePicks?.length" :href="'/@' + getRecommendationAtPosition(message, position).guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="getRecommendationAtPosition(message, position).guidePicks[0].note || ''" @click.stop>Picked by @{{ getRecommendationAtPosition(message, position).guidePicks[0].handle }}</a><button v-if="getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl" type="button" class="rec-guide-reel" @click.stop="openGuideReel(getRecommendationAtPosition(message, position).guidePicks[0].reelUrl)">▶ {{ $t('guides.page.watch_reel') }}</button>
                             <div v-if="(getRecommendationAtPosition(message, position).verifiedId || getRecommendationAtPosition(message, position).id?.startsWith('db-')) && getRecommendationAtPosition(message, position)._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(getRecommendationAtPosition(message, position))]" v-html="getPartnerIcon(getRecommendationAtPosition(message, position)) + ' ' + getPartnerLabel(getRecommendationAtPosition(message, position))"></div>
                             <a v-if="getRecommendationAtPosition(message, position).sourceUrl" :href="getRecommendationAtPosition(message, position).sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -448,7 +448,7 @@
                           </div>
                         </div><!-- /recommendation-card -->
                         <div class="rec-card-bottom">
-                          <a v-if="message.recommendations[part.index].guidePicks?.length" :href="'/@' + message.recommendations[part.index].guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="message.recommendations[part.index].guidePicks[0].note || ''" @click.stop>Picked by @{{ message.recommendations[part.index].guidePicks[0].handle }}</a>
+                          <a v-if="message.recommendations[part.index].guidePicks?.length" :href="'/@' + message.recommendations[part.index].guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="message.recommendations[part.index].guidePicks[0].note || ''" @click.stop>Picked by @{{ message.recommendations[part.index].guidePicks[0].handle }}</a><button v-if="message.recommendations[part.index].guidePicks?.[0]?.reelUrl" type="button" class="rec-guide-reel" @click.stop="openGuideReel(message.recommendations[part.index].guidePicks[0].reelUrl)">▶ {{ $t('guides.page.watch_reel') }}</button>
                           <div v-if="(message.recommendations[part.index].verifiedId || message.recommendations[part.index].id?.startsWith('db-')) && message.recommendations[part.index]._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(message.recommendations[part.index])]" v-html="getPartnerIcon(message.recommendations[part.index]) + ' ' + getPartnerLabel(message.recommendations[part.index])"></div>
                           <a v-if="message.recommendations[part.index].sourceUrl" :href="message.recommendations[part.index].sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -605,7 +605,7 @@
                             </div>
                           </div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
-                            <a v-if="rec.guidePicks?.length" :href="'/@' + rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ rec.guidePicks[0].handle }}</a>
+                            <a v-if="rec.guidePicks?.length" :href="'/@' + rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ rec.guidePicks[0].handle }}</a><button v-if="rec.guidePicks?.[0]?.reelUrl" type="button" class="rec-guide-reel" @click.stop="openGuideReel(rec.guidePicks[0].reelUrl)">▶ {{ $t('guides.page.watch_reel') }}</button>
                             <div v-if="(rec.verifiedId || rec.id?.startsWith('db-')) && rec._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(rec)]" v-html="getPartnerIcon(rec) + ' ' + getPartnerLabel(rec)"></div>
                             <!-- Event source ("Check listing") — placed BELOW the card like the
                                  partner badge, so it reads as a footnote to the whole card, not
@@ -1783,7 +1783,7 @@
                 </div>
               </div><!-- /recommendation-card -->
               <div class="rec-card-bottom">
-                <a v-if="item.rec.guidePicks?.length" :href="'/@' + item.rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="item.rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ item.rec.guidePicks[0].handle }}</a>
+                <a v-if="item.rec.guidePicks?.length" :href="'/@' + item.rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="item.rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ item.rec.guidePicks[0].handle }}</a><button v-if="item.rec.guidePicks?.[0]?.reelUrl" type="button" class="rec-guide-reel" @click.stop="openGuideReel(item.rec.guidePicks[0].reelUrl)">▶ {{ $t('guides.page.watch_reel') }}</button>
                 <div v-if="(item.rec.verifiedId || item.rec.id?.startsWith('db-')) && item.rec._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(item.rec)]" v-html="getPartnerIcon(item.rec) + ' ' + getPartnerLabel(item.rec)"></div>
               </div>
               </div><!-- /rec-card-wrapper -->
@@ -1809,6 +1809,20 @@
     </div>
   </transition>
 
+  <!-- A guide's reel, played inside the chat (founder 2026-10-04: "in jinnichat").
+       Instagram's official embed; the site CSP allows frame-src www.instagram.com. -->
+  <Teleport to="body">
+    <div v-if="reelEmbedUrl" class="guide-reel-overlay" @click.self="reelEmbedUrl = null">
+      <div class="guide-reel-box" role="dialog" aria-modal="true" :aria-label="$t('guides.page.watch_reel')">
+        <button type="button" class="guide-reel-close" aria-label="Close" @click="reelEmbedUrl = null">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <iframe :src="reelEmbedUrl" title="Instagram reel" scrolling="no" allowtransparency="true" allow="encrypted-media; picture-in-picture"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"></iframe>
+      </div>
+    </div>
+  </Teleport>
+
 </template>
 
 
@@ -1825,6 +1839,7 @@ import { isNightTime } from '@/utils/timeUtils';
 import { isHiddenLanguage } from '@/utils/languages';
 import { applyDisplayPrefs as applyDisplayPrefsGlobal } from '../utils/displayPrefs'
 import { useI18n } from 'vue-i18n';
+import { instagramEmbed } from '@/utils/guides';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000';
 /** How long the preference bar stays visible after it reveals. */
 const PREFERENCE_BAR_HIDE_MS = 5000;
@@ -1850,6 +1865,7 @@ export default {
   components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView },
   data() {
     return {
+      reelEmbedUrl: null,   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
       // the gap between the shrunk chat shell and the keyboard. 0 = hidden.
       kbStripTop: 0,
@@ -2578,6 +2594,7 @@ export default {
     if (this.usageCheckInterval) { clearInterval(this.usageCheckInterval) }
   },
   methods: {
+    openGuideReel(url) { this.reelEmbedUrl = instagramEmbed(url) },
     // ── Events ────────────────────────────────────────────────────────────────
     //
     //   The chat surfaces event listings just like restaurants/hotels. The
@@ -7844,6 +7861,15 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .rec-guide-pick{font-size:11px;letter-spacing:.02em;text-decoration:none;margin-right:10px;white-space:nowrap}
 .night-mode .rec-guide-pick{color:#ffd27a}
 .day-mode .rec-guide-pick{color:#b4540a}
+/* Watch reel (founder 2026-10-04): a quiet text button beside the badge; the reel plays in an overlay */
+.rec-guide-reel{font:inherit;font-size:11px;letter-spacing:.02em;background:none;border:0;padding:0;cursor:pointer;white-space:nowrap;margin-right:10px}
+.night-mode .rec-guide-reel{color:#ffd27a}
+.day-mode .rec-guide-reel{color:#b4540a}
+.rec-guide-reel:hover{text-decoration:underline;text-underline-offset:3px}
+.guide-reel-overlay{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:16px;background:rgba(8,4,16,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.guide-reel-box{position:relative;width:min(380px,100%);height:min(640px,calc(100dvh - 32px));border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 0 24px -4px rgba(0,0,0,.6)}
+.guide-reel-box iframe{width:100%;height:100%;border:0;display:block}
+.guide-reel-close{position:absolute;top:10px;right:10px;z-index:1;width:34px;height:34px;border-radius:999px;border:0;display:grid;place-items:center;cursor:pointer;color:#fff;background:rgba(20,10,30,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .rec-guide-pick:hover{text-decoration:underline}
 .partner-label--spotlight{color:#3b9fdda2}
 .night-mode .partner-label--signature{color:#ffbf0085}

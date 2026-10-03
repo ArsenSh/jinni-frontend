@@ -93,6 +93,14 @@
           <small v-else-if="handleState === 'reserved'" class="ga-bad">{{ t('guides.apply.reserved') }}</small>
         </label>
 
+        <!-- guides are a global directory (founder 2026-10-04: "each guide each country");
+             names come from the browser in the visitor's own language -->
+        <label>{{ t('guides.apply.country') }}
+          <select v-model="form.country" required>
+            <option v-for="c in countryOptions" :key="c.code" :value="c.code">{{ c.name }}</option>
+          </select>
+        </label>
+
         <label>{{ t('guides.apply.region') }}
           <input v-model.trim="form.region" maxlength="80" required :placeholder="t('guides.apply.region_ph')" />
         </label>
@@ -183,7 +191,14 @@ const sending = ref(false)
 const error = ref('')
 const copied = ref(false)
 const TYPES = ['local', 'licensed', 'creator']
-const form = reactive({ displayName: '', instagram: '', handle: '', region: '', guideType: 'local', languages: ['en'], bio: '', acceptTerms: false })
+// ISO 3166-1 alpha-2 — every country a guide can work in; the label is the browser's own name in the page language
+const COUNTRY_CODES = 'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW'.split(' ')
+const countryOptions = computed(() => {
+  let dn = null
+  try { dn = new Intl.DisplayNames([locale.value || 'en', 'en'], { type: 'region' }) } catch { /* very old browser: codes only */ }
+  return COUNTRY_CODES.map(code => ({ code, name: (dn && dn.of(code)) || code })).sort((a, b) => a.name.localeCompare(b.name, locale.value || 'en'))
+})
+const form = reactive({ displayName: '', instagram: '', handle: '', region: '', country: 'AM', guideType: 'local', languages: ['en'], bio: '', acceptTerms: false })
 const handleTouched = ref(false)
 // Which account this application belongs to — the browser shares one login
 // across tabs, so an admin signed in elsewhere would otherwise apply silently
@@ -388,7 +403,7 @@ onMounted(async () => {
     const r = await guideApi('/me')
     guide.value = r.guide
     if (r.guide?.status === 'active') { clearDraft(); return router.replace('/guide/dashboard') }
-    if (r.guide?.status === 'rejected' && !draft) Object.assign(form, { displayName: r.guide.displayName, instagram: r.guide.instagram, handle: r.guide.handle, region: r.guide.region, guideType: r.guide.guideType, languages: r.guide.languages || [], bio: r.guide.bio || '' })
+    if (r.guide?.status === 'rejected' && !draft) Object.assign(form, { displayName: r.guide.displayName, instagram: r.guide.instagram, handle: r.guide.handle, region: r.guide.region, country: r.guide.country || 'AM', guideType: r.guide.guideType, languages: r.guide.languages || [], bio: r.guide.bio || '' })
   } catch (e) {
     // Expired / revoked session: show the account block on this page instead of leaving it.
     if (e.status === 401) { signedIn.value = false; accountEmail.value = '' }
@@ -513,10 +528,15 @@ input:focus, textarea:focus { outline: none; border-color: #D4AF37; box-shadow: 
 .ga-linkbtn, .night-mode .ga-linkbtn, .ga-check a, .night-mode .ga-check a { color: var(--link) }
 
 /* fields: glass with the sign-in states */
-.ga input:not([type="checkbox"]), .ga textarea, .night-mode input:not([type="checkbox"]), .night-mode textarea, .ga-prefix {
+.ga input:not([type="checkbox"]), .ga textarea, .ga select, .night-mode input:not([type="checkbox"]), .night-mode textarea, .ga-prefix {
   border: 0; border-radius: 16px; color: var(--f-ink); background-color: var(--f-fill); box-shadow: inset 0 0 0 0.75px var(--f-rim);
   transition: background-color 0.25s ease, box-shadow 0.25s ease }
 .ga input::placeholder, .ga textarea::placeholder { color: var(--f-ph) }
+.ga select { font: inherit; font-size: 16px; padding: 11px 40px 11px 13px; appearance: none; -webkit-appearance: none; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 15px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat }
+[dir="rtl"] .ga select { padding: 11px 13px 11px 40px; background-position: 20px 50%, 15px 50% }
+.night-mode .ga select option { color: #1a1a1a }
 .ga-prefix input:not([type="checkbox"]), .night-mode .ga-prefix input:not([type="checkbox"]) { background: transparent; box-shadow: none; border-radius: 0 }
 .ga-prefix span { color: var(--soft); opacity: 1 }
 .ga input:not([type="checkbox"]):hover, .ga textarea:hover, .ga-prefix:hover { background-color: var(--f-fill-hover); box-shadow: inset 0 0 0 0.75px var(--f-rim-hover), 0 0 14px -6px var(--f-glow) }

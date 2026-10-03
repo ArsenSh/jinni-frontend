@@ -1469,7 +1469,7 @@
       "taken": "已被占用，换一个试试",
       "invalid": "3–30 个字母、数字、点或下划线",
       "reserved": "该名称已被保留，请换一个",
-      "region": "您在哪里带团？",
+      "region": "您带团的城市或地区",
       "region_ph": "例如 Yerevan、Dilijan、Syunik",
       "you_are": "您是…",
       "languages": "您带团使用的语言",
@@ -1519,7 +1519,8 @@
       "code_change_email": "使用其他邮箱",
       "code_blocked": "错误次数过多。请等待 15 分钟后重试。",
       "code_wrong": "验证码不正确，还剩 {n} 次机会。",
-      "code_expired": "验证码已过期。请点击下方按钮获取新验证码。"
+      "code_expired": "验证码已过期。请点击下方按钮获取新验证码。",
+      "country": "您带团的国家"
     },
     "dashboard": {
       "no_page_title": "您还没有向导主页",

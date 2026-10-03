@@ -1469,7 +1469,7 @@
       "taken": "Déjà pris — essayez-en un autre",
       "invalid": "3 à 30 lettres, chiffres, points ou tirets bas",
       "reserved": "Ce nom est réservé — choisissez-en un autre",
-      "region": "Où guidez-vous ?",
+      "region": "Villes ou régions où vous guidez",
       "region_ph": "ex. Erevan, Dilijan, Syunik",
       "you_are": "Vous êtes…",
       "languages": "Langues dans lesquelles vous guidez",
@@ -1519,7 +1519,8 @@
       "code_change_email": "Utiliser un autre e-mail",
       "code_blocked": "Trop de codes erronés. Patientez 15 minutes et réessayez.",
       "code_wrong": "Ce code n'est pas bon. Il reste {n} essais.",
-      "code_expired": "Ce code a expiré. Appuyez sur le bouton ci-dessous pour en recevoir un nouveau."
+      "code_expired": "Ce code a expiré. Appuyez sur le bouton ci-dessous pour en recevoir un nouveau.",
+      "country": "Pays où vous guidez"
     },
     "dashboard": {
       "no_page_title": "Vous n'avez pas encore de page de guide",

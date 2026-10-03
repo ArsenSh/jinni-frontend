@@ -1469,7 +1469,7 @@
       "taken": "Taken — try another",
       "invalid": "3–30 letters, digits, dots or underscores",
       "reserved": "That name is reserved — please choose another",
-      "region": "Where do you guide?",
+      "region": "Cities or regions you guide in",
       "region_ph": "e.g. Yerevan, Dilijan, Syunik",
       "you_are": "You are a…",
       "languages": "Languages you guide in",
@@ -1519,7 +1519,8 @@
       "code_change_email": "Use another email",
       "code_blocked": "Too many wrong codes. Please wait 15 minutes and try again.",
       "code_wrong": "That code isn't right. {n} attempts left.",
-      "code_expired": "That code expired. Press the button below to get a new one."
+      "code_expired": "That code expired. Press the button below to get a new one.",
+      "country": "Country you guide in"
     },
     "dashboard": {
       "no_page_title": "You don't have a guide page yet",
