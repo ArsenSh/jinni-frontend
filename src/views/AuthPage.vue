@@ -169,4 +169,81 @@ export default {
 .auth-page.jinni-night :deep(.social-divider span) { color: rgba(220,210,240,0.65) }
 .auth-page.day-mode :deep(.auth-footer a) { color: #9a5a1e }
 .auth-page.jinni-night :deep(.auth-footer a) { color: #ffd29a }
+
+/* ── Field states (founder 2026-10-03: "the hover and so on we can make
+   interesting"; iPhone Passwords painted filled fields bright yellow).
+   Rules: no motion on hover, even shadows, light only. Hover = the glass
+   brightens and its edge warms; focus = lamplight rises inside the field
+   (the Make a Wish light, quiet); autofill keeps the glass (Safari/Chrome let
+   the page restyle it — only iOS's own sheet and key icon are fixed); error
+   = warm rose, not neon; messages = glass pills that fade in. ── */
+.auth-page.day-mode {
+  --f-fill: rgba(255,255,255,0.62); --f-fill-hover: rgba(255,255,255,0.78); --f-solid: #fdf8ee; --f-ink: #5a3c22;
+  --f-rim: rgba(255,255,255,0.9); --f-rim-hover: rgba(232,190,130,0.75); --f-glow: rgba(212,140,60,0.22);
+  --f-light: rgba(255,170,80,0.22); --f-focus-rim: rgba(200,140,50,0.7);
+  --rose: #a83c28; --rose-rim: rgba(180,68,47,0.55); --rose-fill: rgba(180,68,47,0.07);
+  --gold-ink: #8a5a14; --gold-fill: rgba(212,175,55,0.1); --gold-rim: rgba(184,125,40,0.3) }
+.auth-page.jinni-night {
+  --f-fill: rgba(255,255,255,0.06); --f-fill-hover: rgba(255,255,255,0.1); --f-solid: #2a2140; --f-ink: #f3eaf8;
+  --f-rim: rgba(220,210,255,0.12); --f-rim-hover: rgba(255,214,160,0.3); --f-glow: rgba(255,170,90,0.18);
+  --f-light: rgba(255,160,70,0.2); --f-focus-rim: rgba(255,200,120,0.6);
+  --rose: #ffb3a7; --rose-rim: rgba(255,154,138,0.6); --rose-fill: rgba(255,120,110,0.08);
+  --gold-ink: #ffd29a; --gold-fill: rgba(255,210,140,0.07); --gold-rim: rgba(255,210,122,0.3) }
+
+.auth-page.day-mode :deep(.input-field), .auth-page.jinni-night :deep(.input-field),
+.auth-page.day-mode :deep(.social-btn), .auth-page.jinni-night :deep(.social-btn) {
+  background-color: var(--f-fill); color: var(--f-ink); border: 0; box-shadow: inset 0 0 0 0.75px var(--f-rim);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease }
+.auth-page.day-mode :deep(.input-field:hover), .auth-page.jinni-night :deep(.input-field:hover),
+.auth-page.day-mode :deep(.social-btn:hover:not(:disabled)), .auth-page.jinni-night :deep(.social-btn:hover:not(:disabled)) {
+  background-color: var(--f-fill-hover); box-shadow: inset 0 0 0 0.75px var(--f-rim-hover), 0 0 14px -6px var(--f-glow); filter: none }
+/* typing: lamplight rises from the bottom of the field */
+.auth-page.day-mode :deep(.input-field:focus), .auth-page.jinni-night :deep(.input-field:focus) {
+  outline: none; background-color: var(--f-fill-hover);
+  background-image: radial-gradient(70% 130% at 50% 135%, var(--f-light), transparent 70%);
+  box-shadow: inset 0 0 0 0.75px var(--f-focus-rim), 0 0 16px -4px var(--f-glow) }
+/* autofill (iPhone Passwords, Chrome): stay glass, never yellow */
+.auth-page.day-mode :deep(.input-field:-webkit-autofill), .auth-page.jinni-night :deep(.input-field:-webkit-autofill),
+.auth-page.day-mode :deep(.input-field:-webkit-autofill:hover), .auth-page.jinni-night :deep(.input-field:-webkit-autofill:hover),
+.auth-page.day-mode :deep(.input-field:-webkit-autofill:focus), .auth-page.jinni-night :deep(.input-field:-webkit-autofill:focus) {
+  -webkit-text-fill-color: var(--f-ink); caret-color: var(--f-ink);
+  -webkit-box-shadow: inset 0 0 0 0.75px var(--f-rim), inset 0 0 0 100px var(--f-solid);
+  box-shadow: inset 0 0 0 0.75px var(--f-rim), inset 0 0 0 100px var(--f-solid);
+  transition: background-color 600000s 0s, color 600000s 0s }
+.auth-page.day-mode :deep(.input-field:autofill), .auth-page.jinni-night :deep(.input-field:autofill) {
+  box-shadow: inset 0 0 0 0.75px var(--f-rim), inset 0 0 0 100px var(--f-solid) }
+/* a field with a mistake (the glass fields have no border, so the old
+   pink border never showed — 2026-10-03 regression, fixed here) */
+.auth-page.day-mode :deep(.input-field.input-error), .auth-page.jinni-night :deep(.input-field.input-error) {
+  box-shadow: inset 0 0 0 1px var(--rose-rim), 0 0 14px -6px var(--rose-rim) }
+.auth-page .auth-modal-overlay.day-mode :deep(.error-text), .auth-page .auth-modal-overlay.night-mode :deep(.error-text) { color: var(--rose); font-size: 13px }
+/* messages: glass pills that fade in */
+.auth-page .auth-modal-overlay.day-mode :deep(.error-message), .auth-page .auth-modal-overlay.night-mode :deep(.error-message), .auth-page .auth-modal-overlay.day-mode :deep(.success-message), .auth-page .auth-modal-overlay.night-mode :deep(.success-message) {
+  display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; padding: 11px 18px; font-size: 14.5px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); animation: auth-msg-in 0.35s ease-out }
+.auth-page .auth-modal-overlay.day-mode :deep(.error-message), .auth-page .auth-modal-overlay.night-mode :deep(.error-message) { color: var(--rose); background: var(--rose-fill); box-shadow: inset 0 0 0 0.75px var(--rose-rim) }
+.auth-page .auth-modal-overlay.day-mode :deep(.success-message), .auth-page .auth-modal-overlay.night-mode :deep(.success-message) { color: var(--gold-ink); background: var(--gold-fill); box-shadow: inset 0 0 0 0.75px var(--gold-rim) }
+.auth-page :deep(.success-message)::before { content: ''; flex: none; width: 7px; height: 7px; border-radius: 50%;
+  background: linear-gradient(45deg, #D4AF37, #FF8C00); box-shadow: 0 0 8px rgba(255,170,60,0.8) }
+/* password strength: the palette's own weak / medium / strong */
+.auth-page.day-mode { --pw-weak: #c0573f; --pw-mid: #c98a1e; --pw-ok: #4f8a3c }
+.auth-page.jinni-night { --pw-weak: #ff9a8a; --pw-mid: #f0c060; --pw-ok: #8fd18a }
+.auth-page :deep(.password-strength) { height: 2px; margin: 8px 20px 0; background: rgba(140,110,90,0.15) }
+.auth-page :deep(.strength-bar.weak) { background: var(--pw-weak) }
+.auth-page :deep(.strength-bar.medium) { background: var(--pw-mid) }
+.auth-page :deep(.strength-bar.strong) { background: var(--pw-ok) }
+.auth-page.day-mode :deep(.password-hints span) { color: rgba(122,84,52,0.6) }
+.auth-page.jinni-night :deep(.password-hints span) { color: rgba(220,210,240,0.5) }
+.auth-page :deep(.password-hints span.met) { color: var(--pw-ok) }
+@keyframes auth-msg-in { from { opacity: 0 } to { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .auth-page :deep(.error-message), .auth-page :deep(.success-message) { animation: none } }
+/* the other controls */
+.auth-page.day-mode :deep(.toggle-btn:not(.active):hover) { color: #6e3f16; background: rgba(255,255,255,0.35) }
+.auth-page.jinni-night :deep(.toggle-btn:not(.active):hover) { color: #fbf5ff; background: rgba(255,255,255,0.06) }
+.auth-page.day-mode :deep(.back-btn), .auth-page.jinni-night :deep(.back-btn) { border: 0; color: var(--f-ink); background: var(--f-fill); box-shadow: inset 0 0 0 0.75px var(--f-rim) }
+.auth-page.day-mode :deep(.back-btn:hover), .auth-page.jinni-night :deep(.back-btn:hover) { color: var(--f-ink); background: var(--f-fill-hover);
+  border: 0; box-shadow: inset 0 0 0 0.75px var(--f-rim-hover), 0 0 14px -6px var(--f-glow) }
+.auth-page.day-mode :deep(.password-toggle:hover) { color: #6e3f16 }
+.auth-page.jinni-night :deep(.password-toggle:hover) { color: #fff1d6 }
+.auth-page.day-mode :deep(.email-address), .auth-page.jinni-night :deep(.email-address) { color: var(--gold-ink); background: var(--gold-fill); box-shadow: inset 0 0 0 0.75px var(--gold-rim) }
 </style>
