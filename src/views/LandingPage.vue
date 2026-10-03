@@ -5,6 +5,7 @@
     <JinniNightSky v-if="isNightMode" />
     <DesertSky v-else />
     <div class="header-container">
+      <img v-if="isNightMode" class="brand-lamp" src="/images/lamp.webp" alt="" aria-hidden="true">
       <div class="app-name" translate="no">Jinni</div>
     </div>
     <div class="language-selector-container">
@@ -1221,14 +1222,92 @@ export default {
 .landing-container.jinni-night .cities-sub { color: #c5bcd6 }
 .landing-container.jinni-night .footer-links a { color: #e6dcf2 }
 .landing-container.jinni-night .footer-copyright { color: rgba(220,210,240,0.55) }
+
+/* ── JINNI NIGHT · the preview's layout and type (founder 2026-10-03: "the font
+   there, layout, everything was interesting and better … mine looked
+   childish"). Ported from LandingLab/night-directions.html design 4 so the
+   live page IS the preview: Cinzel titles at 500 (not bold), Lora for every
+   sentence, lamp + JINNI mark, a hero that flows instead of filling the
+   screen, one section rhythm, the plain-link desktop bar, a ruled footer.
+   Night only — day keeps its own layout. ── */
+.landing-container.jinni-night { --section: clamp(64px, 9vw, 104px); --lora: 'Lora', 'Noto Serif Armenian', Georgia, serif }
+
+/* mark: small lamp + JINNI (Cinzel's lowercase is small caps) */
+.landing-container.jinni-night .header-container { gap: 10px }
+.landing-container.jinni-night .brand-lamp { width: 44px; height: auto; margin: -6px -4px -6px -6px; filter: drop-shadow(0 0 8px rgba(255,170,90,0.35)) }
+.landing-container.jinni-night .app-name { font-size: 22px; font-weight: 600; letter-spacing: 2px; background: none; -webkit-text-fill-color: #f3eaf8; color: #f3eaf8; filter: none }
+
+/* desktop bar: plain links, an outlined Sign in — no capsule */
+.landing-container.jinni-night :deep(.lnav-links) { background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; gap: 8px; padding: 0 }
+.landing-container.jinni-night :deep(.lnav-links a) { font-family: var(--lora); font-weight: 400; opacity: 0.75 }
+.landing-container.jinni-night :deep(.lnav-links a:hover) { opacity: 1; background: none }
+.landing-container.jinni-night :deep(.lnav-links .lnav-signin) { opacity: 0.9; padding: 8px 16px; margin-inline-start: 8px }
+.landing-container.jinni-night .lang-trigger { font-family: var(--lora) }
+
+/* hero: flows from under the bar; lamp → title → line → button */
+.landing-container.jinni-night .hero { min-height: 0; display: block; padding: calc(var(--hdr-top) + var(--hdr-h) + clamp(40px, 7vh, 88px)) 24px var(--section) }
+.landing-container.jinni-night .hero-content { max-width: 1180px; margin: 0 auto }
+.landing-container.jinni-night .lamp { width: min(210px, 50vw); margin: 0 auto -8px }
+.landing-container.jinni-night .hero .magic-title { font-family: var(--brand-serif); font-weight: 500; font-size: clamp(36px, 6.4vw, 76px); line-height: 1.08;
+  letter-spacing: 0.02em; max-width: 900px; margin: 0 auto 18px }
+.landing-container.jinni-night .hero .magic-subtitle { font-family: var(--lora); font-size: clamp(17px, 2vw, 20px); line-height: 1.55; max-width: 560px; margin: 0 auto 34px }
+.landing-container.jinni-night .hero .magic-button, .landing-container.jinni-night .hero .magic-button:hover { margin: 0; min-height: 56px; padding: 14px 36px }
+.landing-container.jinni-night .hero .wish-label, .landing-container.jinni-night .hero .magic-button:hover .wish-label { font-family: var(--lora); font-size: 17px; font-weight: 600 }
+
+/* features / plans */
+.landing-container.jinni-night .features { padding: 0 24px var(--section) }
+.landing-container.jinni-night .features-container { max-width: 1180px }
+.landing-container.jinni-night .features h2.features-heading { font-family: var(--brand-serif); font-weight: 500; font-size: clamp(24px, 3.2vw, 34px); line-height: 1.2;
+  letter-spacing: 0.02em; margin: 0 0 clamp(28px, 4vw, 44px) }
+.landing-container.jinni-night .wish-num { font-family: var(--brand-serif); font-size: 13px; font-weight: 400; line-height: 1; letter-spacing: 0.2em; margin: 0; opacity: 0.6 }
+.landing-container.jinni-night .wish-item h3 { font-family: var(--lora); font-size: 18px; font-weight: 600; line-height: 1.3; margin: 14px 0 10px }
+.landing-container.jinni-night .wish-item p { font-family: var(--lora); font-size: 15.5px; line-height: 1.6; margin: 0; color: rgba(238,230,246,0.78) }
+
+/* the Explore / For Business switch: the bar's links do this job now */
+.landing-container.jinni-night .mode-switch-wrapper { display: none }
+
+/* cities */
+.landing-container.jinni-night .cities { padding: 0 24px var(--section) }
+.landing-container.jinni-night .cities .features-container { max-width: 900px }
+.landing-container.jinni-night .cities h2.cities-heading { font-size: clamp(22px, 2.8vw, 30px); margin: 0 0 8px }
+.landing-container.jinni-night .cities-sub { font-family: var(--lora); font-size: 16px; color: rgba(238,230,246,0.7); margin: 0 0 26px }
+.landing-container.jinni-night .cities-country { margin: 0 auto 22px }
+.landing-container.jinni-night .cities-country-name { font-family: var(--brand-serif); font-size: 12px; font-weight: 400; letter-spacing: 0.2em; color: rgba(238,230,246,0.55); opacity: 1; margin: 0 0 12px }
+.landing-container.jinni-night .cities-grid { justify-content: center; gap: 10px 14px }
+.landing-container.jinni-night .city-card-name { font-family: var(--lora); font-size: 17px; font-weight: 400 }
+.landing-container.jinni-night .city-card-meta { font-family: var(--lora); font-size: 13px; opacity: 0.8 }
+
+/* footer: one ruled line — © left, links right */
+.landing-container.jinni-night .footer { margin-top: auto; padding: 0 }
+.landing-container.jinni-night .footer-content { max-width: 1180px; margin: 0 auto; padding: 26px 24px calc(26px + env(safe-area-inset-bottom, 0px));
+  display: flex; justify-content: space-between; align-items: center; gap: 12px 16px; flex-wrap: wrap;
+  border-top: 1px solid rgba(200,190,255,0.14); text-align: start }
+.landing-container.jinni-night .footer-copyright { order: -1; margin: 0; font-family: var(--lora); font-size: 13px; color: rgba(238,230,246,0.6) }
+.landing-container.jinni-night .footer-links { gap: 0; justify-content: flex-end }
+.landing-container.jinni-night .footer-links a { font-family: var(--lora); font-size: 13px; padding: 0; color: rgba(238,230,246,0.6) }
+.landing-container.jinni-night .footer-links a:hover { color: #f3eaf8 }
+.landing-container.jinni-night .footer-links a + a::before { content: '·'; margin: 0 8px; color: rgba(238,230,246,0.4) }
+@media (max-width: 768px) {
+  .landing-container.jinni-night .header-container { gap: 8px }
+  .landing-container.jinni-night .brand-lamp { width: 38px }
+  .landing-container.jinni-night .app-name { font-size: 20px }
+  .landing-container.jinni-night .footer-content { justify-content: center; text-align: center }
+}
+
+/* Cinzel now loads (2026-10-03): it is a capitals face, so day keeps it for
+   titles only and sets its sentence in Lora, as the Jinni Day preview does. */
+.landing-container.day-mode .hero .magic-subtitle { font-family: 'Lora', 'Noto Serif Armenian', Georgia, serif }
 </style>
 
 <style>
 /* ── Hide the page scrollbar (matches JinniChat's approach) ────────────────── */
 /* Firefox */
-html { scrollbar-width: none; -ms-overflow-style: none }
+html, body { scrollbar-width: none; -ms-overflow-style: none }
 /* WebKit (Chrome, Safari, Edge) */
-html::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important }
+html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; background: transparent !important }
+/* founder 2026-10-03: a white bar showed on desktop. body carries overflow-x:
+   hidden (genie-theme.css), so some browsers draw the page bar from body, not
+   html — hide it on both. */
 
 
 </style>

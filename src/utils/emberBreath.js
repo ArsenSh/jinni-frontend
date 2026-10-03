@@ -3,7 +3,9 @@
 // Each breath (3.4 s, the CSS rhythm) moves the glow to a new random spot inside
 // the button; the registered --ex/--ey properties (genie-theme.css) transition
 // it there. Returns a stop function. Does nothing under reduced motion.
-export function startEmberBreath(el) {
+export function startEmberBreath(node) {
+  // a component's $el can be a comment/text node (dev builds keep template comments)
+  const el = node && node.nodeType !== 1 ? node.nextElementSibling : node
   if (!el || typeof window === 'undefined') return () => {}
   try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {} } catch { /* old browser */ }
   let last = { x: 50, y: 110 }
