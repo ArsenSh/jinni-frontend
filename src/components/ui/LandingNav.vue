@@ -129,5 +129,8 @@ export default {
 @media (max-width: 768px) {
   .lnav-links { display: none }
   .lnav-menu-btn { display: inline-block }
+  /* Founder 2026-10-03: on phones the menu button sits at the far edge,
+     the language pill before it (the header row is the pages' flex row). */
+  .lnav { order: 2 }
 }
 </style>
