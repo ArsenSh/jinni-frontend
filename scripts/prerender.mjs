@@ -92,7 +92,7 @@ function cityHtml(shell, page, L, lang) {
     const title = fill(L.discover?.seo_title || "{city}: {count} places to eat, see and discover — Jinni's Discoveries", { city: city.name, count });
     const description = fill(L.discover?.seo_desc || '{count} restaurants, sights, hidden gems and activities in {city} that Jinni knows and trusts. Free to browse — ask Jinni for what fits you.', { city: city.name, count });
     const canonical = `${SITE}${lang.prefix}/discover/${city.slug}`;
-    const intro = fill(L.discover?.intro || 'Places Jinni has verified in {city} — open to everyone, no account needed.', { city: city.name });
+    const intro = fill(L.discover?.intro || 'The places Jinni knows in {city}. Open to everyone, no account needed.', { city: city.name });
     const alternates = LANGS.map(l => `    <link rel="alternate" hreflang="${l.code}" href="${SITE}${l.prefix}/discover/${city.slug}">`).join('\n')
         + `\n    <link rel="alternate" hreflang="x-default" href="${SITE}/discover/${city.slug}">`;
     const ld = {

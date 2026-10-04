@@ -4,23 +4,24 @@
          a login: same look, same cards, but no saving, no preferences, no
          search, no personal ordering. Every action that needs Jinni goes to
          sign-up. Data comes from /api/public (cache only, never Google). ═══ -->
+    <!-- The landing's world (founder 2026-10-05): sky first (App.vue's chrome sync reads its
+         colours), lamp + JINNI bar, then the city as the hero. The language follows the
+         address (/ru/discover/…), so there is no language pill here. -->
+    <JinniNightSky v-if="theme === 'night-mode'" />
+    <JinniDaySky v-else />
+    <div class="ex-top">
+      <router-link to="/" class="ex-brand"><img src="/images/lamp.webp" alt="" class="ex-brand-lamp"/><span translate="no">JINNI</span></router-link>
+      <router-link to="/auth" class="ex-signin">{{ t('landing.nav.sign_in') || 'Sign in' }}</router-link>
+    </div>
     <header class="ex-head">
-      <!-- Way back to the landing (founder 2026-09-17): the lamp already
-           links home, but nothing says so — this pill does. -->
-      <button type="button" class="back-btn dc-back" @click="$router.push('/')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        {{ t('legal.back_to_home') || 'Back' }}
-      </button>
-      <router-link to="/" class="ex-app-link"><img src="/images/lamp.webp" class="ex-app-icon" alt="Jinni"/></router-link>
-      <h1 class="ex-title">{{ pageTitle }}</h1>
-      <p class="ex-sub" v-if="city">{{ [city.name, city.country].filter(Boolean).join(', ') }}</p>
-      <p class="ex-intro">{{ city ? (t('discover.intro', { city: city.name }) || `Places Jinni has verified in ${city.name} — open to everyone, no account needed.`) : '' }}</p>
-      <!-- Same pair as Jinni's Discoveries (founder 2026-09-17): Meet Jinni
-           → sign-up; Preferences → the public copy of the onboarding page,
-           which returns here after saving. -->
+      <p class="ex-kicker">{{ t('explore.title') || "Jinni's Discoveries" }}</p>
+      <h1 class="ex-title">{{ city ? city.name : (t('explore.title') || "Jinni's Discoveries") }}</h1>
+      <p class="ex-sub" v-if="city"><b v-if="city.country">{{ city.country }}</b><i v-if="city.country && city.count" aria-hidden="true"></i><span v-if="city.count">{{ t('discover.places_count', { n: city.count }) }}</span></p>
+      <p class="ex-intro">{{ city ? (t('discover.intro', { city: city.name }) || `The places Jinni knows in ${city.name}. Open to everyone, no account needed.`) : '' }}</p>
+      <!-- Meet Jinni → sign-up; Preferences → the public copy of the onboarding page,
+           which returns here after saving (founder 2026-09-17). -->
       <div class="ex-head-cta">
         <button class="ex-back" @click="goAuth">
-          <img src="/images/lamp.webp" class="ex-back-lamp" alt=""/>
           <span class="jinni-grad">{{ t('explore.back_chat') || 'Meet Jinni' }}</span>
         </button>
         <button class="ex-pref" @click="goPreferences">
@@ -39,7 +40,7 @@
       </span>
     </div>
 
-    <p v-if="hasAnyRaw && !hasAny && !loading" class="dc-nomatch">{{ t('discover.no_match') || 'No verified places match these filters — clear one to see more.' }}</p>
+    <p v-if="hasAnyRaw && !hasAny && !loading" class="dc-nomatch">{{ t('discover.no_match') || 'No places match these filters — clear one to see more.' }}</p>
 
     <nav v-if="hasAny" class="ex-nav" :class="{ 'is-stuck': navStuck }" ref="navEl">
       <div class="ex-nav-inner">
@@ -70,7 +71,7 @@
 
     <template v-else>
       <section v-for="c in orderedCategories" :key="c" :ref="el => catEls[c] = el" class="ex-section">
-        <div class="ex-section-head"><h2 class="ex-section-title">{{ catLabel(c) }}</h2></div>
+        <div class="ex-section-head"><h2 class="ex-section-title">{{ catLabel(c) }}</h2><span class="ex-section-count">{{ t('discover.places_count', { n: categories[c].length }) }}</span><span class="ex-section-rule" aria-hidden="true"></span></div>
         <div class="ex-rail-wrap">
           <button class="ex-rail-btn ex-rail-btn--prev" @click="scrollRail(c, -1)" tabindex="-1" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -93,9 +94,9 @@
                      Discoveries cards use (verified / spotlight / signature). -->
                 <span v-if="p.tier" class="ex-tier" :class="'ex-tier--' + p.tier">✦ {{ tierLabel(p.tier) }}</span>
                 <div class="ex-card-acts ex-card-acts--bottom" @click.stop>
-                  <button class="ex-act-more" @click="openInfo(p, c)">{{ t('chat.recommendations.more') || 'More' }}</button>
+                  <button class="ex-act-more" @click="openInfo(p, c)">{{ t('chat.recommendations.more') || 'More' }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
                   <button v-if="(p.photos && p.photos.length > 1) || p.photoCount > 1" class="ex-act ex-act--photo" :title="t('explore.photos') || 'Photos'" @click="openGallery(p)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>{{ p.photoCount > 1 ? p.photoCount : (p.photos ? p.photos.length : '') }}
                   </button>
                 </div>
               </div>
@@ -124,7 +125,6 @@
         <p class="ex-footer-line">{{ t('discover.footer_line') || 'This is what Jinni already knows here — in chat it finds what fits you.' }}</p>
         <p class="ex-footer-ask">{{ t('explore.footer_ask') || "Didn't find what you were looking for?" }}</p>
         <button class="ex-footer-cta" @click="goAuth">
-          <img src="/images/lamp.webp" class="ex-back-lamp" alt=""/>
           <span class="jinni-grad">{{ t('explore.ask_chat') || 'Ask Jinni' }}</span>
         </button>
         <div class="ex-footer-links">
@@ -222,6 +222,9 @@
 
 <script>
 import { isNightTime } from '../utils/timeUtils';
+import { startEmberBreath } from '@/utils/emberBreath';
+import JinniDaySky from '@/components/ui/JinniDaySky.vue';
+import JinniNightSky from '@/components/ui/JinniNightSky.vue';
 
 const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || '';
 const CAT_LABELS = {
@@ -231,6 +234,7 @@ const CAT_LABELS = {
 
 export default {
   name: 'DiscoverCity',
+  components: { JinniDaySky, JinniNightSky },
   data() {
     return {
       loading: true, rawCategories: {}, city: null, serverOrder: null, rates: null,
@@ -338,6 +342,9 @@ export default {
     }
   },
   watch: { '$route.params.slug'() { this.load(); } },
+  // Meet Jinni / Ask Jinni breathe like the landing's Make a Wish: each button gets its
+  // moving light once it is on the page (the footer one arrives after the data).
+  updated() { this.emberSync(); },
   mounted() {
     this.load();
     this._onKey = (e) => {
@@ -351,6 +358,7 @@ export default {
     window.addEventListener('resize', this.computeRailN, { passive: true });
   },
   beforeUnmount() {
+    (this._embers || []).forEach(stop => stop());
     window.removeEventListener('keydown', this._onKey);
     window.removeEventListener('scroll', this.onWinScroll);
     window.removeEventListener('resize', this.computeRailN);
@@ -359,6 +367,11 @@ export default {
     this.clearSeo();
   },
   methods: {
+    emberSync() {
+      if (!this.$el || !this.$el.querySelectorAll) return;
+      this._embers = this._embers || [];
+      this.$el.querySelectorAll('.ex-back, .ex-footer-cta').forEach((el) => { if (!el._ember) { el._ember = true; this._embers.push(startEmberBreath(el)); } });
+    },
     t(key, params) {
       if (!this.$t) return null;
       const s = this.$t(key, params);
@@ -1135,5 +1148,187 @@ export default {
    action reuses the lamp glyph at button size. */
 .ex-app-link { display: inline-block; line-height: 0; }
 .pd-action .ex-back-lamp { width: 16px; height: 16px; }
+
+/* ═══ EXPLORE · the landing's world (founder 2026-10-05: "edit the discovery
+   page design too, the way we have in landing and business landing"; approved
+   in the artifact preview "Jinni Discover Redesign"). The same block lives in
+   ExploreView.vue and DiscoverCity.vue and overrides the rules above by order.
+   Sky = JinniDaySky / JinniNightSky as the first child; lamp + JINNI top bar;
+   a centred hero with the city in Cinzel; Meet Jinni / Ask Jinni = the
+   landing's Make a Wish (Ember Breath glass); NO category chip bar (founder:
+   "without that will be more interesting"); the rails keep their own measures
+   — square photos, squircle arrows in the gutters, dots on phones (founder:
+   "old version maybe better … also the card sizes"); More + photos are two
+   dark-glass marks on the photo's lower edge, always visible. Content, order
+   and logic unchanged; the info modal + gallery stay the chat's port. ═══ */
+.explore { position: relative; z-index: 1; background: none;
+  --serif: 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif;
+  --lora: 'Lora', 'Noto Serif Armenian', Georgia, serif; font-family: var(--lora) }
+.explore.day-mode { background: none; color: #7a5434;
+  --ink: #7A4A1C; --body: #7a5434; --soft: rgba(122,84,52,0.8); --accent: #c0702a; --rule: rgba(122,74,28,0.16); --halo: rgba(255,170,80,0.3);
+  --glass: rgba(255,255,255,0.5); --glass-hover: rgba(255,255,255,0.66);
+  --glass-rim: inset 0 0 0 0.75px rgba(255,255,255,0.9), 0 0 18px -2px rgba(140,61,7,0.12);
+  --glass-rim-hover: inset 0 0 0 0.75px rgba(232,190,130,0.75), 0 0 18px -2px rgba(140,61,7,0.16);
+  --f-fill: rgba(255,255,255,0.62); --f-fill-hover: rgba(255,255,255,0.78); --f-ink: #5a3c22; --f-ph: rgba(122,84,52,0.55);
+  --f-rim: rgba(255,255,255,0.9); --f-rim-hover: rgba(232,190,130,0.75); --f-glow: rgba(212,140,60,0.22); --f-light: rgba(255,170,80,0.22); --f-focus-rim: rgba(200,140,50,0.7);
+  --cta-ink: #6e3f16; --cta-glass: rgba(255,255,255,0.35); --cta-ink-shadow: 0 0 8px rgba(255,248,235,0.8);
+  --cta-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 18px -3px rgba(190,110,40,0.3);
+  --cta-rim-hover: inset 0 0 0 0.75px rgba(255,255,255,0.95), inset 0 1px 0 rgba(255,255,255,0.95), 0 0 22px -3px rgba(190,110,40,0.42);
+  --cta-light: rgba(255,160,70,0.75); --cta-core: rgba(255,230,170,0.7); --cta-speck: rgba(255,214,120,0.4);
+  /* the older tokens, re-pointed so rules above follow the new world */
+  --ex-text: var(--body); --ex-heading: var(--ink); --ex-muted: var(--soft); --ex-accent: var(--accent); --ex-line: var(--rule);
+  --ex-chip: var(--glass); --ex-glass-2: var(--glass-hover); --ex-ring: inset 0 0 0 0.75px rgba(255,255,255,0.9);
+  --ex-shimmer: rgba(255,255,255,0.45); --ex-glint: rgba(255,255,255,0.7) }
+.explore.night-mode { background: none; color: #eee6f6;
+  --ink: #fbf5ff; --body: #c9c0da; --soft: rgba(238,230,246,0.72); --accent: #ffb36b; --rule: rgba(200,190,255,0.14); --halo: rgba(124,77,255,0.42);
+  --glass: rgba(255,255,255,0.05); --glass-hover: rgba(255,255,255,0.1);
+  --glass-rim: inset 0 0 0 0.75px rgba(220,210,255,0.14), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -2px rgba(0,0,0,0.45);
+  --glass-rim-hover: inset 0 0 0 0.75px rgba(255,214,160,0.3), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 18px -2px rgba(0,0,0,0.45);
+  --f-fill: rgba(255,255,255,0.06); --f-fill-hover: rgba(255,255,255,0.1); --f-ink: #f3eaf8; --f-ph: rgba(220,210,240,0.5);
+  --f-rim: rgba(220,210,255,0.16); --f-rim-hover: rgba(255,214,160,0.3); --f-glow: rgba(255,170,90,0.18); --f-light: rgba(255,160,70,0.2); --f-focus-rim: rgba(255,200,120,0.6);
+  --cta-ink: #fffaf0; --cta-glass: rgba(255,255,255,0.04); --cta-ink-shadow: 0 0 10px rgba(120,50,0,0.55), 0 0 2px rgba(80,30,0,0.4);
+  --cta-rim: inset 0 0 0 0.75px rgba(255,240,215,0.38), inset 0 1px 0 rgba(255,246,228,0.5), 0 0 18px -2px rgba(255,160,80,0.32);
+  --cta-rim-hover: inset 0 0 0 0.75px rgba(255,240,215,0.5), inset 0 1px 0 rgba(255,246,228,0.62), 0 0 22px -2px rgba(255,160,80,0.44);
+  --cta-light: rgba(255,150,50,0.62); --cta-core: rgba(255,228,170,0.5); --cta-speck: rgba(233,199,102,0.34);
+  --ex-text: var(--body); --ex-heading: var(--ink); --ex-muted: var(--soft); --ex-accent: var(--accent); --ex-line: var(--rule);
+  --ex-chip: var(--glass); --ex-glass-2: var(--glass-hover); --ex-ring: inset 0 0 0 0.75px rgba(220,210,255,0.14);
+  --ex-shimmer: rgba(255,255,255,0.05); --ex-glint: rgba(255,255,255,0.08) }
+
+/* top bar: lamp + JINNI, like the landing */
+.ex-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 1180px; margin: 0 auto; padding: 16px 20px 0 }
+.ex-brand { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font: 500 22px/1 var(--serif); letter-spacing: 0.14em; color: var(--ink) }
+.explore.day-mode .ex-brand { color: #b8741f }
+.ex-brand-lamp { width: 44px; height: auto; margin: -6px 0 -6px -6px }
+.explore.night-mode .ex-brand-lamp { filter: drop-shadow(0 0 8px rgba(255,170,90,0.35)) }
+.explore.day-mode .ex-brand-lamp { filter: saturate(0.88) brightness(0.95) }
+.ex-signin { padding: 8px 4px; font-size: 14.5px; color: var(--soft); text-decoration: none; transition: color .2s ease }
+.ex-signin:hover { color: var(--ink) }
+
+/* hero: the city in the spotlight */
+.ex-head { position: relative; padding-top: clamp(22px, 5vw, 52px); gap: 14px }
+.ex-head::before { content: ''; position: absolute; z-index: -1; top: -10px; left: 50%; width: 440px; max-width: 100vw; height: 280px; margin-left: -220px;
+  pointer-events: none; filter: blur(40px); background: radial-gradient(closest-side, var(--halo), transparent) }
+.ex-kicker { margin: 0; font: 500 12.5px/1.2 var(--serif); letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent) }
+.ex-title { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(44px, 9vw, 84px); line-height: 1.02; letter-spacing: 0.04em;
+  color: var(--ink); background: none; -webkit-text-fill-color: currentColor; text-wrap: balance; text-shadow: none }
+.ex-sub { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin: 0; font: 400 15px/1.4 var(--lora);
+  letter-spacing: 0; text-transform: none; color: var(--soft) }
+.ex-sub b { font-weight: 600; color: var(--ink) }
+.ex-sub i { width: 4px; height: 4px; border-radius: 50%; background: var(--accent) }
+.ex-intro { margin: 2px 0 0; max-width: 520px; font-style: italic; font-size: clamp(16.5px, 2vw, 18.5px); line-height: 1.6; color: var(--body); opacity: 1; text-wrap: balance }
+.ex-head-cta { margin-top: 10px; gap: 12px }
+
+/* buttons: Meet Jinni / Ask Jinni = the landing's Make a Wish (Ember Breath:
+   clear glass, the light lives inside and rises from a new spot each breath —
+   utils/emberBreath.js moves --ex/--ey); Preferences = a glass pill */
+.ex-back, .ex-footer-cta { position: relative; overflow: hidden; isolation: isolate; justify-content: center; min-height: 56px; padding: 14px 36px; border: 0;
+  font: 600 17px/1.25 var(--lora); color: var(--cta-ink); text-shadow: var(--cta-ink-shadow); background: var(--cta-glass); box-shadow: var(--cta-rim);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%);
+  transition: --ex 3.4s ease-in-out, --ey 3.4s ease-in-out, box-shadow .25s ease }
+.ex-back:hover, .ex-footer-cta:hover { background: var(--cta-glass); box-shadow: var(--cta-rim-hover) }
+.ex-back:active { transform: none }
+.ex-back::before, .ex-footer-cta::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(62% 120% at var(--ex, 50%) var(--ey, 110%), var(--cta-light), transparent 70%), radial-gradient(34% 80% at var(--ex, 50%) var(--ey, 110%), var(--cta-core), transparent 70%);
+  animation: ex-breathe 3.4s ease-in-out infinite }
+.ex-back::after, .ex-footer-cta::after { content: ''; position: absolute; inset: -60% -30%; z-index: -1; pointer-events: none; filter: blur(12px);
+  background: radial-gradient(18% 30% at 30% 50%, var(--cta-speck), transparent 100%); animation: ex-drift 11s ease-in-out infinite }
+@keyframes ex-breathe { 0%, 100% { opacity: 0.38 } 50% { opacity: 0.82 } }
+@keyframes ex-drift { 0% { transform: translate(-9%, 2%) } 33% { transform: translate(7%, -3%) } 66% { transform: translate(-3%, 4%) } 100% { transform: translate(-9%, 2%) } }
+@media (prefers-reduced-motion: reduce) { .ex-back::before, .ex-footer-cta::before, .ex-back::after, .ex-footer-cta::after { animation: none } }
+.ex-back .jinni-grad, .ex-pref .jinni-grad, .ex-footer-cta .jinni-grad { background: none; -webkit-text-fill-color: currentColor; color: inherit }
+.ex-pref { min-height: 52px; padding: 12px 24px; border: 0; font: 500 16px/1.25 var(--lora); color: var(--ink); background: var(--glass); box-shadow: var(--glass-rim);
+  backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); transition: background-color .2s ease, box-shadow .2s ease }
+.ex-pref:hover { background: var(--glass-hover); box-shadow: var(--glass-rim-hover) }
+.ex-pref svg { color: var(--accent) }
+
+/* search: a glass field with the sign-in states + the solid gold action */
+.ex-search { margin-top: 24px; padding: 6px 6px 6px 18px; background: var(--f-fill); box-shadow: inset 0 0 0 0.75px var(--f-rim), 0 0 18px -2px rgba(0,0,0,0.12);
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%); transition: background-color .25s ease, box-shadow .25s ease }
+.explore.day-mode .ex-search { box-shadow: inset 0 0 0 0.75px var(--f-rim), 0 0 18px -2px rgba(140,61,7,0.12) }
+.ex-search:hover { background-color: var(--f-fill-hover); box-shadow: inset 0 0 0 0.75px var(--f-rim-hover), 0 0 14px -6px var(--f-glow) }
+.ex-search:focus-within { background-color: var(--f-fill-hover); background-image: radial-gradient(70% 130% at 50% 135%, var(--f-light), transparent 70%);
+  box-shadow: inset 0 0 0 0.75px var(--f-focus-rim), 0 0 16px -4px var(--f-glow) }
+.ex-search-icon { color: var(--accent) }
+.ex-search-input { font: 400 16px/1.3 var(--lora); color: var(--f-ink) }
+.ex-search-input::placeholder { color: var(--f-ph) }
+.ex-search-btn { min-height: 42px; padding: 10px 22px; font: 600 15px/1.2 var(--lora); color: #fff; -webkit-text-fill-color: #fff;
+  background: linear-gradient(45deg, #D4AF37, #FF8C00); box-shadow: 0 0 16px -4px rgba(255,140,0,0.5); transition: filter .2s ease, box-shadow .2s ease }
+.ex-search-btn:hover:not(:disabled) { filter: brightness(1.05); box-shadow: 0 0 20px -3px rgba(255,140,0,0.6) }
+.ex-search-btn:disabled { opacity: 0.5 }
+.ex-showing { padding: 7px 14px; font-family: var(--lora); font-size: 14px; color: var(--ink); background: var(--glass); box-shadow: var(--glass-rim);
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%) }
+.ex-showing svg { color: var(--accent) }
+.ex-showing-clear { color: var(--soft) }
+.ex-showing-clear:hover { color: var(--ink) }
+.ex-showing--miss { color: var(--soft) }
+.ex-pref-lead, .explore.night-mode .ex-pref-lead { font-size: 14px; color: var(--soft); opacity: 1; gap: 7px }
+.ex-pref-lead svg { color: var(--accent) }
+
+/* no category chip bar: the page runs from the hero straight into the rails */
+.ex-nav { display: none }
+
+/* sections: a Cinzel title, its count, a fading rule */
+.ex-section { padding-top: clamp(30px, 5vw, 46px) }
+.ex-section-head { align-items: center; gap: 14px; margin-bottom: 16px }
+.ex-section-title { font-family: var(--serif); font-weight: 500; font-size: clamp(19px, 2.6vw, 24px); line-height: 1.2; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink) }
+.ex-section-count { flex: none; font-size: 13.5px; font-style: italic; color: var(--soft) }
+.ex-section-rule { flex: 1; min-width: 12px; height: 1px; background: linear-gradient(90deg, var(--rule), transparent) }
+
+/* cards keep their measures; the photo gets the glass rim, the text the new inks */
+.ex-card-imgwrap { border-radius: 18px; margin-bottom: 10px; background: var(--f-fill); box-shadow: var(--glass-rim) }
+.ex-card-name { font: 600 16.5px/1.3 var(--lora); color: var(--ink) }
+.ex-card-dates { font-size: 13px; color: var(--accent) }
+.ex-card-sub { font-size: 13.5px; color: var(--soft) }
+.ex-card-imgless { color: var(--soft) }
+.ex-tier { font-family: var(--lora); font-weight: 600 }
+
+/* More + photos: two quiet dark-glass marks on the photo's lower edge, always
+   there (no hover, no hold) — the same glass in both themes, like the guide
+   page's tag on a photo */
+.explore .ex-card .ex-card-acts--bottom { opacity: 1 !important; background: linear-gradient(180deg, transparent 58%, rgba(8,4,18,0.5) 100%) }
+.explore .ex-card .ex-card-acts--bottom > * { pointer-events: auto }
+.explore .ex-act-more, .explore.night-mode .ex-act-more, .explore .ex-act--photo, .explore.night-mode .ex-act--photo {
+  display: inline-flex; align-items: center; height: 34px; border-radius: 999px; text-shadow: none;
+  color: #fff4e2 !important; background: rgba(16,7,34,0.42) !important; box-shadow: inset 0 0 0 0.75px rgba(255,235,200,0.4) !important;
+  backdrop-filter: blur(10px) saturate(150%); -webkit-backdrop-filter: blur(10px) saturate(150%); transition: background-color .2s ease, box-shadow .2s ease }
+.explore .ex-act-more:hover, .explore.night-mode .ex-act-more:hover, .explore .ex-act--photo:hover, .explore.night-mode .ex-act--photo:hover {
+  background: rgba(16,7,34,0.62) !important; box-shadow: inset 0 0 0 0.75px rgba(255,226,170,0.8), 0 0 14px -3px rgba(255,180,90,0.6) !important }
+.ex-act-more { left: 12px; top: auto; bottom: 12px; transform: none; min-width: 0; gap: 8px; padding: 0 12px 0 15px;
+  font: 500 11.5px/1 var(--serif); letter-spacing: 0.2em; text-transform: uppercase }
+.ex-act-more svg { flex: none; width: 13px; height: 13px; fill: none; stroke: #ffd27a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+:lang(ar) .ex-act-more, :lang(ar) .ex-kicker, :lang(ar) .ex-section-title, [dir="rtl"] .ex-act-more, [dir="rtl"] .ex-kicker, [dir="rtl"] .ex-section-title { letter-spacing: 0 }
+.ex-act--photo { right: 12px; bottom: 12px; width: auto; gap: 6px; padding: 0 11px; font: 600 12.5px/1 system-ui, sans-serif; font-variant-numeric: tabular-nums }
+.ex-act--photo svg { width: 15px; height: 15px; filter: none }
+
+/* rail arrows: the same squircles, in the new glass */
+.ex-rail-btn { color: var(--ink); background: var(--glass); box-shadow: var(--glass-rim); transition: background-color .2s ease, box-shadow .2s ease }
+.ex-rail-btn:hover { background: var(--glass-hover); box-shadow: var(--glass-rim-hover) }
+
+/* not explored yet */
+.ex-empty { margin: 44px auto 60px; padding: 34px 26px 30px; max-width: 540px; border-radius: 28px; background: var(--glass); box-shadow: var(--glass-rim);
+  backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%) }
+@media (max-width: 600px) { .ex-empty { margin-inline: 16px } }
+.ex-empty-title { font-family: var(--serif); font-weight: 500; font-size: clamp(21px, 3.4vw, 26px); line-height: 1.25; letter-spacing: 0.02em; color: var(--ink); text-wrap: balance }
+.ex-empty-sub { font-size: 16px; line-height: 1.6; color: var(--body) }
+.ex-cta { min-height: 50px; padding: 13px 30px; font: 600 16.5px/1.25 var(--lora); color: #fff; -webkit-text-fill-color: #fff;
+  background: linear-gradient(45deg, #D4AF37, #FF8C00); box-shadow: 0 0 18px -4px rgba(255,140,0,0.5); transition: filter .2s ease, box-shadow .2s ease }
+.ex-cta:hover { filter: brightness(1.05); box-shadow: 0 0 22px -3px rgba(255,140,0,0.6) }
+.ex-cta:active { transform: none }
+
+/* footer: a ruled sign-off */
+.ex-footer { gap: 12px; max-width: 1120px; margin: clamp(40px, 7vw, 76px) auto 0; padding: 34px 18px 44px; border-top: 1px solid var(--rule) }
+.ex-footer-divider { width: auto; color: var(--accent); opacity: 0.9 }
+.ex-fd-line { display: none }
+.ex-footer-line { max-width: 520px; font-style: italic; font-size: 17px; line-height: 1.55; color: var(--body); opacity: 1; text-wrap: balance }
+.ex-footer-ask { margin-top: 0; font-size: 14.5px; color: var(--soft) }
+.ex-footer-links { margin-top: 12px; gap: 12px; font-family: var(--lora); font-size: 13.5px; color: var(--soft); opacity: 1 }
+.ex-footer-links a:hover { color: var(--ink); text-decoration: none }
+
+@media (max-width: 520px) {
+  .ex-top { padding: 12px 16px 0 }
+  .ex-back, .ex-footer-cta { min-height: 52px; padding: 12px 28px; font-size: 16px }
+  .ex-pref { min-height: 48px; padding: 10px 20px; font-size: 15px }
+  .ex-search-btn { padding: 10px 18px }
+}
 </style>
 
