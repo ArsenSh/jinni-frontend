@@ -10,9 +10,7 @@
     <a class="gr-chip" :href="'/@' + pick.handle" target="_blank" rel="noopener" :title="pick.note || ''">
       <i aria-hidden="true">{{ initials }}</i><b>@{{ pick.handle }}</b><em>· {{ t('guides.chat.guide_pick') }}</em>
     </a>
-    <button v-if="embed && !open" type="button" class="gr-play" @click.stop="$emit('toggle')">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>{{ t('guides.page.watch_reel') }}
-    </button>
+    <!-- no play pill on the photo: the card's images button opens the gallery on the reel -->
     <div v-if="embed && open" class="gr-stage">
       <div class="gr-blur" :style="photo ? { backgroundImage: `url(${photo})` } : null"></div>
       <iframe class="gr-frame" :src="embed" title="Instagram reel" scrolling="no" allowtransparency="true" allow="encrypted-media; picture-in-picture"

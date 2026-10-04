@@ -277,8 +277,10 @@
                             <div class="rec-details">
                               <div class="rec-header">
                                 <div class="rec-name">{{ getRecommendationAtPosition(message, position).name }}</div>
-                                <button @click.stop="requestImages(getRecommendationAtPosition(message, position))"class="image-request-btn":class="{ 'loading': getButtonState(getRecommendationAtPosition(message, position)) === 'loading' }":disabled="isButtonDisabled(getRecommendationAtPosition(message, position)) || isOnCooldown">
-                                  <svg v-if="getButtonState(getRecommendationAtPosition(message, position)) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <button @click.stop="requestImages(getRecommendationAtPosition(message, position))"class="image-request-btn":class="{ 'has-reel': !!getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl, 'loading': getButtonState(getRecommendationAtPosition(message, position)) === 'loading' }":disabled="isButtonDisabled(getRecommendationAtPosition(message, position)) || isOnCooldown">
+                                  <!-- the guide's reel is slide 1 of this gallery (founder 2026-10-04: "the image request already brings that video at very first") -->
+<svg v-if="getButtonState(getRecommendationAtPosition(message, position)) !== 'loading' && getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="15" height="15" rx="3.5"/><path d="M9 9.3v6.4l5.2-3.2z" fill="currentColor" stroke="none"/><path d="M20 1.8l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" class="reel-spark" stroke="none"/></svg>
+<svg v-else-if="getButtonState(getRecommendationAtPosition(message, position)) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                                     <circle cx="8.5" cy="8.5" r="1.5"/>
                                     <polyline points="21,15 16,10 5,21"/>
@@ -405,8 +407,10 @@
                           <div class="rec-details">
                             <div class="rec-header">
                               <div class="rec-name">{{ message.recommendations[part.index].name }}</div>
-                              <button @click.stop="requestImages(message.recommendations[part.index])" class="image-request-btn" :class="{ 'loading': getButtonState(message.recommendations[part.index]) === 'loading' }" :disabled="isButtonDisabled(message.recommendations[part.index]) || isOnCooldown">
-                                <svg v-if="getButtonState(message.recommendations[part.index]) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <button @click.stop="requestImages(message.recommendations[part.index])" class="image-request-btn" :class="{ 'has-reel': !!message.recommendations[part.index].guidePicks?.[0]?.reelUrl, 'loading': getButtonState(message.recommendations[part.index]) === 'loading' }" :disabled="isButtonDisabled(message.recommendations[part.index]) || isOnCooldown">
+                                <!-- the guide's reel is slide 1 of this gallery (founder 2026-10-04: "the image request already brings that video at very first") -->
+<svg v-if="getButtonState(message.recommendations[part.index]) !== 'loading' && message.recommendations[part.index].guidePicks?.[0]?.reelUrl" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="15" height="15" rx="3.5"/><path d="M9 9.3v6.4l5.2-3.2z" fill="currentColor" stroke="none"/><path d="M20 1.8l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" class="reel-spark" stroke="none"/></svg>
+<svg v-else-if="getButtonState(message.recommendations[part.index]) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                                   <circle cx="8.5" cy="8.5" r="1.5"/>
                                   <polyline points="21,15 16,10 5,21"/>
@@ -563,8 +567,10 @@
                             <div class="rec-details">
                               <div class="rec-header">
                                 <div class="rec-name">{{ rec.name }}</div>
-                                <button @click.stop="requestImages(rec)" class="image-request-btn" :class="{ 'loading': getButtonState(rec) === 'loading', 'disabled-cooldown': isOnCooldown }" :disabled="isButtonDisabled(rec) || isOnCooldown">
-                                  <svg v-if="getButtonState(rec) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <button @click.stop="requestImages(rec)" class="image-request-btn" :class="{ 'has-reel': !!rec.guidePicks?.[0]?.reelUrl, 'loading': getButtonState(rec) === 'loading', 'disabled-cooldown': isOnCooldown }" :disabled="isButtonDisabled(rec) || isOnCooldown">
+                                  <!-- the guide's reel is slide 1 of this gallery (founder 2026-10-04: "the image request already brings that video at very first") -->
+<svg v-if="getButtonState(rec) !== 'loading' && rec.guidePicks?.[0]?.reelUrl" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="15" height="15" rx="3.5"/><path d="M9 9.3v6.4l5.2-3.2z" fill="currentColor" stroke="none"/><path d="M20 1.8l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" class="reel-spark" stroke="none"/></svg>
+<svg v-else-if="getButtonState(rec) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                                     <circle cx="8.5" cy="8.5" r="1.5"/>
                                     <polyline points="21,15 16,10 5,21"/>
@@ -1753,8 +1759,10 @@
                   <div class="rec-header">
                     <div class="rec-name">{{ item.rec.name }}</div>
                     <!-- Image request button (restored) -->
-                    <button @click.stop="requestImages(item.rec)" class="image-request-btn" :class="{ 'loading': getButtonState(item.rec) === 'loading' }" :disabled="isButtonDisabled(item.rec) || isOnCooldown">
-                      <svg v-if="getButtonState(item.rec) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <button @click.stop="requestImages(item.rec)" class="image-request-btn" :class="{ 'has-reel': !!item.rec.guidePicks?.[0]?.reelUrl, 'loading': getButtonState(item.rec) === 'loading' }" :disabled="isButtonDisabled(item.rec) || isOnCooldown">
+                      <!-- the guide's reel is slide 1 of this gallery (founder 2026-10-04: "the image request already brings that video at very first") -->
+<svg v-if="getButtonState(item.rec) !== 'loading' && item.rec.guidePicks?.[0]?.reelUrl" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="15" height="15" rx="3.5"/><path d="M9 9.3v6.4l5.2-3.2z" fill="currentColor" stroke="none"/><path d="M20 1.8l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" class="reel-spark" stroke="none"/></svg>
+<svg v-else-if="getButtonState(item.rec) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                         <circle cx="8.5" cy="8.5" r="1.5"/>
                         <polyline points="21,15 16,10 5,21"/>
@@ -7878,6 +7886,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .night-mode .rec-guide-reel{color:#ffd27a}
 .day-mode .rec-guide-reel{color:#b4540a}
 .rec-guide-reel:hover{text-decoration:underline;text-underline-offset:3px}
+/* images button on a card with a guide's reel: the gallery opens on the reel — a play-in-frame icon
+   with a gold spark and a soft warm ring (founder 2026-10-04) */
+.image-request-btn.has-reel{box-shadow:inset 0 0 0 .75px rgba(255,200,120,.6),0 0 14px -2px rgba(255,160,70,.55)}
+.night-mode .image-request-btn.has-reel{color:#ffd29a}
+.day-mode .image-request-btn.has-reel{color:#9a5a1e}
+.reel-gallery-icon .reel-spark{fill:#FFB347;filter:drop-shadow(0 0 2px rgba(255,170,70,.9))}
 /* A guide's reel playing IN the card (founder 2026-10-04, LandingLab guide-reel-card.html:
    "mobile … one tap, desktop interesting, grid like that too"). GuideReel fills the photo
    area; these rules give that area the room: 9:16 on phones, a tall stage on a desktop
