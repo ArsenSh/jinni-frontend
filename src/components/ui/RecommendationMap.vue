@@ -486,7 +486,8 @@ export default {
     // the real ground colour instead of Leaflet's default grey.
     sampleGroundColour() {
       try {
-        const canvases = [...(this.$el ? this.$el.querySelectorAll('.leaflet-tile-pane canvas') : [])].slice(0, 4);
+        const root = this.mapRoot();
+        const canvases = [...(root ? root.querySelectorAll('.leaflet-tile-pane canvas') : [])].slice(0, 4);
         if (!canvases.length) return null;
         const counts = new Map();
         for (const c of canvases) {
@@ -499,11 +500,23 @@ export default {
         return `rgb(${(best >> 16) & 255}, ${(best >> 8) & 255}, ${best & 255})`;
       } catch (e) { return null; }   // tainted (raster) or not drawn yet
     },
+    // The element that really is the map. While fullscreen the map is TELEPORTED to
+    // <body>, and this.$el is then only a placeholder node — querying it threw, so the
+    // ground colour was never set and the chrome sync below never fired (open since
+    // 2026-09-20: chat fullscreen map kept the page's bar colours; found 2026-10-04).
+    mapRoot() {
+      const el = this.$el;
+      if (el && el.nodeType === 1 && el.classList && el.classList.contains('rec-map')) return el;
+      return (el && el.nodeType === 1 && el.querySelector && el.querySelector('.rec-map')) || document.querySelector('.rec-map.is-fullscreen');
+    },
     syncGroundColour() {
       if (!this.fullscreen) return;
-      const colour = this.sampleGroundColour();
-      const c = this.$el && this.$el.querySelector('.leaflet-container');
-      if (colour && c && c.style.backgroundColor !== colour) c.style.backgroundColor = colour;
+      try {
+        const colour = this.sampleGroundColour();
+        const root = this.mapRoot();
+        const c = root && root.querySelector('.leaflet-container');
+        if (colour && c && c.style.backgroundColor !== colour) c.style.backgroundColor = colour;
+      } catch (e) { /* never block the sync below */ }
       window.dispatchEvent(new Event('jinni:chrome-sync'));
     },
     async enterFullscreen() {
@@ -535,7 +548,7 @@ export default {
     },
     exitFullscreen() {
       this.fullscreen = false;
-      try { const c = this.$el && this.$el.querySelector('.leaflet-container'); if (c) c.style.backgroundColor = ''; } catch (e) {}
+      try { const r = this.mapRoot(); const c = r && r.querySelector('.leaflet-container'); if (c) c.style.backgroundColor = ''; } catch (e) {}
       this.$nextTick(() => setTimeout(() => window.dispatchEvent(new Event('jinni:chrome-sync')), 60));   // page colours back
       this.stopLiveTracking();          // drop the live GPS watch when the big map closes
       document.removeEventListener('keydown', this.onEsc);
@@ -1843,6 +1856,15 @@ export default {
    instead of a painted strip (founder 2026-09-21). The cards strip and the
    controls already keep clear of it through env(safe-area-inset-bottom). */
 .rec-map.is-fullscreen .rec-map-body { max-height: none; height: 100%; opacity: 1; }
+/* iOS Safari (founder 2026-10-04 screenshot): the map is sized to the LARGEST viewport
+   (100lvh) so it runs on under Safari's glass bar — but everything anchored to its
+   bottom then sat UNDER that bar (the place cards were cut in half). --bar-gap is the
+   bar's height while it shows (0 when it hides or on desktop); bottom-anchored
+   controls rise by exactly that, and the map keeps running underneath. */
+.rec-map.is-fullscreen { --bar-gap: calc(100lvh - 100dvh); }
+.rec-map.is-fullscreen .rec-map-cards { bottom: calc(14px + env(safe-area-inset-bottom, 0px) + var(--bar-gap)); }
+.rec-map.is-fullscreen .rec-map-routeinfo { bottom: calc(16px + env(safe-area-inset-bottom, 0px) + var(--bar-gap)); }
+.rec-map.is-fullscreen:not(.has-cards) :deep(.leaflet-control-zoom) { margin-bottom: calc(18px + env(safe-area-inset-bottom, 0px) + var(--bar-gap)) !important; }
 .rec-map.is-fullscreen .rec-map-stage, .rec-map.is-fullscreen .rec-map-canvas { height: 100%; }
 .rec-map-close-fs {
   position: absolute;

@@ -106,7 +106,13 @@ function findPagePaint(rootEl) {
     const [el, depth] = queue.shift();
     scanned++;
     let paint = null;
-    try { paint = parsePaint(getComputedStyle(el)); } catch (e) { /* detached node */ }
+    // Only a PAGE-SIZED element can be the page's paint (2026-10-04: a guide chip's
+    // little apricot→bronze avatar disc in a chat card became Safari's bar colour
+    // on the whole day chat). Smaller elements are skipped; their children are
+    // still searched below.
+    let big = true;
+    try { const r = el.getBoundingClientRect(); big = r.width >= window.innerWidth * 0.8 && r.height >= window.innerHeight * 0.33; } catch (e) { /* detached node */ }
+    try { if (big) paint = parsePaint(getComputedStyle(el)); } catch (e) { /* detached node */ }
     // A backdrop may state the colours it really shows at the screen's top and
     // bottom (data-chrome-top/bottom). Needed where a radial gradient's last
     // stop is a far corner, not the visible edge: StarrySky's ends in #000 but
