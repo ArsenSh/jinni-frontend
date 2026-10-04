@@ -1598,6 +1598,9 @@
       "foot": "由真实本地向导推荐，尽在",
       "become": "成为向导",
       "title_suffix": "Jinni 上的本地推荐"
+    },
+    "chat": {
+      "guide_pick": "向导精选"
     }
   },
   "guideTerms": {

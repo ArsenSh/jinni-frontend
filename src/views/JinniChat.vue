@@ -240,11 +240,11 @@
                         <!-- Recommendation at this position -->
                         <div v-if="getRecommendationAtPosition(message, position)" class="inline-recommendation-wrapper">
                           <div :class="['rec-card-wrapper', getPartnerWrapperClass(getRecommendationAtPosition(message, position))]">
-                          <div class="recommendation-card" :class="{ 'large-card': message.isChatRecommendation }">
+                          <div class="recommendation-card" :class="{ 'large-card': message.isChatRecommendation, 'reel-open': isReelOpen(getRecommendationAtPosition(message, position)) }">
                           <!-- Store rec in variable for cleaner template -->
                             <template v-if="getRecommendationAtPosition(message, position).image">
                               <div class="rec-image">
-                                <img :src="getImageUrl(getRecommendationAtPosition(message, position).image)" :alt="getRecommendationAtPosition(message, position).name" @error="handleImageError" loading="lazy">
+                                <img :src="getImageUrl(getRecommendationAtPosition(message, position).image)" :alt="getRecommendationAtPosition(message, position).name" @error="handleImageError" loading="lazy"><GuideReel v-if="getRecommendationAtPosition(message, position).guidePicks?.length" :pick="getRecommendationAtPosition(message, position).guidePicks[0]" :photo="getRecommendationAtPosition(message, position).image ? getImageUrl(getRecommendationAtPosition(message, position).image) : ''" :open="isReelOpen(getRecommendationAtPosition(message, position))" @toggle="toggleReel(getRecommendationAtPosition(message, position))" />
                                   <div class="image-overlay">
                                     <div class="overlay-actions">
                                       <button @click.stop="showPlaceInfo(getRecommendationAtPosition(message, position))" class="text-action-btn info-btn":disabled="isOnCooldown":class="{ 'disabled-cooldown': isOnCooldown }">
@@ -322,7 +322,7 @@
                             </div>
                           </div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
-                            <a v-if="getRecommendationAtPosition(message, position).guidePicks?.length" :href="'/@' + getRecommendationAtPosition(message, position).guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="getRecommendationAtPosition(message, position).guidePicks[0].note || ''" @click.stop>Picked by @{{ getRecommendationAtPosition(message, position).guidePicks[0].handle }}</a><button v-if="getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl" type="button" class="rec-guide-reel" @click.stop="openGuideReel(getRecommendationAtPosition(message, position).guidePicks[0].reelUrl)">▶ {{ $t('guides.page.watch_reel') }}</button>
+                            
                             <div v-if="(getRecommendationAtPosition(message, position).verifiedId || getRecommendationAtPosition(message, position).id?.startsWith('db-')) && getRecommendationAtPosition(message, position)._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(getRecommendationAtPosition(message, position))]" v-html="getPartnerIcon(getRecommendationAtPosition(message, position)) + ' ' + getPartnerLabel(getRecommendationAtPosition(message, position))"></div>
                             <a v-if="getRecommendationAtPosition(message, position).sourceUrl" :href="getRecommendationAtPosition(message, position).sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -369,9 +369,9 @@
                       <!-- Recommendation cards (inline) -->
                       <div v-else-if="part.type === 'recommendation' && message.recommendations && message.recommendations[part.index] && !(message.metadata && message.metadata.routeTo)" class="inline-recommendation-wrapper">
                         <div :class="['rec-card-wrapper', getPartnerWrapperClass(message.recommendations[part.index])]">
-                        <div class="recommendation-card inline-card" :class="{ 'large-card': message.isChatRecommendation }" @touchstart="handleCardTouchStart(message.recommendations[part.index], $event)" @touchend="handleCardTouchEnd(message.recommendations[part.index], $event)">
+                        <div class="recommendation-card inline-card" :class="{ 'large-card': message.isChatRecommendation, 'reel-open': isReelOpen(message.recommendations[part.index]) }" @touchstart="handleCardTouchStart(message.recommendations[part.index], $event)" @touchend="handleCardTouchEnd(message.recommendations[part.index], $event)">
                           <div class="rec-image" v-if="message.recommendations[part.index].image">
-                            <img :src="getImageUrl(message.recommendations[part.index].image)" :alt="message.recommendations[part.index].name" @error="handleImageError" loading="lazy">
+                            <img :src="getImageUrl(message.recommendations[part.index].image)" :alt="message.recommendations[part.index].name" @error="handleImageError" loading="lazy"><GuideReel v-if="message.recommendations[part.index].guidePicks?.length" :pick="message.recommendations[part.index].guidePicks[0]" :photo="message.recommendations[part.index].image ? getImageUrl(message.recommendations[part.index].image) : ''" :open="isReelOpen(message.recommendations[part.index])" @toggle="toggleReel(message.recommendations[part.index])" />
                             <div class="image-overlay">
                               <div class="overlay-actions">
                                 <button @click.stop="showPlaceInfo(message.recommendations[part.index])" class="text-action-btn info-btn":disabled="isOnCooldown">
@@ -448,7 +448,7 @@
                           </div>
                         </div><!-- /recommendation-card -->
                         <div class="rec-card-bottom">
-                          <a v-if="message.recommendations[part.index].guidePicks?.length" :href="'/@' + message.recommendations[part.index].guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="message.recommendations[part.index].guidePicks[0].note || ''" @click.stop>Picked by @{{ message.recommendations[part.index].guidePicks[0].handle }}</a><button v-if="message.recommendations[part.index].guidePicks?.[0]?.reelUrl" type="button" class="rec-guide-reel" @click.stop="openGuideReel(message.recommendations[part.index].guidePicks[0].reelUrl)">▶ {{ $t('guides.page.watch_reel') }}</button>
+                          
                           <div v-if="(message.recommendations[part.index].verifiedId || message.recommendations[part.index].id?.startsWith('db-')) && message.recommendations[part.index]._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(message.recommendations[part.index])]" v-html="getPartnerIcon(message.recommendations[part.index]) + ' ' + getPartnerLabel(message.recommendations[part.index])"></div>
                           <a v-if="message.recommendations[part.index].sourceUrl" :href="message.recommendations[part.index].sourceUrl" target="_blank" rel="noopener noreferrer" class="rec-event-source rec-event-source--below" @click.stop>
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -517,7 +517,7 @@
                       </div>
                       <div v-if="!(message.metadata && message.metadata.routeTo)" class="recommendation-grid">
                         <div v-for="(rec, recIndex) in message.recommendations" :key="recIndex" :class="['rec-card-wrapper', getPartnerWrapperClass(rec)]">
-                          <div class="recommendation-card" @touchstart="handleCardTouchStart(rec, $event)" @touchend="handleCardTouchEnd(rec, $event)">
+                          <div class="recommendation-card" :class="{ 'reel-open': isReelOpen(rec) }" @touchstart="handleCardTouchStart(rec, $event)" @touchend="handleCardTouchEnd(rec, $event)">
                             <!-- An event with a date but no image is a DATE-CARD: the event
                                  is real and its schedule is real, but it has no Google
                                  place to take a photo from (a street festival has no venue
@@ -529,7 +529,7 @@
                                    'loading-skeleton': (rec.isStreaming || !rec.image) && !(!rec.image && !rec.isStreaming && rec.eventSchedule),
                                    'rec-image--event': !rec.image && !rec.isStreaming && rec.eventSchedule
                                  }">
-                              <img v-if="rec.image" :src="getImageUrl(rec.image)" :alt="rec.name" @error="handleImageError" loading="lazy">
+                              <img v-if="rec.image" :src="getImageUrl(rec.image)" :alt="rec.name" @error="handleImageError" loading="lazy"><GuideReel v-if="rec.guidePicks?.length" :pick="rec.guidePicks[0]" :photo="rec.image ? getImageUrl(rec.image) : ''" :open="isReelOpen(rec)" @toggle="toggleReel(rec)" />
                               <div v-if="!rec.image && !rec.isStreaming && rec.eventSchedule" class="rec-image-event-mark">
                                 <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
                                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -605,7 +605,7 @@
                             </div>
                           </div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
-                            <a v-if="rec.guidePicks?.length" :href="'/@' + rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ rec.guidePicks[0].handle }}</a><button v-if="rec.guidePicks?.[0]?.reelUrl" type="button" class="rec-guide-reel" @click.stop="openGuideReel(rec.guidePicks[0].reelUrl)">▶ {{ $t('guides.page.watch_reel') }}</button>
+                            
                             <div v-if="(rec.verifiedId || rec.id?.startsWith('db-')) && rec._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(rec)]" v-html="getPartnerIcon(rec) + ' ' + getPartnerLabel(rec)"></div>
                             <!-- Event source ("Check listing") — placed BELOW the card like the
                                  partner badge, so it reads as a footnote to the whole card, not
@@ -1668,7 +1668,9 @@
   <div v-if="showFullscreenModal" class="fullscreen-image-modal" @click="closeFullscreenModal">
     <div class="fullscreen-image-container" @click.stop>
       <div v-if="fullscreenImages.length > 0" style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-        <img :src="fullscreenImages[currentFullscreenIndex]?.url || fullscreenImages[currentFullscreenIndex]?.src" :alt="fullscreenImages[currentFullscreenIndex]?.title || 'Image'" class="fullscreen-image" @load="handleFullscreenImageLoad" @error="handleImageError">
+        <!-- slide 1 can be the guide's reel (founder 2026-10-04: "the video of insta has not appeared there") -->
+        <iframe v-if="fullscreenImages[currentFullscreenIndex]?.kind === 'reel'" :src="fullscreenImages[currentFullscreenIndex].url" class="fullscreen-reel" title="Instagram reel" scrolling="no" allowtransparency="true" allow="encrypted-media; picture-in-picture" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation" @click.stop></iframe>
+        <img v-else :src="fullscreenImages[currentFullscreenIndex]?.url || fullscreenImages[currentFullscreenIndex]?.src" :alt="fullscreenImages[currentFullscreenIndex]?.title || 'Image'" class="fullscreen-image" @load="handleFullscreenImageLoad" @error="handleImageError">
         <button v-if="fullscreenImages.length > 1" @click.stop="previousFullscreenImage" :disabled="currentFullscreenIndex === 0" class="fullscreen-nav-btn fullscreen-prev">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M15 18l-6-6 6-6"/>
@@ -1840,6 +1842,7 @@ import { isHiddenLanguage } from '@/utils/languages';
 import { applyDisplayPrefs as applyDisplayPrefsGlobal } from '../utils/displayPrefs'
 import { useI18n } from 'vue-i18n';
 import { instagramEmbed } from '@/utils/guides';
+import GuideReel from '@/components/ui/GuideReel.vue';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000';
 /** How long the preference bar stays visible after it reveals. */
 const PREFERENCE_BAR_HIDE_MS = 5000;
@@ -1862,10 +1865,12 @@ export default {
       unmounted(el) { document.body.removeEventListener('click', el.clickOutsideEvent) }
     }
   },
-  components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView },
+  components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView, GuideReel },
   data() {
     return {
-      reelEmbedUrl: null,   // a guide's reel open over the chat (Picked by @… → Watch reel)
+      reelEmbedUrl: null,
+      openReels: {},
+      galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
       // the gap between the shrunk chat shell and the keyboard. 0 = hidden.
       kbStripTop: 0,
@@ -2595,6 +2600,9 @@ export default {
   },
   methods: {
     openGuideReel(url) { this.reelEmbedUrl = instagramEmbed(url) },
+    reelKey(rec) { return (rec && (rec.placeId || rec.verifiedId || rec.name)) || '' },
+    isReelOpen(rec) { return !!this.openReels[this.reelKey(rec)] },
+    toggleReel(rec) { const k = this.reelKey(rec); this.openReels = { ...this.openReels, [k]: !this.openReels[k] } },
     // ── Events ────────────────────────────────────────────────────────────────
     //
     //   The chat surfaces event listings just like restaurants/hotels. The
@@ -5594,6 +5602,8 @@ export default {
       finally { if (typeof done === 'function') done(); }
     },
     async requestImages(recommendation) {
+      const gp = recommendation?.guidePicks?.[0];
+      this.galleryReel = gp?.reelUrl ? instagramEmbed(gp.reelUrl) : null;
       if (this.isOnCooldown) {
         // console.log('🚫 Image request blocked - user on cooldown');
         this.showCooldownMessage(this.usageStatus);
@@ -6741,12 +6751,14 @@ export default {
     },
     openFullscreenModal(images) {
       this.fullscreenImages = images.map(img => ({...img, url: this.getImageUrl(img.url || img.src), title: img.title || img.alt || 'Image'}));
+      if (this.galleryReel) this.fullscreenImages.unshift({ kind: 'reel', url: this.galleryReel, title: 'Reel' });
       this.currentFullscreenIndex = 0;
       this.showFullscreenModal = true;
       this.fullscreenLoading = false;
       document.body.style.overflow = 'hidden';
     },
     closeFullscreenModal() {
+      this.galleryReel = null;
       this.showFullscreenModal = false;
       this.fullscreenImages = [];
       this.currentFullscreenIndex = 0;
@@ -7866,6 +7878,19 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .night-mode .rec-guide-reel{color:#ffd27a}
 .day-mode .rec-guide-reel{color:#b4540a}
 .rec-guide-reel:hover{text-decoration:underline;text-underline-offset:3px}
+/* A guide's reel playing IN the card (founder 2026-10-04, LandingLab guide-reel-card.html:
+   "mobile … one tap, desktop interesting, grid like that too"). GuideReel fills the photo
+   area; these rules give that area the room: 9:16 on phones, a tall stage on a desktop
+   large card, two rows in the desktop quick-action grid. */
+.fullscreen-reel{height:min(86vh,760px);aspect-ratio:9 / 16;max-width:94vw;border:0;border-radius:14px;background:#000}
+.recommendation-card.reel-open .rec-image{aspect-ratio:9 / 16;height:auto;max-height:min(80vh,720px)}
+.recommendation-card.reel-open .image-overlay,.recommendation-card.reel-open .rec-image-save-btn{display:none}
+@media (min-width:601px){
+  .large-card.reel-open .rec-image{aspect-ratio:auto;height:min(560px,75vh);max-height:none}
+  .recommendation-grid .rec-card-wrapper:has(.reel-open){grid-row:span 2;display:flex;flex-direction:column}
+  .recommendation-grid .recommendation-card.reel-open{flex:1 1 auto;display:flex;flex-direction:column}
+  .recommendation-grid .recommendation-card.reel-open .rec-image{aspect-ratio:auto;flex:1 1 auto;min-height:340px;max-height:none}
+}
 .guide-reel-overlay{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:16px;background:rgba(8,4,16,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .guide-reel-box{position:relative;width:min(380px,100%);height:min(640px,calc(100dvh - 32px));border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 0 24px -4px rgba(0,0,0,.6)}
 .guide-reel-box iframe{width:100%;height:100%;border:0;display:block}

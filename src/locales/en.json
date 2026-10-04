@@ -1598,6 +1598,9 @@
       "foot": "Picks by real local guides on",
       "become": "Become a guide",
       "title_suffix": "local picks on Jinni"
+    },
+    "chat": {
+      "guide_pick": "guide's pick"
     }
   },
   "guideTerms": {
