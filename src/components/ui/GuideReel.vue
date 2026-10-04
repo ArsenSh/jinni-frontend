@@ -7,8 +7,8 @@
        centring the 9:16 reel over the place's blurred photo. Instagram's
        official embed; it never autoplays (Instagram's rule), so one tap. -->
   <div class="gr" :class="{ open }" @click.stop>
-    <a class="gr-chip" :href="'/@' + pick.handle" target="_blank" rel="noopener" :title="'@' + pick.handle + (pick.note ? ' — ' + pick.note : '')">
-      <i aria-hidden="true"><span>{{ initials }}</span></i><b>{{ firstName }}</b><em>· {{ t('guides.chat.guide_pick') }}</em>
+    <a class="gr-chip" :href="'/@' + pick.handle" target="_blank" rel="noopener" :title="(pick.displayName || '@' + pick.handle) + ' · @' + pick.handle + (pick.note ? ' — ' + pick.note : '')" :aria-label="(pick.displayName || pick.handle) + ' — ' + t('guides.chat.guide_pick')">
+      <i aria-hidden="true"><span>{{ initials }}</span></i><span class="gr-seal">{{ t('guides.chat.guide_pick') }}</span>
     </a>
     <!-- no play pill on the photo: the card's images button opens the gallery on the reel -->
     <div v-if="embed && open" class="gr-stage">
@@ -49,7 +49,10 @@ export default {
 <style scoped>
 .gr { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .gr > * { pointer-events: auto; }
-/* The guide chip (founder 2026-10-04: "more interesting, and the profile icon colour can
+/* SEAL (founder 2026-10-04, guide-chip-options.html C1 night / C2 day): the avatar in its
+   story ring with a "GUIDE'S PICK" seal tucked under it — chat violet at night,
+   champagne by day. These rules follow and override the pill below.
+   Earlier: the guide chip (founder 2026-10-04: "more interesting, and the profile icon colour can
    match the chat"): a story-style ring in the chat's own light — violet → blue → a touch
    of gold at night, apricot → honey → bronze by day — around the initials, then the
    guide's first name. Theme from the page's night-mode / day-mode ancestor. */
@@ -83,4 +86,16 @@ export default {
 .gr.open .gr-chip { z-index: 2; }
 /* phones: the reel fills the card, and its own header already names the account */
 @media (max-width: 600px) { .gr.open .gr-chip { display: none; } }
+
+.gr-chip { padding: 0; gap: 0; background: none !important; box-shadow: none !important; backdrop-filter: none; -webkit-backdrop-filter: none; overflow: visible; }
+.gr-chip i { width: 36px; height: 36px; position: relative; z-index: 1; box-shadow: 0 0 12px -2px rgba(124,77,255,0.65); }
+.gr-chip i span { font-size: 11px; }
+.gr-seal { margin-left: -12px; padding: 6px 13px 6px 19px; border-radius: 0 999px 999px 0; font: 600 10.5px/1 'Cinzel', 'Palatino Linotype', Georgia, serif;
+  letter-spacing: 0.16em; text-transform: uppercase; color: #fff; background: linear-gradient(45deg, #8b5cf6, #4f7bff); box-shadow: 0 0 14px -3px rgba(124,77,255,0.75); }
+.gr-chip:hover .gr-seal { box-shadow: 0 0 18px -2px rgba(124,77,255,0.9); }
+:global(.day-mode) .gr-chip i { box-shadow: 0 0 12px -2px rgba(192,112,42,0.5); }
+:global(.day-mode) .gr-seal { color: #4a2f17; background: linear-gradient(45deg, #f6e7c8, #e9cf9a); box-shadow: 0 0 14px -4px rgba(233,207,154,0.85); }
+:global(.day-mode) .gr-chip:hover .gr-seal { box-shadow: 0 0 18px -3px rgba(233,207,154,1); }
+/* the chip is the way to the guide's page — a tap must land on it first time */
+.gr-chip { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; z-index: 4; }
 </style>
