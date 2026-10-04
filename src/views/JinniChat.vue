@@ -277,9 +277,9 @@
                             <div class="rec-details">
                               <div class="rec-header">
                                 <div class="rec-name">{{ getRecommendationAtPosition(message, position).name }}</div>
-                                <button @click.stop="requestImages(getRecommendationAtPosition(message, position))"class="image-request-btn":class="{ 'has-reel': !!guideClip(getRecommendationAtPosition(message, position)), 'loading': getButtonState(getRecommendationAtPosition(message, position)) === 'loading' }":disabled="isButtonDisabled(getRecommendationAtPosition(message, position)) || isOnCooldown">
+                                <button @click.stop="requestImages(getRecommendationAtPosition(message, position))"class="image-request-btn":class="{ 'has-reel': !!getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl, 'loading': getButtonState(getRecommendationAtPosition(message, position)) === 'loading' }":disabled="isButtonDisabled(getRecommendationAtPosition(message, position)) || isOnCooldown">
                                   <!-- the guide's reel is slide 1 of this gallery (founder 2026-10-04: "the image request already brings that video at very first") -->
-<svg v-if="getButtonState(getRecommendationAtPosition(message, position)) !== 'loading' && guideClip(getRecommendationAtPosition(message, position))" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.8v10.4l8.2-5.2z" fill="currentColor" stroke="none"/></svg>
+<svg v-if="getButtonState(getRecommendationAtPosition(message, position)) !== 'loading' && getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.8v10.4l8.2-5.2z" fill="currentColor" stroke="none"/></svg>
 <svg v-else-if="getButtonState(getRecommendationAtPosition(message, position)) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                                     <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -407,9 +407,9 @@
                           <div class="rec-details">
                             <div class="rec-header">
                               <div class="rec-name">{{ message.recommendations[part.index].name }}</div>
-                              <button @click.stop="requestImages(message.recommendations[part.index])" class="image-request-btn" :class="{ 'has-reel': !!guideClip(message.recommendations[part.index]), 'loading': getButtonState(message.recommendations[part.index]) === 'loading' }" :disabled="isButtonDisabled(message.recommendations[part.index]) || isOnCooldown">
+                              <button @click.stop="requestImages(message.recommendations[part.index])" class="image-request-btn" :class="{ 'has-reel': !!message.recommendations[part.index].guidePicks?.[0]?.reelUrl, 'loading': getButtonState(message.recommendations[part.index]) === 'loading' }" :disabled="isButtonDisabled(message.recommendations[part.index]) || isOnCooldown">
                                 <!-- the guide's reel is slide 1 of this gallery (founder 2026-10-04: "the image request already brings that video at very first") -->
-<svg v-if="getButtonState(message.recommendations[part.index]) !== 'loading' && guideClip(message.recommendations[part.index])" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.8v10.4l8.2-5.2z" fill="currentColor" stroke="none"/></svg>
+<svg v-if="getButtonState(message.recommendations[part.index]) !== 'loading' && message.recommendations[part.index].guidePicks?.[0]?.reelUrl" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.8v10.4l8.2-5.2z" fill="currentColor" stroke="none"/></svg>
 <svg v-else-if="getButtonState(message.recommendations[part.index]) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                                   <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -567,9 +567,9 @@
                             <div class="rec-details">
                               <div class="rec-header">
                                 <div class="rec-name">{{ rec.name }}</div>
-                                <button @click.stop="requestImages(rec)" class="image-request-btn" :class="{ 'has-reel': !!guideClip(rec), 'loading': getButtonState(rec) === 'loading', 'disabled-cooldown': isOnCooldown }" :disabled="isButtonDisabled(rec) || isOnCooldown">
+                                <button @click.stop="requestImages(rec)" class="image-request-btn" :class="{ 'has-reel': !!rec.guidePicks?.[0]?.reelUrl, 'loading': getButtonState(rec) === 'loading', 'disabled-cooldown': isOnCooldown }" :disabled="isButtonDisabled(rec) || isOnCooldown">
                                   <!-- the guide's reel is slide 1 of this gallery (founder 2026-10-04: "the image request already brings that video at very first") -->
-<svg v-if="getButtonState(rec) !== 'loading' && guideClip(rec)" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.8v10.4l8.2-5.2z" fill="currentColor" stroke="none"/></svg>
+<svg v-if="getButtonState(rec) !== 'loading' && rec.guidePicks?.[0]?.reelUrl" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.8v10.4l8.2-5.2z" fill="currentColor" stroke="none"/></svg>
 <svg v-else-if="getButtonState(rec) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                                     <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -1675,9 +1675,7 @@
     <div class="fullscreen-image-container" @click.stop>
       <div v-if="fullscreenImages.length > 0" style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
         <!-- slide 1 can be the guide's reel (founder 2026-10-04: "the video of insta has not appeared there") -->
-        <!-- the guide's own uploaded clip plays in Jinni's player (founder 2026-10-05); a pick with only an Instagram link still falls back to the embed -->
-        <GuideVideo v-if="fullscreenImages[currentFullscreenIndex]?.kind === 'video'" :key="fullscreenImages[currentFullscreenIndex].url" class="fullscreen-guide-video" :src="fullscreenImages[currentFullscreenIndex].url" :poster="fullscreenImages[currentFullscreenIndex].poster" :ig-url="fullscreenImages[currentFullscreenIndex].ig" :ig-label="$t('guides.page.on_instagram')" @error="onGuideVideoError" />
-        <iframe v-else-if="fullscreenImages[currentFullscreenIndex]?.kind === 'reel'" :src="fullscreenImages[currentFullscreenIndex].url" class="fullscreen-reel" title="Instagram reel" scrolling="no" allowtransparency="true" allow="encrypted-media; picture-in-picture" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation" @click.stop></iframe>
+        <iframe v-if="fullscreenImages[currentFullscreenIndex]?.kind === 'reel'" :src="fullscreenImages[currentFullscreenIndex].url" class="fullscreen-reel" title="Instagram reel" scrolling="no" allowtransparency="true" allow="encrypted-media; picture-in-picture" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation" @click.stop></iframe>
         <img v-else :src="fullscreenImages[currentFullscreenIndex]?.url || fullscreenImages[currentFullscreenIndex]?.src" :alt="fullscreenImages[currentFullscreenIndex]?.title || 'Image'" class="fullscreen-image" @load="handleFullscreenImageLoad" @error="handleImageError">
         <button v-if="fullscreenImages.length > 1" @click.stop="previousFullscreenImage" :disabled="currentFullscreenIndex === 0" class="fullscreen-nav-btn fullscreen-prev">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -1761,9 +1759,9 @@
                   <div class="rec-header">
                     <div class="rec-name">{{ item.rec.name }}</div>
                     <!-- Image request button (restored) -->
-                    <button @click.stop="requestImages(item.rec)" class="image-request-btn" :class="{ 'has-reel': !!guideClip(item.rec), 'loading': getButtonState(item.rec) === 'loading' }" :disabled="isButtonDisabled(item.rec) || isOnCooldown">
+                    <button @click.stop="requestImages(item.rec)" class="image-request-btn" :class="{ 'has-reel': !!item.rec.guidePicks?.[0]?.reelUrl, 'loading': getButtonState(item.rec) === 'loading' }" :disabled="isButtonDisabled(item.rec) || isOnCooldown">
                       <!-- the guide's reel is slide 1 of this gallery (founder 2026-10-04: "the image request already brings that video at very first") -->
-<svg v-if="getButtonState(item.rec) !== 'loading' && guideClip(item.rec)" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.8v10.4l8.2-5.2z" fill="currentColor" stroke="none"/></svg>
+<svg v-if="getButtonState(item.rec) !== 'loading' && item.rec.guidePicks?.[0]?.reelUrl" class="reel-gallery-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.8v10.4l8.2-5.2z" fill="currentColor" stroke="none"/></svg>
 <svg v-else-if="getButtonState(item.rec) !== 'loading'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                         <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -1795,7 +1793,7 @@
                 </div>
               </div><!-- /recommendation-card -->
               <div class="rec-card-bottom">
-                <a v-if="item.rec.guidePicks?.length" :href="'/@' + item.rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="item.rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ item.rec.guidePicks[0].handle }}</a><button v-if="guideClip(item.rec)" type="button" class="rec-guide-reel" @click.stop="openGuideReel(item.rec.guidePicks[0])">▶ {{ $t('guides.page.watch_reel') }}</button>
+                <a v-if="item.rec.guidePicks?.length" :href="'/@' + item.rec.guidePicks[0].handle" target="_blank" rel="noopener" class="rec-guide-pick" :title="item.rec.guidePicks[0].note || ''" @click.stop>Picked by @{{ item.rec.guidePicks[0].handle }}</a><button v-if="item.rec.guidePicks?.[0]?.reelUrl" type="button" class="rec-guide-reel" @click.stop="openGuideReel(item.rec.guidePicks[0].reelUrl)">▶ {{ $t('guides.page.watch_reel') }}</button>
                 <div v-if="(item.rec.verifiedId || item.rec.id?.startsWith('db-')) && item.rec._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(item.rec)]" v-html="getPartnerIcon(item.rec) + ' ' + getPartnerLabel(item.rec)"></div>
               </div>
               </div><!-- /rec-card-wrapper -->
@@ -1824,15 +1822,9 @@
   <!-- A guide's reel, played inside the chat (founder 2026-10-04: "in jinnichat").
        Instagram's official embed; the site CSP allows frame-src www.instagram.com. -->
   <Teleport to="body">
-    <div v-if="reelEmbedUrl || reelVideo" class="guide-reel-overlay" @click.self="closeGuideReel">
-      <template v-if="reelVideo">
-        <button type="button" class="guide-reel-close guide-reel-close-fixed" aria-label="Close" @click="closeGuideReel">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-        </button>
-        <GuideVideo class="guide-reel-video" :src="reelVideo.url" :poster="reelVideo.poster" :ig-url="reelVideo.ig" :ig-label="$t('guides.page.on_instagram')" @error="onOverlayVideoError" />
-      </template>
-      <div v-else class="guide-reel-box" role="dialog" aria-modal="true" :aria-label="$t('guides.page.watch_reel')">
-        <button type="button" class="guide-reel-close" aria-label="Close" @click="closeGuideReel">
+    <div v-if="reelEmbedUrl" class="guide-reel-overlay" @click.self="reelEmbedUrl = null">
+      <div class="guide-reel-box" role="dialog" aria-modal="true" :aria-label="$t('guides.page.watch_reel')">
+        <button type="button" class="guide-reel-close" aria-label="Close" @click="reelEmbedUrl = null">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
         <iframe :src="reelEmbedUrl" title="Instagram reel" scrolling="no" allowtransparency="true" allow="encrypted-media; picture-in-picture"
@@ -1859,7 +1851,6 @@ import { applyDisplayPrefs as applyDisplayPrefsGlobal } from '../utils/displayPr
 import { useI18n } from 'vue-i18n';
 import { instagramEmbed } from '@/utils/guides';
 import GuideReel from '@/components/ui/GuideReel.vue';
-import GuideVideo from '@/components/ui/GuideVideo.vue';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000';
 /** How long the preference bar stays visible after it reveals. */
 const PREFERENCE_BAR_HIDE_MS = 5000;
@@ -1882,11 +1873,10 @@ export default {
       unmounted(el) { document.body.removeEventListener('click', el.clickOutsideEvent) }
     }
   },
-  components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView, GuideReel, GuideVideo },
+  components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView, GuideReel },
   data() {
     return {
       reelEmbedUrl: null,
-      reelVideo: null,      // the same overlay, playing the guide's uploaded clip in Jinni's own player
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -2617,24 +2607,7 @@ export default {
     if (this.usageCheckInterval) { clearInterval(this.usageCheckInterval) }
   },
   methods: {
-    // A guide's clip for a card: their uploaded video (Jinni's player) when there is one, else the Instagram embed.
-    guideClip(rec) { const g = rec?.guidePicks?.[0]; return !!(g && (g.videoUrl || g.reelUrl)) },
-    guideClipSlide(g) {
-      if (g?.videoUrl) return { kind: 'video', url: this.getImageUrl(g.videoUrl), poster: g.posterUrl ? this.getImageUrl(g.posterUrl) : '', ig: g.reelUrl || '', embed: g.reelUrl ? instagramEmbed(g.reelUrl) : null }
-      const embed = g?.reelUrl ? instagramEmbed(g.reelUrl) : null
-      return embed ? { kind: 'reel', url: embed } : null
-    },
-    openGuideReel(pick) { const c = this.guideClipSlide(pick); if (c?.kind === 'video') this.reelVideo = c; else this.reelEmbedUrl = c ? c.url : null },
-    closeGuideReel() { this.reelEmbedUrl = null; this.reelVideo = null },
-    // The uploaded clip would not load (removed since, or blocked) → the Instagram embed if the pick has a link, else nothing.
-    onOverlayVideoError() { const e = this.reelVideo?.embed || null; this.reelVideo = null; this.reelEmbedUrl = e },
-    onGuideVideoError() {
-      const i = this.fullscreenImages.findIndex(x => x.kind === 'video'); if (i < 0) return
-      const e = this.fullscreenImages[i].embed
-      if (e) this.fullscreenImages.splice(i, 1, { kind: 'reel', url: e, title: 'Reel' })
-      else if (this.fullscreenImages.length > 1) { this.fullscreenImages.splice(i, 1); this.currentFullscreenIndex = Math.min(this.currentFullscreenIndex, this.fullscreenImages.length - 1) }
-      else this.closeFullscreenModal()
-    },
+    openGuideReel(url) { this.reelEmbedUrl = instagramEmbed(url) },
     reelKey(rec) { return (rec && (rec.placeId || rec.verifiedId || rec.name)) || '' },
     isReelOpen(rec) { return !!this.openReels[this.reelKey(rec)] },
     toggleReel(rec) { const k = this.reelKey(rec); this.openReels = { ...this.openReels, [k]: !this.openReels[k] } },
@@ -5638,7 +5611,7 @@ export default {
     },
     async requestImages(recommendation) {
       const gp = recommendation?.guidePicks?.[0];
-      this.galleryReel = this.guideClipSlide(gp);
+      this.galleryReel = gp?.reelUrl ? instagramEmbed(gp.reelUrl) : null;
       if (this.isOnCooldown) {
         // console.log('🚫 Image request blocked - user on cooldown');
         this.showCooldownMessage(this.usageStatus);
@@ -6786,7 +6759,7 @@ export default {
     },
     openFullscreenModal(images) {
       this.fullscreenImages = images.map(img => ({...img, url: this.getImageUrl(img.url || img.src), title: img.title || img.alt || 'Image'}));
-      if (this.galleryReel) this.fullscreenImages.unshift({ ...this.galleryReel, title: 'Reel' });
+      if (this.galleryReel) this.fullscreenImages.unshift({ kind: 'reel', url: this.galleryReel, title: 'Reel' });
       this.currentFullscreenIndex = 0;
       this.showFullscreenModal = true;
       this.fullscreenLoading = false;
@@ -7946,10 +7919,6 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .guide-reel-overlay{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:16px;background:rgba(8,4,16,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .guide-reel-box{position:relative;width:min(380px,100%);height:min(640px,calc(100dvh - 32px));border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 0 24px -4px rgba(0,0,0,.6)}
 .guide-reel-box iframe{width:100%;height:100%;border:0;display:block}
-/* the guide's uploaded clip in Jinni's own player (founder 2026-10-05) — gallery slide 1 and the Watch-reel overlay */
-.fullscreen-guide-video{--gv-max-h:min(86vh,760px);max-width:94vw}
-.guide-reel-video{--gv-max-h:calc(100dvh - 32px);max-width:min(520px,100%)}
-.guide-reel-close-fixed{position:fixed;top:14px;right:14px;z-index:2}
 .guide-reel-close{position:absolute;top:10px;right:10px;z-index:1;width:34px;height:34px;border-radius:999px;border:0;display:grid;place-items:center;cursor:pointer;color:#fff;background:rgba(20,10,30,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .rec-guide-pick:hover{text-decoration:underline}
 .partner-label--spotlight{color:#3b9fdda2}

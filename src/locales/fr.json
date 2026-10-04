@@ -1578,15 +1578,7 @@
       "place_gone": "N'est plus affiché sur Jinni",
       "cat_team": "L'équipe Jinni classe ce lieu comme : {cats}.",
       "cat_none": "L'équipe Jinni n'a pas encore classé ce lieu dans une catégorie de guide — demandez-nous d'en ajouter une.",
-      "cat_not_food": "Seuls les lieux qui servent à manger ou à boire peuvent être un choix « restaurant ».",
-      "video": "Votre vidéo de ce lieu",
-      "video_hint": "(facultatif — MP4 ou MOV, jusqu'à 90 secondes et 80 Mo ; lue dans le lecteur de Jinni)",
-      "video_uploading": "Envoi de la vidéo… {pct} %",
-      "video_processing": "vidéo en préparation",
-      "video_ready": "vidéo ajoutée",
-      "video_failed": "échec de la vidéo",
-      "video_remove": "Supprimer la vidéo",
-      "video_too_big": "La vidéo dépasse 80 Mo. Choisissez-en une plus courte ou plus légère."
+      "cat_not_food": "Seuls les lieux qui servent à manger ou à boire peuvent être un choix « restaurant »."
     },
     "page": {
       "loading": "Chargement…",
@@ -1605,8 +1597,7 @@
       "book": "Réserver :",
       "foot": "Des lieux choisis par de vrais guides locaux sur",
       "become": "Devenir guide",
-      "title_suffix": "coups de cœur locaux sur Jinni",
-      "on_instagram": "Voir sur Instagram"
+      "title_suffix": "coups de cœur locaux sur Jinni"
     },
     "chat": {
       "guide_pick": "choix du guide"

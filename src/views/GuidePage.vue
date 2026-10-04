@@ -60,11 +60,9 @@
               </div>
               <div class="gp-card-actions">
                 <a v-if="p.lat != null" :href="`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`" target="_blank" rel="noopener" class="gp-btn-ghost">{{ t('guides.page.map') }}</a>
-                <button v-if="clipOf(p)" type="button" class="gp-btn-ghost gp-reel-btn" :class="{ on: openReel === p.id }" @click="toggleReel(p.id)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="15" height="15" rx="3.5"/><path d="M9 9.3v6.4l5.2-3.2z" class="fill"/><path d="M20 1.8l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" class="spark"/></svg>{{ openReel === p.id ? t('guides.page.hide_reel') : t('guides.page.watch_reel') }}</button>
+                <button v-if="p.embedUrl" type="button" class="gp-btn-ghost gp-reel-btn" :class="{ on: openReel === p.id }" @click="toggleReel(p.id)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="15" height="15" rx="3.5"/><path d="M9 9.3v6.4l5.2-3.2z" class="fill"/><path d="M20 1.8l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" class="spark"/></svg>{{ openReel === p.id ? t('guides.page.hide_reel') : t('guides.page.watch_reel') }}</button>
               </div>
-              <!-- the guide's uploaded clip plays in Jinni's own player (founder 2026-10-05); only an Instagram link → the embed -->
-              <div v-if="openReel === p.id && clipOf(p) === 'video'" class="gp-embed gp-video"><GuideVideo :src="guideImage(p.videoUrl)" :poster="p.posterUrl ? guideImage(p.posterUrl) : (p.image ? guideImage(p.image) : '')" :ig-url="p.reelUrl || ''" :ig-label="t('guides.page.on_instagram')" @error="videoFailed[p.id] = true" /></div>
-              <div v-else-if="openReel === p.id && p.embedUrl" class="gp-embed"><iframe :src="p.embedUrl" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="guide.displayName + ' — Instagram'"></iframe></div>
+              <div v-if="openReel === p.id && p.embedUrl" class="gp-embed"><iframe :src="p.embedUrl" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="guide.displayName + ' — Instagram'"></iframe></div>
             </div>
           </article>
         </section>
@@ -77,12 +75,11 @@
 
 <script setup>
 import '@/assets/styles/jinni-pill.css'
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { guideTheme, guideApi, CATEGORY_KEYS, tagGuideVisit, hasToken, initGuideLanguage, guideImage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
-import GuideVideo from '@/components/ui/GuideVideo.vue'
 import JinniDaySky from '@/components/ui/JinniDaySky.vue'
 import JinniNightSky from '@/components/ui/JinniNightSky.vue'
 
@@ -96,8 +93,6 @@ const guide = ref(null)
 const picks = ref([])
 const tab = ref('all')
 const openReel = ref(null)
-const videoFailed = reactive({})   // a clip that would not load falls back to the Instagram embed
-const clipOf = (p) => (p.videoUrl && !videoFailed[p.id] ? 'video' : (p.embedUrl ? 'embed' : null))
 
 const firstName = computed(() => String(guide.value?.displayName || '').split(' ')[0] || '')
 const initials = computed(() => String(guide.value?.displayName || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase())
@@ -286,7 +281,6 @@ onMounted(async () => {
 .gp-reel-btn svg .fill { fill: currentColor; stroke: none; }
 .gp-reel-btn svg .spark { fill: #FFB347; stroke: none; filter: drop-shadow(0 0 2px rgba(255,170,70,0.9)); }
 .gp-reel-btn.on { box-shadow: inset 0 0 0 0.75px rgba(255,200,120,0.6), 0 0 14px -2px rgba(255,160,70,0.55); }
-.gp-video { --gv-max-h: 560px; }
 .gp-embed iframe { box-shadow: 0 0 24px -6px rgba(0,0,0,0.5); }
 
 /* not found + footer */
