@@ -223,8 +223,7 @@ export default {
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); animation: auth-msg-in 0.35s ease-out }
 .auth-page .auth-modal-overlay.day-mode :deep(.error-message), .auth-page .auth-modal-overlay.night-mode :deep(.error-message) { color: var(--rose); background: var(--rose-fill); box-shadow: inset 0 0 0 0.75px var(--rose-rim) }
 .auth-page .auth-modal-overlay.day-mode :deep(.success-message), .auth-page .auth-modal-overlay.night-mode :deep(.success-message) { color: var(--gold-ink); background: var(--gold-fill); box-shadow: inset 0 0 0 0.75px var(--gold-rim) }
-.auth-page :deep(.success-message)::before { content: ''; flex: none; width: 7px; height: 7px; border-radius: 50%;
-  background: linear-gradient(45deg, #D4AF37, #FF8C00); box-shadow: 0 0 8px rgba(255,170,60,0.8) }
+/* (2026-10-04) no decorative dot — founder: it read as a status light that meant nothing */
 /* password strength: the palette's own weak / medium / strong */
 .auth-page.day-mode { --pw-weak: #c0573f; --pw-mid: #c98a1e; --pw-ok: #4f8a3c }
 .auth-page.jinni-night { --pw-weak: #ff9a8a; --pw-mid: #f0c060; --pw-ok: #8fd18a }

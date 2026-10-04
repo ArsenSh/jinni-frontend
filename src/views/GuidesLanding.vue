@@ -24,7 +24,7 @@
 
     <section class="gl-hero">
       <div class="gl-hero-text">
-        <p class="gl-badge"><span class="gl-dot" aria-hidden="true"></span>{{ t('guides.landing.badge') }} <span class="gl-badge-free">· {{ t('guides.landing.badge_free') }}</span></p>
+        <p class="gl-badge">{{ t('guides.landing.badge') }} <span class="gl-badge-free">· {{ t('guides.landing.badge_free') }}</span></p>
         <h1>{{ t('guides.landing.h1_a') }}<br />{{ t('guides.landing.h1_b') }}<br /><span class="grad">{{ t('guides.landing.h1_c') }}</span></h1>
         <p class="gl-sub">{{ t('guides.landing.sub_before') }} <strong dir="ltr">{{ t('guides.landing.sub_page') }}</strong> {{ t('guides.landing.sub_after') }}</p>
         <div class="gl-cta-row">

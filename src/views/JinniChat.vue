@@ -7702,6 +7702,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .sidebar-collapsed .chat-history{display:none}
 .app-header{padding:15px 15px 0 15px}
 .app-name{font-size:1.6rem;font-weight:600;color:#FFD700;background:linear-gradient(45deg,#D4AF37,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* sidebar brand = the landing's mark (founder 2026-10-04): JINNI in Cinzel, letter-spaced,
+   one colour per theme — no gradient, no glow (landing .app-name in the preview layout) */
+.app-header .app-name{font-family:'Cinzel','Palatino Linotype',Palatino,Georgia,serif;font-size:22px;font-weight:600;letter-spacing:2px;line-height:1;background:none;-webkit-text-fill-color:currentColor;color:#f3eaf8}
+.day-mode .app-header .app-name{color:#b8741f}
+.night-mode .app-header .app-icon{filter:drop-shadow(0 0 8px rgba(255,170,90,.35))}
+.day-mode .app-header .app-icon{filter:saturate(.88) brightness(.95)}
 .app-brand{display:flex;align-items:center;gap:8px;justify-content:flex-start}
 .app-icon{width:3.75rem;height:3.75rem;object-fit:contain}
 .app-icon-collapsed{width:3.4375rem;height:3.4375rem;object-fit:contain}
