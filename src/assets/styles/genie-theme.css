@@ -90,7 +90,8 @@ body.theme-light {
   body:has(.business-landing.jinni-night),
   body:has(.auth-page.jinni-night),
   body:has(.gl.night-mode),
-  body:has(.ga.night-mode) {
+  body:has(.ga.night-mode),
+  body:has(.gp.night-mode) {
     animation: jinni-night-shift linear both;
     animation-timeline: scroll(root);
   }
@@ -98,7 +99,8 @@ body.theme-light {
   body:has(.business-landing.day-mode),
   body:has(.auth-page.day-mode),
   body:has(.gl.day-mode),
-  body:has(.ga.day-mode) {
+  body:has(.ga.day-mode),
+  body:has(.gp.day-mode) {
     animation: jinni-day-shift linear both;
     animation-timeline: scroll(root);
   }

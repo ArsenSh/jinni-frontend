@@ -1,5 +1,9 @@
 <template>
   <div class="gp" :class="theme" :dir="locale === 'ar' ? 'rtl' : 'ltr'">
+    <!-- the landing's world (founder 2026-10-04: "make jinni.travel/@guide more powerful
+         like the landing"); first child, so App.vue's chrome sync reads its colours -->
+    <JinniNightSky v-if="theme === 'night-mode'" />
+    <JinniDaySky v-else />
     <header class="gp-top">
       <router-link to="/" class="gp-brand"><img src="/images/lamp.webp" alt="" class="gp-lamp" /><span translate="no">Jinni</span></router-link>
       <div class="gp-top-right">
@@ -19,18 +23,18 @@
 
       <template v-else>
         <section class="gp-hero">
-          <div class="gp-avatar">{{ initials }}</div>
-          <div>
+          <div class="gp-avatar"><span>{{ initials }}</span></div>
+          <div class="gp-hero-text">
             <p class="gp-kicker">{{ t('guides.types_short.' + (guide.guideType || 'local')) }} · {{ guide.region }}</p>
             <h1>{{ guide.displayName }}</h1>
-            <a :href="`https://www.instagram.com/${guide.instagram}/`" target="_blank" rel="noopener" class="gp-ig">{{ t('guides.page.instagram_link', { handle: '@' + guide.instagram }) }}</a>
+            <a :href="`https://www.instagram.com/${guide.instagram}/`" target="_blank" rel="noopener" class="gp-ig"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1" class="dot"/></svg>{{ t('guides.page.instagram_link', { handle: '@' + guide.instagram }) }}</a>
             <p v-if="guide.bio" class="gp-bio">{{ guide.bio }}</p>
-            <p v-if="guide.languages.length" class="gp-muted">{{ t('guides.page.guides_in', { langs: languagesText }) }}</p>
+            <p v-if="guide.languages.length" class="gp-langs" :aria-label="t('guides.page.guides_in', { langs: languagesText })"><span v-for="l in guide.languages" :key="l">{{ t('guides.langs.' + l) }}</span></p>
           </div>
         </section>
 
         <div class="gp-ask">
-          <router-link :to="askTo" class="gp-btn jinni-pill" @click="tagGuideVisit(guide.handle)">{{ t('guides.page.ask', { name: firstName }) }}</router-link>
+          <router-link :to="askTo" class="gp-btn gp-cta" @click="tagGuideVisit(guide.handle)">{{ t('guides.page.ask', { name: firstName }) }}</router-link>
           <p class="gp-muted">{{ t('guides.page.ask_note') }}</p>
         </div>
 
@@ -42,9 +46,9 @@
 
         <section class="gp-grid">
           <article v-for="p in shown" :key="p.id" class="gp-card">
-            <img v-if="p.image" :src="guideImage(p.image)" :alt="p.name" class="gp-img" loading="lazy" />
+            <div v-if="p.image" class="gp-media"><img :src="guideImage(p.image)" :alt="p.name" class="gp-img" loading="lazy" /><span class="gp-tag on-photo">{{ t('guides.categories.' + p.category) }}</span></div>
             <div class="gp-body">
-              <span class="gp-tag">{{ t('guides.categories.' + p.category) }}</span>
+              <span v-if="!p.image" class="gp-tag">{{ t('guides.categories.' + p.category) }}</span>
               <h3>{{ p.name }}</h3>
               <p v-if="p.address" class="gp-muted gp-addr">{{ p.address }}</p>
               <p v-if="p.note" class="gp-note">"{{ p.note }}" <span>— {{ firstName }}</span></p>
@@ -56,7 +60,7 @@
               </div>
               <div class="gp-card-actions">
                 <a v-if="p.lat != null" :href="`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`" target="_blank" rel="noopener" class="gp-btn-ghost">{{ t('guides.page.map') }}</a>
-                <button v-if="p.embedUrl" type="button" class="gp-btn-ghost" @click="toggleReel(p.id)">{{ openReel === p.id ? t('guides.page.hide_reel') : t('guides.page.watch_reel') }}</button>
+                <button v-if="p.embedUrl" type="button" class="gp-btn-ghost gp-reel-btn" :class="{ on: openReel === p.id }" @click="toggleReel(p.id)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="15" height="15" rx="3.5"/><path d="M9 9.3v6.4l5.2-3.2z" class="fill"/><path d="M20 1.8l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" class="spark"/></svg>{{ openReel === p.id ? t('guides.page.hide_reel') : t('guides.page.watch_reel') }}</button>
               </div>
               <div v-if="openReel === p.id && p.embedUrl" class="gp-embed"><iframe :src="p.embedUrl" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="guide.displayName + ' — Instagram'"></iframe></div>
             </div>
@@ -76,6 +80,8 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { guideTheme, guideApi, CATEGORY_KEYS, tagGuideVisit, hasToken, initGuideLanguage, guideImage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
+import JinniDaySky from '@/components/ui/JinniDaySky.vue'
+import JinniNightSky from '@/components/ui/JinniNightSky.vue'
 
 const { t, locale } = useI18n()
 initGuideLanguage(locale)
@@ -111,8 +117,8 @@ onMounted(async () => {
 
 <style scoped>
 .gp { min-height: 100vh; font-family: 'Lora', Georgia, serif; padding: 0 16px 40px; box-sizing: border-box; }
-.gp.day-mode { background: linear-gradient(180deg, #f9f5eb 0%, #f5edda 50%, #f9f5eb 100%); color: #3c2a1e; }
-.gp.night-mode { background: linear-gradient(180deg, #0a0118 0%, #1a0b2e 50%, #0a0118 100%); color: #f5e6c8; }
+.gp.day-mode { color: #3c2a1e; }
+.gp.night-mode { color: #f5e6c8; }
 /* Both themes end on their TOP colour: iOS 26 paints the area past the page
    with one solid colour (the top), so a page ending lighter showed a band at
    the bottom edge (founder 2026-10-03). */
@@ -160,5 +166,126 @@ onMounted(async () => {
 .gp-muted { opacity: 0.7; font-size: 14px; margin: 0; }
 .gp-foot { max-width: 960px; margin: 40px auto 0; text-align: center; font-size: 13px; opacity: 0.75; }
 .gp-foot a { color: inherit; }
-@media (max-width: 520px) { .gp-hero { flex-direction: column; } }
+
+
+/* ═══ jinni.travel/@guide · the landing's world (founder 2026-10-04: "make the
+   guides page more powerful like the design way we did in landing page").
+   Sky behind, lamp + JINNI, EN glass pill, a centred hero — the guide's initials
+   in the chat chip's story ring with lamplight behind, name in Cinzel, Instagram
+   as a glass pill, bio as a quote, languages as chips, Ember Breath "Ask Jinni
+   like …" — glass tabs (chosen = gold), frosted pick cards with the category on
+   the photo, the guide's note as a gold-tinted quote, tour on a gold glass plate,
+   glass Map / Watch reel buttons, ruled footer. Content and logic unchanged. ═══ */
+.gp { position: relative; z-index: 1; background: none; --serif: 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif;
+  --lora: 'Lora', 'Noto Serif Armenian', Georgia, serif; font-family: var(--lora); padding-inline: 16px; }
+.gp.day-mode { background: none; color: #7a5434;
+  --ink: #7A4A1C; --body: #7a5434; --soft: rgba(122,84,52,0.75); --accent: #c0702a; --link: #9a5a1e;
+  --glass: rgba(255,255,255,0.5); --glass-rim: inset 0 0 0 0.75px rgba(255,255,255,0.9), 0 0 18px -2px rgba(140,61,7,0.12);
+  --chip: rgba(255,255,255,0.55); --chip-rim: inset 0 0 0 0.75px rgba(255,255,255,0.9); --chip-hover: rgba(255,255,255,0.75);
+  --gold-fill: rgba(212,175,55,0.1); --gold-rim: rgba(184,125,40,0.32); --rule: rgba(122,74,28,0.16);
+  --ring: conic-gradient(from 210deg, #ffb36b, #ffd27a, #e9a23b, #c0702a, #ffb36b); --disc: linear-gradient(135deg, #ffb36b, #c0702a); --disc-gap: rgba(249,240,222,1);
+  --halo: rgba(255,170,80,0.32);
+  --lang-ink: #7A4A1C; --lang-glass: rgba(255,255,255,0.45); --lang-glass-hover: rgba(255,255,255,0.62);
+  --lang-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), 0 0 18px -2px rgba(140,61,7,0.14);
+  --cta-ink: #6e3f16; --cta-glass: rgba(255,255,255,0.35); --cta-ink-shadow: 0 0 8px rgba(255,248,235,0.8);
+  --cta-rim: inset 0 0 0 0.75px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 18px -3px rgba(190,110,40,0.3);
+  --cta-light: rgba(255,160,70,0.75); --cta-core: rgba(255,230,170,0.7) }
+.gp.night-mode { background: none; color: #eee6f6;
+  --ink: #fbf5ff; --body: #c9c0da; --soft: rgba(220,210,240,0.68); --accent: #ffb36b; --link: #ffd29a;
+  --glass: rgba(255,255,255,0.05); --glass-rim: inset 0 0 0 0.75px rgba(220,210,255,0.14), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -2px rgba(0,0,0,0.45);
+  --chip: rgba(255,255,255,0.06); --chip-rim: inset 0 0 0 0.75px rgba(220,210,255,0.18); --chip-hover: rgba(255,255,255,0.1);
+  --gold-fill: rgba(255,210,140,0.07); --gold-rim: rgba(255,210,122,0.3); --rule: rgba(200,190,255,0.14);
+  --ring: conic-gradient(from 210deg, #c58bff, #7c4dff, #4f7bff, #6ad0ff, #ffd27a, #c58bff); --disc: linear-gradient(135deg, #8b5cf6, #4338ca 60%, #1e3a8a); --disc-gap: rgba(10,1,24,1);
+  --halo: rgba(124,77,255,0.45);
+  --lang-ink: #f3eaf8; --lang-glass: rgba(255,255,255,0.06); --lang-glass-hover: rgba(255,255,255,0.12);
+  --lang-rim: inset 0 0 0 0.75px rgba(220,210,255,0.22), inset 0 1px 0 rgba(255,255,255,0.12), 0 0 18px -2px rgba(0,0,0,0.3);
+  --cta-ink: #fffaf0; --cta-glass: rgba(255,255,255,0.04); --cta-ink-shadow: 0 0 10px rgba(120,50,0,0.55), 0 0 2px rgba(80,30,0,0.4);
+  --cta-rim: inset 0 0 0 0.75px rgba(255,240,215,0.38), inset 0 1px 0 rgba(255,246,228,0.5), 0 0 18px -2px rgba(255,160,80,0.32);
+  --cta-light: rgba(255,150,50,0.62); --cta-core: rgba(255,228,170,0.5) }
+@media (min-width: 900px) { .gp { padding-inline: 32px; } }
+
+/* header */
+.gp-top { max-width: 1080px; padding: 20px 0; }
+.gp-brand { font-family: var(--serif); font-size: 22px; letter-spacing: 2px; color: var(--ink); }
+.day-mode .gp-brand { color: #b8741f; }
+.gp-lamp { width: 44px; margin: -6px -4px -6px -6px; }
+.night-mode .gp-lamp { filter: drop-shadow(0 0 8px rgba(255,170,90,0.35)); }
+.day-mode .gp-lamp { filter: saturate(0.88) brightness(0.95); }
+.gp-link { border: 0; height: auto; padding: 8px 4px; font-size: 14px; color: var(--soft); }
+.gp-link:hover { color: var(--ink); background: none; }
+.gp-top-right :deep(.gls-btn) { height: 40px; padding: 0 14px 0 12px; border: 0; font-size: 13.5px; font-weight: 600; color: var(--lang-ink);
+  background: var(--lang-glass); box-shadow: var(--lang-rim); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); }
+.gp-top-right :deep(.gls-btn:hover) { background: var(--lang-glass-hover); }
+
+/* hero: centred, the guide in the spotlight */
+.gp-main { max-width: 1080px; }
+.gp-hero { flex-direction: column; align-items: center; text-align: center; gap: 16px; margin: clamp(18px, 5vh, 48px) auto 22px; max-width: 720px; position: relative; }
+.gp-hero::before { content: ''; position: absolute; top: -40px; left: 50%; width: 420px; max-width: 100vw; height: 300px; transform: translateX(-50%); z-index: -1;
+  pointer-events: none; filter: blur(40px); background: radial-gradient(closest-side, var(--halo), transparent); }
+.gp-avatar { flex: none; width: 112px; height: 112px; padding: 3px; box-sizing: border-box; border-radius: 50%; background: var(--ring); box-shadow: 0 0 30px -6px var(--halo); font-size: 0; }
+.gp-avatar span { width: 100%; height: 100%; border-radius: 50%; display: grid; place-items: center; font: 600 36px/1 var(--serif); letter-spacing: 0.04em;
+  color: #fff; background: var(--disc); box-shadow: 0 0 0 3px var(--disc-gap); }
+.gp-hero-text { display: grid; justify-items: center; gap: 10px; }
+.gp-kicker, .night-mode .gp-kicker { margin: 0; font-family: var(--serif); font-size: 12.5px; letter-spacing: 0.22em; color: var(--accent); }
+.gp-hero h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: clamp(34px, 6vw, 60px); line-height: 1.08; letter-spacing: 0.02em; color: var(--ink);
+  text-wrap: balance; text-shadow: 0 0 30px rgba(255,170,90,0.16); }
+.day-mode .gp-hero h1 { text-shadow: none; }
+.gp-ig, .night-mode .gp-ig { display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px 8px 12px; border-radius: 999px; text-decoration: none; font-size: 14.5px;
+  color: var(--ink); background: var(--chip); box-shadow: var(--chip-rim); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.gp-ig:hover { background: var(--chip-hover); }
+.gp-ig svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.gp-ig svg .dot { fill: currentColor; stroke: none; }
+.gp-bio { margin: 2px 0 0; max-width: 560px; font-style: italic; font-size: clamp(16.5px, 2vw, 18.5px); line-height: 1.6; color: var(--body); }
+.gp-bio::before { content: '“'; } .gp-bio::after { content: '”'; }
+.gp-langs { margin: 2px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.gp-langs span { padding: 4px 11px; border-radius: 999px; font-size: 12.5px; color: var(--body); background: var(--chip); box-shadow: var(--chip-rim); }
+
+/* Ask Jinni like … = Ember Breath glass (the landing's Make a Wish) */
+.gp-ask { flex-direction: column; justify-content: center; gap: 10px; margin: 6px 0 34px; text-align: center; }
+.gp .gp-cta { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 14px 36px;
+  border: 0; border-radius: 999px; text-decoration: none; font: 600 17px/1.25 var(--lora); color: var(--cta-ink); text-shadow: var(--cta-ink-shadow); background: var(--cta-glass);
+  backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); box-shadow: var(--cta-rim); }
+.gp .gp-cta::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(62% 120% at 50% 110%, var(--cta-light), transparent 70%), radial-gradient(34% 80% at 50% 110%, var(--cta-core), transparent 70%);
+  animation: gp-breathe 3.4s ease-in-out infinite; }
+@keyframes gp-breathe { 0%, 100% { opacity: 0.45 } 50% { opacity: 0.9 } }
+@media (prefers-reduced-motion: reduce) { .gp .gp-cta::before { animation: none; } }
+.gp-ask .gp-muted { color: var(--soft); opacity: 1; }
+
+/* tabs: glass, the chosen one gold */
+.gp-tabs { justify-content: center; margin-bottom: 22px; }
+.gp-tab { border: 0; color: var(--body); background: var(--chip); box-shadow: var(--chip-rim); transition: background-color 0.2s ease; }
+.gp-tab:hover { background: var(--chip-hover); }
+.gp-tab.on, .gp-tab.jinni-chip-on { color: #fff !important; background: linear-gradient(45deg, #D4AF37, #FF8C00) !important; box-shadow: 0 0 14px -4px rgba(255,140,0,0.5) !important; border: 0 !important; }
+
+/* pick cards: frosted glass like the landing cards */
+.gp-grid { gap: 18px; }
+.day-mode .gp-card, .night-mode .gp-card { border-radius: 22px; background: var(--glass); box-shadow: var(--glass-rim);
+  backdrop-filter: blur(14px) saturate(150%); -webkit-backdrop-filter: blur(14px) saturate(150%); }
+.gp-media { position: relative; }
+.gp-media::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(8,4,18,0.35) 0%, transparent 35%); }
+.gp-tag { font-family: var(--serif); font-size: 11px; letter-spacing: 0.14em; color: var(--accent); background: var(--gold-fill); box-shadow: inset 0 0 0 0.75px var(--gold-rim); }
+.gp-tag.on-photo { position: absolute; z-index: 1; top: 10px; left: 10px; color: #fff4e2; background: rgba(16,7,34,0.45); box-shadow: inset 0 0 0 0.75px rgba(255,235,200,0.35);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.gp-body { padding: 16px 18px 18px; gap: 9px; }
+.gp-body h3 { font: 600 19px/1.3 var(--lora); color: var(--ink); }
+.gp-addr { color: var(--soft); opacity: 1; }
+.gp-note { padding: 10px 13px; border-radius: 14px; background: var(--gold-fill); box-shadow: inset 0 0 0 0.75px var(--gold-rim); color: var(--body); font-size: 15px; }
+.gp-note span { color: var(--accent); opacity: 1; font-size: 13px; }
+.gp-tour { border: 0; border-radius: 14px; background: var(--gold-fill); box-shadow: inset 0 0 0 0.75px var(--gold-rim), 0 0 16px -8px rgba(255,170,80,0.5); color: var(--body); }
+.gp-tour strong { color: var(--ink); font-family: var(--lora); }
+.gp-book { color: var(--link); }
+.gp-btn-ghost { display: inline-flex; align-items: center; gap: 7px; border: 0; color: var(--ink); background: var(--chip); box-shadow: var(--chip-rim); }
+.gp-btn-ghost:hover { background: var(--chip-hover); }
+.gp-reel-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.gp-reel-btn svg .fill { fill: currentColor; stroke: none; }
+.gp-reel-btn svg .spark { fill: #FFB347; stroke: none; filter: drop-shadow(0 0 2px rgba(255,170,70,0.9)); }
+.gp-reel-btn.on { box-shadow: inset 0 0 0 0.75px rgba(255,200,120,0.6), 0 0 14px -2px rgba(255,160,70,0.55); }
+.gp-embed iframe { box-shadow: 0 0 24px -6px rgba(0,0,0,0.5); }
+
+/* not found + footer */
+.day-mode .gp-panel, .night-mode .gp-panel { background: var(--glass); box-shadow: var(--glass-rim); border-radius: 26px; }
+.gp-panel h1 { font-family: var(--serif); font-weight: 500; color: var(--ink); }
+.gp-foot { max-width: 1080px; margin-top: clamp(48px, 8vw, 88px); padding: 22px 0 calc(26px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--rule); color: var(--soft); opacity: 1; }
+.gp-foot a { color: var(--link); text-decoration: none; }
 </style>
