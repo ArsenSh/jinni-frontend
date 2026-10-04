@@ -90,6 +90,15 @@
             <label><span>{{ t('guides.dashboard.why') }} <span class="gd-muted">{{ t('guides.dashboard.why_hint') }}</span></span>
               <textarea v-model="draft.note" maxlength="280" rows="2" :placeholder="t('guides.dashboard.why_ph')"></textarea>
             </label>
+            <!-- The guide's own clip (founder 2026-10-05): Jinni plays it in its own player — no Instagram box. -->
+            <label><span>{{ t('guides.dashboard.video') }} <span class="gd-muted">{{ t('guides.dashboard.video_hint') }}</span></span>
+              <input :key="fileKey" type="file" accept="video/mp4,video/quicktime,video/webm" @change="pickFile" />
+            </label>
+            <p v-if="uploadPct != null" class="gd-muted">{{ t('guides.dashboard.video_uploading', { pct: uploadPct }) }}</p>
+            <div v-if="editingVideo?.status === 'ready' && !videoFile" class="gd-embed gd-video">
+              <GuideVideo :src="guideImage(editingVideo.videoUrl)" :poster="editingVideo.posterUrl ? guideImage(editingVideo.posterUrl) : ''" :autoplay="false" />
+              <button type="button" class="gd-btn-ghost gd-danger" @click="removeVideo">{{ t('guides.dashboard.video_remove') }}</button>
+            </div>
             <label><span>{{ t('guides.dashboard.reel') }} <span class="gd-muted">{{ t('guides.dashboard.reel_hint') }}</span></span>
               <input v-model.trim="draft.reelUrl" dir="ltr" :placeholder="t('guides.dashboard.reel_ph')" />
             </label>
@@ -127,6 +136,9 @@
                 <p v-if="p.note" class="gd-note">"{{ p.note }}"</p>
                 <small v-if="p.tour" class="gd-muted">{{ t('guides.dashboard.tour_line') }} {{ p.tour.title }}{{ p.tour.price != null ? ` · ${p.tour.price} ${p.tour.currency || ''}` : '' }}</small>
                 <small v-if="p.reelUrl" class="gd-muted"> · {{ t('guides.dashboard.reel_attached') }}</small>
+                <small v-if="p.video?.status === 'ready'" class="gd-muted"> · {{ t('guides.dashboard.video_ready') }}</small>
+                <small v-else-if="p.video?.status === 'processing'" class="gd-muted"> · {{ t('guides.dashboard.video_processing') }}</small>
+                <small v-else-if="p.video?.status === 'failed'" class="gd-bad"> · {{ t('guides.dashboard.video_failed') }}{{ p.video.error ? ' — ' + p.video.error : '' }}</small>
               </div>
               <div class="gd-list-actions">
                 <button type="button" class="gd-btn-ghost" @click="edit(p)">{{ t('guides.dashboard.edit') }}</button>
@@ -142,9 +154,10 @@
 
 <script setup>
 import '@/assets/styles/jinni-pill.css'
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { guideTheme, guideApi, CATEGORY_KEYS, instagramEmbed, initGuideLanguage, guideImage } from '@/utils/guides'
+import { guideTheme, guideApi, CATEGORY_KEYS, instagramEmbed, initGuideLanguage, guideImage, guideVideoUpload } from '@/utils/guides'
+import GuideVideo from '@/components/ui/GuideVideo.vue'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
 import SwitchModeOverlay from '@/components/ui/SwitchModeOverlay.vue'
 import JinniDaySky from '@/components/ui/JinniDaySky.vue'
@@ -176,6 +189,29 @@ const editing = ref(null)
 const emptyTour = () => ({ title: '', durationHours: '', price: '', currency: 'AMD', contact: '', languages: [] })
 const draft = reactive({ place: null, category: '', note: '', reelUrl: '', tour: emptyTour() })
 let timer = null
+// The pick's video: chosen here, sent after the pick itself is saved, then prepared by the server.
+const MAX_VIDEO_BYTES = 80 * 1024 * 1024
+const videoFile = ref(null)
+const uploadPct = ref(null)
+const fileKey = ref(0)                      // re-creates the file input to clear it
+const editingVideo = computed(() => (editing.value ? picks.value.find(x => x.id === editing.value)?.video : null))
+let pollTimer = null, polls = 0
+function pickFile(e) {
+  const f = e.target.files?.[0] || null
+  error.value = ''
+  if (f && f.size > MAX_VIDEO_BYTES) { error.value = t('guides.dashboard.video_too_big'); videoFile.value = null; fileKey.value++; return }
+  videoFile.value = f
+}
+// While the server prepares a video, ask again every few seconds (for about four minutes).
+function pollVideos() {
+  clearTimeout(pollTimer)
+  if (!picks.value.some(p => p.video?.status === 'processing') || polls > 60) { polls = 0; return }
+  pollTimer = setTimeout(async () => { polls++; try { await load() } catch { /* next round */ } pollVideos() }, 4000)
+}
+async function removeVideo() {
+  if (!editing.value) return
+  try { await guideApi(`/me/picks/${editing.value}/video`, { method: 'DELETE' }); await load() } catch (e) { error.value = e.message }
+}
 
 const pageUrl = computed(() => `${window.location.origin}/@${guide.value?.handle || ''}`)
 const reelEmbed = computed(() => (draft.reelUrl ? instagramEmbed(draft.reelUrl) : null))
@@ -213,6 +249,7 @@ const catHint = computed(() => {
 function reset() {
   Object.assign(draft, { place: null, category: '', note: '', reelUrl: '', tour: emptyTour() })
   editing.value = null; query.value = ''; results.value = []; error.value = ''; searched.value = false
+  videoFile.value = null; uploadPct.value = null; fileKey.value++
 }
 function edit(p) {
   reset()
@@ -230,9 +267,18 @@ async function save() {
   const body = { placeId: draft.place.placeId, category: draft.category, note: draft.note, reelUrl: draft.reelUrl || null,
     tour: draft.category === 'activity' && draft.tour.title ? draft.tour : null }
   try {
-    if (editing.value) await guideApi(`/me/picks/${editing.value}`, { method: 'PUT', body })
-    else await guideApi('/me/picks', { method: 'POST', body })
-    await load(); reset()
+    let id = editing.value
+    if (id) await guideApi(`/me/picks/${id}`, { method: 'PUT', body })
+    else id = (await guideApi('/me/picks', { method: 'POST', body })).pick?.id
+    if (videoFile.value && id) {
+      uploadPct.value = 0
+      try { await guideVideoUpload(id, videoFile.value, (pct) => { uploadPct.value = pct }) }
+      catch (e) {
+        // The pick itself is saved; stay on it so the video can be tried again.
+        await load(); editing.value = id; uploadPct.value = null; error.value = e.message; return
+      }
+    }
+    await load(); reset(); pollVideos()
   } catch (e) { error.value = e.message } finally { saving.value = false }
 }
 async function remove(p) {
@@ -241,7 +287,8 @@ async function remove(p) {
 }
 async function copy(text) { try { await navigator.clipboard.writeText(text); copied.value = true; setTimeout(() => (copied.value = false), 1600) } catch { /* manual copy */ } }
 
-onMounted(async () => { try { await load() } catch { /* shows the empty state */ } finally { loading.value = false } })
+onMounted(async () => { try { await load(); pollVideos() } catch { /* shows the empty state */ } finally { loading.value = false } })
+onBeforeUnmount(() => clearTimeout(pollTimer))
 </script>
 
 <style scoped>
@@ -301,6 +348,7 @@ input:focus, textarea:focus { outline: none; border-color: #D4AF37; box-shadow: 
 .gd-chip { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.5); background: transparent; color: inherit; cursor: pointer; }
 .gd-embed { display: flex; justify-content: center; }
 .gd-embed iframe { width: 100%; max-width: 360px; height: 560px; border: 0; border-radius: 14px; background: #fff; }
+.gd-video { --gv-max-h: 420px; flex-direction: column; align-items: center; gap: 10px; }
 .gd-tour { display: grid; gap: 10px; padding: 14px; border-radius: 14px; border: 1px dashed rgba(212, 175, 55, 0.6); }
 .gd-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .gd-actions, .gd-list-actions { display: flex; gap: 8px; flex-wrap: wrap; }

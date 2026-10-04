@@ -1578,7 +1578,15 @@
       "place_gone": "No longer shown on Jinni",
       "cat_team": "Jinni's team lists this place as: {cats}.",
       "cat_none": "Jinni's team hasn't listed this place under a guide category yet — ask us to add one.",
-      "cat_not_food": "Only places that serve food or drink can be a restaurant pick."
+      "cat_not_food": "Only places that serve food or drink can be a restaurant pick.",
+      "video": "Your video of this place",
+      "video_hint": "(optional — MP4 or MOV, up to 90 seconds and 80 MB; it plays in Jinni's own player)",
+      "video_uploading": "Uploading video… {pct}%",
+      "video_processing": "video is being prepared",
+      "video_ready": "video attached",
+      "video_failed": "video failed",
+      "video_remove": "Remove video",
+      "video_too_big": "The video is larger than 80 MB. Please choose a shorter or smaller one."
     },
     "page": {
       "loading": "Loading…",
@@ -1597,7 +1605,8 @@
       "book": "Book:",
       "foot": "Picks by real local guides on",
       "become": "Become a guide",
-      "title_suffix": "local picks on Jinni"
+      "title_suffix": "local picks on Jinni",
+      "on_instagram": "Watch on Instagram"
     },
     "chat": {
       "guide_pick": "guide's pick"

@@ -1578,7 +1578,15 @@
       "place_gone": "已不再在 Jinni 上显示",
       "cat_team": "Jinni 团队将此地点归类为：{cats}。",
       "cat_none": "Jinni 团队尚未将此地点归入向导类别——请联系我们添加。",
-      "cat_not_food": "只有提供餐饮的地点才能作为餐厅推荐。"
+      "cat_not_food": "只有提供餐饮的地点才能作为餐厅推荐。",
+      "video": "您拍摄的这个地点的视频",
+      "video_hint": "（可选 — MP4 或 MOV，最长 90 秒、最大 80 MB；在 Jinni 自己的播放器中播放）",
+      "video_uploading": "正在上传视频… {pct}%",
+      "video_processing": "视频正在处理中",
+      "video_ready": "已添加视频",
+      "video_failed": "视频保存失败",
+      "video_remove": "移除视频",
+      "video_too_big": "视频超过 80 MB，请选择更短或更小的视频。"
     },
     "page": {
       "loading": "加载中…",
@@ -1597,7 +1605,8 @@
       "book": "预约：",
       "foot": "由真实本地向导推荐，尽在",
       "become": "成为向导",
-      "title_suffix": "Jinni 上的本地推荐"
+      "title_suffix": "Jinni 上的本地推荐",
+      "on_instagram": "在 Instagram 上观看"
     },
     "chat": {
       "guide_pick": "向导精选"

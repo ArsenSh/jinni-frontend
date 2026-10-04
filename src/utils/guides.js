@@ -105,3 +105,28 @@ export function tagGuideVisit(handle) {
     }
   } catch { /* storage blocked — attribution is best-effort */ }
 }
+
+/**
+ * Upload a pick's video (founder 2026-10-05: the guide's own clip, played in Jinni's
+ * player). XHR rather than fetch, for the progress number. Resolves once the file has
+ * ARRIVED — the server then prepares it, and /me reports video.status.
+ */
+export function guideVideoUpload(pickId, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', `${API}/api/guides/me/picks/${pickId}/video`)
+    const token = localStorage.getItem('authToken')
+    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100)) }
+    xhr.onload = () => {
+      let data = {}
+      try { data = JSON.parse(xhr.responseText) } catch { /* not JSON */ }
+      if (xhr.status >= 200 && xhr.status < 300) resolve(data)
+      else reject(new Error(data.error || `Upload failed (${xhr.status})`))
+    }
+    xhr.onerror = () => reject(new Error('Could not reach Jinni. Check your connection and try again.'))
+    const body = new FormData()
+    body.append('video', file)
+    xhr.send(body)
+  })
+}
