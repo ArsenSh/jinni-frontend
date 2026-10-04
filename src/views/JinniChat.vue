@@ -1675,7 +1675,7 @@
     <div class="fullscreen-image-container" @click.stop>
       <div v-if="fullscreenImages.length > 0" style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
         <!-- slide 1 can be the guide's reel (founder 2026-10-04: "the video of insta has not appeared there") -->
-        <iframe v-if="fullscreenImages[currentFullscreenIndex]?.kind === 'reel'" :src="fullscreenImages[currentFullscreenIndex].url" class="fullscreen-reel" title="Instagram reel" scrolling="no" allowtransparency="true" allow="encrypted-media; picture-in-picture" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation" @click.stop></iframe>
+        <ReelCrop v-if="fullscreenImages[currentFullscreenIndex]?.kind === 'reel'" :embed="fullscreenImages[currentFullscreenIndex].url" class="fullscreen-reel" :ig-label="$t('guides.page.watch_reel')" />
         <img v-else :src="fullscreenImages[currentFullscreenIndex]?.url || fullscreenImages[currentFullscreenIndex]?.src" :alt="fullscreenImages[currentFullscreenIndex]?.title || 'Image'" class="fullscreen-image" @load="handleFullscreenImageLoad" @error="handleImageError">
         <button v-if="fullscreenImages.length > 1" @click.stop="previousFullscreenImage" :disabled="currentFullscreenIndex === 0" class="fullscreen-nav-btn fullscreen-prev">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -1820,15 +1820,14 @@
   </transition>
 
   <!-- A guide's reel, played inside the chat (founder 2026-10-04: "in jinnichat").
-       Instagram's official embed; the site CSP allows frame-src www.instagram.com. -->
+       Instagram's official embed, cropped to the video alone (ReelCrop, founder 2026-10-05); the site CSP allows frame-src www.instagram.com. -->
   <Teleport to="body">
     <div v-if="reelEmbedUrl" class="guide-reel-overlay" @click.self="reelEmbedUrl = null">
       <div class="guide-reel-box" role="dialog" aria-modal="true" :aria-label="$t('guides.page.watch_reel')">
         <button type="button" class="guide-reel-close" aria-label="Close" @click="reelEmbedUrl = null">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
-        <iframe :src="reelEmbedUrl" title="Instagram reel" scrolling="no" allowtransparency="true" allow="encrypted-media; picture-in-picture"
-                sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"></iframe>
+        <ReelCrop :embed="reelEmbedUrl" :ig-label="$t('guides.page.watch_reel')" />
       </div>
     </div>
   </Teleport>
@@ -1851,6 +1850,7 @@ import { applyDisplayPrefs as applyDisplayPrefsGlobal } from '../utils/displayPr
 import { useI18n } from 'vue-i18n';
 import { instagramEmbed } from '@/utils/guides';
 import GuideReel from '@/components/ui/GuideReel.vue';
+import ReelCrop from '@/components/ui/ReelCrop.vue';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000';
 /** How long the preference bar stays visible after it reveals. */
 const PREFERENCE_BAR_HIDE_MS = 5000;
@@ -1873,7 +1873,7 @@ export default {
       unmounted(el) { document.body.removeEventListener('click', el.clickOutsideEvent) }
     }
   },
-  components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView, GuideReel },
+  components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView, GuideReel, ReelCrop },
   data() {
     return {
       reelEmbedUrl: null,
@@ -7907,7 +7907,8 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
    "mobile … one tap, desktop interesting, grid like that too"). GuideReel fills the photo
    area; these rules give that area the room: 9:16 on phones, a tall stage on a desktop
    large card, two rows in the desktop quick-action grid. */
-.fullscreen-reel{height:min(86vh,760px);aspect-ratio:9 / 16;max-width:94vw;border:0;border-radius:14px;background:#000}
+/* only the video of the guide's reel (ReelCrop): as tall as the screen allows, never wider than it */
+.fullscreen-reel{--reel-h:min(86vh,675px,calc(94vw * 16 / 9))}
 .recommendation-card.reel-open .rec-image{aspect-ratio:9 / 16;height:auto;max-height:min(80vh,720px)}
 .recommendation-card.reel-open .image-overlay,.recommendation-card.reel-open .rec-image-save-btn{display:none}
 @media (min-width:601px){
@@ -7917,8 +7918,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
   .recommendation-grid .recommendation-card.reel-open .rec-image{aspect-ratio:auto;flex:1 1 auto;min-height:340px;max-height:none}
 }
 .guide-reel-overlay{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:16px;background:rgba(8,4,16,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.guide-reel-box{position:relative;width:min(380px,100%);height:min(640px,calc(100dvh - 32px));border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 0 24px -4px rgba(0,0,0,.6)}
-.guide-reel-box iframe{width:100%;height:100%;border:0;display:block}
+.guide-reel-box{position:relative;--reel-h:min(calc(100dvh - 32px),675px,calc((100vw - 32px) * 16 / 9))}
 .guide-reel-close{position:absolute;top:10px;right:10px;z-index:1;width:34px;height:34px;border-radius:999px;border:0;display:grid;place-items:center;cursor:pointer;color:#fff;background:rgba(20,10,30,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .rec-guide-pick:hover{text-decoration:underline}
 .partner-label--spotlight{color:#3b9fdda2}

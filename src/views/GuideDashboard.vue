@@ -94,7 +94,7 @@
               <input v-model.trim="draft.reelUrl" dir="ltr" :placeholder="t('guides.dashboard.reel_ph')" />
             </label>
             <p v-if="draft.reelUrl && !reelEmbed" class="gd-bad">{{ t('guides.dashboard.reel_bad') }}</p>
-            <div v-if="reelEmbed" class="gd-embed"><iframe :src="reelEmbed" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="t('guides.dashboard.reel_preview')"></iframe></div>
+            <div v-if="reelEmbed" class="gd-embed"><ReelCrop :embed="reelEmbed" :ig-label="t('guides.dashboard.reel_preview')" /></div>
 
             <div v-if="draft.category === 'activity'" class="gd-tour">
               <p><strong>{{ t('guides.dashboard.tour_q') }}</strong> <span class="gd-muted">{{ t('guides.dashboard.tour_hint') }}</span></p>
@@ -145,6 +145,7 @@ import '@/assets/styles/jinni-pill.css'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { guideTheme, guideApi, CATEGORY_KEYS, instagramEmbed, initGuideLanguage, guideImage } from '@/utils/guides'
+import ReelCrop from '@/components/ui/ReelCrop.vue'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
 import SwitchModeOverlay from '@/components/ui/SwitchModeOverlay.vue'
 import JinniDaySky from '@/components/ui/JinniDaySky.vue'
@@ -299,8 +300,7 @@ input:focus, textarea:focus { outline: none; border-color: #D4AF37; box-shadow: 
 .gd-chosen > div { flex: 1; }
 .gd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .gd-chip { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(212, 175, 55, 0.5); background: transparent; color: inherit; cursor: pointer; }
-.gd-embed { display: flex; justify-content: center; }
-.gd-embed iframe { width: 100%; max-width: 360px; height: 560px; border: 0; border-radius: 14px; background: #fff; }
+.gd-embed { display: flex; justify-content: center; --reel-h: min(480px, calc((100vw - 64px) * 16 / 9)); }
 .gd-tour { display: grid; gap: 10px; padding: 14px; border-radius: 14px; border: 1px dashed rgba(212, 175, 55, 0.6); }
 .gd-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .gd-actions, .gd-list-actions { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -410,7 +410,6 @@ p.gd-bad { padding: 11px 16px; border-radius: 16px; background: rgba(180,68,47,0
 .gd-cat-hint { color: var(--soft) }
 
 /* the reel preview and the optional tour: a quieter gold glass inset, no dashed border */
-.gd-embed iframe { border-radius: 18px; box-shadow: 0 0 18px -2px rgba(0,0,0,0.18) }
 .gd-tour { border: 0; padding: 18px 16px; gap: 12px; border-radius: 22px; background: var(--gold-fill); box-shadow: inset 0 0 0 0.75px var(--gold-rim) }
 .gd-tour p { color: var(--body) }
 .gd-tour strong { color: var(--ink) }

@@ -62,7 +62,8 @@
                 <a v-if="p.lat != null" :href="`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`" target="_blank" rel="noopener" class="gp-btn-ghost">{{ t('guides.page.map') }}</a>
                 <button v-if="p.embedUrl" type="button" class="gp-btn-ghost gp-reel-btn" :class="{ on: openReel === p.id }" @click="toggleReel(p.id)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="15" height="15" rx="3.5"/><path d="M9 9.3v6.4l5.2-3.2z" class="fill"/><path d="M20 1.8l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z" class="spark"/></svg>{{ openReel === p.id ? t('guides.page.hide_reel') : t('guides.page.watch_reel') }}</button>
               </div>
-              <div v-if="openReel === p.id && p.embedUrl" class="gp-embed"><iframe :src="p.embedUrl" loading="lazy" scrolling="no" allowtransparency="true" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin" :title="guide.displayName + ' — Instagram'"></iframe></div>
+              <!-- only the video of the reel, without Instagram's header and details (founder 2026-10-05) -->
+              <div v-if="openReel === p.id && p.embedUrl" class="gp-embed"><ReelCrop :embed="p.embedUrl" :ig-label="t('guides.page.watch_reel')" /></div>
             </div>
           </article>
         </section>
@@ -80,6 +81,7 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { guideTheme, guideApi, CATEGORY_KEYS, tagGuideVisit, hasToken, initGuideLanguage, guideImage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
+import ReelCrop from '@/components/ui/ReelCrop.vue'
 import JinniDaySky from '@/components/ui/JinniDaySky.vue'
 import JinniNightSky from '@/components/ui/JinniNightSky.vue'
 
@@ -161,8 +163,7 @@ onMounted(async () => {
 .gp-tour strong { width: 100%; }
 .gp-book { width: 100%; font-weight: 600; }
 .gp-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.gp-embed { display: flex; justify-content: center; }
-.gp-embed iframe { width: 100%; max-width: 360px; height: 560px; border: 0; border-radius: 14px; background: #fff; }
+.gp-embed { display: flex; justify-content: center; --reel-h: min(560px, calc((100vw - 64px) * 16 / 9)); }
 .gp-muted { opacity: 0.7; font-size: 14px; margin: 0; }
 .gp-foot { max-width: 960px; margin: 40px auto 0; text-align: center; font-size: 13px; opacity: 0.75; }
 .gp-foot a { color: inherit; }
@@ -281,7 +282,6 @@ onMounted(async () => {
 .gp-reel-btn svg .fill { fill: currentColor; stroke: none; }
 .gp-reel-btn svg .spark { fill: #FFB347; stroke: none; filter: drop-shadow(0 0 2px rgba(255,170,70,0.9)); }
 .gp-reel-btn.on { box-shadow: inset 0 0 0 0.75px rgba(255,200,120,0.6), 0 0 14px -2px rgba(255,160,70,0.55); }
-.gp-embed iframe { box-shadow: 0 0 24px -6px rgba(0,0,0,0.5); }
 
 /* not found + footer */
 .day-mode .gp-panel, .night-mode .gp-panel { background: var(--glass); box-shadow: var(--glass-rim); border-radius: 26px; }
