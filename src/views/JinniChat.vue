@@ -7894,10 +7894,12 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .rec-guide-reel:hover{text-decoration:underline;text-underline-offset:3px}
 /* images button on a card with a guide's reel: the gallery opens on the reel — a play-in-frame icon
    with a gold spark and a soft warm ring (founder 2026-10-04) */
-/* design 4 (founder 2026-10-04): the guide avatar's STORY RING around a play mark */
-.image-request-btn.has-reel{border:2px solid transparent!important;box-shadow:0 0 12px -3px rgba(124,77,255,.55)}
-.night-mode .image-request-btn.has-reel{background:linear-gradient(#2a1b4a,#2a1b4a) padding-box,conic-gradient(from 210deg,#c58bff,#7c4dff,#4f7bff,#6ad0ff,#ffd27a,#c58bff) border-box!important}
-.day-mode .image-request-btn.has-reel{background:linear-gradient(#fffaf2,#fffaf2) padding-box,conic-gradient(from 210deg,#ffb36b,#ffd27a,#e9a23b,#c0702a,#ffb36b) border-box!important;box-shadow:0 0 12px -3px rgba(192,112,42,.45)}
+/* the video button keeps design 4's place but wears the COMET ARC (design 3, 2026-10-04) —
+   the same edge as the guide's avatar */
+.image-request-btn.has-reel::before{content:'';position:absolute;inset:0;border-radius:50%;padding:2px;pointer-events:none;background:conic-gradient(from 20deg, rgba(255,210,122,0) 0deg, rgba(255,210,122,0.15) 60deg, #ffd27a 300deg, #fff3d6 330deg, rgba(255,210,122,0) 331deg);-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);}
+.day-mode .image-request-btn.has-reel::before{background:conic-gradient(from 20deg, rgba(192,112,42,0) 0deg, rgba(192,112,42,0.15) 60deg, #c0702a 300deg, #ffb36b 330deg, rgba(192,112,42,0) 331deg)}
+.image-request-btn.has-reel{box-shadow:0 0 12px -3px rgba(255,170,80,.45)}
+.day-mode .image-request-btn.has-reel{box-shadow:0 0 12px -3px rgba(192,112,42,.4)}
 .night-mode .image-request-btn.has-reel{color:#ffd29a}
 .day-mode .image-request-btn.has-reel{color:#9a5a1e}
 .reel-gallery-icon .reel-spark{fill:#FFB347;filter:drop-shadow(0 0 2px rgba(255,170,70,.9))}

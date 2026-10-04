@@ -288,4 +288,10 @@ onMounted(async () => {
 .gp-panel h1 { font-family: var(--serif); font-weight: 500; color: var(--ink); }
 .gp-foot { max-width: 1080px; margin-top: clamp(48px, 8vw, 88px); padding: 22px 0 calc(26px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--rule); color: var(--soft); opacity: 1; }
 .gp-foot a { color: var(--link); text-decoration: none; }
+
+/* COMET ARC (design 3, founder 2026-10-04) — the same edge as the chat chip and video button */
+.gp-avatar { background: none !important; padding: 0; position: relative; }
+.gp-avatar span { box-shadow: none !important; }
+.gp-avatar::before { content: ''; position: absolute; inset: -9px; border-radius: 50%; padding: 3px; pointer-events: none; background: conic-gradient(from 20deg, rgba(255,210,122,0) 0deg, rgba(255,210,122,0.15) 60deg, #ffd27a 300deg, #fff3d6 330deg, rgba(255,210,122,0) 331deg); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.day-mode .gp-avatar::before { background: conic-gradient(from 20deg, rgba(192,112,42,0) 0deg, rgba(192,112,42,0.15) 60deg, #c0702a 300deg, #ffb36b 330deg, rgba(192,112,42,0) 331deg); }
 </style>

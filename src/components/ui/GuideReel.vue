@@ -98,4 +98,11 @@ export default {
 :global(.day-mode) .gr-chip:hover .gr-seal { box-shadow: 0 0 18px -3px rgba(233,207,154,1); }
 /* the chip is the way to the guide's page — a tap must land on it first time */
 .gr-chip { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; z-index: 4; }
+/* COMET ARC (founder 2026-10-04, guide-avatar-edges.html design 3): one gold arc that
+   brightens and fades at its tail replaces the multi-colour story ring — the same edge on
+   the chip, the video button and the guide page avatar. */
+.gr-chip i { background: none !important; padding: 0; }
+.gr-chip i span { box-shadow: none !important; }
+.gr-chip i::before { content: ''; position: absolute; inset: -4px; border-radius: 50%; padding: 2px; pointer-events: none; background: conic-gradient(from 20deg, rgba(255,210,122,0) 0deg, rgba(255,210,122,0.15) 60deg, #ffd27a 300deg, #fff3d6 330deg, rgba(255,210,122,0) 331deg); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+:global(.day-mode) .gr-chip i::before { background: conic-gradient(from 20deg, rgba(192,112,42,0) 0deg, rgba(192,112,42,0.15) 60deg, #c0702a 300deg, #ffb36b 330deg, rgba(192,112,42,0) 331deg); }
 </style>
