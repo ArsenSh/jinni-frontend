@@ -1301,16 +1301,20 @@ export default {
 .ex-act--photo { right: 12px; bottom: 12px; width: auto; gap: 6px; padding: 0 11px; font: 600 12.5px/1 system-ui, sans-serif; font-variant-numeric: tabular-nums }
 .ex-act--photo svg { width: 15px; height: 15px; filter: none }
 
-/* save = the Slim silk ribbon (founder 2026-10-05, preview option C6): a narrow ribbon
-   hanging from the photo's top edge — dark glass when not saved, gold with a soft glow when
-   saved. Always visible, like More and photos; the tap area stays 44px wide. */
-.explore .ex-card .ex-save { top: 0; right: 20px; width: 18px; height: 56px; border-radius: 0; opacity: 1 !important; pointer-events: auto;
-  filter: drop-shadow(0 0 5px rgba(0,0,0,0.4)); transition: filter .2s ease }
+/* save = the Slim silk ribbon in GLACIER glass (founder 2026-10-05, preview options C6 then
+   G1): a narrow pane of clear frosted glass cut to the ribbon's shape, hanging from the
+   photo's top edge, with a bright rim drawn over it. Saved: the same glass lit from inside by
+   warm light rising from the tip, and a soft glow. Always visible, like More and photos; the
+   tap area stays 44px wide. The glow sits on the rim's svg, not on the button: a filter on
+   the button would stop the pane's backdrop blur from seeing the photo. */
+.explore .ex-card .ex-save { top: 0; right: 20px; width: 18px; height: 56px; border-radius: 0; opacity: 1 !important; pointer-events: auto }
 .explore .ex-save::before { content: ''; position: absolute; inset: -2px -13px -8px }
-.explore .ex-save svg path, .explore.night-mode .ex-save svg path { stroke: rgba(255,235,200,0.8); stroke-width: 1.2 }
-.explore .ex-save:not(.saved) svg path { fill: rgba(16,7,34,0.45) }
-.explore .ex-save.saved { filter: drop-shadow(0 0 8px rgba(255,170,80,0.75)) }
-.explore .ex-save.saved svg path, .explore.night-mode .ex-save.saved svg path { stroke: #fff3d6 }
+.explore .ex-save-glass { position: absolute; inset: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); background: rgba(255,255,255,0.24);
+  backdrop-filter: blur(9px) saturate(170%) brightness(1.12); -webkit-backdrop-filter: blur(9px) saturate(170%) brightness(1.12); transition: background .25s ease }
+.explore .ex-save svg { position: relative; display: block; overflow: visible; filter: drop-shadow(0 0 4px rgba(0,0,0,0.3)); transition: filter .25s ease }
+.explore .ex-save svg path, .explore.night-mode .ex-save svg path { fill: none; stroke: rgba(255,255,255,0.85); stroke-width: 1.1 }
+.explore .ex-save.saved .ex-save-glass { background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,214,140,0.62) 45%, rgba(255,160,60,0.9) 100%) }
+.explore .ex-save.saved svg { filter: drop-shadow(0 0 7px rgba(255,170,80,0.85)) }
 
 /* rail arrows: the same squircles, in the new glass */
 .ex-rail-btn { color: var(--ink); background: var(--glass); box-shadow: var(--glass-rim); transition: background-color .2s ease, box-shadow .2s ease }
