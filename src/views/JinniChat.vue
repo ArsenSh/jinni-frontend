@@ -220,7 +220,7 @@
           <div class="main-chat-area" ref="mainChatArea">
             <div class="chat-messages" ref="chatMessages">
               <div v-for="(message, index) in messages" :key="message.id || index" v-show="!message.hidden" :class="['message-bubble', message.sender, { 'touched': touchedMessageId === (message.id || index), 'msg-complete': !message.streaming }]" @touchstart="message.sender === 'user' && (touchedMessageId = (message.id || index))" @touchend.passive="true">
-                <div class="content" :class="{ 'qa-layout': isQuickActionAnswer(message) }">
+                <div class="content">
                   <!-- ============= STREAMING MODE ============= -->
                   <template v-if="message.streaming || streamingLampAnimatingIds.has(message.id)">
 <!-- The lamp and what it is busy with, on ONE line: the note reads as
@@ -626,7 +626,6 @@
                       </div><!-- /recommendation-grid -->
                       <RecommendationMap
                         :route-only="!!(message.metadata && message.metadata.routeTo)"
-                        :auto-open="isDesktop && isQuickActionAnswer(message) && index === messages.length - 1"
                         :ref="el => registerRecMap(message.id, el)"
                         :recommendations="message.recommendations"
                         :theme="currentTheme"
@@ -7257,13 +7256,6 @@ export default {
         if (usageData.daily.tokens.percentage > 80 || usageData.daily.places.percentage > 80) { this.showUsageWarning(this.usageStatus) }
       }
     },
-    // A finished quick-action answer (the grid branch, not a route answer): on large desktops its
-    // text and map sit in a left column and the cards to the right (founder 2026-10-06, "do the best way").
-    isQuickActionAnswer(message) {
-      return !!message && !message.streaming && Array.isArray(message.recommendations) && message.recommendations.length > 0
-        && !message.isChatRecommendation && !(message.contentParts && message.contentParts.length) && !message.itineraryRequest && !message.itineraryId
-        && !(message.metadata && message.metadata.routeTo);
-    },
     // The line on a photo-led card's plate: distance · address (either may be missing).
     plateMeta(rec) {
       if (!rec) return '';
@@ -9390,7 +9382,7 @@ html[data-text-size="big"] .input-wrapper textarea{padding-top:10px;padding-bott
    · One bar: More · Ask · Photos — or Reel when a guide's pick has one (it opens today's
      gallery window with the reel first).
    · Photo sizes: phones 5:6 everywhere (4:5 at first; founder 2026-10-06: "a little shorter"); desktop large/inline 3:2 (the settled size); desktop
-     quick-action grid 1:1, three in a row (founder: "lets keep 1:1 SQUARE for desktop grid").
+     quick-action grid 1:1, two in a row (founder: "lets keep 1:1 SQUARE for desktop grid" … "2 by 2 like before").
    · Save = the glacier-glass Slim silk ribbon, always visible. More/Ask no longer hide in a
      hover overlay. Business tiers keep their settled card colours. ═══ */
 .recommendation-card.pl { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; border-radius: 22px; cursor: default }
@@ -9415,34 +9407,10 @@ html[data-text-size="big"] .input-wrapper textarea{padding-top:10px;padding-bott
   .inline-recommendation-wrapper > .rec-card-wrapper:has(> .recommendation-card.pl) { width: 100%; max-width: 640px; margin-inline: auto }
   .inline-recommendation-wrapper > .recommendation-card.pl { width: 100%; max-width: 640px; margin-inline: auto }
 }
-/* a wider chat column on large desktops (founder 2026-10-06: "horizontal size of chat is short because
-   rec grid cards are narrower" … "but chat input container is needless to make horizontally long"):
-   the messages column grows from 800 to 980px so three grid cards are ~300px each; the answer TEXT keeps
-   its readable 760px line, and the message box keeps its 820px width, centred. */
-@media (min-width: 1100px) {
-  .centered-content { max-width: 1000px }
-  .main-chat-area, .chat-messages, .chat-header { max-width: 980px }
-  .message-bubble.ai .message-text { max-width: 760px }
-  .chat-input-container { width: 100%; max-width: 820px; margin-inline: auto !important }
-}
-/* QUICK-ACTION ANSWERS ON LARGE DESKTOPS (founder 2026-10-06: the answer text and the map bar were as
-   wide as the three-card grid; "do the best way"): the text, the See-route button and the map form a
-   300px left column, like a lead paragraph, and the cards sit to the right, two to a row at the same
-   ~300px each. The map opens by itself for the newest answer (there is room beside the cards); older
-   answers and phones keep it closed. Phones and narrower windows keep the one-column flow. */
-@media (min-width: 1100px) {
-  .message-bubble.ai .content.qa-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: auto auto auto auto; column-gap: 24px; align-items: start }
-  .message-bubble.ai .content.qa-layout > .message-text { grid-column: 1; grid-row: 1; max-width: none }
-  .message-bubble.ai .content.qa-layout > .route-cta-btn { grid-column: 1; grid-row: 2; justify-self: start }
-  .message-bubble.ai .content.qa-layout > .recommendations { display: contents }
-  .message-bubble.ai .content.qa-layout .recommendations > .section-title { grid-column: 2; grid-row: 1; margin-top: 0 }
-  .message-bubble.ai .content.qa-layout .recommendations > .recommendation-grid { grid-column: 2; grid-row: 2 / span 2; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; margin-top: 0 }
-  .message-bubble.ai .content.qa-layout .recommendations > .rec-map { grid-column: 1; grid-row: 3; margin-top: 14px; min-width: 0 }
-  .message-bubble.ai .content.qa-layout .recommendations > .view-more-container, .message-bubble.ai .content.qa-layout .recommendations > .view-more-loading,
-  .message-bubble.ai .content.qa-layout > *:not(.message-text):not(.route-cta-btn):not(.recommendations) { grid-column: 1 / -1 }
-}
-/* three square cards in a row on desktop, never more; one per row on phones */
-.recommendation-grid:has(.recommendation-card.pl) { grid-template-columns: repeat(auto-fill, minmax(max(230px, calc((100% - 30px) / 3)), 1fr)) }
+/* two square cards per row on desktop (founder 2026-10-06: tried three in a wider column and a side-by-side
+   layout, then "made it worse, make the grid 2 by 2 like before"); one per row on phones */
+.recommendation-grid:has(.recommendation-card.pl) { grid-template-columns: minmax(0, 1fr) }
+@media (min-width: 769px) { .recommendation-grid:has(.recommendation-card.pl) { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
 /* a short shade at the top keeps the ribbon and the guide's chip readable */
 .recommendation-card.pl .rec-image::before { content: ''; position: absolute; z-index: 1; inset: 0 0 auto 0; height: 26%; pointer-events: none; background: linear-gradient(180deg, rgba(8,4,18,0.34), transparent) }
 /* More/Ask live in the bar now */
