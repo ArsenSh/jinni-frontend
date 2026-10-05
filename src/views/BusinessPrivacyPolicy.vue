@@ -13,25 +13,8 @@
       <div class="header-content">
         <h1 class="page-title">{{ $t('businessPrivacy.title') }}</h1>
         <p class="page-subtitle">{{ $t('businessPrivacy.last_updated') }}</p>
-        <div class="lang-selector">
-          <div v-if="langOpen" class="lang-backdrop" @click="langOpen = false"></div>
-          <button class="lang-trigger" @click="langOpen = !langOpen">
-            {{ currentLangLabel }}
-          </button>
-          <div class="lang-dropdown" v-if="langOpen"
-            :style="{ background: currentTheme === 'night-mode' ? '#1e1438' : '#fff8f0' }">
-            <button
-              v-for="lang in languages"
-              :key="lang.code"
-              class="lang-option"
-              :class="{ active: $i18n.locale === lang.code }"
-              :style="$i18n.locale === lang.code
-                ? { background: currentTheme === 'night-mode' ? '#2a1550' : '#ffe4c4', color: currentTheme === 'night-mode' ? '#c084fc' : '#A0522D' }
-                : { background: currentTheme === 'night-mode' ? '#1e1438' : '#fff8f0', color: currentTheme === 'night-mode' ? '#e2e8f0' : '#3c2a1e' }"
-              @click="selectLang(lang.code)"
-            >{{ lang.label }}</button>
-          </div>
-        </div>
+        <!-- the landing's language pill (founder 2026-10-05), shared with the guide pages -->
+        <div class="lang-selector"><GuideLangSwitch /></div>
       </div>
     </header>
 
@@ -111,9 +94,10 @@
 <script>
 import { isNightTime } from '@/utils/timeUtils';
 import DesertSky from '@/components/ui/DesertSky.vue';
+import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue';
 export default {
   name: 'BusinessPrivacyPolicy',
-  components: { DesertSky },
+  components: { DesertSky, GuideLangSwitch },
   data() {
     return {
       langOpen: false,

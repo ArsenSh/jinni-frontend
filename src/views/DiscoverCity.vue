@@ -1205,7 +1205,8 @@ export default {
 .ex-signin:hover { color: var(--ink) }
 
 /* hero: the city in the spotlight */
-.ex-head { position: relative; padding-top: clamp(22px, 5vw, 52px); gap: 14px }
+/* about a centimetre of air between the top bar and "Jinni's Discoveries" (founder 2026-10-05) */
+.ex-head { position: relative; padding-top: clamp(56px, calc(5vw + 38px), 92px); gap: 14px }
 .ex-head::before { content: ''; position: absolute; z-index: -1; top: -10px; left: 50%; width: 440px; max-width: 100vw; height: 280px; margin-left: -220px;
   pointer-events: none; filter: blur(40px); background: radial-gradient(closest-side, var(--halo), transparent) }
 .ex-kicker { margin: 0; font: 500 12.5px/1.2 var(--serif); letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent) }
@@ -1315,13 +1316,18 @@ export default {
 .ex-cta:hover { filter: brightness(1.05); box-shadow: 0 0 22px -3px rgba(255,140,0,0.6) }
 .ex-cta:active { transform: none }
 
-/* footer: a ruled sign-off */
-.ex-footer { gap: 12px; max-width: 1120px; margin: clamp(40px, 7vw, 76px) auto 0; padding: 34px 18px 44px; border-top: 1px solid var(--rule) }
-.ex-footer-divider { width: auto; color: var(--accent); opacity: 0.9 }
+/* footer: a ruled sign-off. Each step has its own distance, so the rhythm holds
+   whatever the sentence length: spark · sentence · question · button · links. The sentence
+   may run to 640px (one line on a desktop in most languages) and wraps in even lines on a
+   phone; the links wrap as whole words instead of running off the screen (ru, fr). */
+.ex-footer { gap: 0; max-width: 1120px; margin: clamp(40px, 7vw, 76px) auto 0; padding: 34px 18px 44px; border-top: 1px solid var(--rule) }
+.explore .ex-footer-divider, .explore.night-mode .ex-footer-divider { width: auto; color: var(--accent); opacity: 0.9 }
 .ex-fd-line { display: none }
-.ex-footer-line { max-width: 520px; font-style: italic; font-size: 17px; line-height: 1.55; color: var(--body); opacity: 1; text-wrap: balance }
-.ex-footer-ask { margin-top: 0; font-size: 14.5px; color: var(--soft) }
-.ex-footer-links { margin-top: 12px; gap: 12px; font-family: var(--lora); font-size: 13.5px; color: var(--soft); opacity: 1 }
+.ex-footer-line { margin-top: 14px; max-width: min(640px, 100%); font-style: italic; font-size: 17px; line-height: 1.55; color: var(--body); opacity: 1; text-wrap: balance }
+.ex-footer-ask { margin-top: 18px; max-width: min(520px, 100%); font-size: 15px; font-weight: 400; line-height: 1.45; color: var(--soft); text-wrap: balance }
+.ex-footer-cta { margin-top: 18px }
+.ex-footer-links { margin-top: 28px; flex-wrap: wrap; justify-content: center; gap: 6px 12px; max-width: 100%; font-family: var(--lora); font-size: 13.5px; color: var(--soft); opacity: 1 }
+.ex-footer-links a { white-space: nowrap }
 .ex-footer-links a:hover { color: var(--ink); text-decoration: none }
 
 @media (max-width: 520px) {
