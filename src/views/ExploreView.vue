@@ -135,16 +135,17 @@
               <!-- Save — the chat's hanging ribbon bookmark, gold when saved -->
               <button class="ex-save" :class="{ saved: !!saved[p.placeId] }" @click.stop="toggleSave(p, c)"
                       :title="saved[p.placeId] ? (t('chat.saved.remove_saved') || 'Remove from saved') : (t('chat.saved.save_place') || 'Save place')">
-                <svg v-if="saved[p.placeId]" width="24" height="90" viewBox="0 0 24 90" fill="url(#exSaveGradient)" stroke="none">
+                <!-- Slim silk ribbon (founder 2026-10-05); colours in the style block below -->
+                <svg v-if="saved[p.placeId]" width="18" height="56" viewBox="0 0 18 56" fill="url(#exSaveGradient)">
                   <defs>
                     <linearGradient id="exSaveGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="rgb(212,175,55)"/>
-                      <stop offset="100%" stop-color="rgb(255,140,0)"/>
+                      <stop offset="0%" stop-color="#f3d27a"/>
+                      <stop offset="100%" stop-color="#ff9a2e"/>
                     </linearGradient>
                   </defs>
-                  <path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  <path d="M2 0h14v52l-7-6-7 6z"/>
                 </svg>
-                <svg v-else width="24" height="90" viewBox="0 0 24 90" fill="currentColor" stroke="none"><path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <svg v-else width="18" height="56" viewBox="0 0 18 56"><path d="M2 0h14v52l-7-6-7 6z"/></svg>
               </button>
               <!-- More + photos — JinniChat rec-card pattern (founder
                    2026-09-07): centred "More" text pill, 40px photo roundel
@@ -1486,6 +1487,17 @@ export default {
 :lang(ar) .ex-act-more, :lang(ar) .ex-kicker, :lang(ar) .ex-section-title, [dir="rtl"] .ex-act-more, [dir="rtl"] .ex-kicker, [dir="rtl"] .ex-section-title { letter-spacing: 0 }
 .ex-act--photo { right: 12px; bottom: 12px; width: auto; gap: 6px; padding: 0 11px; font: 600 12.5px/1 system-ui, sans-serif; font-variant-numeric: tabular-nums }
 .ex-act--photo svg { width: 15px; height: 15px; filter: none }
+
+/* save = the Slim silk ribbon (founder 2026-10-05, preview option C6): a narrow ribbon
+   hanging from the photo's top edge — dark glass when not saved, gold with a soft glow when
+   saved. Always visible, like More and photos; the tap area stays 44px wide. */
+.explore .ex-card .ex-save { top: 0; right: 20px; width: 18px; height: 56px; border-radius: 0; opacity: 1 !important; pointer-events: auto;
+  filter: drop-shadow(0 0 5px rgba(0,0,0,0.4)); transition: filter .2s ease }
+.explore .ex-save::before { content: ''; position: absolute; inset: -2px -13px -8px }
+.explore .ex-save svg path, .explore.night-mode .ex-save svg path { stroke: rgba(255,235,200,0.8); stroke-width: 1.2 }
+.explore .ex-save:not(.saved) svg path { fill: rgba(16,7,34,0.45) }
+.explore .ex-save.saved { filter: drop-shadow(0 0 8px rgba(255,170,80,0.75)) }
+.explore .ex-save.saved svg path, .explore.night-mode .ex-save.saved svg path { stroke: #fff3d6 }
 
 /* rail arrows: the same squircles, in the new glass */
 .ex-rail-btn { color: var(--ink); background: var(--glass); box-shadow: var(--glass-rim); transition: background-color .2s ease, box-shadow .2s ease }

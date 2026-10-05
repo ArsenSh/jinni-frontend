@@ -1301,6 +1301,17 @@ export default {
 .ex-act--photo { right: 12px; bottom: 12px; width: auto; gap: 6px; padding: 0 11px; font: 600 12.5px/1 system-ui, sans-serif; font-variant-numeric: tabular-nums }
 .ex-act--photo svg { width: 15px; height: 15px; filter: none }
 
+/* save = the Slim silk ribbon (founder 2026-10-05, preview option C6): a narrow ribbon
+   hanging from the photo's top edge — dark glass when not saved, gold with a soft glow when
+   saved. Always visible, like More and photos; the tap area stays 44px wide. */
+.explore .ex-card .ex-save { top: 0; right: 20px; width: 18px; height: 56px; border-radius: 0; opacity: 1 !important; pointer-events: auto;
+  filter: drop-shadow(0 0 5px rgba(0,0,0,0.4)); transition: filter .2s ease }
+.explore .ex-save::before { content: ''; position: absolute; inset: -2px -13px -8px }
+.explore .ex-save svg path, .explore.night-mode .ex-save svg path { stroke: rgba(255,235,200,0.8); stroke-width: 1.2 }
+.explore .ex-save:not(.saved) svg path { fill: rgba(16,7,34,0.45) }
+.explore .ex-save.saved { filter: drop-shadow(0 0 8px rgba(255,170,80,0.75)) }
+.explore .ex-save.saved svg path, .explore.night-mode .ex-save.saved svg path { stroke: #fff3d6 }
+
 /* rail arrows: the same squircles, in the new glass */
 .ex-rail-btn { color: var(--ink); background: var(--glass); box-shadow: var(--glass-rim); transition: background-color .2s ease, box-shadow .2s ease }
 .ex-rail-btn:hover { background: var(--glass-hover); box-shadow: var(--glass-rim-hover) }
