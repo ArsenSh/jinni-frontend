@@ -833,7 +833,8 @@
       "view_more": "Ещё {type}",
       "loading_more": "Ищем ещё {type}...",
       "more": "Подробнее",
-      "ask_ai": "Спросить"
+      "ask_ai": "Спросить",
+      "reel": "Рилс"
     },
     "messages": {
       "connection_error": "Проблемы с подключением. Попробуйте снова!",

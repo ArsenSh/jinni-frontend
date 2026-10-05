@@ -833,7 +833,8 @@
       "view_more": "View More {type}",
       "loading_more": "Finding more {type}...",
       "more": "More",
-      "ask_ai": "Ask"
+      "ask_ai": "Ask",
+      "reel": "Reel"
     },
     "messages": {
       "connection_error": "I'm having trouble connecting to the magic right now. Please try again!",

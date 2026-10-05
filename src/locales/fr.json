@@ -833,7 +833,8 @@
       "ask_ai": "Demander",
       "view_more": "Voir plus de {type}",
       "more_recommendations": "Plus de recommandations",
-      "loading_more": "Chargement de plus de {type}..."
+      "loading_more": "Chargement de plus de {type}...",
+      "reel": "Reel"
     },
     "messages": {
       "connection_error": "J'ai du mal à me connecter à la magie en ce moment. Veuillez réessayer !",

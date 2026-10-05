@@ -833,7 +833,8 @@
       "view_more": "查看更多 {type}",
       "loading_more": "正在查找更多 {type}...",
       "more": "更多",
-      "ask_ai": "询问"
+      "ask_ai": "询问",
+      "reel": "短视频"
     },
     "messages": {
       "connection_error": "我现在连接魔法时遇到问题。请重试！",

@@ -240,7 +240,7 @@
                         <!-- Recommendation at this position -->
                         <div v-if="getRecommendationAtPosition(message, position)" class="inline-recommendation-wrapper">
                           <div :class="['rec-card-wrapper', getPartnerWrapperClass(getRecommendationAtPosition(message, position))]">
-                          <div class="recommendation-card" :class="{ 'large-card': message.isChatRecommendation, 'reel-open': isReelOpen(getRecommendationAtPosition(message, position)) }">
+                          <div class="recommendation-card pl" :class="{ 'large-card': message.isChatRecommendation, 'reel-open': isReelOpen(getRecommendationAtPosition(message, position)) }">
                           <!-- Store rec in variable for cleaner template -->
                             <template v-if="getRecommendationAtPosition(message, position).image">
                               <div class="rec-image">
@@ -256,16 +256,7 @@
                                     </div>
                                   </div>
                                   <button @click.stop="toggleSave(getRecommendationAtPosition(message, position), $event)" @touchstart.stop="() => {}" class="rec-image-save-btn" :class="{ saved: isSaved(getRecommendationAtPosition(message, position)) }" :title="isSaved(getRecommendationAtPosition(message, position)) ? t('chat.saved.remove_saved') : t('chat.saved.save_place')" :disabled="!getRecRef(getRecommendationAtPosition(message, position))">
-                                    <svg v-if="isSaved(getRecommendationAtPosition(message, position))" width="24" height="90" viewBox="0 0 24 90" fill="url(#saveGradient)" stroke="none">
-                                      <defs>
-                                        <linearGradient id="saveGradient" x1="0" y1="0" x2="0" y2="1">
-                                          <stop offset="0%" stop-color="rgb(212,175,55)"/>
-                                          <stop offset="100%" stop-color="rgb(255,140,0)"/>
-                                        </linearGradient>
-                                      </defs>
-                                      <path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                                    </svg>
-                                    <svg v-else width="24" height="90" viewBox="0 0 24 90" fill="rgba(255,255,255,0.34)" stroke="none"><path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                    <span class="rec-save-glass" aria-hidden="true"></span><svg width="18" height="56" viewBox="0 0 18 56" aria-hidden="true"><path d="M1 0v54l8-6.5 8 6.5V0"/></svg>
                                   </button>
                               </div>
                             </template>
@@ -274,7 +265,9 @@
                                 <div class="skeleton-shimmer"></div>
                               </div>
                             </template>
-                            <div class="rec-details">
+                            <!-- photo-led card (founder 2026-10-06): category, name and distance · address ON the photo -->
+<div class="rec-plate"><p v-if="getRecommendationAtPosition(message, position).category || getRecommendationAtPosition(message, position).type" class="rec-plate-kick">{{ getRecommendationAtPosition(message, position).category || getRecommendationAtPosition(message, position).type }}</p><h3 class="rec-plate-name">{{ getRecommendationAtPosition(message, position).name }}</h3><p v-if="plateMeta(getRecommendationAtPosition(message, position))" class="rec-plate-meta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>{{ plateMeta(getRecommendationAtPosition(message, position)) }}</span></p></div>
+<div class="rec-details">
                               <div class="rec-header">
                                 <div class="rec-name">{{ getRecommendationAtPosition(message, position).name }}</div>
                                 <button @click.stop="requestImages(getRecommendationAtPosition(message, position))"class="image-request-btn":class="{ 'has-reel': !!getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl, 'loading': getButtonState(getRecommendationAtPosition(message, position)) === 'loading' }":disabled="isButtonDisabled(getRecommendationAtPosition(message, position)) || isOnCooldown">
@@ -322,7 +315,9 @@
                                 </div>
                               </div>
                             </div>
-                          </div><!-- /recommendation-card -->
+                          <!-- one bar: More · Ask · Photos (or Reel when a guide's pick has one — it opens the gallery with the reel first) -->
+<div class="rec-bar" @click.stop><button type="button" class="rec-bar-btn" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" @click.stop="showPlaceInfo(getRecommendationAtPosition(message, position))">{{ t('chat.recommendations.more') }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button type="button" class="rec-bar-btn" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" @click.stop="handleRecommendationClick(getRecommendationAtPosition(message, position))">{{ t('chat.recommendations.ask_ai') }}</button><button type="button" class="rec-bar-btn" :class="{ 'is-reel': !!getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl, 'loading': getButtonState(getRecommendationAtPosition(message, position)) === 'loading', 'disabled-cooldown': isOnCooldown }" :disabled="isButtonDisabled(getRecommendationAtPosition(message, position)) || isOnCooldown" @click.stop="requestImages(getRecommendationAtPosition(message, position))"><svg v-if="getButtonState(getRecommendationAtPosition(message, position)) === 'loading'" class="loading-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg><svg v-else-if="getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl" class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5v13l10.5-6.5z"/></svg><svg v-else viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>{{ getRecommendationAtPosition(message, position).guidePicks?.[0]?.reelUrl ? t('chat.recommendations.reel') : t('explore.photos') }}</button></div>
+</div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
                             
                             <div v-if="(getRecommendationAtPosition(message, position).verifiedId || getRecommendationAtPosition(message, position).id?.startsWith('db-')) && getRecommendationAtPosition(message, position)._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(getRecommendationAtPosition(message, position))]" v-html="getPartnerIcon(getRecommendationAtPosition(message, position)) + ' ' + getPartnerLabel(getRecommendationAtPosition(message, position))"></div>
@@ -371,7 +366,7 @@
                       <!-- Recommendation cards (inline) -->
                       <div v-else-if="part.type === 'recommendation' && message.recommendations && message.recommendations[part.index] && !(message.metadata && message.metadata.routeTo)" class="inline-recommendation-wrapper">
                         <div :class="['rec-card-wrapper', getPartnerWrapperClass(message.recommendations[part.index])]">
-                        <div class="recommendation-card inline-card" :class="{ 'large-card': message.isChatRecommendation, 'reel-open': isReelOpen(message.recommendations[part.index]) }" @touchstart="handleCardTouchStart(message.recommendations[part.index], $event)" @touchend="handleCardTouchEnd(message.recommendations[part.index], $event)">
+                        <div class="recommendation-card inline-card pl" :class="{ 'large-card': message.isChatRecommendation, 'reel-open': isReelOpen(message.recommendations[part.index]) }" @touchstart="handleCardTouchStart(message.recommendations[part.index], $event)" @touchend="handleCardTouchEnd(message.recommendations[part.index], $event)">
                           <div class="rec-image" v-if="message.recommendations[part.index].image">
                             <img :src="getImageUrl(message.recommendations[part.index].image)" :alt="message.recommendations[part.index].name" @error="handleImageError" loading="lazy"><GuideReel v-if="message.recommendations[part.index].guidePicks?.length" :pick="message.recommendations[part.index].guidePicks[0]" :photo="message.recommendations[part.index].image ? getImageUrl(message.recommendations[part.index].image) : ''" :open="isReelOpen(message.recommendations[part.index])" @toggle="toggleReel(message.recommendations[part.index])" />
                             <div class="image-overlay">
@@ -385,16 +380,7 @@
                               </div>
                             </div>
                             <button @click.stop="toggleSave(message.recommendations[part.index], $event)" @touchstart.stop="() => {}" class="rec-image-save-btn" :class="{ saved: isSaved(message.recommendations[part.index]) }" :title="isSaved(message.recommendations[part.index]) ? t('chat.saved.remove_saved') : t('chat.saved.save_place')" :disabled="!getRecRef(message.recommendations[part.index])">
-                              <svg v-if="isSaved(message.recommendations[part.index])" width="24" height="90" viewBox="0 0 24 90" fill="url(#saveGradient)" stroke="none">
-                                <defs>
-                                  <linearGradient id="saveGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="rgb(212,175,55)"/>
-                                    <stop offset="100%" stop-color="rgb(255,140,0)"/>
-                                  </linearGradient>
-                                </defs>
-                                <path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                              </svg>
-                              <svg v-else width="24" height="90" viewBox="0 0 24 90" fill="rgba(255,255,255,0.34)" stroke="none"><path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                              <span class="rec-save-glass" aria-hidden="true"></span><svg width="18" height="56" viewBox="0 0 18 56" aria-hidden="true"><path d="M1 0v54l8-6.5 8 6.5V0"/></svg>
                             </button>
                           </div>
                           <div v-else class="rec-image-placeholder">
@@ -404,7 +390,9 @@
                               <polyline points="21,15 16,10 5,21"/>
                             </svg>
                           </div>
-                          <div class="rec-details">
+                          <!-- photo-led card (founder 2026-10-06): category, name and distance · address ON the photo -->
+<div class="rec-plate"><p v-if="message.recommendations[part.index].category || message.recommendations[part.index].type" class="rec-plate-kick">{{ message.recommendations[part.index].category || message.recommendations[part.index].type }}</p><h3 class="rec-plate-name">{{ message.recommendations[part.index].name }}</h3><p v-if="plateMeta(message.recommendations[part.index])" class="rec-plate-meta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>{{ plateMeta(message.recommendations[part.index]) }}</span></p></div>
+<div class="rec-details">
                             <div class="rec-header">
                               <div class="rec-name">{{ message.recommendations[part.index].name }}</div>
                               <button @click.stop="requestImages(message.recommendations[part.index])" class="image-request-btn" :class="{ 'has-reel': !!message.recommendations[part.index].guidePicks?.[0]?.reelUrl, 'loading': getButtonState(message.recommendations[part.index]) === 'loading' }" :disabled="isButtonDisabled(message.recommendations[part.index]) || isOnCooldown">
@@ -450,7 +438,9 @@
                               </div>
                             </div>
                           </div>
-                        </div><!-- /recommendation-card -->
+                        <!-- one bar: More · Ask · Photos (or Reel when a guide's pick has one — it opens the gallery with the reel first) -->
+<div class="rec-bar" @click.stop><button type="button" class="rec-bar-btn" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" @click.stop="showPlaceInfo(message.recommendations[part.index])">{{ t('chat.recommendations.more') }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button type="button" class="rec-bar-btn" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" @click.stop="handleRecommendationClick(message.recommendations[part.index])">{{ t('chat.recommendations.ask_ai') }}</button><button type="button" class="rec-bar-btn" :class="{ 'is-reel': !!message.recommendations[part.index].guidePicks?.[0]?.reelUrl, 'loading': getButtonState(message.recommendations[part.index]) === 'loading', 'disabled-cooldown': isOnCooldown }" :disabled="isButtonDisabled(message.recommendations[part.index]) || isOnCooldown" @click.stop="requestImages(message.recommendations[part.index])"><svg v-if="getButtonState(message.recommendations[part.index]) === 'loading'" class="loading-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg><svg v-else-if="message.recommendations[part.index].guidePicks?.[0]?.reelUrl" class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5v13l10.5-6.5z"/></svg><svg v-else viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>{{ message.recommendations[part.index].guidePicks?.[0]?.reelUrl ? t('chat.recommendations.reel') : t('explore.photos') }}</button></div>
+</div><!-- /recommendation-card -->
                         <div class="rec-card-bottom">
                           
                           <div v-if="(message.recommendations[part.index].verifiedId || message.recommendations[part.index].id?.startsWith('db-')) && message.recommendations[part.index]._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(message.recommendations[part.index])]" v-html="getPartnerIcon(message.recommendations[part.index]) + ' ' + getPartnerLabel(message.recommendations[part.index])"></div>
@@ -521,7 +511,7 @@
                       </div>
                       <div v-if="!(message.metadata && message.metadata.routeTo)" class="recommendation-grid">
                         <div v-for="(rec, recIndex) in message.recommendations" :key="recIndex" :class="['rec-card-wrapper', getPartnerWrapperClass(rec)]">
-                          <div class="recommendation-card" :class="{ 'reel-open': isReelOpen(rec) }" @touchstart="handleCardTouchStart(rec, $event)" @touchend="handleCardTouchEnd(rec, $event)">
+                          <div class="recommendation-card pl" :class="{ 'reel-open': isReelOpen(rec) }" @touchstart="handleCardTouchStart(rec, $event)" @touchend="handleCardTouchEnd(rec, $event)">
                             <!-- An event with a date but no image is a DATE-CARD: the event
                                  is real and its schedule is real, but it has no Google
                                  place to take a photo from (a street festival has no venue
@@ -552,19 +542,12 @@
                                 </div>
                               </div>
                               <button v-if="rec.image" @click.stop="toggleSave(rec, $event)" @touchstart.stop="() => {}" class="rec-image-save-btn" :class="{ saved: isSaved(rec) }" :title="isSaved(rec) ? t('chat.saved.remove_saved') : t('chat.saved.save_place')" :disabled="!getRecRef(rec)">
-                                <svg v-if="isSaved(rec)" width="24" height="90" viewBox="0 0 24 90" fill="url(#saveGradient)" stroke="none">
-                                  <defs>
-                                    <linearGradient id="saveGradient" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="0%" stop-color="rgb(212,175,55)"/>
-                                      <stop offset="100%" stop-color="rgb(255,140,0)"/>
-                                    </linearGradient>
-                                  </defs>
-                                  <path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                                </svg>
-                                <svg v-else width="24" height="90" viewBox="0 0 24 90" fill="rgba(255,255,255,0.34)" stroke="none"><path d="M19 87l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                <span class="rec-save-glass" aria-hidden="true"></span><svg width="18" height="56" viewBox="0 0 18 56" aria-hidden="true"><path d="M1 0v54l8-6.5 8 6.5V0"/></svg>
                               </button>
                             </div>
-                            <div class="rec-details">
+                            <!-- photo-led card (founder 2026-10-06): category, name and distance · address ON the photo -->
+<div class="rec-plate"><p v-if="rec.category || rec.type" class="rec-plate-kick">{{ rec.category || rec.type }}</p><h3 class="rec-plate-name">{{ rec.name }}</h3><p v-if="plateMeta(rec)" class="rec-plate-meta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>{{ plateMeta(rec) }}</span></p></div>
+<div class="rec-details">
                               <div class="rec-header">
                                 <div class="rec-name">{{ rec.name }}</div>
                                 <button @click.stop="requestImages(rec)" class="image-request-btn" :class="{ 'has-reel': !!rec.guidePicks?.[0]?.reelUrl, 'loading': getButtonState(rec) === 'loading', 'disabled-cooldown': isOnCooldown }" :disabled="isButtonDisabled(rec) || isOnCooldown">
@@ -609,7 +592,9 @@
                                 </div>
                               </div>
                             </div>
-                          </div><!-- /recommendation-card -->
+                          <!-- one bar: More · Ask · Photos (or Reel when a guide's pick has one — it opens the gallery with the reel first) -->
+<div class="rec-bar" @click.stop><button type="button" class="rec-bar-btn" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" @click.stop="showPlaceInfo(rec)">{{ t('chat.recommendations.more') }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button><button type="button" class="rec-bar-btn" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" @click.stop="handleRecommendationClick(rec)">{{ t('chat.recommendations.ask_ai') }}</button><button type="button" class="rec-bar-btn" :class="{ 'is-reel': !!rec.guidePicks?.[0]?.reelUrl, 'loading': getButtonState(rec) === 'loading', 'disabled-cooldown': isOnCooldown }" :disabled="isButtonDisabled(rec) || isOnCooldown" @click.stop="requestImages(rec)"><svg v-if="getButtonState(rec) === 'loading'" class="loading-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg><svg v-else-if="rec.guidePicks?.[0]?.reelUrl" class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5v13l10.5-6.5z"/></svg><svg v-else viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>{{ rec.guidePicks?.[0]?.reelUrl ? t('chat.recommendations.reel') : t('explore.photos') }}</button></div>
+</div><!-- /recommendation-card -->
                           <div class="rec-card-bottom">
                             
                             <div v-if="(rec.verifiedId || rec.id?.startsWith('db-')) && rec._verifiedModel !== 'destination'" :class="['partner-label', getPartnerLabelClass(rec)]" v-html="getPartnerIcon(rec) + ' ' + getPartnerLabel(rec)"></div>
@@ -7271,6 +7256,13 @@ export default {
         if (usageData.daily.tokens.percentage > 80 || usageData.daily.places.percentage > 80) { this.showUsageWarning(this.usageStatus) }
       }
     },
+    // The line on a photo-led card's plate: distance · address (either may be missing).
+    plateMeta(rec) {
+      if (!rec) return '';
+      const dist = rec.distance && rec.distance !== 'Near you km' ? String(rec.distance).trim() : '';
+      const where = String(rec.address || rec.location || '').trim();
+      return [dist, where].filter(Boolean).join(' · ');
+    },
     handleCardTouchStart(recommendation, event) {
       const card = event.currentTarget.closest('.recommendation-card');
       if (card) { card.classList.add('touch-active') }
@@ -9379,4 +9371,108 @@ html[data-text-size="big"] .input-wrapper textarea{padding-top:10px;padding-bott
 
 /* Save ribbon: white hairline like the More button (founder 2026-09-08) */
 .rec-image-save-btn svg path{stroke:rgba(255,255,255,0.75);stroke-width:2}
+
+/* ═══ PHOTO-LED CARDS (founder 2026-10-06, approved in the artifact preview "Jinni Chat Cards",
+   option B worked out). Applies only to cards carrying the .pl marker — the three chat
+   templates (streaming, completed, quick-action grid); the saved panel keeps the old card.
+   · The photo is the card. Category, name and the distance · address line sit ON it, on a
+     plate that blurs and darkens the photo behind the text, so any image colour reads.
+   · Under the photo only what cannot go on it: an event's date, Jinni's description (never in
+     the grid), a hotel's price.
+   · One bar: More · Ask · Photos — or Reel when a guide's pick has one (it opens today's
+     gallery window with the reel first).
+   · Photo sizes: phones 4:5 everywhere; desktop large/inline 3:2 (the settled size); desktop
+     quick-action grid 1:1, three in a row (founder: "lets keep 1:1 SQUARE for desktop grid").
+   · Save = the glacier-glass Slim silk ribbon, always visible. More/Ask no longer hide in a
+     hover overlay. Business tiers keep their settled card colours. ═══ */
+.recommendation-card.pl { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; border-radius: 22px; cursor: default }
+.recommendation-card.pl > .rec-image, .recommendation-card.pl > .rec-image-placeholder, .recommendation-card.pl > .rec-plate { grid-column: 1; grid-row: 1 }
+.recommendation-card.pl > .rec-details { grid-column: 1; grid-row: 2 }
+.recommendation-card.pl > .rec-bar { grid-column: 1; grid-row: 3 }
+.rec-card-wrapper:has(> .recommendation-card.pl) { border-radius: 22px }
+.genie-chat-container .recommendation-card.pl .rec-image, .genie-chat-container .recommendation-card.pl .rec-image-placeholder {
+  display: block; width: 100%; height: auto !important; max-height: none !important; aspect-ratio: 4 / 5 !important; border-radius: 0 }
+.recommendation-card.pl .rec-image-placeholder { background: linear-gradient(180deg, #2a1f45, #130822) }
+.recommendation-card.pl .rec-image-placeholder svg { display: none }
+@media (min-width: 769px) {
+  /* the settled desktop size: 3:2, never taller than 380px */
+  .genie-chat-container .recommendation-card.pl .rec-image, .genie-chat-container .recommendation-card.pl .rec-image-placeholder { aspect-ratio: 3 / 2 !important; max-height: 380px !important }
+  .genie-chat-container .recommendation-grid .recommendation-card.pl .rec-image { aspect-ratio: 1 / 1 !important; max-height: none !important }
+}
+/* three square cards in a row on desktop, never more; one per row on phones */
+.recommendation-grid:has(.recommendation-card.pl) { grid-template-columns: repeat(auto-fill, minmax(max(230px, calc((100% - 30px) / 3)), 1fr)) }
+/* a short shade at the top keeps the ribbon and the guide's chip readable */
+.recommendation-card.pl .rec-image::before { content: ''; position: absolute; z-index: 1; inset: 0 0 auto 0; height: 26%; pointer-events: none; background: linear-gradient(180deg, rgba(8,4,18,0.34), transparent) }
+/* More/Ask live in the bar now */
+.recommendation-card.pl .image-overlay { display: none !important }
+.recommendation-card.pl.touch-active { transform: none }
+
+/* THE PLATE: the text never sits on the bare photo */
+.rec-plate { position: relative; z-index: 2; align-self: end; display: grid; gap: 6px; padding: 56px 18px 16px; isolation: isolate; pointer-events: none; min-width: 0 }
+.rec-plate::before { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(180deg, rgba(8,4,18,0) 0%, rgba(8,4,18,0.62) 38%, rgba(8,4,18,0.86) 100%);
+  backdrop-filter: blur(16px) saturate(120%); -webkit-backdrop-filter: blur(16px) saturate(120%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 42%); mask-image: linear-gradient(180deg, transparent 0%, #000 42%) }
+.rec-plate-kick { margin: 0; font: 500 11.5px/1.2 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif; letter-spacing: 0.2em; text-transform: uppercase; color: #ffd29a }
+.rec-plate-name { margin: 0; font: 500 clamp(21px, 6vw, 26px)/1.12 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif; letter-spacing: 0.02em; color: #fffaf2; text-wrap: balance;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden }
+.rec-plate-meta { margin: 0; display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 14px; line-height: 1.3; color: rgba(255,246,232,0.82) }
+.rec-plate-meta span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.rec-plate-meta svg { flex: none; width: 14px; height: 14px; fill: none; stroke: #ffd29a; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round }
+[dir="rtl"] .rec-plate-kick, :lang(ar) .rec-plate-kick, [dir="rtl"] .rec-bar-btn, :lang(ar) .rec-bar-btn { letter-spacing: 0 }
+@media (min-width: 769px) {
+  .large-card .rec-plate-name { font-size: clamp(24px, 2.6vw, 30px) }
+  .recommendation-grid .rec-plate { padding: 44px 14px 13px; gap: 5px }
+  .recommendation-grid .rec-plate-name { font-size: 19px; -webkit-line-clamp: 2 }
+  .recommendation-grid .rec-plate-kick { font-size: 10.5px }
+  .recommendation-grid .rec-plate-meta { font-size: 13px }
+}
+
+/* under the photo: only the date, the description, the price */
+.recommendation-card.pl .rec-details, .large-card.pl .rec-details { padding: 0 }
+.recommendation-card.pl .rec-header, .recommendation-card.pl .rec-type, .recommendation-card.pl .rec-distance, .recommendation-card.pl .rec-location { display: none !important }
+.recommendation-card.pl .rec-event-schedule, .recommendation-card.pl .rec-description, .recommendation-card.pl .rec-hotel-price { margin: 12px 18px 0 }
+.recommendation-card.pl .rec-description { font-size: 15.5px; line-height: 1.55 }
+.recommendation-card.pl .rec-details:has(.rec-event-schedule, .rec-description, .rec-hotel-price)::after { content: ''; display: block; height: 14px }
+
+/* the bar */
+.rec-bar { display: flex; box-shadow: inset 0 1px 0 var(--pl-rule) }
+.rec-details:not(:has(.rec-event-schedule, .rec-description, .rec-hotel-price)) + .rec-bar { box-shadow: none }
+.rec-bar-btn { flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 50px; padding: 6px 8px; border: 0; background: none; cursor: pointer;
+  font: 500 11.5px/1.2 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif; letter-spacing: 0.18em; text-transform: uppercase; text-align: center; color: var(--pl-ink); transition: background-color 0.2s ease }
+.rec-bar-btn + .rec-bar-btn { box-shadow: inset 1px 0 0 var(--pl-rule) }
+.rec-bar-btn:hover:not(:disabled) { background: var(--pl-hover) }
+.rec-bar-btn:disabled { opacity: 0.45; cursor: default }
+.rec-bar-btn svg { flex: none; width: 15px; height: 15px; fill: none; stroke: var(--pl-accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round }
+.rec-bar-btn.is-reel { color: var(--pl-accent) }
+.rec-bar-btn.is-reel svg.play { fill: var(--pl-accent); stroke: none }
+.rec-bar-btn .loading-icon { animation: spin 1s linear infinite }
+.recommendation-grid .rec-bar-btn { min-height: 46px; padding: 6px 4px; font-size: 10px; letter-spacing: 0.1em; gap: 5px }
+.recommendation-grid .rec-bar-btn svg { width: 13px; height: 13px }
+.genie-chat-container.night-mode .recommendation-card.pl, .saved-panel.night .recommendation-card.pl { --pl-ink: #f3eaf8; --pl-accent: #ffb36b; --pl-rule: rgba(200,190,255,0.16); --pl-hover: rgba(255,255,255,0.06) }
+.genie-chat-container.day-mode .recommendation-card.pl, .saved-panel.day .recommendation-card.pl { --pl-ink: #7A4A1C; --pl-accent: #c0702a; --pl-rule: rgba(122,74,28,0.18); --pl-hover: rgba(255,255,255,0.5) }
+
+/* business tiers: the settled card tints stay (they now fill the bar); the tier's colour also
+   glows on the rim and colours the category line and the icons */
+.genie-chat-container.night-mode .card-glow--verified .recommendation-card.pl { --pl-accent: #4ade80; box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.1), 0 0 18px -6px #4ade80 }
+.genie-chat-container.night-mode .card-glow--spotlight .recommendation-card.pl { --pl-accent: #6cbcf0; box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.1), 0 0 18px -6px #6cbcf0 }
+.genie-chat-container.night-mode .card-glow--signature .recommendation-card.pl { --pl-accent: #ffd27a; box-shadow: inset 0 0 0 0.7px rgba(255,255,255,0.1), 0 0 18px -6px #ffd27a }
+.genie-chat-container.day-mode .card-glow--verified .recommendation-card.pl { --pl-accent: #15a34a; box-shadow: inset 0 0 0 0.7px #15a34a, 0 0 18px -6px #15a34a }
+.genie-chat-container.day-mode .card-glow--spotlight .recommendation-card.pl { --pl-accent: #2b86c5; box-shadow: inset 0 0 0 0.7px #2b86c5, 0 0 18px -6px #2b86c5 }
+.genie-chat-container.day-mode .card-glow--signature .recommendation-card.pl { --pl-accent: #b57f0c; box-shadow: inset 0 0 0 0.7px #b57f0c, 0 0 18px -6px #b57f0c }
+.card-glow--verified .rec-plate-kick, .card-glow--verified .rec-plate-meta svg { color: #7cf0a4; stroke: #7cf0a4 }
+.card-glow--spotlight .rec-plate-kick, .card-glow--spotlight .rec-plate-meta svg { color: #9ad4f7; stroke: #9ad4f7 }
+.card-glow--signature .rec-plate-kick, .card-glow--signature .rec-plate-meta svg { color: #ffd27a; stroke: #ffd27a }
+.rec-plate-kick { stroke: none }
+
+/* save: the glacier-glass Slim silk ribbon, always visible (as on Discoveries) */
+.recommendation-card.pl .rec-image-save-btn { top: 0; right: 20px; width: 18px; height: 56px; border-radius: 0; opacity: 1 !important }
+.recommendation-card.pl .rec-image-save-btn:disabled { opacity: 0.3 !important }
+.recommendation-card.pl .rec-image-save-btn::before { content: ''; position: absolute; inset: -2px -13px -8px }
+.rec-save-glass { position: absolute; inset: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); background: rgba(255,255,255,0.24);
+  backdrop-filter: blur(9px) saturate(170%) brightness(1.12); -webkit-backdrop-filter: blur(9px) saturate(170%) brightness(1.12); transition: background 0.25s ease }
+.recommendation-card.pl .rec-image-save-btn svg { position: relative; display: block; overflow: visible; filter: drop-shadow(0 0 4px rgba(0,0,0,0.3)); transition: filter 0.25s ease }
+.recommendation-card.pl .rec-image-save-btn svg path, .recommendation-card.pl .rec-image-save-btn:not(.saved):hover svg path { fill: none; stroke: rgba(255,255,255,0.85); stroke-width: 1.1 }
+.recommendation-card.pl .rec-image-save-btn.saved .rec-save-glass { background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,214,140,0.62) 45%, rgba(255,160,60,0.9) 100%) }
+.recommendation-card.pl .rec-image-save-btn.saved svg { filter: drop-shadow(0 0 7px rgba(255,170,80,0.85)) }
+.recommendation-grid .recommendation-card.pl .rec-image-save-btn { right: 14px }
 </style>
