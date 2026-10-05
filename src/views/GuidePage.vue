@@ -82,6 +82,7 @@ import { useI18n } from 'vue-i18n'
 import { guideTheme, guideApi, CATEGORY_KEYS, tagGuideVisit, hasToken, initGuideLanguage, guideImage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
 import ReelCrop from '@/components/ui/ReelCrop.vue'
+import { trackVisit } from '@/utils/funnel'
 import JinniDaySky from '@/components/ui/JinniDaySky.vue'
 import JinniNightSky from '@/components/ui/JinniNightSky.vue'
 
@@ -106,6 +107,7 @@ const shown = computed(() => (tab.value === 'all' ? picks.value : picks.value.fi
 const toggleReel = (id) => { openReel.value = openReel.value === id ? null : id }
 
 onMounted(async () => {
+  trackVisit('guide')   // admin Overview · Most Used Pages
   const handle = String(route.params.handle || '').toLowerCase()
   try {
     const r = await guideApi(`/public/${encodeURIComponent(handle)}`)

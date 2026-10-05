@@ -100,6 +100,7 @@ import { useI18n } from 'vue-i18n'
 import { guideTheme, guideApi, hasToken, initGuideLanguage } from '@/utils/guides'
 import GuideLangSwitch from '@/components/guides/GuideLangSwitch.vue'
 import LandingNav from '@/components/ui/LandingNav.vue'
+import { trackVisit } from '@/utils/funnel'
 import JinniDaySky from '@/components/ui/JinniDaySky.vue'
 import JinniNightSky from '@/components/ui/JinniNightSky.vue'
 import { useRouter } from 'vue-router'
@@ -116,6 +117,7 @@ const year = new Date().getFullYear()
 const ctaTo = computed(() => (isGuide.value ? '/guide/dashboard' : '/guides/apply'))
 
 onMounted(async () => {
+  trackVisit('guides')   // admin Overview · Most Used Pages
   if (!signedIn) return
   try { const r = await guideApi('/me'); isGuide.value = !!r.guide } catch { /* stays a visitor */ }
 })

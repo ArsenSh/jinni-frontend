@@ -228,6 +228,37 @@
             <p v-else class="empty-state">No funnel data yet for this window.</p>
           </div>
 
+          <!-- Most used pages (founder 2026-10-06) — /api/admin/page-usage -->
+          <div class="card chart-card funnel-card">
+            <div class="card-head">
+              <h2>Most Used Pages</h2>
+              <span class="card-sub">Last {{ pageUsageDays }} days · each person counted once per page</span>
+              <div class="card-head-spacer"></div>
+              <div class="seg-group">
+                <button class="seg-btn" :class="{ 'seg-btn--active': pageUsageDays === 7 }"  @click="pageUsageDays = 7;  fetchPageUsage()">7d</button>
+                <button class="seg-btn" :class="{ 'seg-btn--active': pageUsageDays === 30 }" @click="pageUsageDays = 30; fetchPageUsage()">30d</button>
+              </div>
+            </div>
+            <div v-if="pageUsage" class="funnel-wrap">
+              <div class="qa-section-label">In the app · signed-in travelers ({{ fmt(pageUsage.activeUsers) }} active)</div>
+              <div v-for="r in pageUsageApp" :key="'a-' + r.key" class="funnel-row pu-row">
+                <div class="funnel-label">{{ r.label }}</div>
+                <div class="funnel-bar"><div class="funnel-bar-fill" :style="{ width: r.w }"></div></div>
+                <div class="funnel-count">{{ fmt(r.n) }}</div>
+                <div class="funnel-pct" title="activity, at most one per person per minute (≈ minutes spent)">{{ fmt(r.uses) }} uses</div>
+              </div>
+              <div class="qa-divider"></div>
+              <div class="qa-section-label">Public pages · visitors with or without an account</div>
+              <div v-for="r in pageUsagePublic" :key="'p-' + r.key" class="funnel-row pu-row">
+                <div class="funnel-label">{{ r.label }}</div>
+                <div class="funnel-bar"><div class="funnel-bar-fill" :style="{ width: r.w }"></div></div>
+                <div class="funnel-count">{{ fmt(r.n) }}</div>
+                <div class="funnel-pct">{{ r.path }}</div>
+              </div>
+            </div>
+            <p v-else class="empty-state">No page data yet for this window.</p>
+          </div>
+
           <!-- Feature Usage Chart: Quick Actions + Chat Stream -->
           <div class="card chart-card">
             <div class="card-head">
@@ -5395,6 +5426,23 @@ export default {
       catch (e) { console.warn('funnel fetch failed:', e.message) }
     }
 
+    // ── Most used pages card (2026-10-06) ──
+    // App sections = distinct signed-in travelers (UserActivity); public pages
+    // = distinct anonymous browsers (PageVisit + the funnel's landing view).
+    const pageUsage = ref(null)
+    const pageUsageDays = ref(7)
+    const APP_SECTION_LABELS = { chat: 'Chat', quickAction: 'Quick actions', explore: "Explore (Jinni's Discoveries)", itinerary: 'Itineraries', saves: 'Saved places', map: 'Map & directions' }
+    const PUBLIC_PAGE_LABELS = { landing: ['Landing', '/'], discover: ['Discovery city pages', '/discover/…'], guide: ["Guides' own pages", '/@…'], guides: ['Guides programme', '/guides'], business: ['Business landing', '/business'] }
+    const withWidths = rows => { const max = Math.max(1, ...rows.map(r => r.n)); return rows.map(r => ({ ...r, w: Math.round(100 * r.n / max) + '%' })) }
+    const pageUsageApp = computed(() => withWidths((pageUsage.value?.app || [])
+      .map(r => ({ key: r.key, label: APP_SECTION_LABELS[r.key] || r.key, n: r.users, uses: r.uses }))))
+    const pageUsagePublic = computed(() => withWidths((pageUsage.value?.public || [])
+      .map(r => ({ key: r.key, label: (PUBLIC_PAGE_LABELS[r.key] || [r.key])[0], path: (PUBLIC_PAGE_LABELS[r.key] || [])[1] || '', n: r.visitors }))))
+    const fetchPageUsage = async () => {
+      try { const res = await apiFetch(`/page-usage?days=${pageUsageDays.value}`); pageUsage.value = res.data }
+      catch (e) { console.warn('page usage fetch failed:', e.message) }
+    }
+
     // ── Shared styled chart tooltip (Google + AI provider + retention charts) ──
     const chartTip = ref({ show: false, x: 0, y: 0, title: '', rows: [] })
     let _tipTouchTimer = null
@@ -5959,7 +6007,7 @@ export default {
     const debouncedDestFetch = debounce(() => fetchDestinations(true))
     const fetchAll = async () => {
       loading.value = true
-      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchFunnel(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiBalance(), fetchServerStats(), fetchRoutingUsage(), fetchDbStats()]) }
+      try { await Promise.all([fetchOverview(), fetchRegistrations(), fetchRetention(), fetchFunnel(), fetchPageUsage(), fetchQuickActionStats(), fetchPrefStats(), fetchUsers(), fetchUserLocations(), fetchAIUsage(), fetchProviderStats(), fetchBusinesses(), fetchPlaces(), fetchGoogleUsage(), fetchGoogleMonthly(), fetchAiBalance(), fetchServerStats(), fetchRoutingUsage(), fetchDbStats()]) }
       catch (e) { showToast(e.message, 'error') } finally { loading.value = false }
     }
     // Stored rec images are either absolute URLs or API-relative paths
@@ -8085,6 +8133,7 @@ export default {
       overviewData, overview, registrations, premiumPct, barHeight, maxReg,
       retention, retentionDaily, retBarH, retPct,
       funnel, funnelDays, funnelSteps, funnelPct, fetchFunnel,
+      pageUsage, pageUsageDays, pageUsageApp, pageUsagePublic, fetchPageUsage,
       users, usersLoading, usersPage, usersTotalPages, userSearch, userFilter, userLocations,
       aiUsers, aiLoading, aiPage, aiTotalPages, aiSummary, aiDailyStats, aiChartDays, aiChartMax, dailyTokenPct, dailyPlacesPct, aiCost, todayCost,
       aiProvider, aiProviderLoading, aiProviderSaving, aiProviderSavedAt, fetchAiProvider, saveAiProvider, setProvider,
@@ -9430,8 +9479,10 @@ export default {
 .admin-shell.day-mode .funnel-bar { background: rgba(0,0,0,0.07); }
 .admin-shell.day-mode .funnel-label, .admin-shell.day-mode .funnel-count, .admin-shell.day-mode .funnel-src-row { color: #2c1e10; }
 .admin-shell.day-mode .funnel-pct { color: #A0522D; opacity: 0.85; }
+.funnel-row.pu-row { grid-template-columns: 190px 1fr 44px 84px; }
 @media (max-width: 768px) {
   .funnel-wrap { padding: 12px 14px 14px; }
+  .funnel-row.pu-row { grid-template-columns: 112px 1fr 34px 64px; }
   .funnel-row, .funnel-cols { grid-template-columns: 104px 1fr 40px 44px 50px; gap: 6px; }
   .funnel-label { font-size: 11px; }
   .funnel-src-row { font-size: 10px; gap: 4px; padding: 3px 4px; grid-template-columns: minmax(70px, 1.4fr) repeat(6, minmax(26px, 1fr)); }

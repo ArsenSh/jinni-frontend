@@ -223,6 +223,7 @@
 <script>
 import { isNightTime } from '../utils/timeUtils';
 import { startEmberBreath } from '@/utils/emberBreath';
+import { trackVisit } from '@/utils/funnel';
 import JinniDaySky from '@/components/ui/JinniDaySky.vue';
 import JinniNightSky from '@/components/ui/JinniNightSky.vue';
 
@@ -346,6 +347,7 @@ export default {
   // moving light once it is on the page (the footer one arrives after the data).
   updated() { this.emberSync(); },
   mounted() {
+    trackVisit('discover');   // admin Overview · Most Used Pages
     this.load();
     this._onKey = (e) => {
       if (e.key === 'Escape') { this.closeGallery(); this.closeInfo(); }

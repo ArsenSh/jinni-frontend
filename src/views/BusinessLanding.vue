@@ -112,6 +112,7 @@ import JinniDaySky from '@/components/ui/JinniDaySky.vue'
 import JinniNightSky from '@/components/ui/JinniNightSky.vue'
 import LandingNav from '@/components/ui/LandingNav.vue'
 import { startEmberBreath } from '@/utils/emberBreath'
+import { trackVisit } from '@/utils/funnel'
 export default {
   name: 'BusinessLanding',
   components: { MagicButton, StarrySky, DesertSky, DesertSand, JinniDaySky, JinniNightSky, LandingNav },
@@ -184,6 +185,7 @@ export default {
       stopEmber = el ? startEmberBreath(el) : () => {}   // both themes now (day = copper light)
     }, { immediate: true })
     onMounted(() => {
+      trackVisit('business')   // admin Overview · Most Used Pages
       if (store.state.i18n?.locale) selectedLanguage.value = store.state.i18n.locale
       showAllLanguages.value = false
     })

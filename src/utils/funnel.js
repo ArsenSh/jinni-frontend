@@ -49,10 +49,17 @@ function source() {
   return 'direct';
 }
 
-export function track(event) {
+export function track(event) { send('funnel', { event }); }
+
+// Public-page visit (founder 2026-10-06): the admin Overview's Most Used
+// Pages card. `page` = discover | guide | guides | business (backend
+// models/PageVisit.js); one count per browser, page and day.
+export function trackVisit(page) { send('visit', { page }); }
+
+function send(path, fields) {
   try {
-    const body = JSON.stringify({ event, sid: sid(), source: source() });
-    const url = `${API}/api/public/funnel`;
+    const body = JSON.stringify({ ...fields, sid: sid(), source: source() });
+    const url = `${API}/api/public/${path}`;
     // text/plain is the only beacon body a cross-origin API accepts without
     // a CORS preflight; the server parses the JSON from the text.
     if (navigator.sendBeacon) {
