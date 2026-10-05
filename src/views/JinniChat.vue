@@ -7911,6 +7911,11 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .fullscreen-reel{--reel-h:min(86vh,675px,calc(94vw * 16 / 9))}
 .recommendation-card.reel-open .rec-image{aspect-ratio:9 / 16;height:auto;max-height:min(80vh,720px)}
 .recommendation-card.reel-open .image-overlay,.recommendation-card.reel-open .rec-image-save-btn{display:none}
+/* The guide's pick chip stays ABOVE the card's touch overlay (founder 2026-10-05: on phones the
+   chip "feels click but there is no action" — a touched card lifts .image-overlay to z-index 10,
+   over the chip, so the tap landed on the overlay). The layer itself lets taps through; only
+   the chip takes them. */
+.recommendation-card .rec-image .gr{z-index:11}
 @media (min-width:601px){
   .large-card.reel-open .rec-image{aspect-ratio:auto;height:min(560px,75vh);max-height:none}
   .recommendation-grid .rec-card-wrapper:has(.reel-open){grid-row:span 2;display:flex;flex-direction:column}
