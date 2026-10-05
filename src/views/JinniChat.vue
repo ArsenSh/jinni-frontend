@@ -9395,17 +9395,17 @@ html[data-text-size="big"] .input-wrapper textarea{padding-top:10px;padding-bott
 .recommendation-card.pl .rec-image-placeholder { background: linear-gradient(180deg, #2a1f45, #130822) }
 .recommendation-card.pl .rec-image-placeholder svg { display: none }
 @media (min-width: 769px) {
-  /* the settled desktop size: 3:2, never taller than 380px */
-  .genie-chat-container .recommendation-card.pl .rec-image, .genie-chat-container .recommendation-card.pl .rec-image-placeholder { aspect-ratio: 3 / 2 !important; max-height: 380px !important }
+  /* desktop: 3:2, never taller than 430px (the card is 640px wide at most — founder 2026-10-06: "a little longer") */
+  .genie-chat-container .recommendation-card.pl .rec-image, .genie-chat-container .recommendation-card.pl .rec-image-placeholder { aspect-ratio: 3 / 2 !important; max-height: 430px !important }
   .genie-chat-container .recommendation-grid .recommendation-card.pl .rec-image { aspect-ratio: 1 / 1 !important; max-height: none !important }
 }
-/* desktop: a card in an answer is at most 570px wide (founder 2026-10-06, after seeing it live at the full
+/* desktop: a card in an answer is at most 640px wide (first 570, then widened on the founder's word) (founder 2026-10-06, after seeing it live at the full
    760px column: the 380px cap turned the photo into a 2:1 strip and the description ran ~110 characters
    a line). At 570px the photo is a true 3:2 and the text wraps at a readable length. Centred in the chat column,
    like the message box (founder: "in the middle not from left"); the quick-action grid is not affected. */
 @media (min-width: 769px) {
-  .inline-recommendation-wrapper > .rec-card-wrapper:has(> .recommendation-card.pl) { width: 100%; max-width: 570px; margin-inline: auto }
-  .inline-recommendation-wrapper > .recommendation-card.pl { width: 100%; max-width: 570px; margin-inline: auto }
+  .inline-recommendation-wrapper > .rec-card-wrapper:has(> .recommendation-card.pl) { width: 100%; max-width: 640px; margin-inline: auto }
+  .inline-recommendation-wrapper > .recommendation-card.pl { width: 100%; max-width: 640px; margin-inline: auto }
 }
 /* a wider chat column on large desktops (founder 2026-10-06: "horizontal size of chat is short because
    rec grid cards are narrower" … "but chat input container is needless to make horizontally long"):
