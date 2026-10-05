@@ -1192,4 +1192,33 @@ export default {
 @keyframes gps-glow{0%{box-shadow:0 0 0 0 rgba(212,175,55,0.55)}100%{box-shadow:0 0 14px 6px rgba(212,175,55,0)}}
 .fade-enter-active,.fade-leave-active{transition:opacity 0.3s ease}
 .fade-enter-from,.fade-leave-to{opacity:0}
+
+/* ═══ The landing's lettering, inks and glass on this same page (founder 2026-10-05: "change
+   the way you proposed but keep day mode and night mode button colors"). Layout, order and
+   logic untouched. Cinzel for the brand name and the titles, the landing's inks (bronze by
+   day, soft white at night) in place of the gradient brand name and the violet headings;
+   cards = frosted glass with a fine rim and rounder corners. Every BUTTON keeps its own
+   colours: the option tiles and their chosen state (violet at night, gold by day), the
+   location buttons, Save / Meet Jinni, and the progress bar that matches them. The same
+   block lives in OnboardingPage.vue and DiscoverPreferences.vue. ═══ */
+.onboarding-page { --serif: 'Cinzel', 'Palatino Linotype', Palatino, Georgia, serif; --lora: 'Lora', 'Noto Serif Armenian', Georgia, serif; font-family: var(--lora) }
+.onboarding-page.day-mode { --ink: #7A4A1C; --body: #7a5434; --soft: rgba(122,84,52,0.8); --brand: #b8741f;
+  --glass: rgba(255,255,255,0.5); --glass-rim: inset 0 0 0 0.75px rgba(255,255,255,0.9), 0 0 18px -2px rgba(140,61,7,0.12) }
+.onboarding-page.night-mode { --ink: #fbf5ff; --body: #c9c0da; --soft: rgba(238,230,246,0.72); --brand: #f7efff;
+  --glass: rgba(255,255,255,0.05); --glass-rim: inset 0 0 0 0.75px rgba(220,210,255,0.14), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -2px rgba(0,0,0,0.45) }
+
+/* brand + titles */
+.onboarding-page .brand-name { font-family: var(--serif); font-weight: 500; font-size: 2rem; letter-spacing: 0.14em; text-transform: uppercase;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-fill-color: currentColor; color: var(--brand) }
+.onboarding-page.night-mode .logo-icon { filter: drop-shadow(0 0 12px rgba(255,170,90,0.4)) }
+.onboarding-page.day-mode .logo-icon { filter: saturate(0.88) brightness(0.95) }
+.onboarding-page .page-title { font-family: var(--serif); font-weight: 500; letter-spacing: 0.03em; color: var(--ink) }
+.onboarding-page .subtitle { font-style: italic; color: var(--body) }
+.onboarding-page .section-header h3 { font-family: var(--serif); font-weight: 500; font-size: 1.2rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink) }
+.onboarding-page .section-description { color: var(--soft) }
+.onboarding-page .budget-embed-header h4 { color: var(--ink) }
+.onboarding-page:lang(ar) .brand-name, .onboarding-page:lang(ar) .section-header h3 { letter-spacing: 0 }
+
+/* cards: frosted glass, nothing grows on hover */
+.onboarding-page .card, .onboarding-page .card:hover { border-radius: 22px; background: var(--glass); box-shadow: var(--glass-rim) }
 </style>
