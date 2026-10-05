@@ -9399,6 +9399,14 @@ html[data-text-size="big"] .input-wrapper textarea{padding-top:10px;padding-bott
   .genie-chat-container .recommendation-card.pl .rec-image, .genie-chat-container .recommendation-card.pl .rec-image-placeholder { aspect-ratio: 3 / 2 !important; max-height: 380px !important }
   .genie-chat-container .recommendation-grid .recommendation-card.pl .rec-image { aspect-ratio: 1 / 1 !important; max-height: none !important }
 }
+/* desktop: a card in an answer is at most 570px wide (founder 2026-10-06, after seeing it live at the full
+   760px column: the 380px cap turned the photo into a 2:1 strip and the description ran ~110 characters
+   a line). At 570px the photo is a true 3:2 and the text wraps at a readable length. Left-aligned under
+   the answer text; the quick-action grid is not affected. */
+@media (min-width: 769px) {
+  .inline-recommendation-wrapper > .rec-card-wrapper:has(> .recommendation-card.pl) { width: 100%; max-width: 570px }
+  .inline-recommendation-wrapper > .recommendation-card.pl { width: 100%; max-width: 570px }
+}
 /* three square cards in a row on desktop, never more; one per row on phones */
 .recommendation-grid:has(.recommendation-card.pl) { grid-template-columns: repeat(auto-fill, minmax(max(230px, calc((100% - 30px) / 3)), 1fr)) }
 /* a short shade at the top keeps the ribbon and the guide's chip readable */
