@@ -940,7 +940,8 @@
       "every_day": "ամեն {day}",
       "all_day": "Ամբողջ օրը",
       "starting": "սկսած {date}-ից",
-      "listing_short": "Աֆիշա"
+      "listing_short": "Աֆիշա",
+      "check": "Ստուգել"
     },
     "quick_actions": {
       "open_settings": "Բացել կարգավորումները",

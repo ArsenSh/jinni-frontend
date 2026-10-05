@@ -940,7 +940,8 @@
       "every_day": "каждый {day}",
       "all_day": "Весь день",
       "starting": "начиная с {date}",
-      "listing_short": "Афиша"
+      "listing_short": "Афиша",
+      "check": "Проверить"
     },
     "quick_actions": {
       "open_settings": "Открыть настройки",

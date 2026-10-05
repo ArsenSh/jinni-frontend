@@ -940,7 +940,8 @@
       "every_day": "every {day}",
       "all_day": "All day",
       "starting": "starting {date}",
-      "listing_short": "Listing"
+      "listing_short": "Listing",
+      "check": "Check"
     },
     "quick_actions": {
       "open_settings": "Open Settings",

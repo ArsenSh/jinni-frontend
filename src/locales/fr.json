@@ -940,7 +940,8 @@
       "every_day": "tous les {day}",
       "all_day": "Toute la journée",
       "starting": "à partir du {date}",
-      "listing_short": "Fiche"
+      "listing_short": "Fiche",
+      "check": "Vérifier"
     },
     "quick_actions": {
       "open_settings": "Ouvrir les paramètres",

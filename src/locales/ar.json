@@ -940,7 +940,8 @@
       "every_day": "كل {day}",
       "all_day": "طوال اليوم",
       "starting": "ابتداءً من {date}",
-      "listing_short": "الإعلان"
+      "listing_short": "الإعلان",
+      "check": "تحقق"
     },
     "quick_actions": {
       "open_settings": "فتح الإعدادات",
