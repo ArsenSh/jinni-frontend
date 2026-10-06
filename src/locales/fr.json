@@ -1039,7 +1039,10 @@
       "limit": "Les réponses vocales du jour sont épuisées ; Jinni reparlera demain.",
       "not_supported": "La voix n'est pas disponible dans ce navigateur. Écrivez votre message.",
       "mic_blocked": "Le micro est bloqué. Autorisez-le pour jinni.travel dans les réglages du navigateur.",
-      "unavailable": "La voix de Jinni n'est pas disponible pour le moment."
+      "unavailable": "La voix de Jinni n'est pas disponible pour le moment.",
+      "done": "Terminé",
+      "listen": "Écouter",
+      "no_device_voice": "Ce téléphone n'a pas de voix pour cette langue. La voix de Jinni est disponible avec Premium."
     }
   },
   "profile": {

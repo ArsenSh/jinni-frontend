@@ -1039,7 +1039,10 @@
       "limit": "今天的语音回答已用完；Jinni 明天会再次开口。",
       "not_supported": "此浏览器不支持语音。请输入您的消息。",
       "mic_blocked": "麦克风已被阻止。请在浏览器设置中允许 jinni.travel 使用麦克风。",
-      "unavailable": "Jinni 的声音暂时不可用。"
+      "unavailable": "Jinni 的声音暂时不可用。",
+      "done": "完成",
+      "listen": "聆听",
+      "no_device_voice": "此手机没有该语言的语音。Jinni 自己的声音需要 Premium。"
     }
   },
   "profile": {

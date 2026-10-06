@@ -729,6 +729,12 @@
                     <button @click="toggleMessageFeedback(message, 'dislike')" class="feedback-btn msg-feedback-btn" :class="{ active: getMessageFeedback(message) === 'dislike' }" :title="t('chat.feedback.bad_response')">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
                     </button>
+                    <!-- Listen (founder 2026-10-07): every reply can be read aloud — Premium in Jinni's voice,
+                         free users in the phone's own voice. Tap again to stop. -->
+                    <button v-if="messageSpeakable(message)" @click="toggleListen(message)" class="feedback-btn msg-feedback-btn listen-btn" :class="{ active: listeningMessageId === message.id }" :title="listeningMessageId === message.id ? t('chat.voice.stop') : t('chat.voice.listen')">
+                      <svg v-if="listeningMessageId !== message.id" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/></svg>
+                      <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                    </button>
                     <div class="message-feedback-divider"></div>
                     <button @click="copyMessage(message)" class="feedback-btn msg-feedback-btn" :class="{ active: copiedMessageId === message.id }" :title="copiedMessageId === message.id ? t('chat.feedback.copied') : t('chat.feedback.copy_response')">
                       <svg v-if="copiedMessageId !== message.id" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -796,8 +802,9 @@
           </div>
           <div class="chat-input-container">
             <div v-if="voice.notice || voice.speaking || voice.listening" class="voice-notice" :class="{ 'is-live': voice.speaking || voice.listening }">
-              <span v-if="voice.listening" class="voice-dot" aria-hidden="true"></span>
-              <span>{{ voice.listening ? t('chat.voice.listening') : (voice.speaking ? t('chat.voice.speaking') : voice.notice) }}</span>
+              <span v-if="voice.listening || voice.speaking" class="voice-bars" :class="{ 'is-speaking': voice.speaking }" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="voice-text">{{ voice.listening ? (userInput.trim() || t('chat.voice.listening')) : (voice.speaking ? t('chat.voice.speaking') : voice.notice) }}</span>
+              <button v-if="voice.listening" type="button" class="voice-stop" @click="stopVoiceInput">{{ t('chat.voice.done') }}</button>
               <button v-if="voice.speaking" type="button" class="voice-stop" @click="stopSpeaking">{{ t('chat.voice.stop') }}</button>
               <button v-else-if="voice.notice" type="button" class="voice-stop" @click="voice.notice = ''" aria-label="Close">✕</button>
             </div>
@@ -1035,7 +1042,7 @@
                      tap, speak, and the words go off as the message. A premium user then hears the answer in
                      Jinni's voice; a free user reads it and sees a one-line hint. Text typed → the arrow. -->
                 <button v-if="!userInput.trim() && !isStreaming" type="button" @click.stop="toggleVoiceInput" class="send-button mic-button" :class="{ 'is-listening': voice.listening, 'disabled-cooldown': isOnCooldown }" :disabled="isOnCooldown" :title="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')" :aria-label="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')">
-                  <svg v-if="!voice.listening" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>
+                  <svg v-if="!voice.listening" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg>
                   <svg v-else viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
                 </button>
                 <button v-else @click="sendMessage" class="send-button" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" :title="t('chat.input.send')">
@@ -1875,9 +1882,10 @@ export default {
   data() {
     return {
       reelEmbedUrl: null,
+      listeningMessageId: null,   // the reply being read aloud by the Listen button
       // Jinni's voice (2026-10-07): listening = the mic is on; speaking = an answer is being read; lastSentByVoice = the
       // answer to the message just sent should be spoken (premium) or hinted (free); notice = the one-line bar's text.
-      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, queue: [], noticeTimer: null },
+      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -7282,9 +7290,19 @@ export default {
       this.voice.notice = text; clearTimeout(this.voice.noticeTimer);
       if (ms) this.voice.noticeTimer = setTimeout(() => { this.voice.notice = ''; }, ms);
     },
+    // iPhone Safari plays audio later only through an element that already played during a tap:
+    // one <audio> is created and "unlocked" here with a silent clip, then reused for every answer.
+    unlockAudio() {
+      if (this.voice.player) return;
+      const a = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC1CQEwTJ9mjRvBA4UOLD8nKVOWfh+UlK3z/177OXrfOdKl7pyn3Xf//WreyTRUoAWgBgkOAGbZHBgG1OF6zM82DWbZaUmMBptgQhGjsyYqc9ae9XFz280948NMBWInluyEQc9NSVuBfOlkc9BxkiUMSPQeHyZRv0QGDRyCX+xEGCQ8bhcRHwwGUAA');
+      a.preload = 'auto';
+      a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+      this.voice.player = a;
+    },
     toggleVoiceInput() {
       if (this.voice.listening) { this.stopVoiceInput(); return; }
       this.stopSpeaking();
+      this.unlockAudio();
       const lang = this.voiceLang(), isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       const useBrowser = SR && !(isIOS && lang === 'hy-AM');
@@ -7338,6 +7356,7 @@ export default {
       if (!this.userInput.trim()) return;
       this.voice.lastSentByVoice = true;
       this.sendMessage();
+      this.playFiller();
     },
     // Speech OUT: only when the message was spoken, and only for Premium. The text of the answer
     // is read paragraph by paragraph so the first words come quickly; cards are not read.
@@ -7356,6 +7375,7 @@ export default {
       for (const p of paras) { if ((cur + '\n' + p).length > 600 && cur) { chunks.push(cur); cur = p; } else cur = cur ? cur + '\n' + p : p; }
       if (cur) chunks.push(cur);
       this.voice.speaking = true; this.voice.queue = chunks.slice(0, 4);
+      if (this.voice.filler) { try { await this.voice.filler; } catch (e) {} }
       const lang = String(this.locale || 'en').slice(0, 2), token = localStorage.getItem('authToken');
       const fetchChunk = (i) => fetch(`${API_BASE_URL}/api/voice/speak`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ text: this.voice.queue[i], lang, chunk: i }) });
       try {
@@ -7374,17 +7394,64 @@ export default {
           }
           const blob = await r.blob();
           if (!this.voice.speaking) return;
-          await new Promise((resolve) => {
-            const a = new Audio(URL.createObjectURL(blob)); this.voice.audio = a;
-            a.onended = resolve; a.onerror = resolve; a.play().catch(resolve);
-          });
+          await this.playBlob(blob);
         }
       } catch (e) { this.voiceNotice(this.t('chat.voice.unavailable')); }
-      finally { if (this.voice.speaking) { this.voice.speaking = false; this.voice.audio = null; } }
+      finally { if (this.voice.speaking) { this.voice.speaking = false; this.voice.audio = null; } this.listeningMessageId = null; }
+    },
+    playBlob(blob) {
+      return new Promise((resolve) => {
+        const a = this.voice.player || new Audio(); this.voice.player = a; this.voice.audio = a;
+        const url = URL.createObjectURL(blob);
+        const done = () => { a.onended = null; a.onerror = null; URL.revokeObjectURL(url); resolve(); };
+        a.onended = done; a.onerror = done; a.src = url;
+        a.play().catch((e) => { console.warn('[voice] play blocked:', e && e.message); done(); });
+      });
+    },
+    // The spoken "let me see" line: fetched (cached on the server) and played as soon as the spoken
+    // message goes off, so Jinni is never silent while it searches. Premium only; the answer's own
+    // voice waits for it to finish.
+    async playFiller() {
+      if (!(this.usageStatus && this.usageStatus.isPremium)) return;
+      try {
+        const r = await fetch(`${API_BASE_URL}/api/voice/filler?lang=${String(this.locale || 'en').slice(0, 2)}`, { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } });
+        if (!r.ok) return;
+        const blob = await r.blob();
+        if (this.voice.speaking) return;            // the answer is already being read
+        this.voice.filler = this.playBlob(blob);
+        await this.voice.filler; this.voice.filler = null;
+      } catch (e) { this.voice.filler = null; }
+    },
+    // ── Listen button on a reply ──
+    messageText(message) {
+      const parts = (message.contentParts || []).filter(p => p.type === 'text').map(p => p.content).join('\n');
+      return (parts || message.text || '').trim();
+    },
+    messageSpeakable(message) { return !!this.messageText(message) && !message.hidden; },
+    toggleListen(message) {
+      if (this.listeningMessageId === message.id) { this.stopSpeaking(); return; }
+      this.stopSpeaking();
+      const text = this.messageText(message); if (!text) return;
+      this.listeningMessageId = message.id;
+      if (this.usageStatus && this.usageStatus.isPremium) { this.unlockAudio(); this.speakText(text); return; }
+      // Free: the phone's own voice (free, built in). Not Jinni's voice — that is the Premium one.
+      const synth = window.speechSynthesis;
+      if (!synth) { this.listeningMessageId = null; this.voiceNotice(this.t('chat.voice.not_supported')); return; }
+      const lang = this.voiceLang();
+      const clean = text.replace(/[→←]/g, ' ').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/https?:\/\/\S+/g, ' ').replace(/[*_`#>|]+/g, ' ').slice(0, 2500);
+      const u = new SpeechSynthesisUtterance(clean); u.lang = lang; u.rate = 0.95;
+      const v = (synth.getVoices() || []).filter(x => (x.lang || '').toLowerCase().startsWith(lang.slice(0, 2).toLowerCase()));
+      if (!v.length) { this.listeningMessageId = null; this.voiceNotice(this.t('chat.voice.no_device_voice'), 7000); return; }
+      u.voice = v.find(x => x.localService) || v[0];
+      u.onend = () => { if (this.listeningMessageId === message.id) this.listeningMessageId = null; this.voice.speaking = false; };
+      u.onerror = u.onend;
+      this.voice.speaking = true; synth.speak(u);
     },
     stopSpeaking() {
+      this.listeningMessageId = null;
+      if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (e) {} }
       this.voice.speaking = false; this.voice.queue = [];
-      if (this.voice.audio) { try { this.voice.audio.pause(); } catch (e) {} this.voice.audio = null; }
+      if (this.voice.audio) { try { this.voice.audio.pause(); this.voice.audio.onended && this.voice.audio.onended(); } catch (e) {} this.voice.audio = null; }
     },
     // The line on a photo-led card's plate: distance · address (either may be missing).
     plateMeta(rec) {
@@ -9629,7 +9696,15 @@ a.rec-bar-btn { text-decoration: none }
 .night-mode .voice-notice{color:#f3eaf8;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 .75px rgba(220,210,255,.18)}
 .day-mode .voice-notice{color:#7A4A1C;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.9)}
 .voice-notice.is-live{box-shadow:inset 0 0 0 .75px rgba(255,210,122,.6),0 0 14px -4px rgba(255,170,80,.6)}
-.voice-dot{width:8px;height:8px;border-radius:50%;background:#ff8c69;animation:voice-pulse 1.4s ease-out infinite}
+.voice-bars{display:inline-flex;align-items:center;gap:3px;height:18px;flex:none}
+.voice-bars i{display:block;width:3px;height:6px;border-radius:2px;background:#ffb36b;animation:voice-bar 1s ease-in-out infinite}
+.voice-bars i:nth-child(2){animation-delay:.15s}.voice-bars i:nth-child(3){animation-delay:.3s}.voice-bars i:nth-child(4){animation-delay:.45s}.voice-bars i:nth-child(5){animation-delay:.6s}
+.voice-bars.is-speaking i{background:#ffd27a;animation-duration:.8s}
+@keyframes voice-bar{0%,100%{height:5px;opacity:.6}50%{height:18px;opacity:1}}
+@media (prefers-reduced-motion: reduce){.voice-bars i{animation:none;height:10px}}
+.listen-btn.active{color:#ffb36b !important}
+.voice-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.voice-notice.is-live .voice-text{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .voice-stop{border:0;padding:4px 11px;border-radius:999px;font:600 12.5px/1 inherit;cursor:pointer;color:inherit;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.25)}
 .day-mode .voice-stop{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 .75px rgba(122,74,28,.3)}
 

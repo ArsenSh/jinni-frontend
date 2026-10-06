@@ -1039,7 +1039,10 @@
       "limit": "Today's spoken answers are used up; Jinni will speak again tomorrow.",
       "not_supported": "Voice is not available in this browser. Please type your message.",
       "mic_blocked": "The microphone is blocked. Allow it for jinni.travel in your browser settings.",
-      "unavailable": "Jinni's voice is not available right now."
+      "unavailable": "Jinni's voice is not available right now.",
+      "done": "Done",
+      "listen": "Listen",
+      "no_device_voice": "This phone has no voice for this language. Jinni's own voice comes with Premium."
     }
   },
   "profile": {
