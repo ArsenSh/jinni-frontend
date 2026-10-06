@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Jinni Voice Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* VOICE LAB (founder 2026-10-07: "can we create a demo option before adding live code?" …
+   "i would like brand like Jinni voice"). A standalone page, no app code: it shows what the
+   phone's browser can do for free (speech in, voices out) in EN / RU / HY, and lets two cloud
+   voices be tried with keys that never leave this browser — OpenAI's preset voices, and an
+   ElevenLabs voice, which is where a custom-made Jinni voice would live. Nothing is saved. */
+:root { --bg: #0a0118; --bg2: #16213e; --ink: #fbf5ff; --body: #c9c0da; --soft: rgba(220,210,240,0.68); --accent: #ffb36b; --gold: #ffd27a;
+  --glass: rgba(255,255,255,0.05); --rim: inset 0 0 0 0.75px rgba(220,210,255,0.14), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -2px rgba(0,0,0,0.45);
+  --chip: rgba(255,255,255,0.06); --chip-rim: inset 0 0 0 0.75px rgba(220,210,255,0.18); --on: rgba(212,175,55,0.2); --on-ink: #ffd27a; --on-rim: inset 0 0 0 1px rgba(255,210,122,0.75);
+  --field: rgba(255,255,255,0.06); --field-rim: rgba(220,210,255,0.16); --serif: 'Cinzel', Georgia, serif; --lora: 'Lora', Georgia, serif; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; padding: 20px 16px calc(40px + env(safe-area-inset-bottom)); color: var(--body); font: 16px/1.5 var(--lora); background: linear-gradient(180deg, var(--bg) 0%, #1a0b2e 40%, var(--bg2) 100%); background-attachment: fixed; }
+.wrap { max-width: 640px; margin: 0 auto; display: grid; gap: 16px; }
+h1 { margin: 10px 0 0; text-align: center; font: 500 clamp(26px, 6vw, 36px)/1.1 var(--serif); letter-spacing: 0.04em; color: var(--ink); }
+.kicker { margin: 0; text-align: center; font: 500 12px/1.2 var(--serif); letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent); }
+.sub { margin: 0; text-align: center; font-style: italic; color: var(--soft); }
+.panel { padding: 18px; border-radius: 22px; background: var(--glass); box-shadow: var(--rim); display: grid; gap: 12px; }
+h2 { margin: 0; font: 500 15px/1.2 var(--serif); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { padding: 9px 15px; border: 0; border-radius: 999px; font: 500 14.5px/1 var(--lora); color: var(--body); background: var(--chip); box-shadow: var(--chip-rim); cursor: pointer; }
+.chip.on { color: var(--on-ink); background: var(--on); box-shadow: var(--on-rim); }
+.btn { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 10px 22px; border: 0; border-radius: 999px; font: 600 15.5px/1.2 var(--lora); color: #fff; cursor: pointer;
+  background: linear-gradient(45deg, rgba(212,175,55,0.86), rgba(255,140,0,0.86)); box-shadow: 0 0 16px rgba(255,170,90,0.42); }
+.btn.quiet { color: var(--ink); background: var(--chip); box-shadow: var(--chip-rim); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn.live { background: linear-gradient(45deg, #e5484d, #ff8c69); box-shadow: 0 0 18px rgba(255,100,100,0.5); }
+.btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+textarea, select, input { width: 100%; padding: 11px 13px; border: 0; border-radius: 14px; font: 400 16px/1.45 var(--lora); color: var(--ink); background: var(--field); box-shadow: inset 0 0 0 0.75px var(--field-rim); }
+textarea { min-height: 96px; resize: vertical; }
+label { display: grid; gap: 6px; font-size: 12.5px; letter-spacing: 0.04em; color: var(--soft); }
+.note { margin: 0; font-size: 13.5px; color: var(--soft); }
+.note b { color: var(--gold); font-weight: 600; }
+.status { margin: 0; min-height: 1.4em; font-size: 14px; color: var(--accent); }
+.range { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; font-size: 13.5px; color: var(--soft); }
+input[type=range] { padding: 0; box-shadow: none; background: none; accent-color: #ffb36b; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">Jinni · Voice lab</p>
+  <h1>Talk to Jinni</h1>
+  <p class="sub">A demo of what this phone's browser can do, in English, Russian and Armenian. Nothing is saved.</p>
+
+  <section class="panel">
+    <h2>Language</h2>
+    <div class="row" id="langs">
+      <button type="button" class="chip on" data-lang="en-US" data-k="en">English</button>
+      <button type="button" class="chip" data-lang="ru-RU" data-k="ru">Русский</button>
+      <button type="button" class="chip" data-lang="hy-AM" data-k="hy">Հայերեն</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>1 · You speak</h2>
+    <div class="row">
+      <button type="button" class="btn" id="mic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg><span id="mic-label">Tap to talk</span></button>
+      <button type="button" class="chip" id="mode-browser">Browser (free)</button>
+      <button type="button" class="chip" id="mode-cloud">Cloud (Whisper)</button>
+    </div>
+    <p class="status" id="stt-status"></p>
+    <textarea id="transcript" placeholder="What you say appears here, as it would in Jinni's message box."></textarea>
+    <p class="note"><b>Browser</b> recognition is free and built into the phone. On iPhone it knows English and Russian, not Armenian. <b>Cloud</b> uses Whisper, works for all three on every phone, and needs the OpenAI key below (about half a cent per minute).</p>
+  </section>
+
+  <section class="panel">
+    <h2>2 · Jinni speaks</h2>
+    <label>Text to read<textarea id="say"></textarea></label>
+    <div class="range"><span>Slower</span><input type="range" id="rate" min="0.7" max="1.3" step="0.05" value="0.95"><span>Faster · <b id="rate-v">0.95</b></span></div>
+    <div class="grid2">
+      <label>Browser voice (free)<select id="voices"></select></label>
+      <label>OpenAI voice (natural, preset)<select id="cvoice"><option value="nova">Nova — warm, female</option><option value="shimmer">Shimmer — soft, female</option><option value="alloy">Alloy — neutral</option><option value="echo">Echo — male</option><option value="onyx">Onyx — deep, male</option><option value="fable">Fable — storyteller</option></select></label>
+    </div>
+    <div class="row">
+      <button type="button" class="btn quiet" id="speak-browser"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/></svg>Browser voice</button>
+      <button type="button" class="btn" id="speak-cloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/></svg>OpenAI voice</button>
+      <button type="button" class="btn" id="speak-eleven"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 6.3 6.3 2.2-6.3 2.2L12 19l-2.2-6.3-6.3-2.2 6.3-2.2z"/></svg>Jinni voice (ElevenLabs)</button>
+      <button type="button" class="chip" id="stop">Stop</button>
+    </div>
+    <p class="status" id="tts-status"></p>
+    <p class="note">The <b>browser voice</b> is whatever this phone has installed: iPhone has natural English and Russian voices and no Armenian one. The <b>OpenAI voice</b> sounds like a person, reads all three languages, about a cent per answer, but it is one of six presets anyone can use. A <b>Jinni voice</b> of its own is made at ElevenLabs — designed from a description or recorded with an actor — and then used here by its voice id.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Cloud keys (optional)</h2>
+    <label>OpenAI API key — stays in this browser tab only<input type="password" id="key" placeholder="sk-…" autocomplete="off"></label>
+    <label>ElevenLabs API key<input type="password" id="ekey" placeholder="xi-…" autocomplete="off"></label>
+    <label>ElevenLabs voice id (the Jinni voice)<input type="text" id="evoice" placeholder="voice id from the ElevenLabs voice library or your designed voice" autocomplete="off"></label>
+    <p class="note">Needed only for the cloud features. Paste them here on the phone to try; close the tab and they are gone.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SAMPLE = {
+    en: "Here is a hidden gem near you: the Aram Khachaturian Museum, a quiet house-museum with a small concert hall, about one and a half kilometres from you. Shall I show the way?",
+    ru: "Вот скрытая жемчужина рядом с вами: дом-музей Арама Хачатуряна, тихий музей с небольшим концертным залом, примерно в полутора километрах от вас. Показать дорогу?",
+    hy: "Ահա մի թաքնված գանձ ձեր մոտ՝ Արամ Խաչատրյանի տուն-թանգարանը, հանգիստ թանգարան փոքր համերգասրահով, ձեզանից մոտ մեկուկես կիլոմետր հեռու։ Ցույց տա՞մ ճանապարհը։"
+  };
+  var lang = 'en-US', k = 'en', mode = 'browser';
+  var val = function (id) { return ($(id).value || '').trim(); };
+  ['key', 'ekey', 'evoice'].forEach(function (id) {
+    try { $(id).value = sessionStorage.getItem('voicelab_' + id) || ''; } catch (e) {}
+    $(id).addEventListener('input', function () { try { sessionStorage.setItem('voicelab_' + id, val(id)); } catch (e) {} });
+  });
+
+  // ── language
+  [].slice.call(document.querySelectorAll('#langs .chip')).forEach(function (c) { c.addEventListener('click', function () {
+    [].slice.call(document.querySelectorAll('#langs .chip')).forEach(function (x) { x.classList.toggle('on', x === c); });
+    lang = c.dataset.lang; k = c.dataset.k; $('say').value = SAMPLE[k]; fillVoices();
+  }); });
+  $('say').value = SAMPLE.en;
+
+  // ── 1 · speech in
+  function setMode(m) { mode = m; $('mode-browser').classList.toggle('on', m === 'browser'); $('mode-cloud').classList.toggle('on', m === 'cloud'); }
+  $('mode-browser').addEventListener('click', function () { setMode('browser'); }); $('mode-cloud').addEventListener('click', function () { setMode('cloud'); }); setMode('browser');
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = null, listening = false, recorder = null, chunks = [];
+  function micUI(on, label) { listening = on; $('mic').classList.toggle('live', on); $('mic-label').textContent = label; }
+  $('mic').addEventListener('click', function () {
+    if (listening) { if (mode === 'browser' && rec) rec.stop(); if (mode === 'cloud' && recorder) recorder.stop(); return; }
+    $('stt-status').textContent = '';
+    if (mode === 'browser') {
+      if (!SR) { $('stt-status').textContent = 'This browser has no built-in speech recognition. Try the Cloud mode.'; return; }
+      rec = new SR(); rec.lang = lang; rec.interimResults = true; rec.continuous = false;
+      var base = $('transcript').value ? $('transcript').value.replace(/\s*$/, ' ') : '';
+      rec.onresult = function (e) { var t = ''; for (var i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; $('transcript').value = base + t; };
+      rec.onerror = function (e) { $('stt-status').textContent = 'Recognition error: ' + e.error + (e.error === 'language-not-supported' || e.error === 'not-allowed' ? ' — this browser cannot do ' + k.toUpperCase() + ' for free; try Cloud.' : ''); micUI(false, 'Tap to talk'); };
+      rec.onend = function () { micUI(false, 'Tap to talk'); };
+      try { rec.start(); micUI(true, 'Listening… tap to stop'); } catch (e) { $('stt-status').textContent = 'Could not start: ' + e.message; }
+    } else {
+      if (!val('key')) { $('stt-status').textContent = 'Paste the OpenAI key below first.'; return; }
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+        chunks = []; recorder = new MediaRecorder(stream);
+        recorder.ondataavailable = function (e) { if (e.data.size) chunks.push(e.data); };
+        recorder.onstop = function () {
+          stream.getTracks().forEach(function (t) { t.stop(); }); micUI(false, 'Tap to talk'); $('stt-status').textContent = 'Transcribing…';
+          var blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' }); var fd = new FormData();
+          fd.append('file', blob, 'speech.' + ((recorder.mimeType || '').indexOf('mp4') >= 0 ? 'mp4' : 'webm')); fd.append('model', 'whisper-1'); fd.append('language', k);
+          fetch('https://api.openai.com/v1/audio/transcriptions', { method: 'POST', headers: { Authorization: 'Bearer ' + val('key') }, body: fd })
+            .then(function (r) { return r.json(); }).then(function (j) { if (j.text) { $('transcript').value = ($('transcript').value ? $('transcript').value.replace(/\s*$/, ' ') : '') + j.text; $('stt-status').textContent = ''; } else { $('stt-status').textContent = 'Cloud error: ' + (j.error && j.error.message || 'no text'); } })
+            .catch(function (e) { $('stt-status').textContent = 'Cloud error: ' + e.message; });
+        };
+        recorder.start(); micUI(true, 'Recording… tap to stop');
+      }).catch(function (e) { $('stt-status').textContent = 'Microphone blocked: ' + e.message; });
+    }
+  });
+
+  // ── 2 · speech out
+  var synth = window.speechSynthesis, voices = [];
+  function fillVoices() {
+    voices = synth ? synth.getVoices() : []; var sel = $('voices'); sel.innerHTML = '';
+    var mine = voices.filter(function (v) { return (v.lang || '').toLowerCase().indexOf(k) === 0; });
+    if (!mine.length) { sel.innerHTML = '<option value="">No ' + k.toUpperCase() + ' voice on this device</option>'; return; }
+    mine.forEach(function (v) { var o = document.createElement('option'); o.value = v.name; o.textContent = v.name + (v.localService ? '' : ' (online)'); sel.appendChild(o); });
+  }
+  if (synth) { fillVoices(); synth.onvoiceschanged = fillVoices; }
+  $('rate').addEventListener('input', function () { $('rate-v').textContent = $('rate').value; });
+  var audio = null;
+  function stopAll() { if (synth) synth.cancel(); if (audio) { audio.pause(); audio = null; } $('tts-status').textContent = ''; }
+  function playBlob(b, label) { audio = new Audio(URL.createObjectURL(b)); audio.onended = function () { $('tts-status').textContent = ''; }; $('tts-status').textContent = 'Speaking (' + label + ')…'; return audio.play(); }
+  $('stop').addEventListener('click', stopAll);
+  $('speak-browser').addEventListener('click', function () {
+    stopAll(); if (!synth) { $('tts-status').textContent = 'This browser cannot speak.'; return; }
+    var u = new SpeechSynthesisUtterance($('say').value); u.lang = lang; u.rate = Number($('rate').value);
+    var v = voices.filter(function (x) { return x.name === $('voices').value; })[0]; if (v) u.voice = v; else if (!$('voices').value) { $('tts-status').textContent = 'No free ' + k.toUpperCase() + ' voice on this device — try a cloud voice.'; return; }
+    u.onend = function () { $('tts-status').textContent = ''; }; $('tts-status').textContent = 'Speaking (browser)…'; synth.speak(u);
+  });
+  $('speak-cloud').addEventListener('click', function () {
+    stopAll(); if (!val('key')) { $('tts-status').textContent = 'Paste the OpenAI key below first.'; return; }
+    $('tts-status').textContent = 'Asking the OpenAI voice…';
+    fetch('https://api.openai.com/v1/audio/speech', { method: 'POST', headers: { Authorization: 'Bearer ' + val('key'), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'tts-1', voice: $('cvoice').value, input: $('say').value, speed: Number($('rate').value), response_format: 'mp3' }) })
+      .then(function (r) { if (!r.ok) return r.json().then(function (j) { throw new Error(j.error && j.error.message || r.status); }); return r.blob(); })
+      .then(function (b) { return playBlob(b, 'OpenAI'); })
+      .catch(function (e) { $('tts-status').textContent = 'Cloud error: ' + e.message; });
+  });
+  $('speak-eleven').addEventListener('click', function () {
+    stopAll(); if (!val('ekey') || !val('evoice')) { $('tts-status').textContent = 'Paste the ElevenLabs key and a voice id below first.'; return; }
+    $('tts-status').textContent = 'Asking the Jinni voice…';
+    // speed: ElevenLabs takes 0.7–1.2 on its multilingual model
+    var speed = Math.min(1.2, Math.max(0.7, Number($('rate').value)));
+    fetch('https://api.elevenlabs.io/v1/text-to-speech/' + encodeURIComponent(val('evoice')) + '?output_format=mp3_44100_128', { method: 'POST', headers: { 'xi-api-key': val('ekey'), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: $('say').value, model_id: 'eleven_multilingual_v2', voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.2, speed: speed } }) })
+      .then(function (r) { if (!r.ok) return r.text().then(function (t) { throw new Error(t.slice(0, 160) || r.status); }); return r.blob(); })
+      .then(function (b) { return playBlob(b, 'Jinni voice'); })
+      .catch(function (e) { $('tts-status').textContent = 'ElevenLabs error: ' + e.message; });
+  });
+})();
+</script>
+</body>
+</html>
