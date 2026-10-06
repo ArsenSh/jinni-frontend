@@ -1027,7 +1027,20 @@
       "breakfast_no": "不含早餐",
       "collecting": "正在收集最佳地点..."
     },
-    "search_place": "查找"
+    "search_place": "查找",
+    "voice": {
+      "mic": "与 Jinni 说话",
+      "stop_listening": "停止聆听",
+      "listening": "正在聆听… 说完后请点击按钮",
+      "transcribing": "正在理解您说的话…",
+      "speaking": "Jinni 正在说话",
+      "stop": "停止",
+      "premium_hint": "Jinni 可以用自己的声音朗读回答 — 需要 Premium。",
+      "limit": "今天的语音回答已用完；Jinni 明天会再次开口。",
+      "not_supported": "此浏览器不支持语音。请输入您的消息。",
+      "mic_blocked": "麦克风已被阻止。请在浏览器设置中允许 jinni.travel 使用麦克风。",
+      "unavailable": "Jinni 的声音暂时不可用。"
+    }
   },
   "profile": {
     "title": "您的个人资料",

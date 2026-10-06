@@ -795,6 +795,12 @@
             <div class="greeting">{{ greetingLine() }}</div>
           </div>
           <div class="chat-input-container">
+            <div v-if="voice.notice || voice.speaking || voice.listening" class="voice-notice" :class="{ 'is-live': voice.speaking || voice.listening }">
+              <span v-if="voice.listening" class="voice-dot" aria-hidden="true"></span>
+              <span>{{ voice.listening ? t('chat.voice.listening') : (voice.speaking ? t('chat.voice.speaking') : voice.notice) }}</span>
+              <button v-if="voice.speaking" type="button" class="voice-stop" @click="stopSpeaking">{{ t('chat.voice.stop') }}</button>
+              <button v-else-if="voice.notice" type="button" class="voice-stop" @click="voice.notice = ''" aria-label="Close">✕</button>
+            </div>
             <!-- Quota notice. Lives here rather than in the transcript: it is
                  a status message about the account, not part of the
                  conversation, and it used to sit in the history forever as a
@@ -1025,7 +1031,14 @@
                     <path d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.364 6.364l-2.121-2.121M8.757 8.757L6.636 6.636m12.728 0l-2.121 2.121M8.757 15.243l-2.121 2.121"/>
                   </svg>
                 </button>
-                <button @click="sendMessage" class="send-button" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" :title="t('chat.input.send')">
+                <!-- Jinni's voice (founder 2026-10-07): an empty box shows a MIC in the send button's place —
+                     tap, speak, and the words go off as the message. A premium user then hears the answer in
+                     Jinni's voice; a free user reads it and sees a one-line hint. Text typed → the arrow. -->
+                <button v-if="!userInput.trim() && !isStreaming" type="button" @click.stop="toggleVoiceInput" class="send-button mic-button" :class="{ 'is-listening': voice.listening, 'disabled-cooldown': isOnCooldown }" :disabled="isOnCooldown" :title="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')" :aria-label="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')">
+                  <svg v-if="!voice.listening" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>
+                  <svg v-else viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                </button>
+                <button v-else @click="sendMessage" class="send-button" :disabled="isOnCooldown" :class="{ 'disabled-cooldown': isOnCooldown }" :title="t('chat.input.send')">
                   <svg v-if="!isStreaming" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 19V5M5 12l7-7 7 7"/>
                   </svg>
@@ -1862,6 +1875,9 @@ export default {
   data() {
     return {
       reelEmbedUrl: null,
+      // Jinni's voice (2026-10-07): listening = the mic is on; speaking = an answer is being read; lastSentByVoice = the
+      // answer to the message just sent should be spoken (premium) or hinted (free); notice = the one-line bar's text.
+      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, queue: [], noticeTimer: null },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -2568,6 +2584,7 @@ export default {
     }
   },
   beforeUnmount() {
+    this.stopVoiceInput(); this.stopSpeaking(); clearTimeout(this.voice.noticeTimer);
     if (this._vvHandler && window.visualViewport) {
       window.visualViewport.removeEventListener('resize', this._vvHandler);
       window.visualViewport.removeEventListener('scroll', this._vvHandler);
@@ -5166,6 +5183,7 @@ export default {
                     this.messages[messageIndex].streaming = false;
                     this.messages[messageIndex].nearbyMode = data.nearbyMode;
                     this.messages[messageIndex].contentParts = data.contentParts;
+                    this.onAnswerComplete(this.messages[messageIndex]);
                     this.messages[messageIndex].recommendations = data.recommendations;
                     // Cards ⇒ chat-rec message (drives the large-card style). v1 sets
                     // this via streaming_recommendation events; v2 emits cards only at
@@ -7255,6 +7273,118 @@ export default {
         // console.log('✅ Usage status updated from response');
         if (usageData.daily.tokens.percentage > 80 || usageData.daily.places.percentage > 80) { this.showUsageWarning(this.usageStatus) }
       }
+    },
+    // ── Jinni's voice (founder 2026-10-07) ─────────────────────────────────────────────────────
+    // Speech IN: the browser's own recognition where it has the language (free), else the server's
+    // Whisper fallback (iPhone Safari has no Armenian). The words fill the box and go off as the message.
+    voiceLang() { const m = { en: 'en-US', ru: 'ru-RU', hy: 'hy-AM', fr: 'fr-FR', ar: 'ar-SA', zh: 'zh-CN' }; return m[String(this.locale || 'en').slice(0, 2)] || 'en-US'; },
+    voiceNotice(text, ms = 6000) {
+      this.voice.notice = text; clearTimeout(this.voice.noticeTimer);
+      if (ms) this.voice.noticeTimer = setTimeout(() => { this.voice.notice = ''; }, ms);
+    },
+    toggleVoiceInput() {
+      if (this.voice.listening) { this.stopVoiceInput(); return; }
+      this.stopSpeaking();
+      const lang = this.voiceLang(), isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const useBrowser = SR && !(isIOS && lang === 'hy-AM');
+      if (useBrowser) {
+        const rec = new SR(); rec.lang = lang; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+        const base = this.userInput ? this.userInput.replace(/\s*$/, ' ') : '';
+        let heard = '';
+        rec.onresult = (e) => { heard = ''; for (let i = 0; i < e.results.length; i++) heard += e.results[i][0].transcript; this.userInput = base + heard; };
+        rec.onerror = (e) => {
+          this.voice.listening = false; this.voice.rec = null;
+          if (e.error === 'not-allowed' || e.error === 'service-not-allowed') this.voiceNotice(this.t('chat.voice.mic_blocked'));
+          else if (e.error === 'language-not-supported' || e.error === 'audio-capture') this.startCloudVoiceInput();
+          else if (e.error !== 'aborted' && e.error !== 'no-speech') this.voiceNotice(this.t('chat.voice.not_supported'));
+        };
+        rec.onend = () => { this.voice.listening = false; this.voice.rec = null; if (heard.trim()) this.sendVoiceMessage(); };
+        try { rec.start(); this.voice.rec = rec; this.voice.listening = true; } catch (e) { this.startCloudVoiceInput(); }
+      } else {
+        this.startCloudVoiceInput();
+      }
+    },
+    async startCloudVoiceInput() {
+      if (!navigator.mediaDevices || !window.MediaRecorder) { this.voiceNotice(this.t('chat.voice.not_supported')); return; }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const chunks = []; const recorder = new MediaRecorder(stream);
+        recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+        recorder.onstop = async () => {
+          stream.getTracks().forEach(t => t.stop()); this.voice.listening = false; this.voice.recorder = null;
+          if (!chunks.length) return;
+          this.voiceNotice(this.t('chat.voice.transcribing'), 0);
+          try {
+            const fd = new FormData(); const type = recorder.mimeType || 'audio/webm';
+            fd.append('audio', new Blob(chunks, { type }), 'speech.' + (type.includes('mp4') ? 'mp4' : 'webm')); fd.append('lang', String(this.locale || 'en').slice(0, 2));
+            const r = await fetch(`${API_BASE_URL}/api/voice/transcribe`, { method: 'POST', headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }, body: fd });
+            const j = await r.json().catch(() => ({}));
+            this.voice.notice = '';
+            if (!r.ok || !j.text) { this.voiceNotice(this.t('chat.voice.not_supported')); return; }
+            this.userInput = (this.userInput ? this.userInput.replace(/\s*$/, ' ') : '') + j.text;
+            this.sendVoiceMessage();
+          } catch (e) { this.voiceNotice(this.t('chat.voice.not_supported')); }
+        };
+        recorder.start(); this.voice.recorder = recorder; this.voice.listening = true;
+      } catch (e) { this.voiceNotice(this.t('chat.voice.mic_blocked')); }
+    },
+    stopVoiceInput() {
+      try { if (this.voice.rec) this.voice.rec.stop(); } catch (e) {}
+      try { if (this.voice.recorder && this.voice.recorder.state !== 'inactive') this.voice.recorder.stop(); } catch (e) {}
+      this.voice.listening = false;
+    },
+    sendVoiceMessage() {
+      if (!this.userInput.trim()) return;
+      this.voice.lastSentByVoice = true;
+      this.sendMessage();
+    },
+    // Speech OUT: only when the message was spoken, and only for Premium. The text of the answer
+    // is read paragraph by paragraph so the first words come quickly; cards are not read.
+    onAnswerComplete(message) {
+      if (!this.voice.lastSentByVoice) return;
+      this.voice.lastSentByVoice = false;
+      if (!(this.usageStatus && this.usageStatus.isPremium)) { this.voiceNotice(this.t('chat.voice.premium_hint'), 9000); return; }
+      const parts = (message.contentParts || []).filter(p => p.type === 'text').map(p => p.content).join('\n');
+      const text = (parts || message.text || '').trim();
+      if (text) this.speakText(text);
+    },
+    async speakText(text) {
+      this.stopSpeaking();
+      const paras = text.split(/\n{2,}/).map(t => t.trim()).filter(Boolean);
+      const chunks = []; let cur = '';
+      for (const p of paras) { if ((cur + '\n' + p).length > 600 && cur) { chunks.push(cur); cur = p; } else cur = cur ? cur + '\n' + p : p; }
+      if (cur) chunks.push(cur);
+      this.voice.speaking = true; this.voice.queue = chunks.slice(0, 4);
+      const lang = String(this.locale || 'en').slice(0, 2), token = localStorage.getItem('authToken');
+      const fetchChunk = (i) => fetch(`${API_BASE_URL}/api/voice/speak`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ text: this.voice.queue[i], lang, chunk: i }) });
+      try {
+        let next = fetchChunk(0);
+        for (let i = 0; i < this.voice.queue.length; i++) {
+          if (!this.voice.speaking) return;
+          const r = await next;
+          if (i + 1 < this.voice.queue.length) next = fetchChunk(i + 1);   // the next chunk is fetched while this one plays
+          if (!r.ok) {
+            const j = await r.json().catch(() => ({}));
+            this.stopSpeaking();
+            if (j.error === 'premium_required') this.voiceNotice(this.t('chat.voice.premium_hint'), 9000);
+            else if (j.error === 'voice_limit') this.voiceNotice(this.t('chat.voice.limit'), 9000);
+            else this.voiceNotice(this.t('chat.voice.unavailable'));
+            return;
+          }
+          const blob = await r.blob();
+          if (!this.voice.speaking) return;
+          await new Promise((resolve) => {
+            const a = new Audio(URL.createObjectURL(blob)); this.voice.audio = a;
+            a.onended = resolve; a.onerror = resolve; a.play().catch(resolve);
+          });
+        }
+      } catch (e) { this.voiceNotice(this.t('chat.voice.unavailable')); }
+      finally { if (this.voice.speaking) { this.voice.speaking = false; this.voice.audio = null; } }
+    },
+    stopSpeaking() {
+      this.voice.speaking = false; this.voice.queue = [];
+      if (this.voice.audio) { try { this.voice.audio.pause(); } catch (e) {} this.voice.audio = null; }
     },
     // The line on a photo-led card's plate: distance · address (either may be missing).
     plateMeta(rec) {
@@ -9489,4 +9619,18 @@ a.rec-bar-btn { text-decoration: none }
 .recommendation-card.pl .rec-image-save-btn.saved .rec-save-glass { background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,214,140,0.62) 45%, rgba(255,160,60,0.9) 100%) }
 .recommendation-card.pl .rec-image-save-btn.saved svg { filter: drop-shadow(0 0 7px rgba(255,170,80,0.85)) }
 .recommendation-grid .recommendation-card.pl .rec-image-save-btn { right: 14px }
+
+/* ═══ JINNI'S VOICE (founder 2026-10-07): the mic in the send button's place, the one-line voice bar ═══ */
+.mic-button.is-listening{color:#fff !important;background:linear-gradient(45deg,#e5484d,#ff8c69) !important;box-shadow:0 0 0 0 rgba(255,120,100,.55);animation:voice-pulse 1.4s ease-out infinite}
+@keyframes voice-pulse{0%{box-shadow:0 0 0 0 rgba(255,120,100,.55)}100%{box-shadow:0 0 0 12px rgba(255,120,100,0)}}
+@media (prefers-reduced-motion: reduce){.mic-button.is-listening{animation:none}}
+.voice-notice{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 8px 8px;padding:8px 14px;border-radius:999px;font-size:13.5px;line-height:1.3;text-align:center;
+  backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%)}
+.night-mode .voice-notice{color:#f3eaf8;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 .75px rgba(220,210,255,.18)}
+.day-mode .voice-notice{color:#7A4A1C;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.9)}
+.voice-notice.is-live{box-shadow:inset 0 0 0 .75px rgba(255,210,122,.6),0 0 14px -4px rgba(255,170,80,.6)}
+.voice-dot{width:8px;height:8px;border-radius:50%;background:#ff8c69;animation:voice-pulse 1.4s ease-out infinite}
+.voice-stop{border:0;padding:4px 11px;border-radius:999px;font:600 12.5px/1 inherit;cursor:pointer;color:inherit;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.25)}
+.day-mode .voice-stop{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 .75px rgba(122,74,28,.3)}
+
 </style>

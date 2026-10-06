@@ -1027,7 +1027,20 @@
       "breakfast_no": "Not included",
       "collecting": "Collecting the best places..."
     },
-    "search_place": "Look up"
+    "search_place": "Look up",
+    "voice": {
+      "mic": "Talk to Jinni",
+      "stop_listening": "Stop listening",
+      "listening": "Listening… tap the button when you are done",
+      "transcribing": "Understanding what you said…",
+      "speaking": "Jinni is speaking",
+      "stop": "Stop",
+      "premium_hint": "Jinni can answer out loud in its own voice — with Premium.",
+      "limit": "Today's spoken answers are used up; Jinni will speak again tomorrow.",
+      "not_supported": "Voice is not available in this browser. Please type your message.",
+      "mic_blocked": "The microphone is blocked. Allow it for jinni.travel in your browser settings.",
+      "unavailable": "Jinni's voice is not available right now."
+    }
   },
   "profile": {
     "title": "Your Profile",

@@ -1027,7 +1027,20 @@
       "breakfast_no": "غير مشمول",
       "collecting": "نجمع أفضل الأماكن..."
     },
-    "search_place": "بحث"
+    "search_place": "بحث",
+    "voice": {
+      "mic": "تحدث مع Jinni",
+      "stop_listening": "إيقاف الاستماع",
+      "listening": "أستمع… اضغط الزر عندما تنتهي",
+      "transcribing": "أفهم ما قلته…",
+      "speaking": "Jinni يتحدث",
+      "stop": "إيقاف",
+      "premium_hint": "يمكن لـ Jinni أن يجيب بصوته — مع Premium.",
+      "limit": "انتهت الإجابات الصوتية لهذا اليوم؛ سيتحدث Jinni مجددًا غدًا.",
+      "not_supported": "الصوت غير متاح في هذا المتصفح. من فضلك اكتب رسالتك.",
+      "mic_blocked": "الميكروفون محظور. اسمح به لـ jinni.travel في إعدادات المتصفح.",
+      "unavailable": "صوت Jinni غير متاح الآن."
+    }
   },
   "profile": {
     "title": "ملفك الشخصي",

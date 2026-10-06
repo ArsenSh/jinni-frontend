@@ -1027,7 +1027,20 @@
       "breakfast_no": "Non inclus",
       "collecting": "Nous rassemblons les meilleurs lieux..."
     },
-    "search_place": "Rechercher"
+    "search_place": "Rechercher",
+    "voice": {
+      "mic": "Parler à Jinni",
+      "stop_listening": "Arrêter l'écoute",
+      "listening": "J'écoute… appuyez sur le bouton quand vous avez fini",
+      "transcribing": "Je comprends ce que vous avez dit…",
+      "speaking": "Jinni parle",
+      "stop": "Stop",
+      "premium_hint": "Jinni peut répondre à voix haute, avec sa propre voix — avec Premium.",
+      "limit": "Les réponses vocales du jour sont épuisées ; Jinni reparlera demain.",
+      "not_supported": "La voix n'est pas disponible dans ce navigateur. Écrivez votre message.",
+      "mic_blocked": "Le micro est bloqué. Autorisez-le pour jinni.travel dans les réglages du navigateur.",
+      "unavailable": "La voix de Jinni n'est pas disponible pour le moment."
+    }
   },
   "profile": {
     "title": "Profil",
