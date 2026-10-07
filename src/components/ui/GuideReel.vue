@@ -67,11 +67,11 @@ export default {
   text-transform: uppercase; color: #fff; background: linear-gradient(135deg, #8b5cf6, #4338ca 60%, #1e3a8a); box-shadow: 0 0 0 1.5px rgba(16,7,34,0.85); }
 .gr-chip b { font-weight: 650; letter-spacing: 0.01em; overflow: hidden; text-overflow: ellipsis; }
 .gr-chip em { font-style: normal; opacity: 0.72; }
-:global(.day-mode) .gr-chip { color: #6e3f16; background: rgba(255,250,242,0.72);
+.day-mode .gr-chip { color: #6e3f16; background: rgba(255,250,242,0.72);
   box-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.9), 0 0 16px -4px rgba(192,112,42,0.45); }
-:global(.day-mode) .gr-chip:hover { background: rgba(255,250,242,0.88); }
-:global(.day-mode) .gr-chip i { background: conic-gradient(from 210deg, #ffb36b, #ffd27a, #e9a23b, #c0702a, #ffb36b); }
-:global(.day-mode) .gr-chip i span { background: linear-gradient(135deg, #ffb36b, #c0702a); box-shadow: 0 0 0 1.5px rgba(255,250,242,0.95); }
+.day-mode .gr-chip:hover { background: rgba(255,250,242,0.88); }
+.day-mode .gr-chip i { background: conic-gradient(from 210deg, #ffb36b, #ffd27a, #e9a23b, #c0702a, #ffb36b); }
+.day-mode .gr-chip i span { background: linear-gradient(135deg, #ffb36b, #c0702a); box-shadow: 0 0 0 1.5px rgba(255,250,242,0.95); }
 .gr-play { position: absolute; left: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px 7px 10px; border: 0; border-radius: 999px; cursor: pointer;
   font: 600 12.5px/1 system-ui, sans-serif; color: #fff; background: rgba(255,255,255,0.16); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   box-shadow: inset 0 0 0 0.75px rgba(255,255,255,0.55), 0 0 18px -4px rgba(255,170,80,0.6); }
@@ -93,9 +93,9 @@ export default {
 .gr-seal { margin-left: -12px; padding: 6px 13px 6px 19px; border-radius: 0 999px 999px 0; font: 600 10.5px/1 'Cinzel', 'Palatino Linotype', Georgia, serif;
   letter-spacing: 0.16em; text-transform: uppercase; color: #fff; background: linear-gradient(45deg, #8b5cf6, #4f7bff); box-shadow: 0 0 14px -3px rgba(124,77,255,0.75); }
 .gr-chip:hover .gr-seal { box-shadow: 0 0 18px -2px rgba(124,77,255,0.9); }
-:global(.day-mode) .gr-chip i { box-shadow: 0 0 12px -2px rgba(192,112,42,0.5); }
-:global(.day-mode) .gr-seal { color: #4a2f17; background: linear-gradient(45deg, #f6e7c8, #e9cf9a); box-shadow: 0 0 14px -4px rgba(233,207,154,0.85); }
-:global(.day-mode) .gr-chip:hover .gr-seal { box-shadow: 0 0 18px -3px rgba(233,207,154,1); }
+.day-mode .gr-chip i { box-shadow: 0 0 12px -2px rgba(192,112,42,0.5); }
+.day-mode .gr-seal { color: #4a2f17; background: linear-gradient(45deg, #f6e7c8, #e9cf9a); box-shadow: 0 0 14px -4px rgba(233,207,154,0.85); }
+.day-mode .gr-chip:hover .gr-seal { box-shadow: 0 0 18px -3px rgba(233,207,154,1); }
 /* the chip is the way to the guide's page — a tap must land on it first time */
 .gr-chip { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; z-index: 4; }
 /* COMET ARC (founder 2026-10-04, guide-avatar-edges.html design 3): one gold arc that
@@ -104,5 +104,5 @@ export default {
 .gr-chip i { background: none !important; padding: 0; }
 .gr-chip i span { box-shadow: none !important; }
 .gr-chip i::before { content: ''; position: absolute; inset: -4px; border-radius: 50%; padding: 2px; pointer-events: none; background: conic-gradient(from 20deg, rgba(255,210,122,0) 0deg, rgba(255,210,122,0.15) 60deg, #ffd27a 300deg, #fff3d6 330deg, rgba(255,210,122,0) 331deg); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-:global(.day-mode) .gr-chip i::before { background: conic-gradient(from 20deg, rgba(192,112,42,0) 0deg, rgba(192,112,42,0.15) 60deg, #c0702a 300deg, #ffb36b 330deg, rgba(192,112,42,0) 331deg); }
+.day-mode .gr-chip i::before { background: conic-gradient(from 20deg, rgba(192,112,42,0) 0deg, rgba(192,112,42,0.15) 60deg, #c0702a 300deg, #ffb36b 330deg, rgba(192,112,42,0) 331deg); }
 </style>
