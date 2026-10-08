@@ -1041,7 +1041,7 @@
                 <!-- Jinni's voice (founder 2026-10-07): an empty box shows a MIC in the send button's place —
                      tap, speak, and the words go off as the message. A premium user then hears the answer in
                      Jinni's voice; a free user reads it and sees a one-line hint. Text typed → the arrow. -->
-                <button v-if="!userInput.trim() && !isStreaming" type="button" @click.stop="toggleVoiceInput" class="send-button mic-button" :class="{ 'is-listening': voice.listening, 'disabled-cooldown': isOnCooldown }" :disabled="isOnCooldown" :title="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')" :aria-label="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')">
+                <button v-if="(!userInput.trim() || voice.listening) && !isStreaming" type="button" @click.stop="toggleVoiceInput" class="send-button mic-button" :class="{ 'is-listening': voice.listening, 'disabled-cooldown': isOnCooldown }" :disabled="isOnCooldown" :title="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')" :aria-label="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')">
                   <svg v-if="!voice.listening" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg>
                   <svg v-else viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
                 </button>
