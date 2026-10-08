@@ -1824,12 +1824,6 @@
     </div>
   </transition>
 
-  <!-- Voice aura (founder 2026-10-08): the screen's left and right edges glow while Jinni listens
-       (the chat's violet-blue) and while it speaks (lamp gold), breathing slowly. Sits over everything,
-       takes no space, lets every tap through. -->
-  <Teleport to="body">
-    <div v-if="voice.listening || voice.speaking" class="voice-aura" :class="voice.listening ? 'is-listening' : 'is-speaking'" aria-hidden="true"></div>
-  </Teleport>
 
   <!-- A guide's reel, played inside the chat (founder 2026-10-04: "in jinnichat").
        Instagram's official embed, cropped to the video alone (ReelCrop, founder 2026-10-05); the site CSP allows frame-src www.instagram.com. -->
@@ -9816,14 +9810,5 @@ a.rec-bar-btn { text-decoration: none }
 @media (min-width:769px){.message-bubble.user .content{max-width:70%}}
 .message-bubble.user{margin-bottom:24px}
 
-/* ═══ VOICE AURA: the screen edges breathe while Jinni listens (violet-blue) or speaks (gold) ═══ */
-.voice-aura{position:fixed;inset:0;z-index:4000;pointer-events:none;--aura-a:rgba(124,77,255,.75);--aura-b:rgba(79,123,255,.55)}
-.voice-aura.is-speaking{--aura-a:rgba(255,179,107,.8);--aura-b:rgba(255,210,122,.55)}
-.voice-aura::before,.voice-aura::after{content:'';position:absolute;top:0;bottom:0;width:min(22vw,110px);filter:blur(18px);animation:aura-breathe 2.4s ease-in-out infinite}
-.voice-aura::before{left:0;background:linear-gradient(90deg,var(--aura-a),var(--aura-b) 35%,transparent 100%);transform-origin:left center}
-.voice-aura::after{right:0;background:linear-gradient(270deg,var(--aura-a),var(--aura-b) 35%,transparent 100%);transform-origin:right center;animation-delay:-1.2s}
-.voice-aura.is-speaking::before,.voice-aura.is-speaking::after{animation-duration:1.6s}
-@keyframes aura-breathe{0%,100%{opacity:.45;transform:scaleX(.8)}50%{opacity:1;transform:scaleX(1.15)}}
-@media (prefers-reduced-motion: reduce){.voice-aura::before,.voice-aura::after{animation:none;opacity:.7}}
 
 </style>
