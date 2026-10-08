@@ -10160,7 +10160,7 @@ a.rec-bar-btn { text-decoration: none }
 .cooldown-explore-text{font-size:13.5px;line-height:1.45}
 .cooldown-explore-cta{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px}
 .cooldown-explore-cta svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.genie-chat-container.night-mode .cooldown-explore{color:#f3eaf8;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 .75px rgba(255,210,122,.45),0 0 16px -4px rgba(255,170,80,.35)}
+.genie-chat-container.night-mode .cooldown-explore{color:#f3eaf8;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 .8px rgba(255,255,255,.16),0 0 16px -4px rgba(0,0,0,.4)}
 .genie-chat-container.night-mode .cooldown-explore-cta{color:#ffd27a}
 .genie-chat-container.night-mode .cooldown-explore:hover{background:rgba(255,255,255,.1)}
 .genie-chat-container.day-mode .cooldown-explore{color:#5a3c22;background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.95),0 0 16px -4px rgba(140,61,7,.18)}
