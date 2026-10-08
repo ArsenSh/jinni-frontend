@@ -1212,6 +1212,8 @@
       "short": "Limit reached. Try at {time}",
       "long": "You've reached your limit. Try again at {time}",
       "soon": "You've reached your limit. Try again soon",
+      "explore": "While you wait, everything Jinni has found near you is in Jinni's Discoveries — free, no limit.",
+      "explore_cta": "Open Jinni's Discoveries",
       "unknown_time": "Unknown"
     },
     "warning": {

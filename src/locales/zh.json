@@ -1212,6 +1212,8 @@
       "short": "已达到限制。请在 {time} 重试",
       "long": "您已达到限制。请在 {time} 重试",
       "soon": "您已达到限制。请稍后重试",
+      "explore": "等待期间，Jinni 在你附近找到的一切都在「Jinni 的发现」里——免费、不限次数。",
+      "explore_cta": "打开 Jinni 的发现",
       "unknown_time": "未知"
     },
     "warning": {

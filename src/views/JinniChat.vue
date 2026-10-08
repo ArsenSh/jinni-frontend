@@ -813,6 +813,12 @@
                  conversation, and it used to sit in the history forever as a
                  fake AI turn. Absolutely positioned so showing it never
                  shifts the composer under the user's fingers. -->
+            <!-- Daily limit reached (founder 2026-10-09): Jinni's Discoveries has no AI cost and no limit — offered to people
+                 who already know the app (not on their first day: "they will not understand anything"). -->
+            <button v-if="isOnCooldown && knowsTheApp" type="button" class="cooldown-explore" @click="$router.push('/explore')">
+              <span class="cooldown-explore-text">{{ t('usage.cooldown.explore') }}</span>
+              <span class="cooldown-explore-cta">{{ t('usage.cooldown.explore_cta') }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </button>
             <transition name="usage-notice">
               <div v-if="usageNotice" class="usage-notice" role="status">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16.5v.01"/></svg>
@@ -2508,6 +2514,11 @@ export default {
       }
       return this.t('usage.cooldown.unknown_time');
     },
+    knowsTheApp() {
+      if ((this.chatSessions || []).length >= 2) return true;
+      let first = 0; try { first = Number(localStorage.getItem('jinni_first_seen')) || 0; } catch (e) {}
+      return !!first && Date.now() - first > 24 * 60 * 60 * 1000;
+    },
     cooldownMessage() {
       if (!this.isOnCooldown) return '';
       const endTime = this.cooldownEndTime;
@@ -2635,6 +2646,7 @@ export default {
   },
   mounted() {
     this.loadVoiceStatus();   // Jinni's voice: may this user hear it, does the server recogniser exist
+    try { if (!localStorage.getItem('jinni_first_seen')) localStorage.setItem('jinni_first_seen', String(Date.now())); } catch (e) {}   // knowsTheApp
     this.checkScreenSize();
     this.$nextTick(() => this._fitGreetingSoon());
     try { document.fonts?.ready?.then(() => this._fitGreeting()); } catch (e) {}
@@ -10130,6 +10142,19 @@ a.rec-bar-btn { text-decoration: none }
 .vm-night .vm-end{background:rgba(229,72,77,.18);box-shadow:inset 0 0 0 .75px rgba(255,140,120,.45)}
 .vm-day .vm-end{color:#c2410c}
 @media (prefers-reduced-motion: reduce){.vm-l{animation:none}.vm-orb,.vm-l,.vm-card,.vm-hint{transition:none}}
+
+/* Daily limit reached: the way on to Jinni's Discoveries (no AI, no limit) */
+.cooldown-explore{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:560px;margin:0 auto 10px;padding:12px 16px;border:0;border-radius:18px;cursor:pointer;text-align:center;font:inherit;transition:background-color .2s ease,box-shadow .2s ease}
+.cooldown-explore-text{font-size:13.5px;line-height:1.45}
+.cooldown-explore-cta{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px}
+.cooldown-explore-cta svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.genie-chat-container.night-mode .cooldown-explore{color:#f3eaf8;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 .75px rgba(255,210,122,.45),0 0 16px -4px rgba(255,170,80,.35)}
+.genie-chat-container.night-mode .cooldown-explore-cta{color:#ffd27a}
+.genie-chat-container.night-mode .cooldown-explore:hover{background:rgba(255,255,255,.1)}
+.genie-chat-container.day-mode .cooldown-explore{color:#5a3c22;background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.95),0 0 16px -4px rgba(140,61,7,.18)}
+.genie-chat-container.day-mode .cooldown-explore-cta{color:#a8601f}
+.genie-chat-container.day-mode .cooldown-explore:hover{background:rgba(255,255,255,.8)}
+.cooldown-explore:focus-visible{outline:2px solid #ffb36b;outline-offset:2px}
 
 /* The user's message is a bubble on the right that fits its text (founder 2026-10-08: it stretched across
    the whole width, reading as a second column). Up to 85% of the width on phones, 70% on desktop; the

@@ -1212,6 +1212,8 @@
       "short": "Limite atteinte. Réessayez à {time}",
       "long": "Vous avez atteint votre limite. Réessayez à {time}",
       "soon": "Vous avez atteint votre limite. Réessayez bientôt",
+      "explore": "En attendant, tout ce que Jinni a trouvé près de vous est dans les Découvertes de Jinni — gratuit, sans limite.",
+      "explore_cta": "Ouvrir les Découvertes de Jinni",
       "unknown_time": "Inconnu"
     },
     "warning": {
