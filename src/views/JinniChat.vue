@@ -1027,7 +1027,7 @@
                   :placeholder="isOnCooldown ? cooldownMessage : (modeSwitchNotice || t('chat.input.placeholder'))"
                   ref="chatInput"
                   rows="1"
-                  @input="adjustTextareaHeight"
+                  @input="adjustTextareaHeight(); if (voice.speaking) stopSpeaking()"
                   @paste="handlePaste"
                   :disabled="isOnCooldown"
                   :class="{ 'input-disabled': isOnCooldown }"
@@ -1885,7 +1885,7 @@ export default {
       listeningMessageId: null,   // the reply being read aloud by the Listen button
       // Jinni's voice (2026-10-07): listening = the mic is on; speaking = an answer is being read; lastSentByVoice = the
       // answer to the message just sent should be spoken (premium) or hinted (free); notice = the one-line bar's text.
-      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null },
+      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -2592,7 +2592,7 @@ export default {
     }
   },
   beforeUnmount() {
-    this.stopVoiceInput(); this.stopSpeaking(); clearTimeout(this.voice.noticeTimer);
+    this.stopVoiceInput(); this.stopSpeaking(); clearTimeout(this.voice.noticeTimer); clearTimeout(this.voice.fillerTimer);
     if (this._vvHandler && window.visualViewport) {
       window.visualViewport.removeEventListener('resize', this._vvHandler);
       window.visualViewport.removeEventListener('scroll', this._vvHandler);
@@ -7353,16 +7353,24 @@ export default {
       this.voice.listening = false;
     },
     sendVoiceMessage() {
-      if (!this.userInput.trim()) return;
+      const said = this.userInput.trim();
+      if (!said) return;
       this.voice.lastSentByVoice = true;
+      this.voice.answerStarted = false;
       this.sendMessage();
-      this.playFiller();
+      // The "let me see" line only when there is really a wait (founder 2026-10-08: for "hi" it just
+      // delayed the answer): not for short messages, and only if nothing has arrived after 1.5 s.
+      clearTimeout(this.voice.fillerTimer);
+      if (said.split(/\s+/).length >= 3) this.voice.fillerTimer = setTimeout(() => { if (!this.voice.answerStarted && !this.voice.speaking) this.playFiller(); }, 1500);
     },
     // Speech OUT: only when the message was spoken, and only for Premium. The text of the answer
     // is read paragraph by paragraph so the first words come quickly; cards are not read.
     onAnswerComplete(message) {
+      this.voice.answerStarted = true; clearTimeout(this.voice.fillerTimer);
       if (!this.voice.lastSentByVoice) return;
       this.voice.lastSentByVoice = false;
+      if (this.voice.spokenId === message.id) return;      // never read the same reply twice
+      this.voice.spokenId = message.id;
       if (!(this.usageStatus && this.usageStatus.isPremium)) { this.voiceNotice(this.t('chat.voice.premium_hint'), 9000); return; }
       const parts = (message.contentParts || []).filter(p => p.type === 'text').map(p => p.content).join('\n');
       const text = (parts || message.text || '').trim();
