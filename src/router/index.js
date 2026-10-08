@@ -235,6 +235,14 @@ router.beforeEach(async (to, from, next) => {
     // Sign-up attribution: posts the stored first-landing source once a token
     // exists (any login path), then never again in this browser.
     sendAcquisition();
+    // Founder 2026-10-09: Instagram ads land on /discover/...; a signed-out visitor who ARRIVES there (first page of
+    // the visit, e.g. from an ad or a shared link) signs up instead of browsing — "better for them to authenticate".
+    // Clicking a city on the landing (an in-site navigation) still opens it. The ad's utm_* was already captured
+    // in main.js before this runs. After sign-in/up they go to the chat or onboarding, not back here.
+    if (/^Discover/.test(String(to.name || '')) && !from.name) {
+        const tok = localStorage.getItem('authToken');
+        if (!(tok && isValidToken(tok))) return next({ name: 'Auth', query: tok ? {} : { mode: 'signup' }, replace: true });
+    }
     if (to.meta.public) return next();
     if (to.name && from.name && to.name === from.name) {
         console.warn('⚠️ Preventing redirect loop:', to.name);
@@ -334,6 +342,8 @@ router.beforeEach(async (to, from, next) => {
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
         }
+        // Explore from an ad / link with no account on this browser: open on Create account, then the chat (2026-10-09)
+        if (to.name === 'Explore' && !authToken) return next({ name: 'Auth', query: { mode: 'signup' }, replace: true });
         return next({ name: 'Auth', query: { redirect: to.fullPath } });
     }
     // Staff — locked to their working page(s) plus a few utility routes.
