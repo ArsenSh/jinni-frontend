@@ -9775,4 +9775,11 @@ a.rec-bar-btn { text-decoration: none }
 .voice-stop{border:0;padding:4px 11px;border-radius:999px;font:600 12.5px/1 inherit;cursor:pointer;color:inherit;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.25)}
 .day-mode .voice-stop{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 .75px rgba(122,74,28,.3)}
 
+/* The user's message is a bubble on the right that fits its text (founder 2026-10-08: it stretched across
+   the whole width, reading as a second column). Up to 85% of the width on phones, 70% on desktop; the
+   answer below stays full width, as every chat app does it. */
+.message-bubble.user .content{max-width:85%;width:fit-content;width:-moz-fit-content}
+@media (min-width:769px){.message-bubble.user .content{max-width:70%}}
+.message-bubble.user{margin-bottom:24px}
+
 </style>
