@@ -801,7 +801,7 @@
             <div class="greeting">{{ greetingLine() }}</div>
           </div>
           <div class="chat-input-container">
-            <div v-if="voice.notice || voice.speaking || voice.listening" class="voice-notice" :class="{ 'is-live': voice.speaking || voice.listening }">
+            <div v-if="!voice.mode && (voice.notice || voice.speaking || voice.listening)" class="voice-notice" :class="{ 'is-live': voice.speaking || voice.listening }">
               <span v-if="voice.listening || voice.speaking" class="voice-bars" :class="{ 'is-speaking': voice.speaking }" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
               <span class="voice-text">{{ voice.listening ? (userInput.trim() || t('chat.voice.listening')) : (voice.speaking ? t('chat.voice.speaking') : voice.notice) }}</span>
               <button v-if="voice.listening" type="button" class="voice-stop" @click="stopVoiceInput">{{ t('chat.voice.done') }}</button>
@@ -1041,7 +1041,7 @@
                 <!-- Jinni's voice (founder 2026-10-07): an empty box shows a MIC in the send button's place —
                      tap, speak, and the words go off as the message. A premium user then hears the answer in
                      Jinni's voice; a free user reads it and sees a one-line hint. Text typed → the arrow. -->
-                <button v-if="(!userInput.trim() || voice.listening) && !isStreaming" type="button" @click.stop="toggleVoiceInput" class="send-button mic-button" :class="{ 'is-listening': voice.listening, 'disabled-cooldown': isOnCooldown }" :disabled="isOnCooldown" :title="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')" :aria-label="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')">
+                <button v-if="(!userInput.trim() || voice.listening) && !isStreaming" type="button" @click.stop="voice.listening ? stopVoiceInput() : openVoiceMode()" class="send-button mic-button" :class="{ 'is-listening': voice.listening, 'disabled-cooldown': isOnCooldown }" :disabled="isOnCooldown" :title="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')" :aria-label="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')">
                   <svg v-if="!voice.listening" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg>
                   <svg v-else viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
                 </button>
@@ -1838,6 +1838,41 @@
     </div>
   </Teleport>
 
+
+  <!-- Jinni's voice mode (founder 2026-10-08, "2 · Orb" from the Jinni Voice Mode preview): a screen of its own with a
+       soft morphing orb. Colour says who is talking: violet-blue only while Jinni listens, gold only (and faster) while it
+       speaks, a slow blend while it thinks. Turn-based: after Jinni speaks it listens again; tap the orb to interrupt.
+       Keyboard = back to typing (the words stay in the box); End = stop everything, nothing half-said is sent. -->
+  <Teleport to="body">
+    <div v-if="voice.mode" ref="voiceModeEl" class="voice-mode" :class="[currentTheme === 'night-mode' ? 'vm-night' : 'vm-day', 'vm-' + voiceState, { 'vm-has-cards': voiceCards.length }]"
+         role="dialog" aria-modal="true" :aria-label="t('chat.voice.mode_title')" tabindex="-1" @keydown.esc="endVoiceMode">
+      <div class="vm-top">Jinni</div>
+      <button type="button" class="vm-stage" :aria-label="voiceMainLabel" @click="voiceMainTap" :disabled="voiceState === 'thinking'">
+        <span class="vm-orb" aria-hidden="true"><b class="vm-l v1"></b><b class="vm-l v2"></b><b class="vm-l v3"></b><b class="vm-l g1"></b><b class="vm-l g2"></b><b class="vm-l g3"></b></span>
+      </button>
+      <p class="vm-words" aria-live="polite">{{ voiceWords }}</p>
+      <p class="vm-hint">{{ voiceHint }}</p>
+      <div v-if="voiceCards.length" ref="voiceCardsRow" class="vm-cards">
+        <button v-for="(rec, i) in voiceCards" :key="'vc' + i" type="button" class="vm-card" :class="{ on: voiceCardOn === i }" @click="voiceOpenCard(rec)">
+          <img v-if="rec.image" :src="getImageUrl(rec.image)" :alt="rec.name" @error="handleImageError" loading="lazy">
+          <span>{{ rec.name }}</span>
+        </button>
+      </div>
+      <div class="vm-ctrl">
+        <button type="button" class="vm-c" :aria-label="t('chat.voice.keyboard')" :title="t('chat.voice.keyboard')" @click="voiceKeyboard">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg>
+        </button>
+        <button type="button" class="vm-c vm-main" :class="{ on: voice.listening }" :aria-label="voiceMainLabel" :title="voiceMainLabel" :disabled="voiceState === 'thinking'" @click="voiceMainTap">
+          <svg v-if="voice.listening" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" class="fill"/></svg>
+          <svg v-else viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <button type="button" class="vm-c vm-end" :aria-label="t('chat.voice.end')" :title="t('chat.voice.end')" @click="endVoiceMode">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+  </Teleport>
+
 </template>
 
 
@@ -1886,7 +1921,9 @@ export default {
       listeningMessageId: null,   // the reply being read aloud by the Listen button
       // Jinni's voice (2026-10-07): listening = the mic is on; speaking = an answer is being read; lastSentByVoice = the
       // answer to the message just sent should be spoken (premium) or hinted (free); notice = the one-line bar's text.
-      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null },
+      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null,
+        // voice mode (2026-10-08): the screen, what was said, the sentence being spoken, the turn's first message index
+        mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '' },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -2066,6 +2103,43 @@ export default {
     };
   },
   computed: {
+    // Jinni's voice mode: one state the screen can show
+    voiceState() {
+      const v = this.voice;
+      if (v.listening) return 'listening';
+      if (v.speaking) return 'speaking';
+      if (v.transcribing || v.lastSentByVoice) return 'thinking';
+      return 'idle';
+    },
+    voiceWords() {
+      const v = this.voice, st = this.voiceState;
+      if (st === 'listening') return this.userInput.trim() || this.t('chat.voice.speak_now');
+      if (st === 'thinking') return v.said;
+      if (st === 'speaking') return String(v.nowSaying || '').replace(/[*_`#>|→←]+/g, ' ').replace(/\s+/g, ' ').trim();
+      return v.notice || '';
+    },
+    voiceHint() {
+      return { listening: this.t('chat.voice.state_listening'), thinking: this.t('chat.voice.state_thinking'), speaking: this.t('chat.voice.state_speaking'), idle: this.t('chat.voice.tap_to_talk') }[this.voiceState];
+    },
+    voiceMainLabel() {
+      return this.voice.listening ? this.t('chat.voice.done') : (this.voice.speaking ? this.t('chat.voice.interrupt') : this.t('chat.voice.mic'));
+    },
+    // the places in this turn's answer (shown as small photo cards on the voice screen)
+    voiceCards() {
+      if (!this.voice.mode) return [];
+      const out = [];
+      for (const m of this.messages.slice(this.voice.turnFrom)) {
+        if (m.sender !== 'ai' || m.hidden) continue;
+        for (const r of (m.recommendations || [])) if (r && r.name && out.length < 6) out.push(r);
+      }
+      return out;
+    },
+    // the card whose name Jinni is saying right now (-1 = none)
+    voiceCardOn() {
+      if (this.voiceState !== 'speaking' || !this.voiceCards.length) return -1;
+      const said = String(this.voice.nowSaying || '').toLowerCase();
+      return this.voiceCards.findIndex(r => { const n = String(r.name).toLowerCase().split(/[,(–—-]/)[0].trim(); return n.length >= 3 && said.includes(n.slice(0, Math.min(n.length, 16))); });
+    },
     /** "30 days left" / "until 5 Sep" — empty for free accounts and for
      *  grandfathered ones with no expiry (premiumUntil === null). */
     premiumExpiryLabel() {
@@ -2463,6 +2537,18 @@ export default {
     canShare() { return !!navigator.share },
   },
   watch: {
+    // voice mode: after Jinni has spoken, listen again (a conversation); never after an error or once the screen is closed
+    'voice.speaking'(now, before) {
+      if (!before || now || !this.voice.mode) return;
+      clearTimeout(this.voice.autoTimer);
+      this.voice.autoTimer = setTimeout(() => {
+        if (this.voice.mode && this.voiceState === 'idle' && !this.voice.notice && !this.isStreaming && !this.isRequestPending) { this.voice.autoStart = true; this.toggleVoiceInput(); }
+      }, 450);
+    },
+    voiceCardOn(i) {
+      if (i < 0) return;
+      this.$nextTick(() => { const row = this.$refs.voiceCardsRow, c = row && row.children[i]; if (c) row.scrollTo({ left: c.offsetLeft - (row.clientWidth - c.clientWidth) / 2, behavior: 'smooth' }); });
+    },
     // Jinni's voice: whatever way an answer ends (complete, error, quota, details), close the voice state
     isStreaming(v) { if (!v) this.voiceStreamEnded(); },
 
@@ -2596,6 +2682,7 @@ export default {
     }
   },
   beforeUnmount() {
+    this.voice.cancel = true; this.voice.mode = false; clearTimeout(this.voice.autoTimer);
     this.stopVoiceInput(); this.stopSpeaking(); clearTimeout(this.voice.noticeTimer); clearTimeout(this.voice.fillerTimer);
     if (this._vvHandler && window.visualViewport) {
       window.visualViewport.removeEventListener('resize', this._vvHandler);
@@ -7312,6 +7399,7 @@ export default {
       if (this.voice.listening) { this.stopVoiceInput(); return; }
       this.stopSpeaking();
       this.unlockAudio();
+      this.voice.cancel = false; this.voice.inputBase = this.userInput; if (this.voice.mode) this.voice.notice = '';
       const lang = this.voiceLang(), isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       const useBrowser = SR && !(isIOS && lang === 'hy-AM');
@@ -7322,12 +7410,14 @@ export default {
         rec.onresult = (e) => { heard = ''; for (let i = 0; i < e.results.length; i++) heard += e.results[i][0].transcript; this.userInput = base + heard; };
         rec.onerror = (e) => {
           this.voice.listening = false; this.voice.rec = null;
+          if (this.voice.cancel) return;
+          if (this.voice.autoStart && (e.error === 'not-allowed' || e.error === 'no-speech')) return;   // an automatic re-listen that could not start or heard nothing: just wait for a tap
           if (e.error === 'not-allowed' || e.error === 'service-not-allowed') this.voiceNotice(this.t('chat.voice.mic_blocked'));
           else if (e.error === 'language-not-supported' || e.error === 'audio-capture') this.startCloudVoiceInput();
           else if (e.error === 'no-speech') this.voiceNotice(this.t('chat.voice.nothing_heard'));
           else if (e.error !== 'aborted') this.voiceNotice(this.t('chat.voice.not_supported'));
         };
-        rec.onend = () => { const was = this.voice.listening; this.voice.listening = false; this.voice.rec = null; if (heard.trim()) this.sendVoiceMessage(); else if (was && !this.voice.notice) this.voiceNotice(this.t('chat.voice.nothing_heard')); };
+        rec.onend = () => { const was = this.voice.listening; this.voice.listening = false; this.voice.rec = null; if (this.voice.cancel) return; if (heard.trim()) this.sendVoiceMessage(); else if (was && !this.voice.notice && !this.voice.autoStart) this.voiceNotice(this.t('chat.voice.nothing_heard')); };
         try { rec.start(); this.voice.rec = rec; this.voice.listening = true; } catch (e) { this.startCloudVoiceInput(); }
       } else {
         this.startCloudVoiceInput();
@@ -7341,21 +7431,22 @@ export default {
         recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
         recorder.onstop = async () => {
           stream.getTracks().forEach(t => t.stop()); this.voice.listening = false; this.voice.recorder = null;
-          if (!chunks.length) return;
-          this.voiceNotice(this.t('chat.voice.transcribing'), 0);
+          if (!chunks.length || this.voice.cancel) return;
+          if (this.voice.mode) this.voice.transcribing = true; else this.voiceNotice(this.t('chat.voice.transcribing'), 0);
           try {
             const fd = new FormData(); const type = recorder.mimeType || 'audio/webm';
             fd.append('audio', new Blob(chunks, { type }), 'speech.' + (type.includes('mp4') ? 'mp4' : 'webm')); fd.append('lang', String(this.locale || 'en').slice(0, 2));
             const r = await fetch(`${API_BASE_URL}/api/voice/transcribe`, { method: 'POST', headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }, body: fd });
             const j = await r.json().catch(() => ({}));
-            this.voice.notice = '';
+            this.voice.notice = ''; this.voice.transcribing = false;
+            if (this.voice.cancel) return;
             if (!r.ok || !j.text) { this.voiceNotice(this.t('chat.voice.not_supported')); return; }
             this.userInput = (this.userInput ? this.userInput.replace(/\s*$/, ' ') : '') + j.text;
             this.sendVoiceMessage();
-          } catch (e) { this.voiceNotice(this.t('chat.voice.not_supported')); }
+          } catch (e) { this.voice.transcribing = false; this.voiceNotice(this.t('chat.voice.not_supported')); }
         };
         recorder.start(); this.voice.recorder = recorder; this.voice.listening = true;
-      } catch (e) { this.voiceNotice(this.t('chat.voice.mic_blocked')); }
+      } catch (e) { if (!this.voice.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked')); }
     },
     stopVoiceInput() {
       try { if (this.voice.rec) this.voice.rec.stop(); } catch (e) {}
@@ -7371,6 +7462,7 @@ export default {
       if (this.isStreaming || this.isRequestPending || this.isOnCooldown) { this.voiceNotice(this.t('chat.voice.busy')); return; }
       this.voice.lastSentByVoice = true;
       this.voice.answerStarted = false;
+      this.voice.said = said; this.voice.turnFrom = this.messages.length; this.voice.nowSaying = '';
       await this.sendMessage();
       if (this.userInput.trim() === said) { this.voice.lastSentByVoice = false; clearTimeout(this.voice.fillerTimer); return; }   // the send was refused
       // The "let me see" line only when there is really a wait (founder 2026-10-08: for "hi" it just
@@ -7396,7 +7488,7 @@ export default {
       this.stopSpeaking();
       // One request for the whole answer (the server clips it): separate requests per paragraph came
       // back at different loudness (founder 2026-10-08).
-      this.voice.speaking = true; this.voice.queue = [text];
+      this.voice.speaking = true; this.voice.queue = [text]; this.voice.nowSaying = text;
       if (this.voice.filler) { try { await this.voice.filler; } catch (e) {} }
       const lang = String(this.locale || 'en').slice(0, 2), token = localStorage.getItem('authToken');
       const fetchChunk = (i) => fetch(`${API_BASE_URL}/api/voice/speak`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ text: this.voice.queue[i], lang, chunk: i }) });
@@ -7508,7 +7600,7 @@ export default {
           return null;
         }
         const id = r.headers.get('X-Voice-Request-Id'); if (id) st.prev = [...st.prev, id].slice(-3);
-        return await r.blob();
+        return { blob: await r.blob(), text };
       } catch (e) { return null; }
     },
     async voicePump() {
@@ -7517,10 +7609,11 @@ export default {
       if (this.voice.filler) { try { await this.voice.filler; } catch (e) {} }
       let next = st.queue.length ? this.voiceFetch(st.queue.shift()) : null;
       while (next && this.voice.speaking && this.voice.stream === st) {
-        const blob = await next;
+        const got = await next;
         next = st.queue.length ? this.voiceFetch(st.queue.shift()) : null;      // the next sentence is fetched while this one plays
-        if (!blob) { if (!next) break; continue; }
-        await this.playBlob(blob);
+        if (!got) { if (!next) break; continue; }
+        this.voice.nowSaying = got.text;
+        await this.playBlob(got.blob);
         if (!next && st.queue.length) next = this.voiceFetch(st.queue.shift());
       }
       st.busy = false;
@@ -7540,6 +7633,33 @@ export default {
           const text = this.messageText(last); if (text) { this.voice.spokenId = last.id; this.speakText(text); }
         }
       }
+    },
+    // ── Voice mode (the screen) ──
+    openVoiceMode() {
+      if (this.isOnCooldown) return;
+      this.voice.mode = true; this.voice.notice = ''; this.voice.said = ''; this.voice.nowSaying = ''; this.voice.autoStart = false;
+      this.voice.turnFrom = this.messages.length;
+      this.toggleVoiceInput();                                   // inside the tap: iPhone needs the gesture for the mic and the audio unlock
+      this.$nextTick(() => { try { this.$refs.voiceModeEl && this.$refs.voiceModeEl.focus(); } catch (e) {} });
+    },
+    voiceMainTap() {
+      this.voice.autoStart = false;
+      if (this.voice.listening) { this.stopVoiceInput(); return; }        // done talking → the words go off
+      if (this.voiceState === 'thinking') return;
+      this.toggleVoiceInput();                                   // idle, or interrupting Jinni (toggleVoiceInput stops the speech first)
+    },
+    leaveVoiceMode(keepWords) {
+      this.voice.cancel = true; clearTimeout(this.voice.autoTimer);
+      this.voice.lastSentByVoice = false; clearTimeout(this.voice.fillerTimer);   // an answer still on its way is not read aloud after leaving
+      this.stopVoiceInput(); this.stopSpeaking();
+      if (!keepWords) this.userInput = this.voice.inputBase || '';
+      this.voice.mode = false; this.voice.transcribing = false; this.voice.notice = ''; this.voice.autoStart = false;
+    },
+    voiceKeyboard() { this.leaveVoiceMode(true); this.$nextTick(() => { try { this.$refs.chatInput && this.$refs.chatInput.focus(); } catch (e) {} }); },
+    endVoiceMode() { this.leaveVoiceMode(false); },
+    voiceOpenCard(rec) {
+      this.leaveVoiceMode(true);
+      this.$nextTick(() => { const el = [...document.querySelectorAll('.recommendation-card')].reverse().find(c => (c.textContent || '').includes(rec.name)); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
     },
     stopSpeaking() {
       this.listeningMessageId = null;
@@ -9802,6 +9922,77 @@ a.rec-bar-btn { text-decoration: none }
 .voice-notice.is-live .voice-text{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .voice-stop{border:0;padding:4px 11px;border-radius:999px;font:600 12.5px/1 inherit;cursor:pointer;color:inherit;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.25)}
 .day-mode .voice-stop{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 .75px rgba(122,74,28,.3)}
+
+/* ═══ VOICE MODE · the orb (founder 2026-10-08, "2 · Orb"). Six soft layers: three violet-blue (you), three gold
+   (Jinni). Each state shows ONE family, cross-fading — the original preview kept all three colours in both states, so
+   listening and speaking looked the same. Speaking morphs faster. Centred, clear of Safari's bars. ═══ */
+.voice-mode{position:fixed;inset:0;z-index:5000;display:flex;flex-direction:column;align-items:center;gap:12px;outline:none;
+  padding:calc(env(safe-area-inset-top,0px) + 22px) 20px calc(env(safe-area-inset-bottom,0px) + 28px);font-family:'Lora',Georgia,serif;overflow:hidden}
+@supports (-webkit-touch-callout:none){.voice-mode{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 74px)}}   /* iPhone: Safari's glass toolbar floats over the page */
+.voice-mode.vm-night{background:linear-gradient(180deg,#0a0118 0%,#1a0b2e 45%,#16213e 100%);color:#f3eaf8}
+.voice-mode.vm-day{background:linear-gradient(180deg,#f9f5eb 0%,#f5edda 55%,#efe4cf 100%);color:#5a3c22}
+.vm-top{font:500 14px/1.2 'Cinzel',Georgia,serif;letter-spacing:.16em;opacity:.8}
+.vm-stage{flex:1 1 auto;min-height:0;width:100%;max-width:420px;display:grid;place-items:center;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;color:inherit}
+.vm-stage:disabled{cursor:default}
+.vm-stage:focus-visible{outline:none}
+.vm-stage:focus-visible .vm-orb{box-shadow:0 0 0 2px rgba(255,210,122,.6)}
+.vm-orb{position:relative;width:min(46vw,190px);aspect-ratio:1;border-radius:50%;transition:width .6s ease}
+.vm-has-cards .vm-orb{width:min(30vw,120px)}
+.vm-l{position:absolute;inset:0;border-radius:46% 54% 52% 48% / 50% 44% 56% 50%;filter:blur(7px);opacity:0;
+  transition:opacity .8s ease;animation:vm-morph 6s ease-in-out infinite}
+.vm-night .vm-l{mix-blend-mode:screen}
+.vm-l.v1{background:radial-gradient(circle at 40% 40%,#c58bff,#7c4dff 60%,transparent 72%)}
+.vm-l.v2{background:radial-gradient(circle at 62% 58%,#6ad0ff,#4f7bff 60%,transparent 72%);animation-delay:-2s;animation-duration:7s}
+.vm-l.v3{background:radial-gradient(circle at 50% 72%,#6f7dff,#3d2fd0 60%,transparent 72%);animation-delay:-4s;animation-duration:8s}
+.vm-l.g1{background:radial-gradient(circle at 42% 40%,#ffc86b,#f08a1c 60%,transparent 72%)}
+.vm-l.g2{background:radial-gradient(circle at 60% 60%,#ffd27a,#ff8c3a 60%,transparent 72%);animation-delay:-2s}
+.vm-l.g3{background:radial-gradient(circle at 50% 72%,#ffb36b,#c96a12 60%,transparent 72%);animation-delay:-4s}
+.vm-day .vm-l.v1{background:radial-gradient(circle at 40% 40%,#a98add,#6a3fd6 60%,transparent 72%)}
+.vm-day .vm-l.v2{background:radial-gradient(circle at 62% 58%,#5fb3e6,#3b62d6 60%,transparent 72%)}
+.vm-day .vm-l.v3{background:radial-gradient(circle at 50% 72%,#8a9ce8,#4a3fc4 60%,transparent 72%)}
+.vm-day .vm-l.g1{background:radial-gradient(circle at 42% 40%,#f3c46e,#d98323 60%,transparent 72%)}
+.vm-day .vm-l.g2{background:radial-gradient(circle at 60% 60%,#eab05a,#c0702a 60%,transparent 72%)}
+.vm-day .vm-l.g3{background:radial-gradient(circle at 50% 72%,#f6d48f,#b5651d 60%,transparent 72%)}
+@keyframes vm-morph{0%,100%{border-radius:46% 54% 52% 48% / 50% 44% 56% 50%;transform:rotate(0) scale(1)}33%{border-radius:58% 42% 46% 54% / 44% 58% 42% 56%;transform:rotate(40deg) scale(1.06)}66%{border-radius:40% 60% 58% 42% / 56% 40% 60% 44%;transform:rotate(-30deg) scale(.95)}}
+/* who is talking: listening = violet-blue only; speaking = gold only, faster; thinking = both, slow; idle = a dim violet breath */
+.vm-listening .vm-l.v1{opacity:.9}.vm-listening .vm-l.v2{opacity:.75}.vm-listening .vm-l.v3{opacity:.6}
+.vm-day.vm-listening .vm-l.v1,.vm-day.vm-listening .vm-l.v2,.vm-day.vm-listening .vm-l.v3{opacity:.9}
+.vm-speaking .vm-l.g1{opacity:.8;animation-duration:1.8s}.vm-speaking .vm-l.g2{opacity:.9}.vm-speaking .vm-l.g3{opacity:.6}
+.vm-day.vm-speaking .vm-l.g1,.vm-day.vm-speaking .vm-l.g2,.vm-day.vm-speaking .vm-l.g3{opacity:.9}
+.vm-speaking .vm-l.g2{animation-duration:2.1s}.vm-speaking .vm-l.g3{animation-duration:2.4s}
+.vm-thinking .vm-l.v1,.vm-thinking .vm-l.g2{opacity:.7;animation-duration:9s}.vm-thinking .vm-l.v2,.vm-thinking .vm-l.g1{opacity:.4;animation-duration:10s}
+.vm-idle .vm-l.v1,.vm-idle .vm-l.v2{opacity:.55;animation-duration:9s}
+.vm-words{margin:0;max-width:min(92%,460px);min-height:3em;text-align:center;font-size:16px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.vm-thinking .vm-words{opacity:.7}
+.vm-hint{margin:0;font:500 11px/1 'Cinzel',Georgia,serif;letter-spacing:.24em;text-transform:uppercase;transition:color .6s ease}
+.vm-night .vm-hint{color:#b9a4ff}.vm-night.vm-speaking .vm-hint{color:#ffd27a}.vm-night.vm-idle .vm-hint{color:rgba(238,230,246,.6)}
+.vm-day .vm-hint{color:#6a3fd6}.vm-day.vm-speaking .vm-hint{color:#a8601f}.vm-day.vm-idle .vm-hint{color:rgba(122,84,52,.7)}
+.vm-cards{display:flex;gap:10px;max-width:min(100%,480px);overflow-x:auto;padding:4px 2px 6px;scrollbar-width:none;flex:none}
+.vm-cards::-webkit-scrollbar{display:none}
+.vm-card{flex:0 0 132px;border:0;padding:0;border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:600 12.5px/1.25 'Lora',Georgia,serif;transition:box-shadow .4s ease,opacity .4s ease;opacity:.75}
+.vm-night .vm-card{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 .75px rgba(220,210,255,.18)}
+.vm-day .vm-card{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.95)}
+.vm-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.vm-card span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:7px 9px 8px}
+.vm-card.on{opacity:1}
+.vm-night .vm-card.on{box-shadow:inset 0 0 0 1px #ffd27a,0 0 16px -4px rgba(255,170,80,.6)}
+.vm-day .vm-card.on{box-shadow:inset 0 0 0 1px #c0702a,0 0 16px -4px rgba(192,112,42,.45)}
+.vm-ctrl{display:flex;align-items:center;gap:22px;margin-top:6px;flex:none}
+.vm-c{width:52px;height:52px;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:inherit;transition:background-color .2s ease,box-shadow .2s ease}
+.vm-night .vm-c{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 .75px rgba(220,210,255,.22)}
+.vm-day .vm-c{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.95),0 0 14px -4px rgba(140,61,7,.15)}
+.vm-c:hover:not(:disabled){filter:brightness(1.12)}
+.vm-c:focus-visible{outline:2px solid #ffb36b;outline-offset:3px}
+.vm-c:disabled{opacity:.45;cursor:default}
+.vm-c svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.vm-c svg .fill{fill:currentColor;stroke:none}
+.vm-main{width:64px;height:64px}
+.vm-night .vm-main.on{background:rgba(139,92,246,.35);box-shadow:inset 0 0 0 .75px rgba(197,139,255,.7)}
+.vm-day .vm-main.on{background:rgba(106,63,214,.16);box-shadow:inset 0 0 0 .75px rgba(106,63,214,.5)}
+.vm-end{color:#ff8a7a}
+.vm-night .vm-end{background:rgba(229,72,77,.18);box-shadow:inset 0 0 0 .75px rgba(255,140,120,.45)}
+.vm-day .vm-end{color:#c2410c}
+@media (prefers-reduced-motion: reduce){.vm-l{animation:none}.vm-orb,.vm-l,.vm-card,.vm-hint{transition:none}}
 
 /* The user's message is a bubble on the right that fits its text (founder 2026-10-08: it stretched across
    the whole width, reading as a second column). Up to 85% of the width on phones, 70% on desktop; the

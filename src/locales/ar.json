@@ -1044,7 +1044,16 @@
       "listen": "استمع",
       "no_device_voice": "لا يوجد صوت لهذه اللغة على هذا الهاتف. صوت Jinni الخاص متاح مع Premium.",
       "nothing_heard": "لم أسمع شيئًا. اضغط الزر وتحدث بعد أن يضيء.",
-      "busy": "ما زال Jinni يجيب — لحظة ثم تحدث مجددًا."
+      "busy": "ما زال Jinni يجيب — لحظة ثم تحدث مجددًا.",
+      "mode_title": "تحدث مع Jinni",
+      "keyboard": "العودة إلى الكتابة",
+      "end": "إنهاء",
+      "speak_now": "تحدث الآن…",
+      "state_listening": "أستمع",
+      "state_thinking": "أفكر",
+      "state_speaking": "أتحدث",
+      "tap_to_talk": "اضغط للتحدث",
+      "interrupt": "قاطع وتحدث"
     }
   },
   "profile": {

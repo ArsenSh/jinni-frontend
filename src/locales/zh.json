@@ -1044,7 +1044,16 @@
       "listen": "聆听",
       "no_device_voice": "此手机没有该语言的语音。Jinni 自己的声音需要 Premium。",
       "nothing_heard": "我没有听到任何内容。请点击按钮，待其亮起后再说话。",
-      "busy": "Jinni 仍在回答，请稍等后再说。"
+      "busy": "Jinni 仍在回答，请稍等后再说。",
+      "mode_title": "与 Jinni 对话",
+      "keyboard": "返回打字",
+      "end": "结束",
+      "speak_now": "请说话…",
+      "state_listening": "正在听",
+      "state_thinking": "正在思考",
+      "state_speaking": "正在说话",
+      "tap_to_talk": "点按说话",
+      "interrupt": "打断并说话"
     }
   },
   "profile": {
