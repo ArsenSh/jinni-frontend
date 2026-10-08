@@ -187,6 +187,9 @@
     </div>
 
     <div class="scroll-container" ref="scrollContainer">
+      <!-- The landing's night sky (founder 2026-10-09: "the background night colour in the landing page is better"):
+           its two slow glows live in this column, so they move with the sidebar as it opens or closes and never hide behind it. -->
+      <JinniNightSky v-if="currentTheme === 'night-mode'" class="chat-night-sky" />
 
       <div class="fixed-header" :class="{ 'with-shadow': messages.length > 0 }">
         <div class="centered-content">
@@ -1892,6 +1895,7 @@ import { useI18n } from 'vue-i18n';
 import { instagramEmbed } from '@/utils/guides';
 import GuideReel from '@/components/ui/GuideReel.vue';
 import ReelCrop from '@/components/ui/ReelCrop.vue';
+import JinniNightSky from '@/components/ui/JinniNightSky.vue';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.1.5:5000';
 /** How long the preference bar stays visible after it reveals. */
 const PREFERENCE_BAR_HIDE_MS = 5000;
@@ -1914,7 +1918,7 @@ export default {
       unmounted(el) { document.body.removeEventListener('click', el.clickOutsideEvent) }
     }
   },
-  components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView, GuideReel, ReelCrop },
+  components: { AnimatedLamp, SwitchModeOverlay, RecommendationMap, ItineraryView, GuideReel, ReelCrop, JinniNightSky },
   data() {
     return {
       reelEmbedUrl: null,
@@ -10130,6 +10134,9 @@ a.rec-bar-btn { text-decoration: none }
 .vm-night .vm-end{background:rgba(229,72,77,.18);box-shadow:inset 0 0 0 .75px rgba(255,140,120,.45)}
 .vm-day .vm-end{color:#c2410c}
 @media (prefers-reduced-motion: reduce){.vm-l{animation:none}.vm-orb,.vm-l,.vm-card,.vm-hint{transition:none}}
+
+/* The landing's night sky in the chat column: behind everything in the column, above the page's own gradient. */
+.scroll-container{isolation:isolate}
 
 /* The user's message is a bubble on the right that fits its text (founder 2026-10-08: it stretched across
    the whole width, reading as a second column). Up to 85% of the width on phones, 70% on desktop; the
