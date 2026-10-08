@@ -101,6 +101,7 @@
                 </div>
               </div>
               <div class="ex-card-name">{{ p.name }}</div>
+              <div v-if="p.eventDates && p.eventDates.start" class="ex-card-dates">{{ evDates(p.eventDates) }}</div>
               <div class="ex-card-sub">
                 <span v-if="p.region" class="ex-card-region">{{ p.region }}</span><span v-if="p.region && Number.isFinite(p.distanceKm)"> · </span><span v-if="Number.isFinite(p.distanceKm)" class="ex-card-dist">{{ p.distanceKm }} {{ t('explore.km') || 'km' }}</span>
               </div>
@@ -294,14 +295,21 @@ export default {
       for (const c of Object.keys(this.rawCategories)) {
         const list = (this.rawCategories[c] || []).filter(keep);
         if (want.size) list.sort((a, b) => matches(b) - matches(a));
-        if (list.length) out[c] = list;
+        // the server sends up to 60 per section (curated first); the visitor sees the best 24 for them (2026-10-09)
+        if (list.length) out[c] = list.slice(0, 24);
       }
       return out;
     },
     orderedCategories() {
       const order = (Array.isArray(this.serverOrder) && this.serverOrder.length) ? this.serverOrder
         : ['restaurants', 'historical', 'hidden_gems', 'activities', 'photo_spots', 'shopping', 'hotels'];
-      return order.filter(c => this.categories[c] && this.categories[c].length);
+      const present = order.filter(c => this.categories[c] && this.categories[c].length);
+      const want = new Set(this.prefs.interests.map(i => i === 'food_drink' ? 'food&drink' : i));
+      if (!want.size) return present;
+      // a section's score = how many of its shown places match the chosen interests (founder 2026-10-09)
+      const score = (c) => this.categories[c].reduce((n, p) => n + ((p.interests || []).some(t => want.has(t)) ? 1 : 0), 0);
+      const sc = Object.fromEntries(present.map(c => [c, score(c)]));
+      return present.slice().sort((a, b) => (sc[b] - sc[a]) || (present.indexOf(a) - present.indexOf(b)));
     },
     hasAny() { return this.orderedCategories.length > 0; },
     hasAnyRaw() { return Object.values(this.rawCategories).some(l => l && l.length); },
@@ -410,6 +418,12 @@ export default {
       });
     },
     catLabelOne(c) { const key = 'explore.cat_one.' + c; const s = this.$t ? this.$t(key) : null; return (s && s !== key) ? s : this.catLabel(c); },
+    evDates(ed) {
+      const loc = localStorage.getItem('jinni_language') || localStorage.getItem('lang') || undefined;
+      const f = d => new Date(d).toLocaleDateString(loc, { weekday: 'short', month: 'short', day: 'numeric' });
+      if (!ed || !ed.start) return '';
+      return ed.end && f(ed.end) !== f(ed.start) ? `${f(ed.start)} → ${f(ed.end)}` : f(ed.start);
+    },
     catLabel(c) { const key = 'explore.cat.' + c; const s = this.$t ? this.$t(key) : null; return (s && s !== key) ? s : (CAT_LABELS[c] || c); },
     async load() {
       this.loading = true;

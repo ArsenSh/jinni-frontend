@@ -111,7 +111,7 @@ function cityHtml(shell, page, L, lang) {
       <section>
         <h2>${esc(catLabel(c))}</h2>
         <ul>
-${categories[c].map(p => `          <li>${p.image ? `<img src="${esc(abs(p.image))}" alt="${esc(p.name)} — ${esc(catLabel(c))}, ${esc(city.name)}" width="380" height="253" loading="lazy"> ` : ''}<strong>${esc(p.name)}</strong>${p.region ? ` <span>${esc(p.region)}</span>` : ''}${Number.isFinite(p.rating) ? ` <span>★ ${esc(p.rating)}</span>` : ''}</li>`).join('\n')}
+${categories[c].slice(0, 24).map(p => `          <li>${p.image ? `<img src="${esc(abs(p.image))}" alt="${esc(p.name)} — ${esc(catLabel(c))}, ${esc(city.name)}" width="380" height="253" loading="lazy"> ` : ''}<strong>${esc(p.name)}</strong>${p.region ? ` <span>${esc(p.region)}</span>` : ''}${Number.isFinite(p.rating) ? ` <span>★ ${esc(p.rating)}</span>` : ''}</li>`).join('\n')}
         </ul>
       </section>`).join('\n');
     const body = `
