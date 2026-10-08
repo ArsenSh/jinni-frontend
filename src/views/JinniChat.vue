@@ -1923,7 +1923,8 @@ export default {
       // answer to the message just sent should be spoken (premium) or hinted (free); notice = the one-line bar's text.
       voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null,
         // voice mode (2026-10-08): the screen, what was said, the sentence being spoken, the turn's first message index
-        mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '' },
+        mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '',
+        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -2116,10 +2117,16 @@ export default {
       if (st === 'listening') return this.userInput.trim() || this.t('chat.voice.speak_now');
       if (st === 'thinking') return v.said;
       if (st === 'speaking') return String(v.nowSaying || '').replace(/[*_`#>|→←]+/g, ' ').replace(/\s+/g, ' ').trim();
-      return v.notice || '';
+      if (v.notice) return v.notice;
+      const last = [...this.messages.slice(v.turnFrom)].reverse().find(m => m.sender === 'ai' && !m.hidden);
+      return last ? this.messageText(last).replace(/[*_`#>|→←]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 260) : '';
     },
     voiceHint() {
       return { listening: this.t('chat.voice.state_listening'), thinking: this.t('chat.voice.state_thinking'), speaking: this.t('chat.voice.state_speaking'), idle: this.t('chat.voice.tap_to_talk') }[this.voiceState];
+    },
+    voiceTurnOver() {
+      const v = this.voice;
+      return v.mode && v.turnOpen && !this.isStreaming && !this.isRequestPending && !v.speaking && !v.transcribing && !v.listening;
     },
     voiceMainLabel() {
       return this.voice.listening ? this.t('chat.voice.done') : (this.voice.speaking ? this.t('chat.voice.interrupt') : this.t('chat.voice.mic'));
@@ -2537,13 +2544,21 @@ export default {
     canShare() { return !!navigator.share },
   },
   watch: {
-    // voice mode: after Jinni has spoken, listen again (a conversation); never after an error or once the screen is closed
-    'voice.speaking'(now, before) {
-      if (!before || now || !this.voice.mode) return;
+    // voice mode: a turn ends when the answer is in, saved and (for Premium) spoken. Then Jinni listens again —
+    // only if it actually spoke (a free user reads the answer on the screen and taps to talk).
+    'voice.speaking'(now) {
+      if (now && this.voice.turnOpen) this.voice.turnSpoken = true;
+      if (now && this.voice.mode) this.voiceBargeStart(); else this.voiceBargeStop();
+    },
+    voiceTurnOver(over) {
+      if (!over) return;
+      const spoken = this.voice.turnSpoken;
+      this.voice.turnOpen = false; this.voice.turnSpoken = false; this.voice.lastSentByVoice = false;   // never stuck on "thinking"
       clearTimeout(this.voice.autoTimer);
+      if (!spoken || this.voice.notice) return;
       this.voice.autoTimer = setTimeout(() => {
-        if (this.voice.mode && this.voiceState === 'idle' && !this.voice.notice && !this.isStreaming && !this.isRequestPending) { this.voice.autoStart = true; this.toggleVoiceInput(); }
-      }, 450);
+        if (this.voice.mode && this.voiceState === 'idle' && !this.voice.notice) { this.voice.autoStart = true; this.toggleVoiceInput(); }
+      }, 400);
     },
     voiceCardOn(i) {
       if (i < 0) return;
@@ -2682,7 +2697,7 @@ export default {
     }
   },
   beforeUnmount() {
-    this.voice.cancel = true; this.voice.mode = false; clearTimeout(this.voice.autoTimer);
+    this.voice.cancel = true; this.voice.mode = false; clearTimeout(this.voice.autoTimer); this.voiceBargeStop(); this.voiceMeterStop();
     this.stopVoiceInput(); this.stopSpeaking(); clearTimeout(this.voice.noticeTimer); clearTimeout(this.voice.fillerTimer);
     if (this._vvHandler && window.visualViewport) {
       window.visualViewport.removeEventListener('resize', this._vvHandler);
@@ -7399,6 +7414,7 @@ export default {
       if (this.voice.listening) { this.stopVoiceInput(); return; }
       this.stopSpeaking();
       this.unlockAudio();
+      this.voiceBargeStop();
       this.voice.cancel = false; this.voice.inputBase = this.userInput; if (this.voice.mode) this.voice.notice = '';
       const lang = this.voiceLang(), isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -7407,7 +7423,18 @@ export default {
         const rec = new SR(); rec.lang = lang; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;   // keeps listening through pauses until Done (founder 2026-10-08: it stopped at the first pause)
         const base = this.userInput ? this.userInput.replace(/\s*$/, ' ') : '';
         let heard = '';
-        rec.onresult = (e) => { heard = ''; for (let i = 0; i < e.results.length; i++) heard += e.results[i][0].transcript; this.userInput = base + heard; };
+        // When has the person finished? Not after a fixed pause: a sentence that sounds finished goes after ~1 s of
+        // quiet, one that ends on "and / with / um…" waits up to ~3 s, and any new word resets the wait
+        // (founder 2026-10-08: "people may stop talking and then want to talk immediately").
+        clearTimeout(this.voice.endTimer); clearTimeout(this.voice.idleTimer);
+        this.voice.idleTimer = setTimeout(() => { if (this.voice.rec === rec && !heard.trim()) { this.voice.discard = true; try { rec.stop(); } catch (e) {} } }, 9000);
+        rec.onresult = (e) => {
+          heard = ''; for (let i = 0; i < e.results.length; i++) heard += e.results[i][0].transcript; this.userInput = base + heard;
+          clearTimeout(this.voice.endTimer);
+          if (!heard.trim()) return;
+          const last = e.results[e.results.length - 1];
+          this.voice.endTimer = setTimeout(() => { if (this.voice.rec === rec && this.voice.listening) { try { rec.stop(); } catch (err) {} } }, this.voiceEndDelay(heard, !!(last && last.isFinal)));
+        };
         rec.onerror = (e) => {
           this.voice.listening = false; this.voice.rec = null;
           if (this.voice.cancel) return;
@@ -7417,7 +7444,8 @@ export default {
           else if (e.error === 'no-speech') this.voiceNotice(this.t('chat.voice.nothing_heard'));
           else if (e.error !== 'aborted') this.voiceNotice(this.t('chat.voice.not_supported'));
         };
-        rec.onend = () => { const was = this.voice.listening; this.voice.listening = false; this.voice.rec = null; if (this.voice.cancel) return; if (heard.trim()) this.sendVoiceMessage(); else if (was && !this.voice.notice && !this.voice.autoStart) this.voiceNotice(this.t('chat.voice.nothing_heard')); };
+        rec.onend = () => { clearTimeout(this.voice.endTimer); clearTimeout(this.voice.idleTimer); const was = this.voice.listening; this.voice.listening = false; this.voice.rec = null; if (this.voice.cancel) return; if (this.voice.discard) { this.voice.discard = false; return; } if (heard.trim()) this.sendVoiceMessage(); else if (was && !this.voice.notice && !this.voice.autoStart) this.voiceNotice(this.t('chat.voice.nothing_heard')); };
+        this.voice.discard = false;
         try { rec.start(); this.voice.rec = rec; this.voice.listening = true; } catch (e) { this.startCloudVoiceInput(); }
       } else {
         this.startCloudVoiceInput();
@@ -7430,8 +7458,9 @@ export default {
         const chunks = []; const recorder = new MediaRecorder(stream);
         recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
         recorder.onstop = async () => {
-          stream.getTracks().forEach(t => t.stop()); this.voice.listening = false; this.voice.recorder = null;
+          stream.getTracks().forEach(t => t.stop()); this.voice.listening = false; this.voice.recorder = null; this.voiceMeterStop();
           if (!chunks.length || this.voice.cancel) return;
+          if (this.voice.discard) { this.voice.discard = false; return; }    // nothing was said
           if (this.voice.mode) this.voice.transcribing = true; else this.voiceNotice(this.t('chat.voice.transcribing'), 0);
           try {
             const fd = new FormData(); const type = recorder.mimeType || 'audio/webm';
@@ -7445,10 +7474,85 @@ export default {
             this.sendVoiceMessage();
           } catch (e) { this.voice.transcribing = false; this.voiceNotice(this.t('chat.voice.not_supported')); }
         };
+        this.voice.discard = false;
         recorder.start(); this.voice.recorder = recorder; this.voice.listening = true;
+        this.voiceMeterStart(stream, recorder);
       } catch (e) { if (!this.voice.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked')); }
     },
+    // How long to wait after the last word before sending. Finished-sounding → short; trailing "and / with / um" → long.
+    voiceEndDelay(text, isFinal) {
+      const t = String(text || '').trim().toLowerCase();
+      const words = t.split(/\s+/).filter(Boolean), lastWord = (words[words.length - 1] || '').replace(/[.,!?…"»]+$/, '');
+      const TRAIL = new Set(['and', 'or', 'but', 'with', 'for', 'to', 'of', 'the', 'a', 'an', 'in', 'on', 'at', 'near', 'so', 'because', 'like', 'um', 'uh', 'er', 'hmm', 'maybe', 'also', 'then', 'which', 'that',
+        'и', 'а', 'но', 'или', 'с', 'со', 'в', 'на', 'для', 'к', 'по', 'что', 'чтобы', 'ну', 'эм', 'так', 'типа', 'потом', 'также', 'где',
+        'et', 'ou', 'mais', 'avec', 'pour', 'de', 'du', 'le', 'la', 'les', 'un', 'une', 'à', 'dans', 'euh', 'donc', 'qui', 'que',
+        'و', 'أو', 'لكن', 'مع', 'في', 'على', 'إلى', 'من', 'يعني',
+        'և', 'ու', 'կամ', 'բայց', 'հետ', 'համար', 'մեջ', 'որ', 'էլ', 'հետո', 'ըմ',
+        '和', '或', '但是', '还有', '然后', '那个', '嗯', '就是']);
+      let ms = isFinal ? 1050 : 1500;
+      if (TRAIL.has(lastWord)) ms += 1500;
+      if (/[?？.!。！]$/.test(t)) ms -= 250;
+      if (words.length < 3 && !/[?？]$/.test(t)) ms += 400;
+      return Math.max(850, Math.min(3200, ms));
+    },
+    // Sound-level end of turn for the recorder path: speech, then ~2 s of quiet → done; 9 s with no speech → nothing to send.
+    voiceMeterStart(stream, recorder) {
+      this.voiceMeterStop();
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
+        const ctx = this.voice.actx || (this.voice.actx = new Ctx());
+        if (ctx.state !== 'running') { ctx.resume().catch(() => {}); }
+        const an = ctx.createAnalyser(); an.fftSize = 1024; ctx.createMediaStreamSource(stream).connect(an);
+        const buf = new Float32Array(an.fftSize), t0 = Date.now(); let noise = 0, n = 0, speech = false, lastLoud = 0;
+        const id = setInterval(() => {
+          if (recorder.state === 'inactive') return this.voiceMeterStop();
+          if (ctx.state !== 'running') { if (Date.now() - t0 > 1500) this.voiceMeterStop(); return; }   // no audio access without a tap: the button finishes
+          an.getFloatTimeDomainData(buf); let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+          const rms = Math.sqrt(sum / buf.length), now = Date.now();
+          if (now - t0 < 400) { noise += rms; n++; return; }
+          const thr = Math.max(0.012, (n ? noise / n : 0) * 2.4);
+          if (rms > thr) { speech = true; lastLoud = now; }
+          if (speech && now - lastLoud > 2000) { this.voiceMeterStop(); try { recorder.stop(); } catch (e) {} }
+          else if (!speech && now - t0 > 9000) { this.voiceMeterStop(); this.voice.discard = true; try { recorder.stop(); } catch (e) {} }
+        }, 80);
+        this.voice.meter = id;
+      } catch (e) { this.voiceMeterStop(); }
+    },
+    // Talking over Jinni stops it and Jinni listens (as in Claude / ChatGPT voice). The mic stays open with echo
+    // cancellation while Jinni speaks; ~0.35 s of the person's voice above the room's level counts. Not on iPhone:
+    // an open mic there can drop Jinni's voice to the earpiece — there the orb is tapped to interrupt.
+    voiceBargeStart() {
+      const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const ctx = this.voice.actx;
+      if (isIOS || this.voice.barge || !ctx || ctx.state !== 'running' || !navigator.mediaDevices) return;
+      this.voice.barge = { pending: true };
+      navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then((stream) => {
+        if (!this.voice.barge || !this.voice.speaking || !this.voice.mode) { stream.getTracks().forEach(t => t.stop()); if (this.voice.barge && this.voice.barge.pending) this.voice.barge = null; return; }
+        const an = ctx.createAnalyser(); an.fftSize = 1024; const src = ctx.createMediaStreamSource(stream); src.connect(an);
+        const buf = new Float32Array(an.fftSize), t0 = Date.now(); let base = 0, n = 0, loudMs = 0;
+        const id = setInterval(() => {
+          an.getFloatTimeDomainData(buf); let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+          const rms = Math.sqrt(sum / buf.length);
+          if (Date.now() - t0 < 350) { base += rms; n++; return; }               // the room + what is left of Jinni's own voice
+          const thr = Math.max(0.03, (n ? base / n : 0) * 3);
+          loudMs = rms > thr ? loudMs + 60 : Math.max(0, loudMs - 60);
+          if (loudMs >= 360 && this.voice.speaking && this.voice.mode) {
+            this.voiceBargeStop(); this.stopSpeaking(); this.voice.autoStart = false; this.toggleVoiceInput();
+          }
+        }, 60);
+        this.voice.barge = { stream, src, id };
+      }).catch(() => { this.voice.barge = null; });
+    },
+    voiceBargeStop() {
+      const b = this.voice.barge; if (!b) return;
+      this.voice.barge = null;
+      if (b.id) clearInterval(b.id);
+      try { b.src && b.src.disconnect(); } catch (e) {}
+      if (b.stream) b.stream.getTracks().forEach(t => t.stop());
+    },
+    voiceMeterStop() { if (this.voice.meter) { clearInterval(this.voice.meter); this.voice.meter = null; } },
     stopVoiceInput() {
+      clearTimeout(this.voice.endTimer); clearTimeout(this.voice.idleTimer);
       try { if (this.voice.rec) this.voice.rec.stop(); } catch (e) {}
       try { if (this.voice.recorder && this.voice.recorder.state !== 'inactive') this.voice.recorder.stop(); } catch (e) {}
       this.voice.listening = false;
@@ -7459,12 +7563,16 @@ export default {
       // Jinni still answering or a request already out → the words stay in the box, nothing is marked
       // as spoken (2026-10-08 fix: the "speak the answer" flag used to survive a refused send and read
       // the NEXT typed message's answer aloud).
+      // the previous answer may still be saving for a moment: wait for it instead of refusing the words
+      for (let i = 0; i < 40 && (this.isStreaming || this.isRequestPending) && !this.voice.cancel; i++) await new Promise(r => setTimeout(r, 150));
+      if (this.voice.cancel) return;
       if (this.isStreaming || this.isRequestPending || this.isOnCooldown) { this.voiceNotice(this.t('chat.voice.busy')); return; }
       this.voice.lastSentByVoice = true;
       this.voice.answerStarted = false;
-      this.voice.said = said; this.voice.turnFrom = this.messages.length; this.voice.nowSaying = '';
+      this.voice.said = said; this.voice.turnFrom = this.messages.length; this.voice.nowSaying = ''; this.voice.turnSpoken = false;
       await this.sendMessage();
       if (this.userInput.trim() === said) { this.voice.lastSentByVoice = false; clearTimeout(this.voice.fillerTimer); return; }   // the send was refused
+      if (this.voice.mode) this.voice.turnOpen = true;
       // The "let me see" line only when there is really a wait (founder 2026-10-08: for "hi" it just
       // delayed the answer): not for short messages, and only if nothing has arrived after 1.5 s.
       clearTimeout(this.voice.fillerTimer);
@@ -7639,6 +7747,7 @@ export default {
       if (this.isOnCooldown) return;
       this.voice.mode = true; this.voice.notice = ''; this.voice.said = ''; this.voice.nowSaying = ''; this.voice.autoStart = false;
       this.voice.turnFrom = this.messages.length;
+      try { const Ctx = window.AudioContext || window.webkitAudioContext; if (Ctx) { this.voice.actx = this.voice.actx || new Ctx(); if (this.voice.actx.state !== 'running') this.voice.actx.resume().catch(() => {}); } } catch (e) {}
       this.toggleVoiceInput();                                   // inside the tap: iPhone needs the gesture for the mic and the audio unlock
       this.$nextTick(() => { try { this.$refs.voiceModeEl && this.$refs.voiceModeEl.focus(); } catch (e) {} });
     },
@@ -7649,7 +7758,7 @@ export default {
       this.toggleVoiceInput();                                   // idle, or interrupting Jinni (toggleVoiceInput stops the speech first)
     },
     leaveVoiceMode(keepWords) {
-      this.voice.cancel = true; clearTimeout(this.voice.autoTimer);
+      this.voice.cancel = true; clearTimeout(this.voice.autoTimer); this.voice.turnOpen = false; this.voiceMeterStop(); this.voiceBargeStop();
       this.voice.lastSentByVoice = false; clearTimeout(this.voice.fillerTimer);   // an answer still on its way is not read aloud after leaving
       this.stopVoiceInput(); this.stopSpeaking();
       if (!keepWords) this.userInput = this.voice.inputBase || '';
