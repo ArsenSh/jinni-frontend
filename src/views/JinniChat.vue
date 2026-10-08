@@ -1885,7 +1885,7 @@ export default {
       listeningMessageId: null,   // the reply being read aloud by the Listen button
       // Jinni's voice (2026-10-07): listening = the mic is on; speaking = an answer is being read; lastSentByVoice = the
       // answer to the message just sent should be spoken (premium) or hinted (free); notice = the one-line bar's text.
-      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null },
+      voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -5022,6 +5022,7 @@ export default {
                   if (messageIndex === -1) continue;
                   if (data.type && eventCount.hasOwnProperty(data.type)) { eventCount[data.type]++ }
                   if (data.type === 'token' && data.content) {
+                    this.voiceFeed(aiMessage.id, data.content);   // Jinni's voice: speak each sentence as it ends
                     currentTextSection += data.content;
                     this.messages[messageIndex].currentText = currentTextSection;
                     this.engineStage = '';
@@ -7373,6 +7374,7 @@ export default {
       if (this.voice.spokenId === message.id) return;      // never read the same reply twice
       this.voice.spokenId = message.id;
       if (!(this.usageStatus && this.usageStatus.isPremium)) { this.voiceNotice(this.t('chat.voice.premium_hint'), 9000); return; }
+      if (this.voice.stream && this.voice.stream.msgId === message.id) { this.voiceFlush(); return; }   // already speaking sentence by sentence
       const parts = (message.contentParts || []).filter(p => p.type === 'text').map(p => p.content).join('\n');
       const text = (parts || message.text || '').trim();
       if (text) this.speakText(text);
@@ -7454,8 +7456,66 @@ export default {
       u.onerror = u.onend;
       this.voice.speaking = true; synth.speak(u);
     },
+    // ── Streaming speech (founder 2026-10-08: "claude replies instantly"): each sentence is sent for
+    // its voice the moment it ends, and plays while the next is fetched. Premium, spoken message only.
+    voiceFeed(msgId, piece) {
+      if (!this.voice.lastSentByVoice || !(this.usageStatus && this.usageStatus.isPremium)) return;
+      let st = this.voice.stream;
+      if (!st || st.msgId !== msgId) { st = this.voice.stream = { msgId, buf: '', queue: [], busy: false, done: false, index: 0, chars: 0, prev: [] }; }
+      if (st.done || st.chars >= 1500) return;
+      st.buf += piece;
+      // cut at the last sentence end that leaves at least ~30 characters before it
+      const re = /[.!?…][”"»)\]]*\s+/g; let m, cut = -1;
+      while ((m = re.exec(st.buf))) { if (m.index + m[0].length >= 30) cut = m.index + m[0].length; }
+      if (cut > 0) { this.voiceEnqueue(st.buf.slice(0, cut)); st.buf = st.buf.slice(cut); }
+    },
+    voiceEnqueue(text) {
+      const st = this.voice.stream; const t = String(text || '').replace(/[→←]/g, ' ').trim();
+      if (!t || st.chars >= 1500) return;
+      st.chars += t.length; st.queue.push(t);
+      this.voice.answerStarted = true; clearTimeout(this.voice.fillerTimer);
+      this.voicePump();
+    },
+    voiceFlush() {
+      const st = this.voice.stream; if (!st) return;
+      if (st.buf.trim()) { this.voiceEnqueue(st.buf); st.buf = ''; }
+      st.done = true;
+      if (!st.busy && !st.queue.length) { this.voice.speaking = false; this.listeningMessageId = null; }
+    },
+    async voiceFetch(text) {
+      const st = this.voice.stream;
+      try {
+        const r = await fetch(`${API_BASE_URL}/api/voice/speak`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('authToken')}` },
+          body: JSON.stringify({ text, lang: String(this.locale || 'en').slice(0, 2), chunk: st.index++, previous_request_ids: st.prev }) });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          if (j.error === 'voice_limit') this.voiceNotice(this.t('chat.voice.limit'), 9000); else if (j.error !== 'premium_required') this.voiceNotice(this.t('chat.voice.unavailable'));
+          return null;
+        }
+        const id = r.headers.get('X-Voice-Request-Id'); if (id) st.prev = [...st.prev, id].slice(-3);
+        return await r.blob();
+      } catch (e) { return null; }
+    },
+    async voicePump() {
+      const st = this.voice.stream; if (!st || st.busy) return;
+      st.busy = true; this.voice.speaking = true;
+      if (this.voice.filler) { try { await this.voice.filler; } catch (e) {} }
+      let next = st.queue.length ? this.voiceFetch(st.queue.shift()) : null;
+      while (next && this.voice.speaking && this.voice.stream === st) {
+        const blob = await next;
+        next = st.queue.length ? this.voiceFetch(st.queue.shift()) : null;      // the next sentence is fetched while this one plays
+        if (!blob) { if (!next) break; continue; }
+        await this.playBlob(blob);
+        if (!next && st.queue.length) next = this.voiceFetch(st.queue.shift());
+      }
+      st.busy = false;
+      if (this.voice.stream !== st || !this.voice.speaking) return;
+      if (st.queue.length) return this.voicePump();
+      if (st.done) { this.voice.speaking = false; this.listeningMessageId = null; }
+    },
     stopSpeaking() {
       this.listeningMessageId = null;
+      if (this.voice.stream) { this.voice.stream.queue = []; this.voice.stream.done = true; this.voice.stream = null; }
       if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (e) {} }
       this.voice.speaking = false; this.voice.queue = [];
       if (this.voice.audio) { try { this.voice.audio.pause(); this.voice.audio.onended && this.voice.audio.onended(); } catch (e) {} this.voice.audio = null; }
