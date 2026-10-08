@@ -1042,7 +1042,8 @@
       "unavailable": "La voix de Jinni n'est pas disponible pour le moment.",
       "done": "Terminé",
       "listen": "Écouter",
-      "no_device_voice": "Ce téléphone n'a pas de voix pour cette langue. La voix de Jinni est disponible avec Premium."
+      "no_device_voice": "Ce téléphone n'a pas de voix pour cette langue. La voix de Jinni est disponible avec Premium.",
+      "nothing_heard": "Je n'ai rien entendu. Appuyez sur le bouton et parlez quand il s'allume."
     }
   },
   "profile": {

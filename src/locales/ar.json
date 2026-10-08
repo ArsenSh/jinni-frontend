@@ -1042,7 +1042,8 @@
       "unavailable": "صوت Jinni غير متاح الآن.",
       "done": "تم",
       "listen": "استمع",
-      "no_device_voice": "لا يوجد صوت لهذه اللغة على هذا الهاتف. صوت Jinni الخاص متاح مع Premium."
+      "no_device_voice": "لا يوجد صوت لهذه اللغة على هذا الهاتف. صوت Jinni الخاص متاح مع Premium.",
+      "nothing_heard": "لم أسمع شيئًا. اضغط الزر وتحدث بعد أن يضيء."
     }
   },
   "profile": {

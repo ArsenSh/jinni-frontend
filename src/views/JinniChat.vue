@@ -7307,7 +7307,7 @@ export default {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       const useBrowser = SR && !(isIOS && lang === 'hy-AM');
       if (useBrowser) {
-        const rec = new SR(); rec.lang = lang; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+        const rec = new SR(); rec.lang = lang; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;   // keeps listening through pauses until Done (founder 2026-10-08: it stopped at the first pause)
         const base = this.userInput ? this.userInput.replace(/\s*$/, ' ') : '';
         let heard = '';
         rec.onresult = (e) => { heard = ''; for (let i = 0; i < e.results.length; i++) heard += e.results[i][0].transcript; this.userInput = base + heard; };
@@ -7315,9 +7315,10 @@ export default {
           this.voice.listening = false; this.voice.rec = null;
           if (e.error === 'not-allowed' || e.error === 'service-not-allowed') this.voiceNotice(this.t('chat.voice.mic_blocked'));
           else if (e.error === 'language-not-supported' || e.error === 'audio-capture') this.startCloudVoiceInput();
-          else if (e.error !== 'aborted' && e.error !== 'no-speech') this.voiceNotice(this.t('chat.voice.not_supported'));
+          else if (e.error === 'no-speech') this.voiceNotice(this.t('chat.voice.nothing_heard'));
+          else if (e.error !== 'aborted') this.voiceNotice(this.t('chat.voice.not_supported'));
         };
-        rec.onend = () => { this.voice.listening = false; this.voice.rec = null; if (heard.trim()) this.sendVoiceMessage(); };
+        rec.onend = () => { const was = this.voice.listening; this.voice.listening = false; this.voice.rec = null; if (heard.trim()) this.sendVoiceMessage(); else if (was && !this.voice.notice) this.voiceNotice(this.t('chat.voice.nothing_heard')); };
         try { rec.start(); this.voice.rec = rec; this.voice.listening = true; } catch (e) { this.startCloudVoiceInput(); }
       } else {
         this.startCloudVoiceInput();
@@ -7378,11 +7379,9 @@ export default {
     },
     async speakText(text) {
       this.stopSpeaking();
-      const paras = text.split(/\n{2,}/).map(t => t.trim()).filter(Boolean);
-      const chunks = []; let cur = '';
-      for (const p of paras) { if ((cur + '\n' + p).length > 600 && cur) { chunks.push(cur); cur = p; } else cur = cur ? cur + '\n' + p : p; }
-      if (cur) chunks.push(cur);
-      this.voice.speaking = true; this.voice.queue = chunks.slice(0, 4);
+      // One request for the whole answer (the server clips it): separate requests per paragraph came
+      // back at different loudness (founder 2026-10-08).
+      this.voice.speaking = true; this.voice.queue = [text];
       if (this.voice.filler) { try { await this.voice.filler; } catch (e) {} }
       const lang = String(this.locale || 'en').slice(0, 2), token = localStorage.getItem('authToken');
       const fetchChunk = (i) => fetch(`${API_BASE_URL}/api/voice/speak`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ text: this.voice.queue[i], lang, chunk: i }) });

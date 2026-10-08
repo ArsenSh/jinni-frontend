@@ -1042,7 +1042,8 @@
       "unavailable": "Jinni 的声音暂时不可用。",
       "done": "完成",
       "listen": "聆听",
-      "no_device_voice": "此手机没有该语言的语音。Jinni 自己的声音需要 Premium。"
+      "no_device_voice": "此手机没有该语言的语音。Jinni 自己的声音需要 Premium。",
+      "nothing_heard": "我没有听到任何内容。请点击按钮，待其亮起后再说话。"
     }
   },
   "profile": {
