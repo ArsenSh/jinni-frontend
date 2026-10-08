@@ -7528,16 +7528,22 @@ export default {
         const ctx = this.voice.actx || (this.voice.actx = new Ctx());
         if (ctx.state !== 'running') { ctx.resume().catch(() => {}); }
         const an = ctx.createAnalyser(); an.fftSize = 1024; ctx.createMediaStreamSource(stream).connect(an);
-        const buf = new Float32Array(an.fftSize), t0 = Date.now(); let noise = 0, n = 0, speech = false, lastLoud = 0;
+        // The room's level = the QUIETEST recent moments (founder 2026-10-09 "it is not hearing normally"): the old
+        // 0.4 s average at the start counted a person who spoke straight away as "the room", so their voice never
+        // passed the bar. Speech above ~0.03 always counts. ~1.2 s of quiet after speech ends the turn (was 2 s).
+        const buf = new Float32Array(an.fftSize), t0 = Date.now(); let floor = Infinity, speech = false, lastLoud = 0, lvl = 0;
         const id = setInterval(() => {
           if (recorder.state === 'inactive') return this.voiceMeterStop();
           if (ctx.state !== 'running') { if (Date.now() - t0 > 1500) this.voiceMeterStop(); return; }   // no audio access without a tap: the button finishes
           an.getFloatTimeDomainData(buf); let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
           const rms = Math.sqrt(sum / buf.length), now = Date.now();
-          if (now - t0 < 400) { noise += rms; n++; return; }
-          const thr = Math.max(0.012, (n ? noise / n : 0) * 2.4);
+          floor = Math.min(floor * 1.003, rms);                                   // follows the quietest level, drifts up slowly
+          const thr = Math.max(0.012, Math.min(floor * 3, 0.03));
           if (rms > thr) { speech = true; lastLoud = now; }
-          if (speech && now - lastLoud > 2000) { this.voiceMeterStop(); try { recorder.stop(); } catch (e) {} }
+          // the orb shows the voice it hears, live (a CSS variable — no re-render of the chat)
+          lvl = lvl * 0.55 + Math.min(1, Math.max(0, (rms - thr * 0.6) / 0.12)) * 0.45;
+          const el = this.$refs.voiceModeEl; if (el) el.style.setProperty('--vm-level', lvl.toFixed(3));
+          if (speech && now - lastLoud > 1200) { this.voiceMeterStop(); try { recorder.stop(); } catch (e) {} }
           else if (!speech && now - t0 > (this.voice.joining ? 4000 : 9000)) { this.voiceMeterStop(); this.voice.discard = true; try { recorder.stop(); } catch (e) {} }
           else if (now - t0 > 30000) { this.voiceMeterStop(); try { recorder.stop(); } catch (e) {} }
         }, 80);
@@ -7595,7 +7601,7 @@ export default {
       }
       return out.slice(0, 40);
     },
-    voiceMeterStop() { if (this.voice.meter) { clearInterval(this.voice.meter); this.voice.meter = null; } },
+    voiceMeterStop() { if (this.voice.meter) { clearInterval(this.voice.meter); this.voice.meter = null; } const el = this.$refs.voiceModeEl; if (el) el.style.setProperty('--vm-level', '0'); },
     stopVoiceInput() {
       clearTimeout(this.voice.endTimer); clearTimeout(this.voice.idleTimer);
       try { if (this.voice.rec) this.voice.rec.stop(); } catch (e) {}
@@ -10091,7 +10097,7 @@ a.rec-bar-btn { text-decoration: none }
 .vm-stage:disabled{cursor:default}
 .vm-stage:focus-visible{outline:none}
 .vm-stage:focus-visible .vm-orb{box-shadow:0 0 0 2px rgba(255,210,122,.6)}
-.vm-orb{position:relative;width:min(46vw,190px);aspect-ratio:1;border-radius:50%;transition:width .6s ease}
+.vm-orb{position:relative;width:min(46vw,190px);aspect-ratio:1;border-radius:50%;transition:width .6s ease,transform .09s linear;transform:scale(calc(1 + var(--vm-level, 0) * .22))}
 .vm-has-cards .vm-orb{width:min(30vw,120px)}
 .vm-l{position:absolute;inset:0;border-radius:46% 54% 52% 48% / 50% 44% 56% 50%;filter:blur(7px);opacity:0;
   transition:opacity .8s ease;animation:vm-morph 6s ease-in-out infinite}
