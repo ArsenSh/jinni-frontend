@@ -2469,6 +2469,9 @@ export default {
     canShare() { return !!navigator.share },
   },
   watch: {
+    // Jinni's voice: whatever way an answer ends (complete, error, quota, details), close the voice state
+    isStreaming(v) { if (!v) this.voiceStreamEnded(); },
+
     // Empty-chat greeting (re)appeared — new chat, or cleared session: fit
     // its box so the lamp+text pair centers (see _fitGreeting).
     'messages.length'(len) { if (len === 0) this.$nextTick(() => this._fitGreetingSoon()); },
@@ -7302,7 +7305,11 @@ export default {
     // one <audio> is created and "unlocked" here with a silent clip, then reused for every answer.
     unlockAudio() {
       if (this.voice.player) return;
-      const a = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC1CQEwTJ9mjRvBA4UOLD8nKVOWfh+UlK3z/177OXrfOdKl7pyn3Xf//WreyTRUoAWgBgkOAGbZHBgG1OF6zM82DWbZaUmMBptgQhGjsyYqc9ae9XFz280948NMBWInluyEQc9NSVuBfOlkc9BxkiUMSPQeHyZRv0QGDRyCX+xEGCQ8bhcRHwwGUAA');
+      // a valid silent WAV built here (a hand-typed mp3 cannot be trusted to decode)
+      const n = 800, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf), w = (o, str) => { for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
+      w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, 8000, true); v.setUint32(28, 16000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+      const a = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })));
       a.preload = 'auto';
       a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
       this.voice.player = a;
@@ -7361,12 +7368,17 @@ export default {
       try { if (this.voice.recorder && this.voice.recorder.state !== 'inactive') this.voice.recorder.stop(); } catch (e) {}
       this.voice.listening = false;
     },
-    sendVoiceMessage() {
+    async sendVoiceMessage() {
       const said = this.userInput.trim();
       if (!said) return;
+      // Jinni still answering or a request already out → the words stay in the box, nothing is marked
+      // as spoken (2026-10-08 fix: the "speak the answer" flag used to survive a refused send and read
+      // the NEXT typed message's answer aloud).
+      if (this.isStreaming || this.isRequestPending || this.isOnCooldown) { this.voiceNotice(this.t('chat.voice.busy')); return; }
       this.voice.lastSentByVoice = true;
       this.voice.answerStarted = false;
-      this.sendMessage();
+      await this.sendMessage();
+      if (this.userInput.trim() === said) { this.voice.lastSentByVoice = false; clearTimeout(this.voice.fillerTimer); return; }   // the send was refused
       // The "let me see" line only when there is really a wait (founder 2026-10-08: for "hi" it just
       // delayed the answer): not for short messages, and only if nothing has arrived after 1.5 s.
       clearTimeout(this.voice.fillerTimer);
@@ -7456,9 +7468,11 @@ export default {
       const lang = this.voiceLang();
       const clean = text.replace(/[→←]/g, ' ').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/https?:\/\/\S+/g, ' ').replace(/[*_`#>|]+/g, ' ').slice(0, 2500);
       const u = new SpeechSynthesisUtterance(clean); u.lang = lang; u.rate = 0.95;
-      const v = (synth.getVoices() || []).filter(x => (x.lang || '').toLowerCase().startsWith(lang.slice(0, 2).toLowerCase()));
-      if (!v.length) { this.listeningMessageId = null; this.voiceNotice(this.t('chat.voice.no_device_voice'), 7000); return; }
-      u.voice = v.find(x => x.localService) || v[0];
+      const all = synth.getVoices() || [];
+      const v = all.filter(x => (x.lang || '').toLowerCase().startsWith(lang.slice(0, 2).toLowerCase()));
+      if (v.length) u.voice = v.find(x => x.localService) || v[0];
+      else if (all.length) { this.listeningMessageId = null; this.voiceNotice(this.t('chat.voice.no_device_voice'), 7000); return; }
+      // an empty list means the phone has not loaded its voices yet: speak with the language alone, the phone picks
       u.onend = () => { if (this.listeningMessageId === message.id) this.listeningMessageId = null; this.voice.speaking = false; };
       u.onerror = u.onend;
       this.voice.speaking = true; synth.speak(u);
@@ -7519,6 +7533,19 @@ export default {
       if (this.voice.stream !== st || !this.voice.speaking) return;
       if (st.queue.length) return this.voicePump();
       if (st.done) { this.voice.speaking = false; this.listeningMessageId = null; }
+    },
+    voiceStreamEnded() {
+      clearTimeout(this.voice.fillerTimer);
+      const st = this.voice.stream;
+      if (st && !st.done) { this.voiceFlush(); }
+      if (this.voice.lastSentByVoice) {
+        // the answer ended without the 'complete' path (details, error, quota): speak what there is, once
+        const last = [...this.messages].reverse().find(m => m.sender === 'ai' && !m.hidden);
+        this.voice.lastSentByVoice = false;
+        if (last && this.voice.spokenId !== last.id && this.usageStatus && this.usageStatus.isPremium && !(st && st.msgId === last.id)) {
+          const text = this.messageText(last); if (text) { this.voice.spokenId = last.id; this.speakText(text); }
+        }
+      }
     },
     stopSpeaking() {
       this.listeningMessageId = null;

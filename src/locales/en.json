@@ -1043,7 +1043,8 @@
       "done": "Done",
       "listen": "Listen",
       "no_device_voice": "This phone has no voice for this language. Jinni's own voice comes with Premium.",
-      "nothing_heard": "I didn't catch anything. Tap the button and speak after it lights up."
+      "nothing_heard": "I didn't catch anything. Tap the button and speak after it lights up.",
+      "busy": "Jinni is still answering — one moment, then speak again."
     }
   },
   "profile": {
