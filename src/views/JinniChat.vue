@@ -7485,7 +7485,13 @@ export default {
             this.voice.notice = ''; this.voice.transcribing = false;
             if (r.status === 503 || r.status === 502) this.voice.stt = false;
             if (this.voice.cancel) return;
-            if (!r.ok || !j.text) { if (this.voice.joining) { this.voice.joining = false; if (this.userInput.trim()) { this.sendVoiceMessage(); return; } } this.voiceNotice(this.t('chat.voice.not_supported')); return; }
+            if (!r.ok || !j.text) {
+              if (this.voice.joining) { this.voice.joining = false; if (this.userInput.trim()) { this.sendVoiceMessage(); return; } }
+              // the server's listener failed: the phone's own takes over from the next tap (stt=false above); never blame the browser
+              if (!r.ok) { if (this.voice.mode) { this.voice.stt = false; this.voiceNotice(this.t('chat.voice.retry_phone'), 0); } else this.voiceNotice(this.t('chat.voice.not_supported')); console.warn('[voice] server listener failed:', r.status, j.provider, j.status); }
+              else this.voiceNotice(this.t('chat.voice.nothing_heard'));
+              return;
+            }
             this.userInput = (this.userInput ? this.userInput.replace(/\s*$/, ' ') : '') + j.text;
             // it ended on "and / with / um…": the person is not done — listen once more and join the two parts
             if (this.voice.mode && !this.voice.joining && this.voiceEndDelay(j.text, true) >= 2400) { this.voice.joining = true; this.startCloudVoiceInput(); return; }

@@ -1053,7 +1053,8 @@
       "state_thinking": "أفكر",
       "state_speaking": "أتحدث",
       "tap_to_talk": "اضغط للتحدث",
-      "interrupt": "قاطع وتحدث"
+      "interrupt": "قاطع وتحدث",
+      "retry_phone": "لم أتمكن من فهم ذلك — اضغط على الميكروفون وقلها مرة أخرى."
     }
   },
   "profile": {

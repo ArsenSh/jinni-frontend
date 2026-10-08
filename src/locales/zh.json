@@ -1053,7 +1053,8 @@
       "state_thinking": "正在思考",
       "state_speaking": "正在说话",
       "tap_to_talk": "点按说话",
-      "interrupt": "打断并说话"
+      "interrupt": "打断并说话",
+      "retry_phone": "没听清——请点麦克风再说一遍。"
     }
   },
   "profile": {

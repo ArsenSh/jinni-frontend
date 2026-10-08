@@ -1053,7 +1053,8 @@
       "state_thinking": "Je réfléchis",
       "state_speaking": "Je parle",
       "tap_to_talk": "Touchez pour parler",
-      "interrupt": "Interrompre et parler"
+      "interrupt": "Interrompre et parler",
+      "retry_phone": "Je n'ai pas compris — touchez le micro et redites-le."
     }
   },
   "profile": {

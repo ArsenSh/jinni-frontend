@@ -1053,7 +1053,8 @@
       "state_thinking": "Thinking",
       "state_speaking": "Speaking",
       "tap_to_talk": "Tap to talk",
-      "interrupt": "Interrupt and talk"
+      "interrupt": "Interrupt and talk",
+      "retry_phone": "I couldn't make that out — tap the mic and say it again."
     }
   },
   "profile": {
