@@ -1924,7 +1924,7 @@ export default {
       voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null,
         // voice mode (2026-10-08): the screen, what was said, the sentence being spoken, the turn's first message index
         mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '',
-        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null },
+        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -2115,7 +2115,7 @@ export default {
     voiceWords() {
       const v = this.voice, st = this.voiceState;
       if (st === 'listening') return this.userInput.trim() || this.t('chat.voice.speak_now');
-      if (st === 'thinking') return v.said;
+      if (st === 'thinking') return v.said || this.userInput.trim();
       if (st === 'speaking') return String(v.nowSaying || '').replace(/[*_`#>|→←]+/g, ' ').replace(/\s+/g, ' ').trim();
       if (v.notice) return v.notice;
       const last = [...this.messages.slice(v.turnFrom)].reverse().find(m => m.sender === 'ai' && !m.hidden);
@@ -2634,6 +2634,7 @@ export default {
     } catch (error) {console.error('❌ Error in created():', error)}
   },
   mounted() {
+    this.loadVoiceStatus();   // Jinni's voice: may this user hear it, does the server recogniser exist
     this.checkScreenSize();
     this.$nextTick(() => this._fitGreetingSoon());
     try { document.fonts?.ready?.then(() => this._fitGreeting()); } catch (e) {}
@@ -7418,7 +7419,9 @@ export default {
       this.voice.cancel = false; this.voice.inputBase = this.userInput; if (this.voice.mode) this.voice.notice = '';
       const lang = this.voiceLang(), isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const useBrowser = SR && !(isIOS && lang === 'hy-AM');
+      // voice mode: the server recogniser, told which place names to expect (founder 2026-10-09: the phone's own
+      // recogniser heard "Amar" as "MA" and cannot learn local names)
+      const useBrowser = SR && !(this.voice.mode && this.voice.stt !== false) && !(isIOS && lang === 'hy-AM');   // server not set up (stt=false): the phone's own
       if (useBrowser) {
         const rec = new SR(); rec.lang = lang; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;   // keeps listening through pauses until Done (founder 2026-10-08: it stopped at the first pause)
         const base = this.userInput ? this.userInput.replace(/\s*$/, ' ') : '';
@@ -7460,17 +7463,21 @@ export default {
         recorder.onstop = async () => {
           stream.getTracks().forEach(t => t.stop()); this.voice.listening = false; this.voice.recorder = null; this.voiceMeterStop();
           if (!chunks.length || this.voice.cancel) return;
-          if (this.voice.discard) { this.voice.discard = false; return; }    // nothing was said
+          if (this.voice.discard) { this.voice.discard = false; if (this.voice.joining) { this.voice.joining = false; if (this.userInput.trim()) this.sendVoiceMessage(); } return; }    // nothing (more) was said
           if (this.voice.mode) this.voice.transcribing = true; else this.voiceNotice(this.t('chat.voice.transcribing'), 0);
           try {
             const fd = new FormData(); const type = recorder.mimeType || 'audio/webm';
-            fd.append('audio', new Blob(chunks, { type }), 'speech.' + (type.includes('mp4') ? 'mp4' : 'webm')); fd.append('lang', String(this.locale || 'en').slice(0, 2));
+            fd.append('audio', new Blob(chunks, { type }), 'speech.' + (type.includes('mp4') ? 'mp4' : 'webm')); fd.append('lang', String(this.locale || 'en').slice(0, 2)); fd.append('hints', JSON.stringify(this.voiceHints()));
             const r = await fetch(`${API_BASE_URL}/api/voice/transcribe`, { method: 'POST', headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }, body: fd });
             const j = await r.json().catch(() => ({}));
             this.voice.notice = ''; this.voice.transcribing = false;
+            if (r.status === 503 || r.status === 502) this.voice.stt = false;
             if (this.voice.cancel) return;
-            if (!r.ok || !j.text) { this.voiceNotice(this.t('chat.voice.not_supported')); return; }
+            if (!r.ok || !j.text) { if (this.voice.joining) { this.voice.joining = false; if (this.userInput.trim()) { this.sendVoiceMessage(); return; } } this.voiceNotice(this.t('chat.voice.not_supported')); return; }
             this.userInput = (this.userInput ? this.userInput.replace(/\s*$/, ' ') : '') + j.text;
+            // it ended on "and / with / um…": the person is not done — listen once more and join the two parts
+            if (this.voice.mode && !this.voice.joining && this.voiceEndDelay(j.text, true) >= 2400) { this.voice.joining = true; this.startCloudVoiceInput(); return; }
+            this.voice.joining = false;
             this.sendVoiceMessage();
           } catch (e) { this.voice.transcribing = false; this.voiceNotice(this.t('chat.voice.not_supported')); }
         };
@@ -7513,7 +7520,8 @@ export default {
           const thr = Math.max(0.012, (n ? noise / n : 0) * 2.4);
           if (rms > thr) { speech = true; lastLoud = now; }
           if (speech && now - lastLoud > 2000) { this.voiceMeterStop(); try { recorder.stop(); } catch (e) {} }
-          else if (!speech && now - t0 > 9000) { this.voiceMeterStop(); this.voice.discard = true; try { recorder.stop(); } catch (e) {} }
+          else if (!speech && now - t0 > (this.voice.joining ? 4000 : 9000)) { this.voiceMeterStop(); this.voice.discard = true; try { recorder.stop(); } catch (e) {} }
+          else if (now - t0 > 30000) { this.voiceMeterStop(); try { recorder.stop(); } catch (e) {} }
         }, 80);
         this.voice.meter = id;
       } catch (e) { this.voiceMeterStop(); }
@@ -7549,6 +7557,25 @@ export default {
       if (b.id) clearInterval(b.id);
       try { b.src && b.src.disconnect(); } catch (e) {}
       if (b.stream) b.stream.getTracks().forEach(t => t.stop());
+    },
+    // May this user hear Jinni's own voice? The server decides (VOICE_PREMIUM_ONLY); asked once per page.
+    voiceSpeaks() {
+      if (this.voice.allowed === null) this.loadVoiceStatus();
+      return this.voice.allowed === null ? true : this.voice.allowed;
+    },
+    async loadVoiceStatus() {
+      if (this.voice.statusLoading) return; this.voice.statusLoading = true;
+      try { const r = await fetch(`${API_BASE_URL}/api/voice/status`, { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }); const j = await r.json(); if (j && j.success) { this.voice.allowed = !!(j.voice ?? j.isPremium); this.voice.stt = !!j.stt; } }
+      catch (e) { /* unknown: let the server refuse if it must */ }
+      finally { if (this.voice.allowed === null) setTimeout(() => { this.voice.statusLoading = false; }, 30000); }   // failed: may ask again in 30 s
+    },
+    voiceHints() {
+      const out = [], seen = new Set();
+      for (const m of [...this.messages].reverse()) {
+        for (const r of (m.recommendations || [])) { const n = r && String(r.name || '').trim(); if (n && !seen.has(n.toLowerCase())) { seen.add(n.toLowerCase()); out.push(n); } }
+        if (out.length >= 40) break;
+      }
+      return out.slice(0, 40);
     },
     voiceMeterStop() { if (this.voice.meter) { clearInterval(this.voice.meter); this.voice.meter = null; } },
     stopVoiceInput() {
@@ -7586,7 +7613,7 @@ export default {
       this.voice.lastSentByVoice = false;
       if (this.voice.spokenId === message.id) return;      // never read the same reply twice
       this.voice.spokenId = message.id;
-      if (!(this.usageStatus && this.usageStatus.isPremium)) { this.voiceNotice(this.t('chat.voice.premium_hint'), 9000); return; }
+      if (!this.voiceSpeaks()) { this.voiceNotice(this.t('chat.voice.premium_hint'), 9000); return; }
       if (this.voice.stream && this.voice.stream.msgId === message.id) { this.voiceFlush(); return; }   // already speaking sentence by sentence
       const parts = (message.contentParts || []).filter(p => p.type === 'text').map(p => p.content).join('\n');
       const text = (parts || message.text || '').trim();
@@ -7634,7 +7661,7 @@ export default {
     // message goes off, so Jinni is never silent while it searches. Premium only; the answer's own
     // voice waits for it to finish.
     async playFiller() {
-      if (!(this.usageStatus && this.usageStatus.isPremium)) return;
+      if (!this.voiceSpeaks()) return;
       try {
         const r = await fetch(`${API_BASE_URL}/api/voice/filler?lang=${String(this.locale || 'en').slice(0, 2)}`, { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } });
         if (!r.ok) return;
@@ -7655,7 +7682,7 @@ export default {
       this.stopSpeaking();
       const text = this.messageText(message); if (!text) return;
       this.listeningMessageId = message.id;
-      if (this.usageStatus && this.usageStatus.isPremium) { this.unlockAudio(); this.speakText(text); return; }
+      if (this.voiceSpeaks()) { this.unlockAudio(); this.speakText(text); return; }
       // Free: the phone's own voice (free, built in). Not Jinni's voice — that is the Premium one.
       const synth = window.speechSynthesis;
       if (!synth) { this.listeningMessageId = null; this.voiceNotice(this.t('chat.voice.not_supported')); return; }
@@ -7674,7 +7701,7 @@ export default {
     // ── Streaming speech (founder 2026-10-08: "claude replies instantly"): each sentence is sent for
     // its voice the moment it ends, and plays while the next is fetched. Premium, spoken message only.
     voiceFeed(msgId, piece) {
-      if (!this.voice.lastSentByVoice || !(this.usageStatus && this.usageStatus.isPremium)) return;
+      if (!this.voice.lastSentByVoice || !this.voiceSpeaks()) return;
       let st = this.voice.stream;
       if (!st || st.msgId !== msgId) { st = this.voice.stream = { msgId, buf: '', queue: [], busy: false, done: false, index: 0, chars: 0, prev: [] }; }
       if (st.done || st.chars >= 1500) return;
@@ -7704,7 +7731,7 @@ export default {
           body: JSON.stringify({ text, lang: String(this.locale || 'en').slice(0, 2), chunk: st.index++, previous_request_ids: st.prev }) });
         if (!r.ok) {
           const j = await r.json().catch(() => ({}));
-          if (j.error === 'voice_limit') this.voiceNotice(this.t('chat.voice.limit'), 9000); else if (j.error !== 'premium_required') this.voiceNotice(this.t('chat.voice.unavailable'));
+          if (j.error === 'voice_limit') this.voiceNotice(this.t('chat.voice.limit'), 9000); else if (j.error === 'premium_required') { this.voice.allowed = false; this.voiceNotice(this.t('chat.voice.premium_hint'), 9000); } else this.voiceNotice(this.t('chat.voice.unavailable'));
           return null;
         }
         const id = r.headers.get('X-Voice-Request-Id'); if (id) st.prev = [...st.prev, id].slice(-3);
@@ -7737,7 +7764,7 @@ export default {
         // the answer ended without the 'complete' path (details, error, quota): speak what there is, once
         const last = [...this.messages].reverse().find(m => m.sender === 'ai' && !m.hidden);
         this.voice.lastSentByVoice = false;
-        if (last && this.voice.spokenId !== last.id && this.usageStatus && this.usageStatus.isPremium && !(st && st.msgId === last.id)) {
+        if (last && this.voice.spokenId !== last.id && this.voiceSpeaks() && !(st && st.msgId === last.id)) {
           const text = this.messageText(last); if (text) { this.voice.spokenId = last.id; this.speakText(text); }
         }
       }
@@ -7746,6 +7773,7 @@ export default {
     openVoiceMode() {
       if (this.isOnCooldown) return;
       this.voice.mode = true; this.voice.notice = ''; this.voice.said = ''; this.voice.nowSaying = ''; this.voice.autoStart = false;
+      if (this.voice.allowed === null) this.loadVoiceStatus();
       this.voice.turnFrom = this.messages.length;
       try { const Ctx = window.AudioContext || window.webkitAudioContext; if (Ctx) { this.voice.actx = this.voice.actx || new Ctx(); if (this.voice.actx.state !== 'running') this.voice.actx.resume().catch(() => {}); } } catch (e) {}
       this.toggleVoiceInput();                                   // inside the tap: iPhone needs the gesture for the mic and the audio unlock
@@ -7758,7 +7786,7 @@ export default {
       this.toggleVoiceInput();                                   // idle, or interrupting Jinni (toggleVoiceInput stops the speech first)
     },
     leaveVoiceMode(keepWords) {
-      this.voice.cancel = true; clearTimeout(this.voice.autoTimer); this.voice.turnOpen = false; this.voiceMeterStop(); this.voiceBargeStop();
+      this.voice.cancel = true; clearTimeout(this.voice.autoTimer); this.voice.turnOpen = false; this.voice.joining = false; this.voiceMeterStop(); this.voiceBargeStop();
       this.voice.lastSentByVoice = false; clearTimeout(this.voice.fillerTimer);   // an answer still on its way is not read aloud after leaving
       this.stopVoiceInput(); this.stopSpeaking();
       if (!keepWords) this.userInput = this.voice.inputBase || '';
