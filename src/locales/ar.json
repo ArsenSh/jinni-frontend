@@ -796,7 +796,7 @@
     "input": {
       "placeholder": "راسل Jinni",
       "placeholder_cooldown": "لقد وصلت إلى الحد الأقصى. حاول مرة أخرى في {time}",
-      "placeholder_mobile_cooldown": "تم الوصول إلى الحد. حاول في {time}",
+      "placeholder_mobile_cooldown": "حاول مجددًا في {time}",
       "mode_nearby": "قريب",
       "mode_discovery": "استكشاف",
       "send": "إرسال الرسالة",
@@ -1210,7 +1210,7 @@
   },
   "usage": {
     "cooldown": {
-      "short": "تم الوصول إلى الحد. حاول في {time}",
+      "short": "حاول مجددًا في {time}",
       "long": "لقد وصلت إلى الحد الخاص بك. حاول مرة أخرى في {time}",
       "soon": "لقد وصلت إلى الحد الخاص بك. حاول مرة أخرى قريباً",
       "explore": "أثناء الانتظار، كل ما وجده Jinni بالقرب منك موجود في اكتشافات Jinni — مجانًا وبلا حد.",

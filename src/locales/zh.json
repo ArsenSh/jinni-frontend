@@ -796,7 +796,7 @@
     "input": {
       "placeholder": "给 Jinni 发消息",
       "placeholder_cooldown": "您已达到限制。请在 {time} 重试",
-      "placeholder_mobile_cooldown": "已达限制。请在 {time} 重试",
+      "placeholder_mobile_cooldown": "请在 {time} 重试",
       "mode_nearby": "附近",
       "mode_discovery": "探索",
       "send": "发送消息",
@@ -1210,7 +1210,7 @@
   },
   "usage": {
     "cooldown": {
-      "short": "已达到限制。请在 {time} 重试",
+      "short": "请在 {time} 重试",
       "long": "您已达到限制。请在 {time} 重试",
       "soon": "您已达到限制。请稍后重试",
       "explore": "等待期间，Jinni 在你附近找到的一切都在「Jinni 的发现」里——免费、不限次数。",

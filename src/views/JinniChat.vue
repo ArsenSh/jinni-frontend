@@ -9817,7 +9817,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 
 /* ── Quota notice above the composer ── */
 .chat-input-container{position:relative}
-.usage-notice{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:7px;max-width:95%;padding:8px 13px;border-radius:999px;font-size: 0.78125rem;font-weight:500;line-height:1.3;text-align:left;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%)}
+.usage-notice{position:absolute;bottom:calc(100% + 8px);left:0;right:0;width:max-content;margin-inline:auto;z-index:6;display:flex;align-items:center;gap:7px;max-width:95%;padding:8px 13px;border-radius:999px;font-size: 0.78125rem;font-weight:500;line-height:1.3;text-align:left;backdrop-filter:blur(14px) saturate(170%);-webkit-backdrop-filter:blur(14px) saturate(170%)}
 .usage-notice svg{flex:0 0 auto}
 /* Width tracks the composer at every breakpoint (Arsen 2026-09-01: "as much
    long as the chat-input-container ... or just 5% little"). 95%, not 100%: the
@@ -9828,7 +9828,7 @@ input:focus+.toggle-slider{box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
 .genie-chat-container.day-mode .usage-notice{color:#8a5a12;background:rgba(255,251,245,0.9);box-shadow:0 6px 20px rgba(120,80,30,0.16)}
 .genie-chat-container.night-mode .usage-notice{color:#f0d79a;background:rgba(44,30,80,0.86);box-shadow:0 6px 22px rgba(0,0,0,0.42)}
 .usage-notice-enter-active,.usage-notice-leave-active{transition:opacity 0.28s ease,transform 0.28s ease}
-.usage-notice-enter-from,.usage-notice-leave-to{opacity:0;transform:translateX(-50%) translateY(6px)}
+.usage-notice-enter-from,.usage-notice-leave-to{opacity:0;transform:translateY(6px)}
 @media (prefers-reduced-motion:reduce){.usage-notice-enter-active,.usage-notice-leave-active{transition:none}}
 
 /* ── Click-to-search place names in AI prose ── */

@@ -796,7 +796,7 @@
     "input": {
       "placeholder": "Écrivez à Jinni",
       "placeholder_cooldown": "Vous avez atteint votre limite. Réessayez à {time}",
-      "placeholder_mobile_cooldown": "Limite atteinte. Réessayez à {time}",
+      "placeholder_mobile_cooldown": "Réessayez à {time}",
       "mode_nearby": "À proximité",
       "mode_discovery": "Découverte",
       "send": "Envoyer le message",
@@ -1210,7 +1210,7 @@
   },
   "usage": {
     "cooldown": {
-      "short": "Limite atteinte. Réessayez à {time}",
+      "short": "Réessayez à {time}",
       "long": "Vous avez atteint votre limite. Réessayez à {time}",
       "soon": "Vous avez atteint votre limite. Réessayez bientôt",
       "explore": "En attendant, tout ce que Jinni a trouvé près de vous est dans les Découvertes de Jinni — gratuit, sans limite.",

@@ -796,7 +796,7 @@
     "input": {
       "placeholder": "Напишите Jinni",
       "placeholder_cooldown": "Вы достигли лимита. Попробуйте в {time}",
-      "placeholder_mobile_cooldown": "Лимит достигнут. Попробуйте в {time}",
+      "placeholder_mobile_cooldown": "Снова в {time}",
       "mode_nearby": "Рядом",
       "mode_discovery": "Исследование",
       "send": "Отправить сообщение",
@@ -1210,7 +1210,7 @@
   },
   "usage": {
     "cooldown": {
-      "short": "Лимит достигнут. Попробуйте в {time}",
+      "short": "Снова в {time}",
       "long": "Вы достигли лимита. Попробуйте снова в {time}",
       "soon": "Вы достигли лимита. Попробуйте скоро",
       "explore": "Пока ждёте, всё, что Jinni нашёл рядом с вами, есть в «Находках Jinni» — бесплатно и без лимита.",

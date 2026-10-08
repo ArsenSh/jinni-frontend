@@ -783,7 +783,7 @@
     "input": {
       "placeholder": "Message Jinni",
       "placeholder_cooldown": "You've reached your limit. Try again at {time}",
-      "placeholder_mobile_cooldown": "Limit reached. Try at {time}",
+      "placeholder_mobile_cooldown": "Try again at {time}",
       "mode_nearby": "Nearby",
       "mode_discovery": "Discovery",
       "send": "Send message",
@@ -1210,7 +1210,7 @@
   },
   "usage": {
     "cooldown": {
-      "short": "Limit reached. Try at {time}",
+      "short": "Try again at {time}",
       "long": "You've reached your limit. Try again at {time}",
       "soon": "You've reached your limit. Try again soon",
       "explore": "While you wait, everything Jinni has found near you is in Jinni's Discoveries — free, no limit.",
