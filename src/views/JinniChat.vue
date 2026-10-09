@@ -7688,7 +7688,16 @@ export default {
         ses.idleTimer = setInterval(() => { if (!ses.done && !ses.committed && !ses.partial && Date.now() - ses.t0 > 9000) ses.finish(); }, 500);
         ses.capTimer = setTimeout(() => this.liveStop(), 30000);
       } catch (e) {
-        if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) { this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false; if (!v.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked')); return; }
+        if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) {
+          // the browser refused the raw microphone (site set to Deny, an in-app browser, no gesture…): try the phone's own
+          // recogniser before saying anything (founder 2026-10-10: "it shows browser microphone permission is needed")
+          this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false;
+          console.warn('[voice] microphone refused for the live listener:', e.name, e.message);
+          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (SR && !v.cancel && v.mode) { v.streamOff = true; v.stt = false; this.toggleVoiceInput(); return; }
+          if (!v.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked'));
+          return;
+        }
         fallback(e && e.message || 'error');
       }
     },
