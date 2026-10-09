@@ -1006,15 +1006,20 @@ export default {
 .day-mode .lamp {
   filter: drop-shadow(0 0 8px rgba(255,170,80,0.45)) drop-shadow(0 0 18px rgba(206,96,26,0.18));
 }
-.landing-container:not(.day-mode) .lamp {
-  filter: drop-shadow(0 0 8px rgba(255,214,150,0.5))
-          drop-shadow(0 0 26px rgba(255,170,90,0.4))
-          drop-shadow(0 0 60px rgba(255,140,60,0.26));
-}
-@media (max-width: 768px) {
-  .landing-container:not(.day-mode) .lamp {
-    filter: drop-shadow(0 0 7px rgba(255,214,150,0.45)) drop-shadow(0 0 20px rgba(255,170,90,0.3));
-  }
+/* Night glow comes from a SHADOW-ONLY COPY of the lamp (founder 2026-10-10:
+   "the shadow makes the border of the box visible"). The violet tint is an
+   ::after with mix-blend-mode INSIDE .lamp; when .lamp itself carries the
+   drop-shadow filter, WebKit (Safari/iPhone) rasterises that blend group as
+   one composited rectangle and shadows the rectangle, not the silhouette —
+   Chrome traces the silhouette, which is why it never showed there. So the
+   filter leaves .lamp: ::before paints the same image as a plain background
+   (no blend child, nothing masked) and casts the glow; it sits under the
+   real image, so it is never seen itself. */
+.landing-container:not(.day-mode) .lamp { filter: none; isolation: isolate }
+.landing-container:not(.day-mode) .lamp::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url('/images/lamp.webp') center / contain no-repeat;
+  filter: drop-shadow(0 0 28px rgba(255,160,70,0.45)) drop-shadow(0 0 70px rgba(255,130,50,0.22));
 }
 
 /* (2026-10-01) Day brand word stays the shared gold — the founder reverted the
@@ -1144,8 +1149,7 @@ export default {
 .landing-container.jinni-night::after { content: none }
 
 /* lamp: bigger, glowing — the warm light of the page */
-.landing-container.jinni-night .lamp { width: 190px; margin-bottom: -46px;
-  filter: drop-shadow(0 0 28px rgba(255,160,70,0.45)) drop-shadow(0 0 70px rgba(255,130,50,0.22)) }
+.landing-container.jinni-night .lamp { width: 190px; margin-bottom: -46px } /* glow: .lamp::before above */
 @media (max-width: 768px) { .landing-container.jinni-night .lamp { width: 130px; margin-bottom: -31px } }
 
 /* type: full-strength, plain (the lab version) */
