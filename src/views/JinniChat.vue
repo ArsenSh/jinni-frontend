@@ -1930,7 +1930,7 @@ export default {
       voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null,
         // voice mode (2026-10-08): the screen, what was said, the sentence being spoken, the turn's first message index
         mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '',
-        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false },
+        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false, tapAt: 0 },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -7455,7 +7455,10 @@ export default {
         rec.onerror = (e) => {
           this.voice.listening = false; this.voice.rec = null;
           if (this.voice.cancel) return;
-          if (this.voice.autoStart && (e.error === 'not-allowed' || e.error === 'no-speech')) return;   // an automatic re-listen that could not start or heard nothing: just wait for a tap
+          if (this.voice.autoStart && (e.error === 'not-allowed' || e.error === 'no-speech')) return;
+          // iPhone's recogniser only starts from a tap; started from a fallback after the permission popup it says
+          // 'not-allowed' although the microphone IS allowed (founder 2026-10-10) — just wait for the next tap
+          if (e.error === 'not-allowed' && this.voice.mode && Date.now() - (this.voice.tapAt || 0) > 1200) return;   // an automatic re-listen that could not start or heard nothing: just wait for a tap
           if (e.error === 'not-allowed' || e.error === 'service-not-allowed') this.voiceNotice(this.t('chat.voice.mic_blocked'));
           else if (e.error === 'language-not-supported' || e.error === 'audio-capture') this.startCloudVoiceInput();
           else if (e.error === 'no-speech') this.voiceNotice(this.t('chat.voice.nothing_heard'));
@@ -7504,7 +7507,12 @@ export default {
         this.voice.discard = false;
         recorder.start(); this.voice.recorder = recorder; this.voice.listening = true;
         this.voiceMeterStart(stream, recorder);
-      } catch (e) { if (!this.voice.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked')); }
+      } catch (e) {
+        if (this.voice.autoStart) return;
+        if (e && e.name === 'NotAllowedError') this.voiceNotice(this.t('chat.voice.mic_blocked'));
+        else if (!this.voice.mode) this.voiceNotice(this.t('chat.voice.not_supported'));
+        console.warn('[voice] recorder could not start:', e && e.name, e && e.message);
+      }
     },
     // How long to wait after the last word before sending. Finished-sounding → short; trailing "and / with / um" → long.
     voiceEndDelay(text, isFinal) {
@@ -7610,6 +7618,7 @@ export default {
       const v = this.voice; const base = this.userInput ? this.userInput.replace(/\s*$/, ' ') : '';
       const ses = { ws: null, stream: null, proc: null, src: null, sink: null, committed: '', partial: '', done: false, open: false, queue: [], t0: Date.now(), last: Date.now(), stopAsked: false, joinTimer: null, idleTimer: null, capTimer: null };
       this._liveSess = ses; v.listening = true; v.discard = false; v.joining = false;
+      try { if (v.actx && v.actx.state !== 'running') v.actx.resume().catch(() => {}); } catch (e) {}
       const show = () => { this.userInput = (base + [ses.committed, ses.partial].filter(Boolean).join(' ')).replace(/\s+/g, ' ').trimStart(); };
       const fallback = (why) => {
         if (ses.done) return; this.liveTeardown(ses); ses.done = true; if (this._liveSess === ses) this._liveSess = null;
@@ -7636,7 +7645,7 @@ export default {
         if (!tokRes.ok || !j.token) return fallback('token ' + tokRes.status);
         const Ctx = window.AudioContext || window.webkitAudioContext; const ctx = v.actx || (v.actx = new Ctx());
         if (ctx.state !== 'running') { try { await ctx.resume(); } catch (e) { /* no gesture */ } }
-        if (ctx.state !== 'running') return fallback('audio not running');
+        if (ctx.state !== 'running') { this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false; console.warn('[voice] audio not running yet — waiting for a tap'); return; }
         // the microphone as 16 kHz 16-bit PCM, ~100 ms per message
         ses.src = ctx.createMediaStreamSource(stream);
         ses.proc = ctx.createScriptProcessor(4096, 1, 1);
@@ -7693,9 +7702,7 @@ export default {
           // recogniser before saying anything (founder 2026-10-10: "it shows browser microphone permission is needed")
           this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false;
           console.warn('[voice] microphone refused for the live listener:', e.name, e.message);
-          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-          if (SR && !v.cancel && v.mode) { v.streamOff = true; v.stt = false; this.toggleVoiceInput(); return; }
-          if (!v.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked'));
+          if (!v.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked'));   // the person (or the browser) said no
           return;
         }
         fallback(e && e.message || 'error');
@@ -7913,14 +7920,15 @@ export default {
     openVoiceMode() {
       if (this.isOnCooldown) return;
       this.voice.mode = true; this.voice.notice = ''; this.voice.said = ''; this.voice.nowSaying = ''; this.voice.autoStart = false;
-      this.voice.allowed = null; this.voice.statusLoading = false; this.loadVoiceStatus();
+      this.voice.allowed = null; this.voice.statusLoading = false; this.loadVoiceStatus(); this.voice.tapAt = Date.now();
       this.voice.turnFrom = this.messages.length;
       try { const Ctx = window.AudioContext || window.webkitAudioContext; if (Ctx) { this.voice.actx = this.voice.actx || new Ctx(); if (this.voice.actx.state !== 'running') this.voice.actx.resume().catch(() => {}); } } catch (e) {}
       this.toggleVoiceInput();                                   // inside the tap: iPhone needs the gesture for the mic and the audio unlock
       this.$nextTick(() => { try { this.$refs.voiceModeEl && this.$refs.voiceModeEl.focus(); } catch (e) {} });
     },
     voiceMainTap() {
-      this.voice.autoStart = false;
+      this.voice.autoStart = false; this.voice.tapAt = Date.now();
+      try { if (this.voice.actx && this.voice.actx.state !== 'running') this.voice.actx.resume().catch(() => {}); } catch (e) {}   // inside the tap (iPhone)
       if (this.voice.listening) { this.stopVoiceInput(); return; }        // done talking → the words go off
       if (this.voiceState === 'thinking') return;
       this.toggleVoiceInput();                                   // idle, or interrupting Jinni (toggleVoiceInput stops the speech first)
