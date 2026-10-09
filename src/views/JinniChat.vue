@@ -1930,7 +1930,7 @@ export default {
       voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null,
         // voice mode (2026-10-08): the screen, what was said, the sentence being spoken, the turn's first message index
         mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '',
-        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null },
+        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -7431,6 +7431,8 @@ export default {
       this.voice.cancel = false; this.voice.inputBase = this.userInput; if (this.voice.mode) this.voice.notice = '';
       const lang = this.voiceLang(), isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      // voice mode: the LIVE listener first (words appear while you speak; falls back to the recorder below)
+      if (this.voice.mode && this.voice.stt !== false && !this.voice.streamOff) { this.startLiveListening(); return; }
       // voice mode: the server recogniser, told which place names to expect (founder 2026-10-09: the phone's own
       // recogniser heard "Amar" as "MA" and cannot learn local names)
       const useBrowser = SR && !(this.voice.mode && this.voice.stt !== false) && !(isIOS && lang === 'hy-AM');   // server not set up (stt=false): the phone's own
@@ -7601,8 +7603,113 @@ export default {
       }
       return out.slice(0, 40);
     },
+    // ── LIVE listening (founder 2026-10-09): the microphone streams to ElevenLabs' realtime Scribe; words appear as
+    // they are said; ElevenLabs' own voice-activity detection says when a phrase ended (~0.9 s of quiet); a phrase that
+    // ends on "and / with / um…" waits up to 2 s for more. Any failure → this turn uses the recorder path instead.
+    async startLiveListening() {
+      const v = this.voice; const base = this.userInput ? this.userInput.replace(/\s*$/, ' ') : '';
+      const ses = { ws: null, stream: null, proc: null, src: null, sink: null, committed: '', partial: '', done: false, open: false, queue: [], t0: Date.now(), last: Date.now(), stopAsked: false, joinTimer: null, idleTimer: null, capTimer: null };
+      this._liveSess = ses; v.listening = true; v.discard = false; v.joining = false;
+      const show = () => { this.userInput = (base + [ses.committed, ses.partial].filter(Boolean).join(' ')).replace(/\s+/g, ' ').trimStart(); };
+      const fallback = (why) => {
+        if (ses.done) return; this.liveTeardown(ses); ses.done = true; if (this._liveSess === ses) this._liveSess = null;
+        console.warn('[voice] live listener unavailable (' + why + ') — using the recorder');
+        v.streamOff = true; v.listening = false;
+        if (!v.cancel && v.mode) this.startCloudVoiceInput();
+      };
+      ses.finish = () => {
+        if (ses.done) return; ses.done = true; this.liveTeardown(ses); if (this._liveSess === ses) this._liveSess = null;
+        v.listening = false;
+        if (v.cancel) return;
+        const text = [ses.committed, ses.stopAsked ? ses.partial : ''].filter(Boolean).join(' ').trim();
+        if (text) { this.userInput = (base + text).trim(); this.sendVoiceMessage(); }
+        else if (!v.autoStart && !this.voice.notice) this.voiceNotice(this.t('chat.voice.nothing_heard'));
+      };
+      try {
+        const [tokRes, stream] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/voice/stt-token`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('authToken')}` }, body: JSON.stringify({ hints: this.voiceHints() }) }),
+          navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } }),
+        ]);
+        ses.stream = stream;
+        if (ses.done || v.cancel || this._liveSess !== ses) { this.liveTeardown(ses); return; }
+        const j = await tokRes.json().catch(() => ({}));
+        if (!tokRes.ok || !j.token) return fallback('token ' + tokRes.status);
+        const Ctx = window.AudioContext || window.webkitAudioContext; const ctx = v.actx || (v.actx = new Ctx());
+        if (ctx.state !== 'running') { try { await ctx.resume(); } catch (e) { /* no gesture */ } }
+        if (ctx.state !== 'running') return fallback('audio not running');
+        // the microphone as 16 kHz 16-bit PCM, ~100 ms per message
+        ses.src = ctx.createMediaStreamSource(stream);
+        ses.proc = ctx.createScriptProcessor(4096, 1, 1);
+        ses.sink = ctx.createGain(); ses.sink.gain.value = 0;
+        const ratio = ctx.sampleRate / 16000; let carry = [];
+        ses.proc.onaudioprocess = (e) => {
+          if (ses.done) return;
+          const inp = e.inputBuffer.getChannelData(0); let sum = 0;
+          for (let i = 0; i < inp.length; i++) sum += inp[i] * inp[i];
+          const rms = Math.sqrt(sum / inp.length), el = this.$refs.voiceModeEl;
+          if (el) el.style.setProperty('--vm-level', Math.min(1, Math.max(0, (rms - 0.01) / 0.1)).toFixed(3));
+          const n = Math.floor(inp.length / ratio), out = new Int16Array(n);
+          for (let i = 0; i < n; i++) { const a = Math.floor(i * ratio), b = Math.min(inp.length, Math.floor((i + 1) * ratio)); let acc = 0; for (let k = a; k < b; k++) acc += inp[k]; const x = Math.max(-1, Math.min(1, acc / Math.max(1, b - a))); out[i] = x < 0 ? x * 0x8000 : x * 0x7fff; }
+          const bytes = new Uint8Array(out.buffer); let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+          const msg = JSON.stringify({ message_type: 'input_audio_chunk', audio_base_64: btoa(bin), commit: false, sample_rate: 16000 });
+          if (ses.open) ses.ws.send(msg); else if (ses.queue.length < 30) ses.queue.push(msg);
+        };
+        ses.src.connect(ses.proc); ses.proc.connect(ses.sink); ses.sink.connect(ctx.destination);
+        const qs = new URLSearchParams({ model_id: j.model || 'scribe_v2_realtime', token: j.token, audio_format: 'pcm_16000', commit_strategy: 'vad', vad_silence_threshold_secs: '0.9' });
+        if (!v.liveNoTerms) (j.keyterms || []).forEach(k => qs.append('keyterms', k));
+        const ws = ses.ws = new WebSocket('wss://api.elevenlabs.io/v1/speech-to-text/realtime?' + qs.toString());
+        ws.onopen = () => { ses.open = true; for (const m of ses.queue) ws.send(m); ses.queue = []; };
+        ws.onmessage = (ev) => {
+          let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+          const type = m.message_type || '';
+          if (type === 'partial_transcript') { ses.partial = String(m.text || '').trim(); ses.last = Date.now(); clearTimeout(ses.joinTimer); show(); return; }
+          if (type === 'committed_transcript' || type === 'committed_transcript_with_timestamps') {
+            const t = String(m.text || '').trim(); if (!t) { if (ses.stopAsked) ses.finish(); return; }
+            if (type === 'committed_transcript_with_timestamps' && ses.lastCommit === t) return;   // the same phrase twice
+            ses.lastCommit = t; ses.committed = (ses.committed + ' ' + t).trim(); ses.partial = ''; ses.last = Date.now(); show();
+            if (ses.stopAsked) return ses.finish();
+            clearTimeout(ses.joinTimer);
+            // finished-sounding → answer now; trailing "and / with…" → give the person 2 s to go on
+            ses.joinTimer = setTimeout(() => ses.finish(), this.voiceEndDelay(ses.committed, true) >= 2400 ? 2000 : 0);
+            return;
+          }
+          if (type === 'session_started') return;
+          if (/error|exceeded|limited|overflow|exhausted|throttled|terms/.test(type)) {
+            console.warn('[voice] live listener:', type, m.error || '');
+            if (type === 'insufficient_audio_activity') return ses.finish();
+            if (!v.liveNoTerms && (type === 'invalid_request' || type === 'input_error') && !ses.committed) { v.liveNoTerms = true; }   // the names list may be the problem: next turn without it
+            if (ses.committed) return ses.finish();
+            return fallback(type);
+          }
+        };
+        ws.onerror = () => { if (!ses.open) fallback('connect'); };
+        ws.onclose = () => { if (!ses.done) { if (ses.committed || ses.partial) { ses.stopAsked = true; ses.finish(); } else if (!ses.open) fallback('closed'); else ses.finish(); } };
+        // nothing said for 9 s → nothing to send; a 30 s monologue still ends
+        ses.idleTimer = setInterval(() => { if (!ses.done && !ses.committed && !ses.partial && Date.now() - ses.t0 > 9000) ses.finish(); }, 500);
+        ses.capTimer = setTimeout(() => this.liveStop(), 30000);
+      } catch (e) {
+        if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) { this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false; if (!v.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked')); return; }
+        fallback(e && e.message || 'error');
+      }
+    },
+    // the person tapped "done" (or 30 s passed): ask ElevenLabs to close the phrase now, keep what was heard
+    liveStop() {
+      const ses = this._liveSess; if (!ses || ses.done) return;
+      ses.stopAsked = true;
+      try { if (ses.open) ses.ws.send(JSON.stringify({ message_type: 'input_audio_chunk', audio_base_64: '', commit: true, sample_rate: 16000 })); } catch (e) {}
+      setTimeout(() => ses.finish(), ses.open ? 1200 : 0);
+    },
+    liveTeardown(ses) {
+      if (!ses) return;
+      clearTimeout(ses.joinTimer); clearInterval(ses.idleTimer); clearTimeout(ses.capTimer);
+      try { ses.proc && (ses.proc.onaudioprocess = null); ses.proc && ses.proc.disconnect(); ses.src && ses.src.disconnect(); ses.sink && ses.sink.disconnect(); } catch (e) {}
+      if (ses.stream) ses.stream.getTracks().forEach(t => t.stop());
+      try { if (ses.ws && ses.ws.readyState <= 1) ses.ws.close(); } catch (e) {}
+      const el = this.$refs.voiceModeEl; if (el) el.style.setProperty('--vm-level', '0');
+    },
     voiceMeterStop() { if (this.voice.meter) { clearInterval(this.voice.meter); this.voice.meter = null; } const el = this.$refs.voiceModeEl; if (el) el.style.setProperty('--vm-level', '0'); },
     stopVoiceInput() {
+      if (this._liveSess) { this.liveStop(); return; }
       clearTimeout(this.voice.endTimer); clearTimeout(this.voice.idleTimer);
       try { if (this.voice.rec) this.voice.rec.stop(); } catch (e) {}
       try { if (this.voice.recorder && this.voice.recorder.state !== 'inactive') this.voice.recorder.stop(); } catch (e) {}
@@ -7797,7 +7904,7 @@ export default {
     openVoiceMode() {
       if (this.isOnCooldown) return;
       this.voice.mode = true; this.voice.notice = ''; this.voice.said = ''; this.voice.nowSaying = ''; this.voice.autoStart = false;
-      if (this.voice.allowed === null) this.loadVoiceStatus();
+      this.voice.allowed = null; this.voice.statusLoading = false; this.loadVoiceStatus();
       this.voice.turnFrom = this.messages.length;
       try { const Ctx = window.AudioContext || window.webkitAudioContext; if (Ctx) { this.voice.actx = this.voice.actx || new Ctx(); if (this.voice.actx.state !== 'running') this.voice.actx.resume().catch(() => {}); } } catch (e) {}
       this.toggleVoiceInput();                                   // inside the tap: iPhone needs the gesture for the mic and the audio unlock
@@ -7811,6 +7918,7 @@ export default {
     },
     leaveVoiceMode(keepWords) {
       this.voice.cancel = true; clearTimeout(this.voice.autoTimer); this.voice.turnOpen = false; this.voice.joining = false; this.voiceMeterStop(); this.voiceBargeStop();
+      if (this._liveSess) { this.liveTeardown(this._liveSess); this._liveSess.done = true; this._liveSess = null; }   // kept OUT of reactive data: a proxy is never === the session
       this.voice.lastSentByVoice = false; clearTimeout(this.voice.fillerTimer);   // an answer still on its way is not read aloud after leaving
       this.stopVoiceInput(); this.stopSpeaking();
       if (!keepWords) this.userInput = this.voice.inputBase || '';
