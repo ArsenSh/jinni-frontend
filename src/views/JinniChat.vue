@@ -7670,7 +7670,11 @@ export default {
         ses.src.connect(ses.proc); ses.proc.connect(ses.sink); ses.sink.connect(ctx.destination);
         const qs = new URLSearchParams({ model_id: j.model || 'scribe_v2_realtime', token: j.token, audio_format: 'pcm_16000', commit_strategy: 'vad', vad_silence_threshold_secs: '0.9' });
         if (!v.liveNoTerms) (j.keyterms || []).forEach(k => qs.append('keyterms', k));
-        const ws = ses.ws = new WebSocket('wss://api.elevenlabs.io/v1/speech-to-text/realtime?' + qs.toString());
+        // the site's Content-Security-Policy must allow wss://api.elevenlabs.io (connect-src); if it does not, the browser
+        // throws a SecurityError right here — that is NOT the microphone (founder 2026-10-10 saw "microphone blocked")
+        let ws;
+        try { ws = ses.ws = new WebSocket('wss://api.elevenlabs.io/v1/speech-to-text/realtime?' + qs.toString()); }
+        catch (err) { return fallback('socket ' + (err && err.name || 'error')); }
         ws.onopen = () => { ses.open = true; for (const m of ses.queue) ws.send(m); ses.queue = []; };
         ws.onmessage = (ev) => {
           let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
