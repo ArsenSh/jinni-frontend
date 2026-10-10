@@ -1851,11 +1851,16 @@
        Keyboard = back to typing (the words stay in the box); End = stop everything, nothing half-said is sent. -->
   <Teleport to="body">
     <div v-if="voice.mode" ref="voiceModeEl" class="voice-mode" :class="[currentTheme === 'night-mode' ? 'vm-night' : 'vm-day', 'vm-' + voiceState, { 'vm-has-cards': voiceCards.length }]"
-         role="dialog" aria-modal="true" :aria-label="t('chat.voice.mode_title')" tabindex="-1" @keydown.esc="endVoiceMode">
+         role="dialog" aria-modal="true" :aria-label="t('chat.voice.mode_title')" tabindex="-1" @keydown.esc="endVoiceMode"
+         @keydown.left="voiceCardGo(-1)" @keydown.right="voiceCardGo(1)" @touchstart.passive="voiceSwipeStart" @touchend="voiceSwipeEnd">
       <!-- B · the place behind the orb (founder 2026-10-10): the place Jinni is naming fills the screen, darkened for reading -->
       <div v-if="voiceCards.length" class="vm-bg" aria-hidden="true">
         <img v-for="(rec, i) in voiceCards" :key="'vb' + i" v-show="rec.image" :src="rec.image ? getImageUrl(rec.image) : ''" alt="" class="vm-bg-ph" :class="{ on: voiceCardShown === i }" @error="handleImageError">
       </div>
+      <template v-if="voiceCards.length > 1">
+        <button type="button" class="vm-nav vm-nav--prev" :aria-label="t('chat.voice.prev_place')" @click="voiceCardGo(-1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button type="button" class="vm-nav vm-nav--next" :aria-label="t('chat.voice.next_place')" @click="voiceCardGo(1)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      </template>
       <div class="vm-top">Jinni</div>
       <button type="button" class="vm-stage" :aria-label="voiceMainLabel" @click="voiceMainTap" :disabled="voiceState === 'thinking'">
         <span class="vm-orb" aria-hidden="true"><b class="vm-l v1"></b><b class="vm-l v2"></b><b class="vm-l v3"></b><b class="vm-l g1"></b><b class="vm-l g2"></b><b class="vm-l g3"></b></span>
@@ -1869,7 +1874,8 @@
           <span v-if="plateMeta(voiceCards[voiceCardShown])" class="vm-place-meta">{{ plateMeta(voiceCards[voiceCardShown]) }}</span>
         </button>
         <div v-if="voiceCards.length > 1" class="vm-place-dots" role="tablist">
-          <button v-for="(rec, i) in voiceCards" :key="'vd' + i" type="button" role="tab" :aria-selected="String(voiceCardShown === i)" :aria-label="rec.name" :class="{ on: voiceCardShown === i }" @click="voice.cardPick = i"></button>
+          <button v-for="(rec, i) in voiceCards" :key="'vd' + i" type="button" role="tab" :aria-selected="String(voiceCardShown === i)" :aria-label="rec.name" :class="{ on: voiceCardShown === i }" @click="voiceCardGo(i - voiceCardShown)"></button>
+          <span class="vm-place-count">{{ voiceCardShown + 1 }} / {{ voiceCards.length }}</span>
         </div>
       </div>
       <div class="vm-ctrl">
@@ -1938,7 +1944,7 @@ export default {
       voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null,
         // voice mode (2026-10-08): the screen, what was said, the sentence being spoken, the turn's first message index
         mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '',
-        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false, tapAt: 0, trail: [], cardPick: 0 },
+        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false, tapAt: 0, trail: [], cardPick: 0, cardManual: false, swipeX: null, swipeY: null },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -2155,7 +2161,7 @@ export default {
       }
       return out;
     },
-    voiceCardShown() { const n = this.voiceCards.length; if (!n) return 0; const on = this.voiceCardOn; return on >= 0 ? on : Math.min(Math.max(0, this.voice.cardPick || 0), n - 1); },
+    voiceCardShown() { const n = this.voiceCards.length; if (!n) return 0; const pick = Math.min(Math.max(0, this.voice.cardPick || 0), n - 1); if (this.voice.cardManual) return pick; const on = this.voiceCardOn; return on >= 0 ? on : pick; },
     // the card whose name Jinni is saying right now (-1 = none)
     voiceCardOn() {
       if (this.voiceState !== 'speaking' || !this.voiceCards.length) return -1;
@@ -2579,7 +2585,10 @@ export default {
         if (this.voice.mode && this.voiceState === 'idle' && !this.voice.notice) { this.voice.autoStart = true; this.toggleVoiceInput(); }
       }, 400);
     },
-    voiceCardOn(i) { if (i >= 0) this.voice.cardPick = i; },
+    voiceCardOn(i) { if (i >= 0 && !this.voice.cardManual) this.voice.cardPick = i; },
+    // Safari's top strip and bottom bar follow the voice screen (App.vue chrome sync): on open/close and when photos appear
+    'voice.mode'() { this.$nextTick(() => setTimeout(() => window.dispatchEvent(new Event('jinni:chrome-sync')), 30)); },
+    'voiceCards.length'(n, o) { if (!!n !== !!o) this.$nextTick(() => window.dispatchEvent(new Event('jinni:chrome-sync'))); },
     // Jinni's voice: whatever way an answer ends (complete, error, quota, details), close the voice state
     isStreaming(v) { if (!v) this.voiceStreamEnded(); },
 
@@ -7616,6 +7625,18 @@ export default {
       catch (e) { /* unknown: let the server refuse if it must */ }
       finally { if (this.voice.allowed === null) setTimeout(() => { this.voice.statusLoading = false; }, 30000); }   // failed: may ask again in 30 s
     },
+    // switching between the places on the voice screen: arrows, dashes, swipe, ← →
+    voiceCardGo(delta) {
+      const n = this.voiceCards.length; if (n < 2 || !delta) return;
+      this.voice.cardPick = ((this.voiceCardShown + delta) % n + n) % n; this.voice.cardManual = true;
+    },
+    voiceSwipeStart(e) { const t = e.touches && e.touches[0]; this.voice.swipeX = t ? t.clientX : null; this.voice.swipeY = t ? t.clientY : null; },
+    voiceSwipeEnd(e) {
+      const t = e.changedTouches && e.changedTouches[0], x0 = this.voice.swipeX, y0 = this.voice.swipeY; this.voice.swipeX = null;
+      if (!t || x0 == null || (e.target && e.target.closest && e.target.closest('button'))) return;
+      const dx = t.clientX - x0, dy = t.clientY - y0;
+      if (Math.abs(dx) > 50 && Math.abs(dy) < 60) this.voiceCardGo(dx < 0 ? 1 : -1);
+    },
     voiceHints() {
       const out = [], seen = new Set();
       for (const m of [...this.messages].reverse()) {
@@ -7774,7 +7795,7 @@ export default {
       if (this.isStreaming || this.isRequestPending || this.isOnCooldown) { this.voiceNotice(this.t('chat.voice.busy')); return; }
       this.voice.lastSentByVoice = true;
       this.voice.answerStarted = false;
-      this.voice.said = said; this.voice.turnFrom = this.messages.length; this.voice.nowSaying = ''; this.voice.turnSpoken = false; this.voice.cardPick = 0;
+      this.voice.said = said; this.voice.turnFrom = this.messages.length; this.voice.nowSaying = ''; this.voice.turnSpoken = false; this.voice.cardPick = 0; this.voice.cardManual = false;
       // the turn starts NOW (founder 2026-10-10: after each answer the button had to be tapped again — the turn used to be
       // opened only after the whole answer had streamed, so Jinni's speech, which starts mid-stream, was never counted)
       if (this.voice.mode) this.voice.turnOpen = true;
@@ -10320,8 +10341,9 @@ a.rec-bar-btn { text-decoration: none }
 .vm-bg{position:absolute;inset:0;z-index:0;pointer-events:none;background:#0a0118}
 .vm-bg-ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
 .vm-bg-ph.on{opacity:1}
-.vm-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,1,24,.86) 0%,rgba(10,1,24,.7) 30%,rgba(10,1,24,.35) 55%,rgba(10,1,24,.82) 80%,rgba(10,1,24,.96) 100%)}
-.voice-mode > *:not(.vm-bg){position:relative;z-index:1}
+/* the very top and bottom fade into solid night, the colour Safari's strip and bar are given (App.vue) — no seam */
+.vm-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0a0118 0%,rgba(10,1,24,.5) 7%,rgba(10,1,24,0) 18%,rgba(10,1,24,0) 58%,rgba(10,1,24,.62) 78%,rgba(10,1,24,.92) 94%,#0a0118 100%)}
+.voice-mode > *:not(.vm-bg):not(.vm-nav){position:relative;z-index:1}
 .vm-has-cards{color:#f3eaf8}
 .vm-has-cards .vm-words,.vm-has-cards .vm-hint,.vm-has-cards .vm-top{text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .vm-has-cards.vm-day .vm-words,.vm-has-cards.vm-day .vm-top{color:#fffaf2}
@@ -10338,6 +10360,21 @@ a.rec-bar-btn { text-decoration: none }
 .vm-place-dots button::before{content:'';display:block;height:3px;border-radius:2px;background:rgba(255,255,255,.3);transition:background-color .4s}
 .vm-place-dots button.on::before{background:#ffd27a}
 .vm-place-dots button:focus-visible{outline:2px solid #ffb36b;outline-offset:2px}
+
+.vm-has-cards .vm-words{padding:8px 14px;border-radius:14px;background:rgba(10,1,24,.42);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.vm-has-cards .vm-words:empty{display:none}
+.vm-has-cards .vm-hint{padding:4px 10px;border-radius:999px;background:rgba(10,1,24,.42);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.vm-nav{position:absolute;top:50%;z-index:2;width:42px;height:42px;margin-top:-21px;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:#fffaf2;
+  background:rgba(10,1,24,.38);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:background-color .2s ease}
+.vm-nav:hover{background:rgba(10,1,24,.55)}
+.vm-nav:focus-visible{outline:2px solid #ffb36b;outline-offset:2px}
+.vm-nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vm-nav--prev{left:12px}.vm-nav--next{right:12px}
+.voice-mode > .vm-nav{position:absolute}
+.vm-place-dots{align-items:center}
+.vm-place-dots button{width:30px;height:20px;padding:8px 0}
+.vm-place-dots button::before{height:4px}
+.vm-place-count{margin-left:6px;font:600 12px/1 'Lora',Georgia,serif;color:rgba(255,246,232,.85);text-shadow:0 1px 3px rgba(0,0,0,.6)}
 @media (prefers-reduced-motion: reduce){.vm-bg-ph{transition:none}}
 
 /* The user's message is a bubble on the right that fits its text (founder 2026-10-08: it stretched across

@@ -249,6 +249,15 @@ export default {
         const c = getComputedStyle(canvas).backgroundColor;
         if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') { top = c; bottom = c; }
       }
+      // Jinni's voice screen covers the viewport too (founder 2026-10-10): with a place photo behind the orb its top and
+      // bottom edges fade into solid night (#0a0118), so Safari's strip and bar take that colour — no band above or
+      // below the photo; without a photo they take the screen's own night / day edges. JinniChat re-syncs on open/close.
+      const vmode = document.querySelector('.voice-mode');
+      if (vmode) {
+        if (vmode.classList.contains('vm-has-cards')) { top = '#0a0118'; bottom = '#0a0118'; }
+        else if (vmode.classList.contains('vm-day')) { top = '#f9f5eb'; bottom = '#efe4cf'; }
+        else { top = '#0a0118'; bottom = '#16213e'; }
+      }
 
       // <html> canvas: the area beyond the page at top and bottom. Safari
       // TILES (repeats) this gradient beyond the document — the original
@@ -290,7 +299,7 @@ export default {
       // the same engine capability the sky-shift fix needs (scroll timeline);
       // old engines keep a solid body — the rule device-proven 2026-08-21.
       const modernChrome = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('animation-timeline: scroll()');
-      document.body.style.backgroundImage = (modernChrome && paint && paint.image && !fsMap) ? paint.image : 'none';
+      document.body.style.backgroundImage = (modernChrome && paint && paint.image && !fsMap && !vmode) ? paint.image : 'none';
       document.body.style.backgroundColor = top;
       // <meta theme-color> — SPLIT by pointer type (2026-08-22): iPhone
       // Safari's URL bar sits at the BOTTOM (coarse pointer → bottom edge,

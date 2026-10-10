@@ -1054,7 +1054,9 @@
       "state_speaking": "Speaking",
       "tap_to_talk": "Tap to talk",
       "interrupt": "Interrupt and talk",
-      "retry_phone": "I couldn't make that out — tap the mic and say it again."
+      "retry_phone": "I couldn't make that out — tap the mic and say it again.",
+      "prev_place": "Previous place",
+      "next_place": "Next place"
     }
   },
   "profile": {
