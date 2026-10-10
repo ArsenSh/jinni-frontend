@@ -2514,7 +2514,14 @@ export default {
       return false;
     },
     cooldownEndTime() {
-      if (!this.usageStatus?.cooldown?.active) return null;
+      if (!this.isOnCooldown) return null;
+      // The DAILY allowance used up (tokens / searches / places) is a lock without a cooldown window, so the box said
+      // "Try again soon" or "Try again at" with no time (founder 2026-10-10). Daily limits reset at midnight UTC: show
+      // that moment in the user's own time.
+      if (!this.usageStatus?.cooldown?.active) {
+        const now = new Date(), reset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+        return reset.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+      }
       const cd = this.usageStatus.cooldown;
       // Prefer an explicit end timestamp; otherwise derive one from hoursRemaining,
       // which the mid-session / 429 cooldown paths set (they carry hours but not an
