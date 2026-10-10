@@ -1852,17 +1852,25 @@
   <Teleport to="body">
     <div v-if="voice.mode" ref="voiceModeEl" class="voice-mode" :class="[currentTheme === 'night-mode' ? 'vm-night' : 'vm-day', 'vm-' + voiceState, { 'vm-has-cards': voiceCards.length }]"
          role="dialog" aria-modal="true" :aria-label="t('chat.voice.mode_title')" tabindex="-1" @keydown.esc="endVoiceMode">
+      <!-- B · the place behind the orb (founder 2026-10-10): the place Jinni is naming fills the screen, darkened for reading -->
+      <div v-if="voiceCards.length" class="vm-bg" aria-hidden="true">
+        <img v-for="(rec, i) in voiceCards" :key="'vb' + i" v-show="rec.image" :src="rec.image ? getImageUrl(rec.image) : ''" alt="" class="vm-bg-ph" :class="{ on: voiceCardShown === i }" @error="handleImageError">
+      </div>
       <div class="vm-top">Jinni</div>
       <button type="button" class="vm-stage" :aria-label="voiceMainLabel" @click="voiceMainTap" :disabled="voiceState === 'thinking'">
         <span class="vm-orb" aria-hidden="true"><b class="vm-l v1"></b><b class="vm-l v2"></b><b class="vm-l v3"></b><b class="vm-l g1"></b><b class="vm-l g2"></b><b class="vm-l g3"></b></span>
       </button>
       <p class="vm-words" aria-live="polite">{{ voiceWords }}</p>
       <p class="vm-hint">{{ voiceHint }}</p>
-      <div v-if="voiceCards.length" ref="voiceCardsRow" class="vm-cards">
-        <button v-for="(rec, i) in voiceCards" :key="'vc' + i" type="button" class="vm-card" :class="{ on: voiceCardOn === i }" @click="voiceOpenCard(rec)">
-          <img v-if="rec.image" :src="getImageUrl(rec.image)" :alt="rec.name" @error="handleImageError" loading="lazy">
-          <span>{{ rec.name }}</span>
+      <div v-if="voiceCards.length" class="vm-place">
+        <button type="button" class="vm-place-label" @click="voiceOpenCard(voiceCards[voiceCardShown])" :title="voiceCards[voiceCardShown].name">
+          <span class="vm-place-kick">{{ voiceCards[voiceCardShown].category || voiceCards[voiceCardShown].type || '' }}</span>
+          <span class="vm-place-name">{{ voiceCards[voiceCardShown].name }}</span>
+          <span v-if="plateMeta(voiceCards[voiceCardShown])" class="vm-place-meta">{{ plateMeta(voiceCards[voiceCardShown]) }}</span>
         </button>
+        <div v-if="voiceCards.length > 1" class="vm-place-dots" role="tablist">
+          <button v-for="(rec, i) in voiceCards" :key="'vd' + i" type="button" role="tab" :aria-selected="String(voiceCardShown === i)" :aria-label="rec.name" :class="{ on: voiceCardShown === i }" @click="voice.cardPick = i"></button>
+        </div>
       </div>
       <div class="vm-ctrl">
         <button type="button" class="vm-c" :aria-label="t('chat.voice.keyboard')" :title="t('chat.voice.keyboard')" @click="voiceKeyboard">
@@ -1930,7 +1938,7 @@ export default {
       voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null,
         // voice mode (2026-10-08): the screen, what was said, the sentence being spoken, the turn's first message index
         mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '',
-        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false, tapAt: 0, trail: [] },
+        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false, tapAt: 0, trail: [], cardPick: 0 },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -2147,6 +2155,7 @@ export default {
       }
       return out;
     },
+    voiceCardShown() { const n = this.voiceCards.length; if (!n) return 0; const on = this.voiceCardOn; return on >= 0 ? on : Math.min(Math.max(0, this.voice.cardPick || 0), n - 1); },
     // the card whose name Jinni is saying right now (-1 = none)
     voiceCardOn() {
       if (this.voiceState !== 'speaking' || !this.voiceCards.length) return -1;
@@ -2570,10 +2579,7 @@ export default {
         if (this.voice.mode && this.voiceState === 'idle' && !this.voice.notice) { this.voice.autoStart = true; this.toggleVoiceInput(); }
       }, 400);
     },
-    voiceCardOn(i) {
-      if (i < 0) return;
-      this.$nextTick(() => { const row = this.$refs.voiceCardsRow, c = row && row.children[i]; if (c) row.scrollTo({ left: c.offsetLeft - (row.clientWidth - c.clientWidth) / 2, behavior: 'smooth' }); });
-    },
+    voiceCardOn(i) { if (i >= 0) this.voice.cardPick = i; },
     // Jinni's voice: whatever way an answer ends (complete, error, quota, details), close the voice state
     isStreaming(v) { if (!v) this.voiceStreamEnded(); },
 
@@ -7768,7 +7774,7 @@ export default {
       if (this.isStreaming || this.isRequestPending || this.isOnCooldown) { this.voiceNotice(this.t('chat.voice.busy')); return; }
       this.voice.lastSentByVoice = true;
       this.voice.answerStarted = false;
-      this.voice.said = said; this.voice.turnFrom = this.messages.length; this.voice.nowSaying = ''; this.voice.turnSpoken = false;
+      this.voice.said = said; this.voice.turnFrom = this.messages.length; this.voice.nowSaying = ''; this.voice.turnSpoken = false; this.voice.cardPick = 0;
       // the turn starts NOW (founder 2026-10-10: after each answer the button had to be tapped again — the turn used to be
       // opened only after the whole answer had streamed, so Jinni's speech, which starts mid-stream, was never counted)
       if (this.voice.mode) this.voice.turnOpen = true;
@@ -10280,16 +10286,6 @@ a.rec-bar-btn { text-decoration: none }
 .vm-hint{margin:0;font:500 11px/1 'Cinzel',Georgia,serif;letter-spacing:.24em;text-transform:uppercase;transition:color .6s ease}
 .vm-night .vm-hint{color:#b9a4ff}.vm-night.vm-speaking .vm-hint{color:#ffd27a}.vm-night.vm-idle .vm-hint{color:rgba(238,230,246,.6)}
 .vm-day .vm-hint{color:#6a3fd6}.vm-day.vm-speaking .vm-hint{color:#a8601f}.vm-day.vm-idle .vm-hint{color:rgba(122,84,52,.7)}
-.vm-cards{display:flex;gap:10px;max-width:min(100%,480px);overflow-x:auto;padding:4px 2px 6px;scrollbar-width:none;flex:none}
-.vm-cards::-webkit-scrollbar{display:none}
-.vm-card{flex:0 0 132px;border:0;padding:0;border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;font:600 12.5px/1.25 'Lora',Georgia,serif;transition:box-shadow .4s ease,opacity .4s ease;opacity:.75}
-.vm-night .vm-card{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 .75px rgba(220,210,255,.18)}
-.vm-day .vm-card{background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.95)}
-.vm-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
-.vm-card span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:7px 9px 8px}
-.vm-card.on{opacity:1}
-.vm-night .vm-card.on{box-shadow:inset 0 0 0 1px #ffd27a,0 0 16px -4px rgba(255,170,80,.6)}
-.vm-day .vm-card.on{box-shadow:inset 0 0 0 1px #c0702a,0 0 16px -4px rgba(192,112,42,.45)}
 .vm-ctrl{display:flex;align-items:center;gap:22px;margin-top:6px;flex:none}
 .vm-c{width:52px;height:52px;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:inherit;transition:background-color .2s ease,box-shadow .2s ease}
 .vm-night .vm-c{background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 .75px rgba(220,210,255,.22)}
@@ -10305,7 +10301,7 @@ a.rec-bar-btn { text-decoration: none }
 .vm-end{color:#ff8a7a}
 .vm-night .vm-end{background:rgba(229,72,77,.18);box-shadow:inset 0 0 0 .75px rgba(255,140,120,.45)}
 .vm-day .vm-end{color:#c2410c}
-@media (prefers-reduced-motion: reduce){.vm-l{animation:none}.vm-orb,.vm-l,.vm-card,.vm-hint{transition:none}}
+@media (prefers-reduced-motion: reduce){.vm-l{animation:none}.vm-orb,.vm-l,.vm-hint{transition:none}}
 
 /* Daily limit reached: the way on to Jinni's Discoveries (no AI, no limit) */
 .cooldown-explore{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:560px;margin:0 auto 10px;padding:12px 16px;border:0;border-radius:18px;cursor:pointer;text-align:center;font:inherit;transition:background-color .2s ease,box-shadow .2s ease}
@@ -10319,6 +10315,30 @@ a.rec-bar-btn { text-decoration: none }
 .genie-chat-container.day-mode .cooldown-explore-cta{color:#a8601f}
 .genie-chat-container.day-mode .cooldown-explore:hover{background:rgba(255,255,255,.8)}
 .cooldown-explore:focus-visible{outline:2px solid #ffb36b;outline-offset:2px}
+
+/* B · the place behind the orb (founder 2026-10-10) */
+.vm-bg{position:absolute;inset:0;z-index:0;pointer-events:none;background:#0a0118}
+.vm-bg-ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
+.vm-bg-ph.on{opacity:1}
+.vm-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,1,24,.86) 0%,rgba(10,1,24,.7) 30%,rgba(10,1,24,.35) 55%,rgba(10,1,24,.82) 80%,rgba(10,1,24,.96) 100%)}
+.voice-mode > *:not(.vm-bg){position:relative;z-index:1}
+.vm-has-cards{color:#f3eaf8}
+.vm-has-cards .vm-words,.vm-has-cards .vm-hint,.vm-has-cards .vm-top{text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.vm-has-cards.vm-day .vm-words,.vm-has-cards.vm-day .vm-top{color:#fffaf2}
+.vm-has-cards.vm-day .vm-hint{color:#ffd27a}
+.vm-has-cards.vm-day .vm-c{color:#f3eaf8;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 .75px rgba(255,255,255,.3)}
+.vm-place{width:100%;max-width:460px;display:grid;gap:10px;flex:none;margin-top:auto}
+.vm-place-label{display:grid;gap:4px;text-align:left;border:0;background:none;padding:0 4px;cursor:pointer;color:#fffaf2;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.vm-place-kick{font:500 10.5px/1.2 'Cinzel',Georgia,serif;letter-spacing:.2em;text-transform:uppercase;color:#ffd29a}
+.vm-place-name{font:500 clamp(20px,5.6vw,26px)/1.15 'Cinzel',Georgia,serif;letter-spacing:.02em;text-wrap:balance}
+.vm-place-meta{font-size:13px;color:rgba(255,246,232,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vm-place-label:focus-visible{outline:2px solid #ffb36b;outline-offset:3px;border-radius:6px}
+.vm-place-dots{display:flex;gap:6px;padding:0 4px}
+.vm-place-dots button{width:24px;height:12px;padding:4px 0;border:0;background:none;cursor:pointer}
+.vm-place-dots button::before{content:'';display:block;height:3px;border-radius:2px;background:rgba(255,255,255,.3);transition:background-color .4s}
+.vm-place-dots button.on::before{background:#ffd27a}
+.vm-place-dots button:focus-visible{outline:2px solid #ffb36b;outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.vm-bg-ph{transition:none}}
 
 /* The user's message is a bubble on the right that fits its text (founder 2026-10-08: it stretched across
    the whole width, reading as a second column). Up to 85% of the width on phones, 70% on desktop; the
