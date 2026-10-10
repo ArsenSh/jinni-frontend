@@ -1930,7 +1930,7 @@ export default {
       voice: { listening: false, speaking: false, lastSentByVoice: false, notice: '', rec: null, recorder: null, audio: null, player: null, queue: [], noticeTimer: null, filler: null, fillerTimer: null, answerStarted: false, spokenId: null, stream: null,
         // voice mode (2026-10-08): the screen, what was said, the sentence being spoken, the turn's first message index
         mode: false, said: '', nowSaying: '', turnFrom: 0, cancel: false, autoStart: false, autoTimer: null, transcribing: false, inputBase: '',
-        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false, tapAt: 0 },
+        turnOpen: false, turnSpoken: false, endTimer: null, idleTimer: null, meter: null, discard: false, actx: null, barge: null, joining: false, allowed: null, statusLoading: false, stt: null, streamOff: false, tapAt: 0, trail: [] },
       openReels: {},
       galleryReel: null,    // the tapped card's guide reel → slide 1 of its image gallery        // cards whose guide reel is playing in place (GuideReel)   // a guide's reel open over the chat (Picked by @… → Watch reel)
       // iOS keyboard: top offset (px) of the fixed filler strip that covers
@@ -7406,6 +7406,8 @@ export default {
     // Speech IN: the browser's own recognition where it has the language (free), else the server's
     // Whisper fallback (iPhone Safari has no Armenian). The words fill the box and go off as the message.
     voiceLang() { const m = { en: 'en-US', ru: 'ru-RU', hy: 'hy-AM', fr: 'fr-FR', ar: 'ar-SA', zh: 'zh-CN' }; return m[String(this.locale || 'en').slice(0, 2)] || 'en-US'; },
+    voiceTrail(step) { try { this.voice.trail = [...(this.voice.trail || []), step].slice(-4); } catch (e) {} },
+    voiceBlocked() { const d = (this.voice.trail || []).join(' · '); this.voiceNotice(this.t('chat.voice.mic_blocked') + (d ? `  [${d}]` : ''), 0); },
     voiceNotice(text, ms = 6000) {
       this.voice.notice = text; clearTimeout(this.voice.noticeTimer);
       if (ms) this.voice.noticeTimer = setTimeout(() => { this.voice.notice = ''; }, ms);
@@ -7459,7 +7461,8 @@ export default {
           // iPhone's recogniser only starts from a tap; started from a fallback after the permission popup it says
           // 'not-allowed' although the microphone IS allowed (founder 2026-10-10) — just wait for the next tap
           if (e.error === 'not-allowed' && this.voice.mode && Date.now() - (this.voice.tapAt || 0) > 1200) return;   // an automatic re-listen that could not start or heard nothing: just wait for a tap
-          if (e.error === 'not-allowed' || e.error === 'service-not-allowed') this.voiceNotice(this.t('chat.voice.mic_blocked'));
+          this.voiceTrail('speech:' + e.error);
+          if (e.error === 'not-allowed' || e.error === 'service-not-allowed') this.voiceBlocked();
           else if (e.error === 'language-not-supported' || e.error === 'audio-capture') this.startCloudVoiceInput();
           else if (e.error === 'no-speech') this.voiceNotice(this.t('chat.voice.nothing_heard'));
           else if (e.error !== 'aborted') this.voiceNotice(this.t('chat.voice.not_supported'));
@@ -7488,7 +7491,7 @@ export default {
             const r = await fetch(`${API_BASE_URL}/api/voice/transcribe`, { method: 'POST', headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }, body: fd });
             const j = await r.json().catch(() => ({}));
             this.voice.notice = ''; this.voice.transcribing = false;
-            if (r.status === 503 || r.status === 502) this.voice.stt = false;
+            if (r.status === 503 || r.status === 502) { this.voice.stt = false; this.voiceTrail('rec-server:' + r.status + (j && j.status ? '/' + j.status : '')); }
             if (this.voice.cancel) return;
             if (!r.ok || !j.text) {
               if (this.voice.joining) { this.voice.joining = false; if (this.userInput.trim()) { this.sendVoiceMessage(); return; } }
@@ -7509,7 +7512,8 @@ export default {
         this.voiceMeterStart(stream, recorder);
       } catch (e) {
         if (this.voice.autoStart) return;
-        if (e && e.name === 'NotAllowedError') this.voiceNotice(this.t('chat.voice.mic_blocked'));
+        this.voiceTrail('rec:' + (e && e.name));
+        if (e && e.name === 'NotAllowedError') this.voiceBlocked();
         else if (!this.voice.mode) this.voiceNotice(this.t('chat.voice.not_supported'));
         console.warn('[voice] recorder could not start:', e && e.name, e && e.message);
       }
@@ -7622,7 +7626,7 @@ export default {
       const show = () => { this.userInput = (base + [ses.committed, ses.partial].filter(Boolean).join(' ')).replace(/\s+/g, ' ').trimStart(); };
       const fallback = (why) => {
         if (ses.done) return; this.liveTeardown(ses); ses.done = true; if (this._liveSess === ses) this._liveSess = null;
-        console.warn('[voice] live listener unavailable (' + why + ') — using the recorder');
+        console.warn('[voice] live listener unavailable (' + why + ') — using the recorder'); this.voiceTrail('live:' + why);
         v.streamOff = true; v.listening = false;
         if (!v.cancel && v.mode) this.startCloudVoiceInput();
       };
@@ -7642,7 +7646,7 @@ export default {
         ses.stream = stream;
         if (ses.done || v.cancel || this._liveSess !== ses) { this.liveTeardown(ses); return; }
         const j = await tokRes.json().catch(() => ({}));
-        if (!tokRes.ok || !j.token) return fallback('token ' + tokRes.status);
+        if (!tokRes.ok || !j.token) return fallback('token ' + tokRes.status + (j && j.status ? '/' + j.status : ''));   // e.g. token 502/401 = ElevenLabs refused the key
         const Ctx = window.AudioContext || window.webkitAudioContext; const ctx = v.actx || (v.actx = new Ctx());
         if (ctx.state !== 'running') { try { await ctx.resume(); } catch (e) { /* no gesture */ } }
         if (ctx.state !== 'running') { this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false; console.warn('[voice] audio not running yet — waiting for a tap'); return; }
@@ -7702,7 +7706,8 @@ export default {
           // recogniser before saying anything (founder 2026-10-10: "it shows browser microphone permission is needed")
           this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false;
           console.warn('[voice] microphone refused for the live listener:', e.name, e.message);
-          if (!v.autoStart) this.voiceNotice(this.t('chat.voice.mic_blocked'));   // the person (or the browser) said no
+          this.voiceTrail('live-mic:' + e.name);
+          if (!v.autoStart) this.voiceBlocked();   // the person (or the browser) said no
           return;
         }
         fallback(e && e.message || 'error');
@@ -7920,7 +7925,7 @@ export default {
     openVoiceMode() {
       if (this.isOnCooldown) return;
       this.voice.mode = true; this.voice.notice = ''; this.voice.said = ''; this.voice.nowSaying = ''; this.voice.autoStart = false;
-      this.voice.allowed = null; this.voice.statusLoading = false; this.loadVoiceStatus(); this.voice.tapAt = Date.now();
+      this.voice.allowed = null; this.voice.statusLoading = false; this.loadVoiceStatus(); this.voice.tapAt = Date.now(); this.voice.trail = [];
       this.voice.turnFrom = this.messages.length;
       try { const Ctx = window.AudioContext || window.webkitAudioContext; if (Ctx) { this.voice.actx = this.voice.actx || new Ctx(); if (this.voice.actx.state !== 'running') this.voice.actx.resume().catch(() => {}); } } catch (e) {}
       this.toggleVoiceInput();                                   // inside the tap: iPhone needs the gesture for the mic and the audio unlock
