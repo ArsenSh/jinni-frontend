@@ -2839,7 +2839,10 @@ export default {
       // its dashboard, or Jinni recorded it when curating the place. Either
       // way it is a listing, not a live bookable rate, and the card says so —
       // it used to render identically to a live price (founder 2026-09-23).
-      const lp = rec && rec.listedPrice;
+      // A Destination's price is Jinni's internal curation reference (founder 2026-10-10: "that 30 dollar is for internal
+      // work") — never on a card, also for cards saved in older chats. Only a venue's own listed price shows.
+      const isDest = rec && (rec._verifiedModel === 'destination' || /^dest_/.test(String(rec.placeId || rec.id || '')));
+      const lp = rec && !isDest ? rec.listedPrice : null;
       if (lp && Number.isFinite(lp.min) && lp.min > 0) return this.t('chat.price.from_listed', { price: money(lp.min, lp.currency) });
       if (lp && Number.isFinite(lp.average) && lp.average > 0) return this.t('chat.price.approx_listed', { price: money(lp.average, lp.currency) });
       return '';
