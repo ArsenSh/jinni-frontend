@@ -7617,9 +7617,9 @@ export default {
     // ── LIVE listening (founder 2026-10-09): the microphone streams to ElevenLabs' realtime Scribe; words appear as
     // they are said; ElevenLabs' own voice-activity detection says when a phrase ended (~0.9 s of quiet); a phrase that
     // ends on "and / with / um…" waits up to 2 s for more. Any failure → this turn uses the recorder path instead.
-    async startLiveListening() {
+    async startLiveListening(attempt = 0) {
       const v = this.voice; const base = this.userInput ? this.userInput.replace(/\s*$/, ' ') : '';
-      const ses = { ws: null, stream: null, proc: null, src: null, sink: null, committed: '', partial: '', done: false, open: false, queue: [], t0: Date.now(), last: Date.now(), stopAsked: false, joinTimer: null, idleTimer: null, capTimer: null };
+      const ses = { ws: null, stream: null, proc: null, src: null, sink: null, committed: '', partial: '', done: false, open: false, queue: [], t0: Date.now(), last: Date.now(), stopAsked: false, joinTimer: null, idleTimer: null, capTimer: null, why: '', maxRms: 0 };
       this._liveSess = ses; v.listening = true; v.discard = false; v.joining = false;
       try { if (v.actx && v.actx.state !== 'running') v.actx.resume().catch(() => {}); } catch (e) {}
       const show = () => { this.userInput = (base + [ses.committed, ses.partial].filter(Boolean).join(' ')).replace(/\s+/g, ' ').trimStart(); };
@@ -7634,8 +7634,17 @@ export default {
         v.listening = false;
         if (v.cancel) return;
         const text = [ses.committed, ses.stopAsked ? ses.partial : ''].filter(Boolean).join(' ').trim();
-        if (text) { this.userInput = (base + text).trim(); this.sendVoiceMessage(); }
-        else if (!v.autoStart && !this.voice.notice) this.voiceNotice(this.t('chat.voice.nothing_heard'));
+        if (text) { this.voice.trail = []; this.userInput = (base + text).trim(); this.sendVoiceMessage(); return; }
+        // ended within 2.5 s having heard nothing (founder 2026-10-10: after 2–3 turns a tap showed "I didn't catch anything"
+        // at once): not silence — a dead microphone after playback (iPhone) or a closed connection. Fresh session once,
+        // then the recorder for this turn; the reason goes in the trail.
+        const quick = !ses.stopAsked && Date.now() - ses.t0 < 2500;
+        if (quick) {
+          this.voiceTrail('live:' + (ses.why || 'ended') + (ses.maxRms === 0 ? '/silent-mic' : ''));
+          if (attempt < 1) { setTimeout(() => { if (v.mode && !v.cancel && !v.listening) this.startLiveListening(attempt + 1); }, 150); return; }
+          if (v.mode && !v.cancel) { this.startCloudVoiceInput(); return; }
+        }
+        if (!v.autoStart && !this.voice.notice) { const d = (this.voice.trail || []).join(' · '); this.voiceNotice(this.t('chat.voice.nothing_heard') + (d ? `  [${d}]` : '')); }
       };
       try {
         const [tokRes, stream] = await Promise.all([
@@ -7648,7 +7657,8 @@ export default {
         if (!tokRes.ok || !j.token) return fallback('token ' + tokRes.status + (j && j.status ? '/' + j.status : ''));   // e.g. token 502/401 = ElevenLabs refused the key
         const Ctx = window.AudioContext || window.webkitAudioContext; const ctx = v.actx || (v.actx = new Ctx());
         if (ctx.state !== 'running') { try { await ctx.resume(); } catch (e) { /* no gesture */ } }
-        if (ctx.state !== 'running') { this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false; console.warn('[voice] audio not running yet — waiting for a tap'); return; }
+        if (ctx.state !== 'running' && attempt > 0) { try { ctx.close(); } catch (e) {} const fresh = new Ctx(); v.actx = fresh; try { await fresh.resume(); } catch (e) {} if (fresh.state === 'running') { this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false; return this.startLiveListening(attempt + 1); } }
+        if ((v.actx || ctx).state !== 'running') { this.liveTeardown(ses); ses.done = true; this._liveSess = null; v.listening = false; this.voiceTrail('live:audio-' + (v.actx || ctx).state); console.warn('[voice] audio not running yet — waiting for a tap'); return; }
         // the microphone as 16 kHz 16-bit PCM, ~100 ms per message
         ses.src = ctx.createMediaStreamSource(stream);
         ses.proc = ctx.createScriptProcessor(4096, 1, 1);
@@ -7658,7 +7668,7 @@ export default {
           if (ses.done) return;
           const inp = e.inputBuffer.getChannelData(0); let sum = 0;
           for (let i = 0; i < inp.length; i++) sum += inp[i] * inp[i];
-          const rms = Math.sqrt(sum / inp.length), el = this.$refs.voiceModeEl;
+          const rms = Math.sqrt(sum / inp.length), el = this.$refs.voiceModeEl; if (rms > ses.maxRms) ses.maxRms = rms;
           if (el) el.style.setProperty('--vm-level', Math.min(1, Math.max(0, (rms - 0.01) / 0.1)).toFixed(3));
           const n = Math.floor(inp.length / ratio), out = new Int16Array(n);
           for (let i = 0; i < n; i++) { const a = Math.floor(i * ratio), b = Math.min(inp.length, Math.floor((i + 1) * ratio)); let acc = 0; for (let k = a; k < b; k++) acc += inp[k]; const x = Math.max(-1, Math.min(1, acc / Math.max(1, b - a))); out[i] = x < 0 ? x * 0x8000 : x * 0x7fff; }
@@ -7690,16 +7700,19 @@ export default {
             return;
           }
           if (type === 'session_started') return;
+          // 'insufficient_audio_activity' (no speech in the audio) did not match the error words below and was ignored — the
+          // session then hung; it is handled first now
+          if (type === 'insufficient_audio_activity') { ses.why = 'no-audio'; return ses.finish(); }
           if (/error|exceeded|limited|overflow|exhausted|throttled|terms/.test(type)) {
             console.warn('[voice] live listener:', type, m.error || '');
-            if (type === 'insufficient_audio_activity') return ses.finish();
+            if (type === 'insufficient_audio_activity') { ses.why = 'no-audio'; return ses.finish(); }
             if (!v.liveNoTerms && (type === 'invalid_request' || type === 'input_error') && !ses.committed) { v.liveNoTerms = true; }   // the names list may be the problem: next turn without it
             if (ses.committed) return ses.finish();
             return fallback(type);
           }
         };
         ws.onerror = () => { if (!ses.open) fallback('connect'); };
-        ws.onclose = () => { if (!ses.done) { if (ses.committed || ses.partial) { ses.stopAsked = true; ses.finish(); } else if (!ses.open) fallback('closed'); else ses.finish(); } };
+        ws.onclose = (ce) => { if (!ses.done) { ses.why = 'closed-' + (ce && ce.code || ''); if (ses.committed || ses.partial) { ses.stopAsked = true; ses.finish(); } else if (!ses.open) fallback('closed'); else ses.finish(); } };
         // nothing said for 9 s → nothing to send; a 30 s monologue still ends
         ses.idleTimer = setInterval(() => { if (!ses.done && !ses.committed && !ses.partial && Date.now() - ses.t0 > 9000) ses.finish(); }, 500);
         ses.capTimer = setTimeout(() => this.liveStop(), 30000);
