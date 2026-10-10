@@ -1870,7 +1870,7 @@
       <div v-if="voiceCards.length" class="vm-place">
         <button type="button" class="vm-place-label" @click="voiceOpenCard(voiceCards[voiceCardShown])" :title="voiceCards[voiceCardShown].name">
           <span class="vm-place-kick">{{ voiceCards[voiceCardShown].category || voiceCards[voiceCardShown].type || '' }}</span>
-          <span class="vm-place-name">{{ voiceCards[voiceCardShown].name }}</span>
+          <span class="vm-place-name">{{ voiceCards[voiceCardShown].name }}<svg class="vm-place-go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span>
           <span v-if="plateMeta(voiceCards[voiceCardShown])" class="vm-place-meta">{{ plateMeta(voiceCards[voiceCardShown]) }}</span>
         </button>
         <div v-if="voiceCards.length > 1" class="vm-place-dots" role="tablist">
@@ -10370,6 +10370,9 @@ a.rec-bar-btn { text-decoration: none }
 .vm-nav:focus-visible{outline:2px solid #ffb36b;outline-offset:2px}
 .vm-nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .vm-nav--prev{left:12px}.vm-nav--next{right:12px}
+/* phones and tablets swipe — the arrows are for mouse users only (founder 2026-10-10) */
+@media (hover: none) and (pointer: coarse){.vm-nav{display:none}}
+.vm-place-go{display:inline-block;width:.8em;height:.8em;margin-left:.3em;vertical-align:-.05em;fill:none;stroke:#ffd29a;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .voice-mode > .vm-nav{position:absolute}
 .vm-place-dots{align-items:center}
 .vm-place-dots button{width:30px;height:20px;padding:8px 0}
