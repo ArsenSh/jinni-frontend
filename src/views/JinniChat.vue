@@ -2132,7 +2132,7 @@ export default {
     },
     voiceTurnOver() {
       const v = this.voice;
-      return v.mode && v.turnOpen && !this.isStreaming && !this.isRequestPending && !v.speaking && !v.transcribing && !v.listening;
+      return v.mode && v.turnOpen && !v.lastSentByVoice && !this.isStreaming && !this.isRequestPending && !v.speaking && !v.transcribing && !v.listening;
     },
     voiceMainLabel() {
       return this.voice.listening ? this.t('chat.voice.done') : (this.voice.speaking ? this.t('chat.voice.interrupt') : this.t('chat.voice.mic'));
@@ -2558,15 +2558,14 @@ export default {
     // voice mode: a turn ends when the answer is in, saved and (for Premium) spoken. Then Jinni listens again —
     // only if it actually spoke (a free user reads the answer on the screen and taps to talk).
     'voice.speaking'(now) {
-      if (now && this.voice.turnOpen) this.voice.turnSpoken = true;
+      if (now && this.voice.mode) this.voice.turnSpoken = true;
       if (now && this.voice.mode) this.voiceBargeStart(); else this.voiceBargeStop();
     },
     voiceTurnOver(over) {
       if (!over) return;
-      const spoken = this.voice.turnSpoken;
-      this.voice.turnOpen = false; this.voice.turnSpoken = false; this.voice.lastSentByVoice = false;   // never stuck on "thinking"
+      this.voice.turnOpen = false; this.voice.turnSpoken = false;
       clearTimeout(this.voice.autoTimer);
-      if (!spoken || this.voice.notice) return;
+      if (this.voice.notice) return;                       // e.g. today's voice limit: wait for a tap
       this.voice.autoTimer = setTimeout(() => {
         if (this.voice.mode && this.voiceState === 'idle' && !this.voice.notice) { this.voice.autoStart = true; this.toggleVoiceInput(); }
       }, 400);
@@ -7753,9 +7752,11 @@ export default {
       this.voice.lastSentByVoice = true;
       this.voice.answerStarted = false;
       this.voice.said = said; this.voice.turnFrom = this.messages.length; this.voice.nowSaying = ''; this.voice.turnSpoken = false;
-      await this.sendMessage();
-      if (this.userInput.trim() === said) { this.voice.lastSentByVoice = false; clearTimeout(this.voice.fillerTimer); return; }   // the send was refused
+      // the turn starts NOW (founder 2026-10-10: after each answer the button had to be tapped again — the turn used to be
+      // opened only after the whole answer had streamed, so Jinni's speech, which starts mid-stream, was never counted)
       if (this.voice.mode) this.voice.turnOpen = true;
+      await this.sendMessage();
+      if (this.userInput.trim() === said) { this.voice.lastSentByVoice = false; this.voice.turnOpen = false; clearTimeout(this.voice.fillerTimer); return; }   // the send was refused
       // The "let me see" line only when there is really a wait (founder 2026-10-08: for "hi" it just
       // delayed the answer): not for short messages, and only if nothing has arrived after 1.5 s.
       clearTimeout(this.voice.fillerTimer);
