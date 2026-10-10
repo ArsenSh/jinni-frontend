@@ -1917,6 +1917,19 @@
             </div>
           </div>
 
+          <!-- Jinni's voice for free accounts (founder 2026-10-10): one switch, saved at once -->
+          <div class="card voice-switch-card" v-if="limitsData" style="margin-top: 14px; padding: 16px 20px">
+            <div class="voice-switch-row">
+              <div>
+                <h2 style="margin:0">Jinni's voice for free users</h2>
+                <span class="card-sub">On: free accounts get the talking screen and hear Jinni answer out loud (same daily cap as Premium). Off: Premium only; free accounts keep the mic as dictation. Premium always has it.</span>
+              </div>
+              <button type="button" class="voice-switch" role="switch" :aria-checked="String(!!limitsData.config.voiceFreeUsers)" :class="{ on: limitsData.config.voiceFreeUsers }" :disabled="voiceSwitchSaving" @click="toggleVoiceFree">
+                <span class="voice-switch-knob"></span><span class="voice-switch-label">{{ limitsData.config.voiceFreeUsers ? 'On' : 'Off' }}</span>
+              </button>
+            </div>
+          </div>
+
           <div class="loc-section-label" v-if="limitsData" style="margin-top: 14px">User limits</div>
           <div class="loc-grid" v-if="limitsData" style="margin-top: 10px">
             <div class="card" style="padding: 18px 20px" v-for="tierKey in ['free', 'premium']" :key="tierKey">
@@ -7447,6 +7460,17 @@ export default {
         }
       } catch (e) { console.warn('limits fetch failed:', e.message) }
     }
+    const voiceSwitchSaving = ref(false)
+    const toggleVoiceFree = async () => {
+      const next = !limitsData.value.config.voiceFreeUsers
+      voiceSwitchSaving.value = true
+      try {
+        await apiFetch('/voice-config', { method: 'POST', body: JSON.stringify({ voiceFreeUsers: next }) })
+        limitsData.value.config.voiceFreeUsers = next
+        showToast(next ? "Jinni's voice is ON for free users" : "Jinni's voice is Premium only")
+      } catch (e) { showToast(e.message, 'error') }
+      finally { voiceSwitchSaving.value = false }
+    }
     const saveLimits = async () => {
       limitsSaving.value = true
       try {
@@ -8147,6 +8171,7 @@ export default {
       aiBalance, aiBalanceForm, aiBalanceSaving, fetchAiBalance, saveAiBalance, runwayDate,
       vitalClass, vitalWord, cpuPct, diskPct, routingUsage,
       placeInfoModal, openPlaceInfo, placeInfoRows, placeInfoHours,
+      voiceSwitchSaving, toggleVoiceFree,
       limitsData, limitsForm, limitsZoneForm, limitsSaving, fetchLimits, saveLimits,
       covData, covForm, covSaving, covCatLabel, fetchCoverage, saveCoverage, covCellTarget, covCellPct, covCellState,
       mapT, mapSelected, mapSearch, mapEst, mapEstimating, mapJob, mapRunning, mapBusy, mapChanged,
@@ -10641,4 +10666,16 @@ body:has(.admin-shell.day-mode)::-webkit-scrollbar-thumb:hover {background-color
   .data-table tbody tr.table-row td.src-actions::before { display: none; }
   .src-actions .src-btn { flex: 1; margin-left: 0; text-align: center; }
 }
+
+/* Jinni's voice switch (Limits) */
+.voice-switch-row{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.voice-switch-row .card-sub{display:block;margin-top:4px;max-width:70ch;line-height:1.45}
+.voice-switch{flex:none;display:inline-flex;align-items:center;gap:8px;border:0;background:none;cursor:pointer;font:600 12px/1 'DM Mono',monospace;color:inherit;padding:4px}
+.voice-switch::before{content:'';width:44px;height:24px;border-radius:999px;background:rgba(128,128,128,.35);transition:background-color .2s ease}
+.voice-switch-knob{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;margin-left:3px;transition:transform .2s ease;box-shadow:0 0 4px rgba(0,0,0,.3)}
+.voice-switch{position:relative}
+.voice-switch.on::before{background:linear-gradient(45deg,#D4AF37,#FF8C00)}
+.voice-switch.on .voice-switch-knob{transform:translateX(20px)}
+.voice-switch:disabled{opacity:.6;cursor:default}
+.voice-switch:focus-visible{outline:2px solid #D4AF37;outline-offset:2px}
 </style>

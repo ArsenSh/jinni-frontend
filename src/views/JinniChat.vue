@@ -1047,7 +1047,7 @@
                 <!-- Jinni's voice (founder 2026-10-07): an empty box shows a MIC in the send button's place —
                      tap, speak, and the words go off as the message. A premium user then hears the answer in
                      Jinni's voice; a free user reads it and sees a one-line hint. Text typed → the arrow. -->
-                <button v-if="(!userInput.trim() || voice.listening) && !isStreaming" type="button" @click.stop="voice.listening ? stopVoiceInput() : openVoiceMode()" class="send-button mic-button" :class="{ 'is-listening': voice.listening, 'disabled-cooldown': isOnCooldown }" :disabled="isOnCooldown" :title="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')" :aria-label="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')">
+                <button v-if="(!userInput.trim() || voice.listening) && !isStreaming" type="button" @click.stop="voice.listening ? stopVoiceInput() : (voice.allowed === false ? toggleVoiceInput() : openVoiceMode())" class="send-button mic-button" :class="{ 'is-listening': voice.listening, 'disabled-cooldown': isOnCooldown }" :disabled="isOnCooldown" :title="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')" :aria-label="voice.listening ? t('chat.voice.stop_listening') : t('chat.voice.mic')">
                   <svg v-if="!voice.listening" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg>
                   <svg v-else viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
                 </button>
@@ -7769,7 +7769,7 @@ export default {
       this.voice.lastSentByVoice = false;
       if (this.voice.spokenId === message.id) return;      // never read the same reply twice
       this.voice.spokenId = message.id;
-      if (!this.voiceSpeaks()) { this.voiceNotice(this.t('chat.voice.premium_hint'), 9000); return; }
+      if (!this.voiceSpeaks()) return;   // voice is Premium-only for this user (Admin → Limits switch): no spoken answer, no nagging hint
       if (this.voice.stream && this.voice.stream.msgId === message.id) { this.voiceFlush(); return; }   // already speaking sentence by sentence
       const parts = (message.contentParts || []).filter(p => p.type === 'text').map(p => p.content).join('\n');
       const text = (parts || message.text || '').trim();
@@ -7929,7 +7929,7 @@ export default {
     openVoiceMode() {
       if (this.isOnCooldown) return;
       this.voice.mode = true; this.voice.notice = ''; this.voice.said = ''; this.voice.nowSaying = ''; this.voice.autoStart = false;
-      this.voice.allowed = null; this.voice.statusLoading = false; this.loadVoiceStatus(); this.voice.tapAt = Date.now(); this.voice.trail = [];
+      this.voice.statusLoading = false; this.loadVoiceStatus(); this.voice.tapAt = Date.now(); this.voice.trail = [];
       this.voice.turnFrom = this.messages.length;
       try { const Ctx = window.AudioContext || window.webkitAudioContext; if (Ctx) { this.voice.actx = this.voice.actx || new Ctx(); if (this.voice.actx.state !== 'running') this.voice.actx.resume().catch(() => {}); } } catch (e) {}
       this.toggleVoiceInput();                                   // inside the tap: iPhone needs the gesture for the mic and the audio unlock
