@@ -5046,7 +5046,8 @@ export default {
         else if (destCity) {locationMode = 'destination'} 
         else {locationMode = 'unknown'}
         const requestBody = { message: userInput, userTimezone: deviceTimezone, destinationInfo: { city: destCity, country: destCountry, mode: locationMode }, actionType: 'general_query', sessionId: this.activeSessionId, nearbyMode: this.nearbyMode, settings: { language: this.userSettings.language, currency: this.userSettings.currency, distanceUnit: this.userSettings.distanceUnit }, context: { userPreferences: this.userPreferences }};
-        if (location) { requestBody.location = { lat: parseFloat(location.lat), lng: parseFloat(location.lng), radius: this.getSearchRadius(), source: location.source || 'unknown' } }
+        // accuracy (metres) lets the server tell a real GPS fix from a laptop's rough estimate (founder 2026-10-10: "400 m away")
+        if (location) { requestBody.location = { lat: parseFloat(location.lat), lng: parseFloat(location.lng), radius: this.getSearchRadius(), source: location.source || 'unknown', ...(Number.isFinite(Number(location.accuracy)) ? { accuracy: Math.round(Number(location.accuracy)) } : {}) } }
         // Engine pick (admin toggle in settings): v2 = the parallel new engine.
         // Same SSE dialect by contract, so everything below renders unchanged.
         const chatEndpoint = this.chatEngine === 'v3' ? 'chat-stream-v3' : (this.chatEngine === 'v2' ? 'chat-stream-v2' : 'chat-stream');
